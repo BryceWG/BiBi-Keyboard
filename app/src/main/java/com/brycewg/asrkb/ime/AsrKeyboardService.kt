@@ -381,6 +381,12 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         val tv = txtStatus ?: return
         tv.text = preview.displaySnippet
 
+        // 限制粘贴板内容为单行显示,避免破坏 UI 布局
+        try {
+            tv.maxLines = 1
+            tv.isSingleLine = true
+        } catch (_: Throwable) { }
+
         // 显示圆角遮罩
         try {
             tv.setBackgroundResource(R.drawable.bg_status_chip)
@@ -422,6 +428,8 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
             tv.setOnClickListener(null)
             tv.background = null
             tv.setPaddingRelative(0, 0, 0, 0)
+            tv.maxLines = 3
+            tv.isSingleLine = false
         } catch (_: Throwable) { }
 
         // 恢复默认状态文案
@@ -875,7 +883,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     // ========== 辅助方法 ==========
 
     /**
-     * 清除状态文本的粘贴板预览样式（背景遮罩、内边距、点击监听器）
+     * 清除状态文本的粘贴板预览样式（背景遮罩、内边距、点击监听器、单行限制）
      * 确保普通状态文本不会显示粘贴板预览的样式
      */
     private fun clearStatusTextStyle() {
@@ -886,6 +894,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
             tv.setOnClickListener(null)
             tv.background = null
             tv.setPaddingRelative(0, 0, 0, 0)
+            // 恢复多行显示
+            tv.maxLines = 3
+            tv.isSingleLine = false
         } catch (_: Throwable) { }
     }
 
