@@ -27,6 +27,7 @@ class ProcessingSpinnerView @JvmOverloads constructor(
   private var sweepAngle: Float = 90f
   private var rotationDeg: Float = 0f
   private var animator: ValueAnimator? = null
+  private var shouldAnimate: Boolean = false
 
   fun setSpinnerColor(color: Int) {
     paint.color = color
@@ -44,7 +45,54 @@ class ProcessingSpinnerView @JvmOverloads constructor(
   }
 
   fun start() {
-    if (animator?.isRunning == true) return
+    shouldAnimate = true
+    startAnimationIfPossible()
+  }
+
+  fun stop() {
+    shouldAnimate = false
+    animator?.cancel()
+    animator = null
+    rotationDeg = 0f
+    invalidate()
+  }
+
+  override fun onVisibilityChanged(changedView: View, visibility: Int) {
+    super.onVisibilityChanged(changedView, visibility)
+    if (changedView == this && visibility == View.VISIBLE && shouldAnimate) {
+      // 当视图变为可见且应该动画时，确保动画正在运行
+      startAnimationIfPossible()
+    }
+  }
+
+  override fun onAttachedToWindow() {
+    super.onAttachedToWindow()
+    // 当视图附加到窗口时，如果应该动画则启动
+    if (shouldAnimate) {
+      post { startAnimationIfPossible() }
+    }
+  }
+
+  override fun onDetachedFromWindow() {
+    super.onDetachedFromWindow()
+    stop()
+  }
+
+  private fun startAnimationIfPossible() {
+    // 只有当视图可见、已附加到窗口且应该动画时才启动
+    if (!shouldAnimate || visibility != View.VISIBLE || !isAttachedToWindow) {
+      return
+    }
+
+    // 如果动画已经在运行，不需要重新创建
+    if (animator?.isRunning == true) {
+      return
+    }
+
+    // 取消旧动画（如果存在）
+    animator?.cancel()
+
+    // 创建并启动新动画
     animator = ValueAnimator.ofFloat(0f, 360f).apply {
       duration = 1000
       repeatCount = ValueAnimator.INFINITE
@@ -55,18 +103,6 @@ class ProcessingSpinnerView @JvmOverloads constructor(
       }
       start()
     }
-  }
-
-  fun stop() {
-    animator?.cancel()
-    animator = null
-    rotationDeg = 0f
-    invalidate()
-  }
-
-  override fun onDetachedFromWindow() {
-    super.onDetachedFromWindow()
-    stop()
   }
 
   override fun onDraw(canvas: Canvas) {
