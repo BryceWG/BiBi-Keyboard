@@ -2,30 +2,34 @@ package com.brycewg.asrkb.asr
 
 import android.content.Context
 import android.util.Log
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversation
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationParam
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationResult
+import com.alibaba.dashscope.common.MultiModalMessage
+import com.alibaba.dashscope.common.Role
+import com.alibaba.dashscope.exception.ApiException
+import com.alibaba.dashscope.exception.NoApiKeyException
+import com.alibaba.dashscope.exception.UploadFileException
+import com.alibaba.dashscope.utils.Constants
+import com.alibaba.dashscope.utils.JsonUtils
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
 import kotlinx.coroutines.CoroutineScope
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.TimeUnit
 
 /**
- * 使用阿里云百炼（DashScope）临时上传 + 生成接口的非流式 ASR 引擎。
+ * 使用阿里云百炼（DashScope）Java SDK 直传本地文件的非流式 ASR 引擎。
+ * - 通过 MultiModalConversation 直接传入 file:// 路径，SDK 负责上传与调用，减少往返延迟。
  */
 class DashscopeFileAsrEngine(
     context: Context,
     scope: CoroutineScope,
     prefs: Prefs,
     listener: StreamingAsrEngine.Listener,
-    onRequestDuration: ((Long) -> Unit)? = null,
-    httpClient: OkHttpClient? = null
+    onRequestDuration: ((Long) -> Unit)? = null
 ) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration) {
 
     companion object {
@@ -34,10 +38,6 @@ class DashscopeFileAsrEngine(
 
     // DashScope：官方限制 3 分钟
     override val maxRecordDurationMillis: Int = 3 * 60 * 1000
-
-    private val http: OkHttpClient = httpClient ?: OkHttpClient.Builder()
-        .callTimeout(90, TimeUnit.SECONDS)
-        .build()
 
     override fun ensureReady(): Boolean {
         if (!super.ensureReady()) return false
@@ -49,150 +49,78 @@ class DashscopeFileAsrEngine(
     }
 
     override suspend fun recognize(pcm: ByteArray) {
-        try {
+        // 1) 将 PCM 写成临时 WAV 文件
+        val tmp = try {
             val wav = pcmToWav(pcm)
-            val tmp = File.createTempFile("asr_dash_", ".wav", context.cacheDir)
-            FileOutputStream(tmp).use { it.write(wav) }
+            File.createTempFile("asr_dash_", ".wav", context.cacheDir).also { f ->
+                FileOutputStream(f).use { it.write(wav) }
+            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to materialize WAV file", e)
+            listener.onError(
+                context.getString(R.string.error_recognize_failed_with_reason, e.message ?: "")
+            )
+            return
+        }
 
-            val apiKey = prefs.dashApiKey
-            // 固定使用非流式模型：qwen3-asr-flash
-            val model = Prefs.DEFAULT_DASH_MODEL
+        try {
+            // 2) 选择地域：默认使用中国大陆地域
+            Constants.baseHttpApiUrl = "https://dashscope.aliyuncs.com/api/v1"
 
-            val policyUrl = "https://dashscope.aliyuncs.com/api/v1/uploads?action=getPolicy&model=" +
-                java.net.URLEncoder.encode(model, "UTF-8")
-            val policyReq = Request.Builder()
-                .url(policyUrl)
-                .get()
-                .addHeader("Authorization", "Bearer $apiKey")
-                .addHeader("Content-Type", "application/json")
+            // 3) 组装消息：用户音频 +（可选）系统提示词
+            val audioPath = "file://" + tmp.absolutePath
+            val userMessage = MultiModalMessage.builder()
+                .role(Role.USER.getValue())
+                .content(listOf(mapOf("audio" to audioPath)))
                 .build()
-            val policyResp = http.newCall(policyReq).execute()
-            val policyBody = policyResp.body?.string().orEmpty()
-            if (!policyResp.isSuccessful) {
-                val detail = formatHttpDetail(policyResp.message)
-                listener.onError(
-                    context.getString(
-                        R.string.error_dash_getpolicy_failed_http,
-                        policyResp.code,
-                        detail
-                    )
-                )
-                return
-            }
-            val policy = try { JSONObject(policyBody).optJSONObject("data") } catch (_: Throwable) { null }
-            if (policy == null) {
-                listener.onError(context.getString(R.string.error_dash_no_data))
-                return
-            }
 
-            val uploadDir = policy.optString("upload_dir").trim('/', ' ')
-            val key = if (uploadDir.isNotEmpty()) {
-                "$uploadDir/" + tmp.nameIfExists()
-            } else tmp.nameIfExists()
-            val ossHost = policy.optString("upload_host")
-            if (ossHost.isBlank()) {
-                listener.onError(context.getString(R.string.error_dash_missing_upload_host))
-                return
+            val basePrompt = prefs.dashPrompt.trim()
+            val sysPrompt = try {
+                // Pro 版可注入个性化上下文
+                com.brycewg.asrkb.asr.ProAsrHelper.buildPromptWithContext(context, basePrompt)
+            } catch (t: Throwable) {
+                basePrompt
             }
-            val multipart = MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("OSSAccessKeyId", policy.optString("oss_access_key_id"))
-                .addFormDataPart("Signature", policy.optString("signature"))
-                .addFormDataPart("policy", policy.optString("policy"))
-                .apply {
-                    if (policy.has("x_oss_object_acl"))
-                        addFormDataPart("x-oss-object-acl", policy.optString("x_oss_object_acl"))
-                    if (policy.has("x_oss_forbid_overwrite"))
-                        addFormDataPart("x-oss-forbid-overwrite", policy.optString("x_oss_forbid_overwrite"))
-                    if (policy.has("x_oss_security_token"))
-                        addFormDataPart("x-oss-security-token", policy.optString("x_oss_security_token"))
-                }
-                .addFormDataPart("key", key)
-                .addFormDataPart("success_action_status", "200")
-                .addFormDataPart(
-                    "file",
-                    "audio.wav",
-                    tmp.asRequestBody("audio/wav".toMediaType())
-                )
+            val systemMessage = MultiModalMessage.builder()
+                .role(Role.SYSTEM.getValue())
+                .content(listOf(mapOf("text" to sysPrompt)))
                 .build()
-            val ossReq = Request.Builder()
-                .url(ossHost)
-                .post(multipart)
-                .build()
-            val ossResp = http.newCall(ossReq).execute()
-            if (!ossResp.isSuccessful) {
-                val err = ossResp.body?.string().orEmpty().ifBlank { ossResp.message }
-                val detail = formatHttpDetail(err)
-                listener.onError(
-                    context.getString(R.string.error_oss_upload_failed_http, ossResp.code, detail)
-                )
-                return
-            }
-            val ossUrl = "oss://$key"
 
-            val asrOptions = JSONObject().apply {
-                put("enable_lid", false)
+            // 4) ASR 参数
+            val asrOptions = HashMap<String, Any>(4).apply {
                 put("enable_itn", true)
                 val lang = prefs.dashLanguage.trim()
                 if (lang.isNotEmpty()) put("language", lang)
             }
-            val systemMsg = JSONObject().apply {
-                val baseCtx = prefs.dashPrompt.trim()
-                // Pro功能：动态拼接个性化热词和上下文信息
-                val ctx = try {
-                    com.brycewg.asrkb.asr.ProAsrHelper.buildPromptWithContext(context, baseCtx)
-                } catch (t: Throwable) {
-                    baseCtx
-                }
-                put("text", ctx)
-            }
-            val userMsg = JSONObject().apply { put("audio", ossUrl) }
-            val bodyObj = JSONObject().apply {
-                put("model", model)
-                put("input", JSONObject().apply {
-                    put("messages", org.json.JSONArray().apply {
-                        put(JSONObject().apply {
-                            put("role", "system")
-                            put("content", org.json.JSONArray().apply { put(systemMsg) })
-                        })
-                        put(JSONObject().apply {
-                            put("role", "user")
-                            put("content", org.json.JSONArray().apply { put(userMsg) })
-                        })
-                    })
-                })
-                put("parameters", JSONObject().apply {
-                    put("asr_options", asrOptions)
-                })
-            }
-            val genReq = Request.Builder()
-                .url("https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation")
-                .addHeader("Authorization", "Bearer $apiKey")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("X-DashScope-OssResourceResolve", "enable")
-                .post(bodyObj.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
+
+            // 5) 构建调用参数并请求
+            val param = MultiModalConversationParam.builder()
+                .apiKey(prefs.dashApiKey)
+                .model(Prefs.DEFAULT_DASH_MODEL)
+                // 顺序不敏感，此处与官方示例一致
+                .message(userMessage)
+                .message(systemMessage)
+                .parameter("asr_options", asrOptions)
                 .build()
+
+            val conv = MultiModalConversation()
             val t0 = System.nanoTime()
-            val genResp = http.newCall(genReq).execute()
-            val genStr = genResp.body?.string().orEmpty()
-            if (!genResp.isSuccessful) {
-                val detail = formatHttpDetail(genResp.message)
-                listener.onError(
-                    context.getString(R.string.error_asr_request_failed_http, genResp.code, detail)
-                )
-                return
-            }
-            val text = parseDashscopeText(genStr)
+            val result: MultiModalConversationResult = conv.call(param)
+
+            // 6) 解析结果（沿用原有 JSON 解析逻辑）
+            val json = try { JsonUtils.toJson(result) } catch (e: Throwable) { "" }
+            val text = parseDashscopeText(json)
             if (text.isNotBlank()) {
                 val dt = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - t0)
-                try { onRequestDuration?.invoke(dt) } catch (_: Throwable) {}
+                try { onRequestDuration?.invoke(dt) } catch (e: Throwable) {
+                    Log.w(TAG, "Failed to dispatch duration", e)
+                }
                 listener.onFinal(text)
             } else {
                 listener.onError(context.getString(R.string.error_asr_empty_result))
             }
-        } catch (t: Throwable) {
-            listener.onError(
-                context.getString(R.string.error_recognize_failed_with_reason, t.message ?: "")
-            )
+        }finally {
+            tmp.delete()
         }
     }
 
