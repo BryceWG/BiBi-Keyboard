@@ -250,6 +250,15 @@ class FloatingAsrService : Service(),
             return
         }
 
+        // 若上次处于错误态，此处复位为 Idle，避免新出现时重复播放错误动画
+        if (stateMachine.isError) {
+            try {
+                stateMachine.transitionTo(FloatingBallState.Idle)
+            } catch (e: Throwable) {
+                Log.w(TAG, "Failed to reset state from Error to Idle before show", e)
+            }
+        }
+
         val ballView = viewManager.getBallView()
         if (ballView != null) {
             viewManager.applyBallAlpha()
@@ -451,6 +460,24 @@ class FloatingAsrService : Service(),
                 }, 3000L)
             } catch (e: Throwable) {
                 Log.w(TAG, "Failed to schedule partial hide after error", e)
+            }
+
+            // 在错误动画结束后，自动将状态复位到 Idle，避免后续刷新/再次显示时重复触发错误动画
+            // 错误抖动时长约 500ms，颜色滤镜在 1000ms 后清除，这里取 1500ms 以确保视觉恢复
+            try {
+                handler.postDelayed({
+                    if (stateMachine.isError) {
+                        try {
+                            stateMachine.transitionTo(FloatingBallState.Idle)
+                            viewManager.updateStateVisual(FloatingBallState.Idle)
+                        } catch (ex: Throwable) {
+                            Log.w(TAG, "Failed to reset state to Idle after error animation", ex)
+                        }
+                        updateVisibilityByPref()
+                    }
+                }, 1500L)
+            } catch (e: Throwable) {
+                Log.w(TAG, "Failed to schedule state reset after error", e)
             }
         }
     }
