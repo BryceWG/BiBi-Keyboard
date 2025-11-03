@@ -390,11 +390,7 @@ class SettingsActivity : AppCompatActivity() {
                     showUpdateDialog(result)
                 } else {
                     Log.d(TAG, "No update available")
-                    Toast.makeText(
-                        this@SettingsActivity,
-                        getString(R.string.update_no_update),
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showCurrentVersionInfoDialog(result)
                 }
             } catch (e: Exception) {
                 progressDialog.dismiss()
@@ -514,6 +510,72 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton(R.string.btn_cancel, null)
+            .show()
+    }
+
+    /**
+     * 显示当前版本信息对话框（无更新时）
+     */
+    private fun showCurrentVersionInfoDialog(result: UpdateChecker.UpdateCheckResult) {
+        val messageBuilder = StringBuilder()
+        messageBuilder.append(
+            getString(
+                R.string.current_version_message,
+                result.currentVersion
+            )
+        )
+
+        // 添加重要提示（如果有）
+        result.importantNotice?.let { notice ->
+            messageBuilder.append("\n\n")
+            // 使用占位符，稍后替换为带样式的文本
+            messageBuilder.append("{{IMPORTANT_NOTICE_START}}")
+            messageBuilder.append(notice)
+            messageBuilder.append("{{IMPORTANT_NOTICE_END}}")
+        }
+
+        // 添加更新时间（如果有）
+        result.updateTime?.let { updateTime ->
+            messageBuilder.append("\n\n")
+            val formattedTime = formatUpdateTime(updateTime)
+            messageBuilder.append(getString(R.string.update_timestamp_label, formattedTime))
+        }
+
+        // 添加发布说明
+        result.releaseNotes?.let { notes ->
+            messageBuilder.append("\n\n")
+            messageBuilder.append(getString(R.string.update_release_notes_label, notes))
+        }
+
+        // 创建带样式的文本（如果有重要提示）
+        val messageText = if (result.importantNotice != null) {
+            createStyledMessage(
+                messageBuilder.toString(),
+                result.importantNotice,
+                result.noticeLevel
+            )
+        } else {
+            messageBuilder.toString()
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.current_version_info_title)
+            .setMessage(messageText)
+            .setPositiveButton(android.R.string.ok, null)
+            .setNeutralButton(R.string.btn_view_release_page) { _, _ ->
+                // 跳转到 GitHub Release 页面
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl))
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to open release page", e)
+                    Toast.makeText(
+                        this,
+                        getString(R.string.error_open_browser),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
             .show()
     }
 

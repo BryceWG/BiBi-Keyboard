@@ -350,6 +350,8 @@
     <string name="update_check_failed">Update check failed: %1$s</string>
     <string name="update_dialog_title">New Version Available</string>
     <string name="update_dialog_message">Current version: %1$s\nLatest version: %2$s\n\nWould you like to download?</string>
+    <string name="current_version_info_title">Current Version Info</string>
+    <string name="current_version_message">Current version: %1$s\n\nYou are using the latest version!</string>
     <string name="btn_download">Download</string>
     <string name="btn_view_release_page">View Release Page</string>
     <string name="btn_manual_check">Manual Check</string>
