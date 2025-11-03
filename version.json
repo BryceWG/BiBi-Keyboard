@@ -1,10 +1,10 @@
 {
-  "version": "3.4.5",
-  "version_code": 91,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.4.5",
-  "release_notes": "本次更新包含 2 个提交:\n- feat(debug): 添加音频采集和ASR引擎的调试日志记录\n- feat(asr): 伪流式识别动态处理间隔，尝试降低长录音处理压力",
+  "version": "3.4.6",
+  "version_code": 92,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.4.6",
+  "release_notes": "本次更新包含 3 个提交:\n- feat(ime): 添加键盘面板自动启动录音功能\n- feat(update): 添加当前版本信息对话框\n- feat(update): 为更新检查添加重要提示样式支持",
   "important_notice": "3.4.4之后支持了应用内下载更新包并安装，无需跳转到浏览器进行下载",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-02T15:16:09Z"
+  "update_time": "2025-11-03T08:32:29Z"
 }
