@@ -26,6 +26,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 import java.util.concurrent.TimeUnit
+import com.brycewg.asrkb.store.Prefs
 
 /**
  * APK 下载与安装服务
@@ -170,6 +171,13 @@ class ApkDownloadService : Service() {
             // 1. 下载 APK
             val apkFile = downloadApk(url, version)
             downloadedApkFile = apkFile
+
+            // 将下载完成的 APK 路径保存，便于授权返回后自动重试安装
+            try {
+                Prefs(this@ApkDownloadService).pendingApkPath = apkFile.absolutePath
+            } catch (t: Throwable) {
+                Log.w(TAG, "Failed to persist pending APK path", t)
+            }
 
             // 2. 下载完成，显示成功通知（带点击安装功能）
             showDownloadCompleteNotification(apkFile)

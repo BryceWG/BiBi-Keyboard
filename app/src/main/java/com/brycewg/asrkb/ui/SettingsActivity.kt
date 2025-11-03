@@ -46,6 +46,8 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.io.File
+import androidx.core.content.FileProvider
 
 /**
  * 主设置页面
@@ -105,6 +107,9 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        // 授权返回后：若已下载APK且具备安装权限，自动继续安装
+        maybeResumePendingApkInstall()
+
         // 检查无障碍服务是否刚刚被启用，给予用户反馈
         checkAccessibilityServiceJustEnabled()
 
@@ -119,6 +124,41 @@ class SettingsActivity : AppCompatActivity() {
 
         // 首次进入时自动展示快速上手指南（首次需等待 5s 才能关闭）
         maybeAutoShowQuickGuideOnFirstOpen()
+    }
+
+    /**
+     * 授予“未知来源应用安装”权限后，自动继续安装已下载的APK
+     */
+    private fun maybeResumePendingApkInstall() {
+        try {
+            // 仅当系统允许从本应用安装且存在待安装APK路径时尝试
+            if (!packageManager.canRequestPackageInstalls()) return
+
+            val prefs = Prefs(this)
+            val path = prefs.pendingApkPath
+            if (path.isBlank()) return
+
+            val apkFile = File(path)
+            if (!apkFile.exists()) {
+                // 文件不存在，清理状态
+                prefs.pendingApkPath = ""
+                return
+            }
+
+            // 构造安装意图并触发系统安装器
+            val uri = FileProvider.getUriForFile(this, "$packageName.fileprovider", apkFile)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/vnd.android.package-archive")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            // 避免重复弹出：在启动安装前即清空标记
+            prefs.pendingApkPath = ""
+            startActivity(intent)
+            Log.d(TAG, "Resumed pending APK install: ${apkFile.path}")
+        } catch (t: Throwable) {
+            Log.e(TAG, "Failed to resume pending APK install", t)
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {

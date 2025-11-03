@@ -882,6 +882,11 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_WD_PASSWORD, "") ?: ""
         set(value) = sp.edit { putString(KEY_WD_PASSWORD, value.trim()) }
 
+    // ---- APK 更新：待安装文件路径（授权后自动继续安装使用；不参与导出） ----
+    var pendingApkPath: String
+        get() = sp.getString(KEY_PENDING_APK_PATH, "") ?: ""
+        set(value) = sp.edit { putString(KEY_PENDING_APK_PATH, value.trim()) }
+
     companion object {
         private const val TAG = "Prefs"
         @Volatile private var TOGGLE_LISTENER_REGISTERED: Boolean = false
@@ -1008,6 +1013,7 @@ class Prefs(context: Context) {
         private const val KEY_WD_URL = "wd_url"
         private const val KEY_WD_USERNAME = "wd_username"
         private const val KEY_WD_PASSWORD = "wd_password"
+        private const val KEY_PENDING_APK_PATH = "pending_apk_path"
 
         const val DEFAULT_ENDPOINT = "https://openspeech.bytedance.com/api/v3/auc/bigmodel/recognize/flash"
         const val SF_ENDPOINT = "https://api.siliconflow.cn/v1/audio/transcriptions"
