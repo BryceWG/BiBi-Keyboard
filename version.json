@@ -1,10 +1,10 @@
 {
-  "version": "3.4.6",
-  "version_code": 92,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.4.6",
-  "release_notes": "本次更新包含 3 个提交:\n- feat(ime): 添加键盘面板自动启动录音功能\n- feat(update): 添加当前版本信息对话框\n- feat(update): 为更新检查添加重要提示样式支持",
+  "version": "3.4.7",
+  "version_code": 93,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.4.7",
+  "release_notes": "本次更新包含 4 个提交:\n- fix(update): APK安装权限授权后自动继续安装功能\n- fix(ui): 修复悬浮球视图状态管理问题\n- fix(ui): 修复悬浮球错误状态复位问题\n- refactor(ui): 实现统一的颜色管理",
   "important_notice": "3.4.4之后支持了应用内下载更新包并安装，无需跳转到浏览器进行下载",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-03T08:32:29Z"
+  "update_time": "2025-11-03T14:13:57Z"
 }
