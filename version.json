@@ -1,10 +1,10 @@
 {
-  "version": "3.4.7",
-  "version_code": 93,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.4.7",
-  "release_notes": "本次更新包含 4 个提交:\n- fix(update): APK安装权限授权后自动继续安装功能\n- fix(ui): 修复悬浮球视图状态管理问题\n- fix(ui): 修复悬浮球错误状态复位问题\n- refactor(ui): 实现统一的颜色管理",
+  "version": "3.4.8",
+  "version_code": 94,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.4.8",
+  "release_notes": "本次更新包含 5 个提交:\n- feat(asr): 添加非流式识别请求耗时统计与展示\n- fix(asr): 修改录音时长统计读取方式\n- refactor(asr): DashScope流式识别改为使用Fun-ASR模型，并迁移到SDK实现\n- feat(asr): 添加DashScope地域选择支持\n- feat(asr): 集成DashScope Java SDK实现本地文件直传,优化Qwen模型非流式识别速度",
   "important_notice": "对Dashscope渠道进行了耗时优化以及流式模式更好的支持,欢迎体验",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-03T14:13:57Z"
+  "update_time": "2025-11-04T03:42:31Z"
 }
