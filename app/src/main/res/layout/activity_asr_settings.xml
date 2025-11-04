@@ -169,6 +169,12 @@
           android:layout_marginTop="8dp"
           android:text="@string/label_volc_streaming" />
 
+        <!-- Pro 注入插槽：火山引擎流式附加设置（例如“双重识别”开关，仅 Pro 变体注入） -->
+        <ViewStub
+          android:id="@+id/pro_inject_stub_volc_streaming"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content" />
+
         <com.google.android.material.materialswitch.MaterialSwitch
           android:id="@+id/switchVolcBidiStreaming"
           android:layout_width="match_parent"

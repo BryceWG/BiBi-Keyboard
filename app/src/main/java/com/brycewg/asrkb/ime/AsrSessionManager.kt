@@ -114,7 +114,8 @@ class AsrSessionManager(
         return when (prefs.asrVendor) {
             AsrVendor.Volc -> if (prefs.hasVolcKeys()) {
                 if (prefs.volcStreamingEnabled) {
-                    VolcStreamAsrEngine(context, scope, prefs, this)
+                    // 通过 Pro 门面创建（OSS 返回原始引擎，Pro 可能返回双重识别包装）
+                    com.brycewg.asrkb.asr.ProAsrHelper.createVolcStreamingEngine(context, scope, prefs, this)
                 } else {
                     VolcFileAsrEngine(context, scope, prefs, this, ::onRequestDuration)
                 }
@@ -171,10 +172,27 @@ class AsrSessionManager(
 
         val current = asrEngine
         val matched = when (prefs.asrVendor) {
-            AsrVendor.Volc -> when (current) {
-                is VolcFileAsrEngine -> if (!prefs.volcStreamingEnabled) current else null
-                is VolcStreamAsrEngine -> if (prefs.volcStreamingEnabled) current else null
-                else -> null
+            AsrVendor.Volc -> {
+                // 读取 Pro 双重识别开关（与主工程共用 asr_prefs；非 Pro 变体此键默认为 false）
+                val wantDual: Boolean = try {
+                    val sp = context.getSharedPreferences("asr_prefs", Context.MODE_PRIVATE)
+                    sp.getBoolean("pro_volc_dual_stream_enabled", false)
+                } catch (_: Throwable) { false }
+
+                when (current) {
+                    is VolcFileAsrEngine -> if (!prefs.volcStreamingEnabled) current else null
+                    is VolcStreamAsrEngine -> {
+                        // 普通流式实例仅在未开启“双重识别”且启用流式时复用；
+                        // 若开启“双重识别”，需要重建为 Pro 包装引擎。
+                        if (prefs.volcStreamingEnabled && !wantDual) current else null
+                    }
+                    else -> {
+                        // 兼容 Pro 双重识别包装引擎：通过类名判断，避免直接依赖 pro 源集类型
+                        val name = current?.javaClass?.simpleName ?: ""
+                        val isProDual = name.contains("ProVolcDualStream")
+                        if (prefs.volcStreamingEnabled && wantDual && isProDual) current else null
+                    }
+                }
             }
 
             AsrVendor.SiliconFlow -> if (current is SiliconFlowFileAsrEngine) current else null

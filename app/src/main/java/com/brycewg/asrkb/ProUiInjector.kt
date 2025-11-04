@@ -101,6 +101,33 @@ object ProUiInjector {
   }
 
   /**
+   * 火山引擎流式设置区注入：
+   * - main 布局提供 ViewStub：@id/pro_inject_stub_volc_streaming
+   * - pro 侧提供布局：res/layout/pro_volc_streaming_extras.xml（包含自定义 View/逻辑）
+   */
+  fun injectIntoVolcStreamingExtras(activity: Activity, root: View) {
+    if (!Edition.isPro) return
+    val res = activity.resources
+    val pkg = activity.packageName
+    try {
+      val layoutId = res.getIdentifier("pro_volc_streaming_extras", "layout", pkg)
+      if (layoutId == 0) return
+
+      val stubId = res.getIdentifier("pro_inject_stub_volc_streaming", "id", pkg)
+      val stub = if (stubId != 0) root.findViewById<ViewStub?>(stubId) else null
+      val inflater = LayoutInflater.from(activity)
+      if (stub != null) {
+        stub.layoutResource = layoutId
+        stub.inflate()
+      } else if (root is ViewGroup) {
+        inflater.inflate(layoutId, root, true)
+      }
+    } catch (t: Throwable) {
+      if (BuildConfig.DEBUG) Log.d(TAG, "skip pro ui inject(volc streaming): ${t.message}")
+    }
+  }
+
+  /**
    * 构建备份 JSON（包含 Pro 变体的额外键）。
    * - OSS：直接返回 Prefs.exportJsonString()
    * - Pro：在不引用 Pro 源集类的前提下，直接从同名 SP 读取并合并额外键
@@ -119,6 +146,8 @@ object ProUiInjector {
       // Pro: 自动备份配置（可选）
       if (sp.contains("pro_auto_backup_enabled")) o.put("pro_auto_backup_enabled", sp.getBoolean("pro_auto_backup_enabled", false))
       if (sp.contains("pro_auto_backup_interval_hours")) o.put("pro_auto_backup_interval_hours", sp.getInt("pro_auto_backup_interval_hours", 24))
+      // Pro: 火山引擎双重识别开关
+      if (sp.contains("pro_volc_dual_stream_enabled")) o.put("pro_volc_dual_stream_enabled", sp.getBoolean("pro_volc_dual_stream_enabled", false))
       o.toString()
     } catch (t: Throwable) {
       if (BuildConfig.DEBUG) Log.d(TAG, "buildBackupJson merge(pro) failed: ${t.message}")
@@ -140,6 +169,7 @@ object ProUiInjector {
       if (o.has("asr_hotwords")) edit.putString("asr_hotwords", o.optString("asr_hotwords"))
       if (o.has("pro_auto_backup_enabled")) edit.putBoolean("pro_auto_backup_enabled", o.optBoolean("pro_auto_backup_enabled"))
       if (o.has("pro_auto_backup_interval_hours")) edit.putInt("pro_auto_backup_interval_hours", o.optInt("pro_auto_backup_interval_hours", 24))
+      if (o.has("pro_volc_dual_stream_enabled")) edit.putBoolean("pro_volc_dual_stream_enabled", o.optBoolean("pro_volc_dual_stream_enabled", false))
       edit.apply()
 
       // 触发 Pro 侧自动备份调度刷新（仅 Pro 变体会有接收者）

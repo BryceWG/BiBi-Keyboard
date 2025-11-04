@@ -218,6 +218,13 @@ class AsrSettingsActivity : AppCompatActivity() {
     }
 
     private fun setupVolcengineSettings() {
+        // Pro：在火山引擎分组内注入“双重识别”
+        try {
+            com.brycewg.asrkb.ProUiInjector.injectIntoVolcStreamingExtras(this, groupVolc)
+        } catch (e: Exception) {
+            android.util.Log.e(TAG, "Failed to inject pro UI (Volc streaming in-group)", e)
+        }
+
         // EditTexts
         findViewById<EditText>(R.id.etAppKey).apply {
             setText(prefs.appKey)
