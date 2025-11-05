@@ -203,10 +203,10 @@
     <string name="toast_llm_profile_deleted">プロファイルが削除されました</string>
     <string name="untitled_profile">無題のプロファイル</string>
 
-    <string name="vendor_paraformer">Paraformer（ローカル）</string>
+    <string name="vendor_paraformer">Paraformer（ローカル・ストリーミング）</string>
     <string name="notif_pf_title_bilingual">Paraformer モデル（中英）</string>
     <string name="notif_pf_title_trilingual">Paraformer モデル（中英+広東語）</string>
-    <string name="paraformer_section_title">Paraformer（ローカル）</string>
+    <string name="paraformer_section_title">Paraformer（ローカル・ストリーミング）</string>
     <string name="label_pf_model_variant">モデルバリアント</string>
     <string name="label_pf_threads">スレッド数（1-8）</string>
     <string name="label_pf_keep_alive">モデルのメモリ保持</string>
@@ -604,4 +604,38 @@
     <string name="fmt_h_m">%1$d時間%2$d分</string>
     <string name="fmt_m_s">%1$d分%2$d秒</string>
     <string name="fmt_s">%1$d秒</string>
+    
+    <!-- Zipformer (Local streaming) -->
+    <string name="vendor_zipformer">Zipformer（ローカル・ストリーミング）</string>
+    <string name="zipformer_section_title">Zipformer（ローカル・ストリーミング）</string>
+    <string name="label_zf_model_variant">モデルバリアント</string>
+    <string name="label_zf_threads">スレッド数 (1-8)</string>
+    <string name="label_zf_keep_alive">モデルをメモリに保持</string>
+    <string name="label_zf_preload">初回表示時にモデルを読み込み</string>
+    <string name="label_zf_use_itn">ITN を有効化（逆正規化）</string>
+    <string name="btn_zf_download_model">Zipformer モデルをダウンロード</string>
+    <string name="btn_zf_clear_model">Zipformer モデルを削除</string>
+    <string name="zf_download_status_done">モデルをインストールしました</string>
+    <string name="zf_download_status_downloading">ダウンロード中… %1$d%%</string>
+    <string name="zf_download_status_extracting">展開中…時間がかかる場合があります</string>
+    <string name="zf_download_status_failed">ダウンロードまたは解凍に失敗しました</string>
+    <string name="zf_download_started_in_bg">バックグラウンドで開始しました。通知で進捗をご確認ください</string>
+    <string name="zf_clear_confirm_title">モデルを削除しますか？</string>
+    <string name="zf_clear_confirm_message">ダウンロード済みの Zipformer モデルを削除します。後で再ダウンロード可能です。続行しますか？</string>
+    <string name="zf_clear_done">削除しました</string>
+    <string name="zf_clear_failed">削除に失敗しました</string>
+    <!-- Variants -->
+    <string name="zf_variant_zh_xl_int8_20250630">中国語（XL・int8）</string>
+    <string name="zf_variant_zh_xl_fp16_20250630">中国語（XL・fp16）</string>
+    <string name="zf_variant_zh_int8_20250630">中国語（int8）</string>
+    <string name="zf_variant_zh_fp16_20250630">中国語（fp16）</string>
+    <string name="zf_variant_bi_int8_20230220">中英（int8）</string>
+    <string name="zf_variant_bi_fp32_20230220">中英（fp32）</string>
+    <string name="zf_variant_small_bi_int8_20230216">小型 中英（int8）</string>
+    <string name="zf_variant_small_bi_fp32_20230216">小型 中英（fp32）</string>
+    <!-- Notifications -->
+    <string name="notif_zf_title_zh_xl">Zipformer 中国語 XL</string>
+    <string name="notif_zf_title_zh">Zipformer 中国語</string>
+    <string name="notif_zf_title_bi">Zipformer 中英</string>
+    <string name="notif_zf_title_small_bi">Zipformer 小型 中英</string>
 </resources>

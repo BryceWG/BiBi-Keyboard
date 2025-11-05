@@ -70,7 +70,13 @@ class AsrSettingsViewModel : ViewModel() {
             pfModelVariant = prefs.pfModelVariant,
             pfNumThreads = prefs.pfNumThreads,
             pfKeepAliveMinutes = prefs.pfKeepAliveMinutes,
-            pfPreloadEnabled = prefs.pfPreloadEnabled
+            pfPreloadEnabled = prefs.pfPreloadEnabled,
+            // Zipformer settings
+            zfModelVariant = prefs.zfModelVariant,
+            zfNumThreads = prefs.zfNumThreads,
+            zfKeepAliveMinutes = prefs.zfKeepAliveMinutes,
+            zfPreloadEnabled = prefs.zfPreloadEnabled,
+            zfUseItn = prefs.zfUseItn
         )
     }
 
@@ -85,6 +91,9 @@ class AsrSettingsViewModel : ViewModel() {
         }
         if (oldVendor == AsrVendor.Paraformer && vendor != AsrVendor.Paraformer) {
             try { com.brycewg.asrkb.asr.unloadParaformerRecognizer() } catch (e: Throwable) { Log.e(TAG, "Failed to unload Paraformer recognizer", e) }
+        }
+        if (oldVendor == AsrVendor.Zipformer && vendor != AsrVendor.Zipformer) {
+            try { com.brycewg.asrkb.asr.unloadZipformerRecognizer() } catch (e: Throwable) { Log.e(TAG, "Failed to unload Zipformer recognizer", e) }
         }
 
         if (vendor == AsrVendor.SenseVoice && prefs.svPreloadEnabled) {
@@ -109,6 +118,16 @@ class AsrSettingsViewModel : ViewModel() {
                     )
                 } catch (e: Throwable) {
                     Log.e(TAG, "Failed to preload Paraformer model", e)
+                }
+            }
+        }
+
+        if (vendor == AsrVendor.Zipformer && prefs.zfPreloadEnabled) {
+            viewModelScope.launch(Dispatchers.Default) {
+                try {
+                    com.brycewg.asrkb.asr.preloadZipformerIfConfigured(appContext, prefs)
+                } catch (e: Throwable) {
+                    Log.e(TAG, "Failed to preload Zipformer model", e)
                 }
             }
         }
@@ -319,6 +338,18 @@ class AsrSettingsViewModel : ViewModel() {
         }
     }
 
+    private fun triggerZfPreloadIfEnabledAndActive(reason: String) {
+        if (prefs.zfPreloadEnabled && prefs.asrVendor == AsrVendor.Zipformer) {
+            viewModelScope.launch(Dispatchers.Default) {
+                try {
+                    com.brycewg.asrkb.asr.preloadZipformerIfConfigured(appContext, prefs)
+                } catch (t: Throwable) {
+                    Log.e(TAG, "Failed to preload Zipformer after $reason", t)
+                }
+            }
+        }
+    }
+
     fun updatePfPreload(enabled: Boolean) {
         prefs.pfPreloadEnabled = enabled
         _uiState.value = _uiState.value.copy(pfPreloadEnabled = enabled)
@@ -335,6 +366,44 @@ class AsrSettingsViewModel : ViewModel() {
                 }
             }
         }
+    }
+
+    // ----- Zipformer -----
+    fun updateZfModelVariant(variant: String) {
+        prefs.zfModelVariant = variant
+        _uiState.value = _uiState.value.copy(zfModelVariant = variant)
+        try { com.brycewg.asrkb.asr.unloadZipformerRecognizer() } catch (_: Throwable) { }
+        triggerZfPreloadIfEnabledAndActive("variant change")
+    }
+
+    fun updateZfKeepAlive(minutes: Int) {
+        prefs.zfKeepAliveMinutes = minutes
+        _uiState.value = _uiState.value.copy(zfKeepAliveMinutes = minutes)
+    }
+
+    fun updateZfNumThreads(v: Int) {
+        val vv = v.coerceIn(1, 8)
+        prefs.zfNumThreads = vv
+        _uiState.value = _uiState.value.copy(zfNumThreads = vv)
+        try { com.brycewg.asrkb.asr.unloadZipformerRecognizer() } catch (_: Throwable) { }
+        triggerZfPreloadIfEnabledAndActive("threads change")
+    }
+
+    fun updateZfPreload(enabled: Boolean) {
+        prefs.zfPreloadEnabled = enabled
+        _uiState.value = _uiState.value.copy(zfPreloadEnabled = enabled)
+        if (enabled && prefs.asrVendor == AsrVendor.Zipformer) {
+            viewModelScope.launch(Dispatchers.Default) {
+                try { com.brycewg.asrkb.asr.preloadZipformerIfConfigured(appContext, prefs) } catch (t: Throwable) {
+                    Log.e(TAG, "Failed to preload Zipformer model", t)
+                }
+            }
+        }
+    }
+
+    fun updateZfUseItn(enabled: Boolean) {
+        prefs.zfUseItn = enabled
+        _uiState.value = _uiState.value.copy(zfUseItn = enabled)
     }
 
     fun checkPfModelDownloaded(context: Context): Boolean {
@@ -359,6 +428,25 @@ class AsrSettingsViewModel : ViewModel() {
         return modelDir != null &&
                 File(modelDir, "tokens.txt").exists() &&
                 (File(modelDir, "model.int8.onnx").exists() || File(modelDir, "model.onnx").exists())
+    }
+
+    fun checkZfModelDownloaded(context: Context): Boolean {
+        val base = context.getExternalFilesDir(null) ?: context.filesDir
+        val root = File(base, "zipformer")
+        val outDir = when {
+            prefs.zfModelVariant.startsWith("zh-xl-") -> File(root, "zh-xlarge-2025-06-30")
+            prefs.zfModelVariant.startsWith("zh-") -> File(root, "zh-2025-06-30")
+            prefs.zfModelVariant.startsWith("bi-small-") -> File(root, "small-bilingual-zh-en-2023-02-16")
+            else -> File(root, "bilingual-zh-en-2023-02-20")
+        }
+        val modelDir = findModelDir(outDir) ?: return false
+        val files = modelDir.listFiles() ?: emptyArray()
+        if (!File(modelDir, "tokens.txt").exists()) return false
+        fun exists(regex: Regex): Boolean = files.any { it.isFile && regex.matches(it.name) }
+        val hasEncoder = exists(Regex("^encoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+        val hasDecoder = exists(Regex("^decoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$")) || exists(Regex("^decoder\\.onnx$"))
+        val hasJoiner = exists(Regex("^joiner(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+        return hasEncoder && hasDecoder && hasJoiner
     }
 
     private fun findModelDir(root: File): File? {
@@ -419,7 +507,13 @@ data class AsrSettingsUiState(
     val pfModelVariant: String = "bilingual-int8",
     val pfNumThreads: Int = 2,
     val pfKeepAliveMinutes: Int = -1,
-    val pfPreloadEnabled: Boolean = false
+    val pfPreloadEnabled: Boolean = false,
+    // Zipformer settings
+    val zfModelVariant: String = "zh-xl-int8-20250630",
+    val zfNumThreads: Int = 2,
+    val zfKeepAliveMinutes: Int = -1,
+    val zfPreloadEnabled: Boolean = false,
+    val zfUseItn: Boolean = false
 ) {
     // Computed visibility properties based on selected vendor
     val isVolcVisible: Boolean get() = selectedVendor == AsrVendor.Volc
@@ -431,4 +525,5 @@ data class AsrSettingsUiState(
     val isSonioxVisible: Boolean get() = selectedVendor == AsrVendor.Soniox
     val isSenseVoiceVisible: Boolean get() = selectedVendor == AsrVendor.SenseVoice
     val isParaformerVisible: Boolean get() = selectedVendor == AsrVendor.Paraformer
+    val isZipformerVisible: Boolean get() = selectedVendor == AsrVendor.Zipformer
 }

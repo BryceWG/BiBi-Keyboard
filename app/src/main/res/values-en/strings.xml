@@ -77,7 +77,7 @@
     <string name="vendor_sf">SiliconFlow</string>
     <string name="vendor_dashscope">Alibaba Cloud DashScope</string>
     <string name="vendor_soniox">Soniox</string>
-    <string name="vendor_sensevoice">SenseVoice (Local)</string>
+    <string name="vendor_sensevoice">SenseVoice (Local Non-stream)</string>
     <string name="label_sf_api_key">API Key (Bearer)</string>
     <string name="label_sf_model_select">Choose model</string>
     <string name="sf_model_default_display">FunAudioLLM/SenseVoiceSmall</string>
@@ -155,7 +155,8 @@
     <!-- Local ASR (placeholder) -->
     <string name="error_local_asr_not_ready">Local ASR not ready. Please integrate sherpa‑onnx and model files later.</string>
     <string name="error_sensevoice_model_missing">SenseVoice model is missing. Configure or download it later in Settings.</string>
-    <string name="vendor_paraformer">Paraformer (Local)</string>
+    <string name="vendor_paraformer">Paraformer (Local streaming)</string>
+    <string name="vendor_zipformer">Zipformer (Local streaming)</string>
     <string name="notif_pf_title_bilingual">Paraformer model (Zh+En)</string>
     <string name="notif_pf_title_trilingual">Paraformer model (Zh+Yue+En)</string>
     <string name="paraformer_section_title">Paraformer (Local)</string>
@@ -181,6 +182,39 @@
     <string name="error_paraformer_model_missing">Paraformer model files are missing. Please configure or download in Settings</string>
     <string name="label_pf_preload">Load model on first show</string>
     <string name="pf_model_info">Note:\n1. Paraformer has two model variants (Zh+En and Zh+Yue+En). The Chinese model also supports some dialects\n2. Each variant download is 1GB and contains both int8 and fp32 quantized versions. Switching between int8 and fp32 of the same variant requires no re-download</string>
+
+    <!-- Zipformer (Local streaming) -->
+    <string name="zipformer_section_title">Zipformer (Local streaming)</string>
+    <string name="label_zf_model_variant">Model variant</string>
+    <string name="label_zf_threads">Threads (1-8)</string>
+    <string name="label_zf_keep_alive">Keep model in memory</string>
+    <string name="label_zf_preload">Load model on first show</string>
+    <string name="label_zf_use_itn">Enable ITN (inverse text normalization)</string>
+    <string name="btn_zf_download_model">Download Zipformer model</string>
+    <string name="btn_zf_clear_model">Clear Zipformer model</string>
+    <string name="zf_download_status_done">Model installed</string>
+    <string name="zf_download_status_downloading">Downloading… %1$d%%</string>
+    <string name="zf_download_status_extracting">Extracting… It may take a while</string>
+    <string name="zf_download_status_failed">Download or extract failed</string>
+    <string name="zf_download_started_in_bg">Started in background. See notification for progress</string>
+    <string name="zf_clear_confirm_title">Clear model?</string>
+    <string name="zf_clear_confirm_message">This will delete downloaded Zipformer model files. You can re-download later. Continue?</string>
+    <string name="zf_clear_done">Model cleared</string>
+    <string name="zf_clear_failed">Clear failed</string>
+    <!-- Variants -->
+    <string name="zf_variant_zh_xl_int8_20250630">Chinese (XL · int8)</string>
+    <string name="zf_variant_zh_xl_fp16_20250630">Chinese (XL · fp16)</string>
+    <string name="zf_variant_zh_int8_20250630">Chinese (int8)</string>
+    <string name="zf_variant_zh_fp16_20250630">Chinese (fp16)</string>
+    <string name="zf_variant_bi_int8_20230220">Zh+En (int8)</string>
+    <string name="zf_variant_bi_fp32_20230220">Zh+En (fp32)</string>
+    <string name="zf_variant_small_bi_int8_20230216">Small Zh+En (int8)</string>
+    <string name="zf_variant_small_bi_fp32_20230216">Small Zh+En (fp32)</string>
+    <!-- Notifications -->
+    <string name="notif_zf_title_zh_xl">Zipformer Chinese XL</string>
+    <string name="notif_zf_title_zh">Zipformer Chinese</string>
+    <string name="notif_zf_title_bi">Zipformer Zh+En</string>
+    <string name="notif_zf_title_small_bi">Zipformer Small Zh+En</string>
 
     <string name="btn_close">Close</string>
     <string name="btn_close_with_seconds">Close (%1$ds)</string>

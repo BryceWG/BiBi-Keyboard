@@ -1438,6 +1438,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         val enabled = when (p.asrVendor) {
             AsrVendor.SenseVoice -> p.svPreloadEnabled
             AsrVendor.Paraformer -> p.pfPreloadEnabled
+            AsrVendor.Zipformer -> p.zfPreloadEnabled
             else -> false
         }
         if (!enabled) return

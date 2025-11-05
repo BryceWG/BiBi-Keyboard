@@ -450,6 +450,7 @@ class AsrHistoryActivity : AppCompatActivity() {
       AsrVendor.Soniox -> getString(R.string.vendor_soniox)
       AsrVendor.SenseVoice -> getString(R.string.vendor_sensevoice)
       AsrVendor.Paraformer -> getString(R.string.vendor_paraformer)
+      AsrVendor.Zipformer -> getString(R.string.vendor_zipformer)
     }
   }
 
@@ -652,6 +653,7 @@ class AsrHistoryActivity : AppCompatActivity() {
           AsrVendor.Soniox -> itemView.context.getString(R.string.vendor_soniox)
           AsrVendor.SenseVoice -> itemView.context.getString(R.string.vendor_sensevoice)
           AsrVendor.Paraformer -> itemView.context.getString(R.string.vendor_paraformer)
+          AsrVendor.Zipformer -> itemView.context.getString(R.string.vendor_zipformer)
         }
       } catch (e: Exception) {
         id

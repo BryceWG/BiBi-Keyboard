@@ -76,7 +76,7 @@
     <string name="vendor_sf">SiliconFlow</string>
     <string name="vendor_dashscope">阿里雲百煉</string>
     <string name="vendor_soniox">Soniox</string>
-    <string name="vendor_sensevoice">SenseVoice（本地）</string>
+    <string name="vendor_sensevoice">SenseVoice（本機非流）</string>
     <string name="label_sf_api_key">API 金鑰（Bearer）</string>
     <string name="label_sf_model_select">選擇模型</string>
     <string name="sf_model_default_display">FunAudioLLM/SenseVoiceSmall</string>
@@ -578,11 +578,45 @@
     <string name="fmt_m_s">%1$d 分鐘 %2$d 秒</string>
     <string name="fmt_s">%1$d 秒</string>
     
+    <!-- Zipformer (Local streaming) -->
+    <string name="vendor_zipformer">Zipformer（本機串流）</string>
+    <string name="zipformer_section_title">Zipformer（本機串流）</string>
+    <string name="label_zf_model_variant">模型版本</string>
+    <string name="label_zf_threads">執行緒數（1-8）</string>
+    <string name="label_zf_keep_alive">模型保留於記憶體</string>
+    <string name="label_zf_preload">首次顯示時載入模型</string>
+    <string name="label_zf_use_itn">啟用 ITN（反向文字正規化）</string>
+    <string name="btn_zf_download_model">下載 Zipformer 模型</string>
+    <string name="btn_zf_clear_model">清除 Zipformer 模型</string>
+    <string name="zf_download_status_done">模型已安裝</string>
+    <string name="zf_download_status_downloading">下載中… %1$d%%</string>
+    <string name="zf_download_status_extracting">解壓中…可能需要一段時間</string>
+    <string name="zf_download_status_failed">下載或解壓失敗</string>
+    <string name="zf_download_started_in_bg">已在背景開始，請在通知列查看進度</string>
+    <string name="zf_clear_confirm_title">確認清除模型？</string>
+    <string name="zf_clear_confirm_message">將刪除已下載的 Zipformer 模型檔，可稍後重新下載。是否繼續？</string>
+    <string name="zf_clear_done">已清除模型</string>
+    <string name="zf_clear_failed">清除失敗</string>
+    <!-- Variants -->
+    <string name="zf_variant_zh_xl_int8_20250630">中文（XL・int8）</string>
+    <string name="zf_variant_zh_xl_fp16_20250630">中文（XL・fp16）</string>
+    <string name="zf_variant_zh_int8_20250630">中文（int8）</string>
+    <string name="zf_variant_zh_fp16_20250630">中文（fp16）</string>
+    <string name="zf_variant_bi_int8_20230220">中英（int8）</string>
+    <string name="zf_variant_bi_fp32_20230220">中英（fp32）</string>
+    <string name="zf_variant_small_bi_int8_20230216">小型中英（int8）</string>
+    <string name="zf_variant_small_bi_fp32_20230216">小型中英（fp32）</string>
+    <!-- Notifications -->
+    <string name="notif_zf_title_zh_xl">Zipformer 中文 XL</string>
+    <string name="notif_zf_title_zh">Zipformer 中文</string>
+    <string name="notif_zf_title_bi">Zipformer 中英</string>
+    <string name="notif_zf_title_small_bi">Zipformer 小型中英</string>
+    
     <!-- Paraformer (Local) -->
-    <string name="vendor_paraformer">Paraformer（本機）</string>
+    <string name="vendor_paraformer">Paraformer（本機串流）</string>
     <string name="notif_pf_title_bilingual">Paraformer 模型（中英）</string>
     <string name="notif_pf_title_trilingual">Paraformer 模型（中英+粵語）</string>
-    <string name="paraformer_section_title">Paraformer（本機）</string>
+    <string name="paraformer_section_title">Paraformer（本機串流）</string>
     <string name="label_pf_model_variant">模型版本</string>
     <string name="label_pf_threads">執行緒數（1-8）</string>
     <string name="label_pf_keep_alive">模型保留於記憶體</string>

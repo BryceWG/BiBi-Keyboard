@@ -164,6 +164,9 @@ class AsrSessionManager(
             AsrVendor.Paraformer -> {
                 ParaformerStreamAsrEngine(context, scope, prefs, this)
             }
+            AsrVendor.Zipformer -> {
+                ZipformerStreamAsrEngine(context, scope, prefs, this)
+            }
         }
     }
 
@@ -221,6 +224,10 @@ class AsrSessionManager(
             }
             AsrVendor.Paraformer -> when (current) {
                 is ParaformerStreamAsrEngine -> current
+                else -> null
+            }
+            AsrVendor.Zipformer -> when (current) {
+                is ZipformerStreamAsrEngine -> current
                 else -> null
             }
         }

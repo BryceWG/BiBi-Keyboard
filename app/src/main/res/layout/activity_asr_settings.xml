@@ -1054,6 +1054,114 @@
           android:text="@string/pf_model_info" />
       </LinearLayout>
 
+      <!-- Zipformer (Local streaming) -->
+      <TextView
+        android:id="@+id/titleZipformer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:textColor="?attr/colorOnSurface"
+        android:text="@string/zipformer_section_title"
+        android:textStyle="bold" />
+
+      <LinearLayout
+        android:id="@+id/groupZipformer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+          android:id="@+id/tvZfModelVariantValue"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          android:clickable="true"
+          android:focusable="true"
+          android:foreground="?attr/selectableItemBackground"
+          android:textColor="?attr/colorOnSurfaceVariant"
+          android:text="@string/zf_variant_zh_xl_int8_20250630" />
+
+        <com.google.android.material.divider.MaterialDivider
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="16dp" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+          android:id="@+id/switchZfPreload"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:text="@string/label_zf_preload" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+          android:id="@+id/switchZfItn"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:text="@string/label_zf_use_itn" />
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:textColor="?attr/colorOnSurface"
+          android:text="@string/label_zf_threads" />
+
+        <com.google.android.material.slider.Slider
+          android:id="@+id/sliderZfThreads"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:valueFrom="1"
+          android:valueTo="8"
+          android:stepSize="1" />
+
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:textColor="?attr/colorOnSurface"
+          android:text="@string/label_zf_keep_alive" />
+
+        <TextView
+          android:id="@+id/tvZfKeepAliveValue"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          android:clickable="true"
+          android:focusable="true"
+          android:foreground="?attr/selectableItemBackground"
+          android:textColor="?attr/colorOnSurfaceVariant"
+          android:text="@string/sv_keep_alive_always" />
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnZfDownloadModel"
+          style="@style/Widget.Material3.Button.TonalButton"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="12dp"
+          app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+          android:text="@string/btn_zf_download_model" />
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnZfClearModel"
+          style="@style/Widget.Material3.Button.TonalButton"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+          android:text="@string/btn_zf_clear_model" />
+
+        <TextView
+          android:id="@+id/tvZfDownloadStatus"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="6dp"
+          android:textColor="?attr/colorOnSurfaceVariant"
+          android:text="" />
+
+      </LinearLayout>
+
     </LinearLayout>
   </androidx.core.widget.NestedScrollView>
 

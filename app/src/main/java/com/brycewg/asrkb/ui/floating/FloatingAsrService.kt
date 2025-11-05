@@ -1105,6 +1105,7 @@ class FloatingAsrService : Service(),
         val enabled = when (prefs.asrVendor) {
             AsrVendor.SenseVoice -> prefs.svPreloadEnabled
             AsrVendor.Paraformer -> prefs.pfPreloadEnabled
+            AsrVendor.Zipformer -> prefs.zfPreloadEnabled
             else -> false
         }
         if (!enabled) return

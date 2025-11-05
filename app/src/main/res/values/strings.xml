@@ -77,8 +77,9 @@
     <string name="vendor_sf">SiliconFlow</string>
     <string name="vendor_dashscope">阿里云百炼（DashScope）</string>
     <string name="vendor_soniox">Soniox</string>
-    <string name="vendor_sensevoice">SenseVoice（本地）</string>
-    <string name="vendor_paraformer">Paraformer（本地）</string>
+    <string name="vendor_sensevoice">SenseVoice（本地非流）</string>
+    <string name="vendor_paraformer">Paraformer（本地流式）</string>
+    <string name="vendor_zipformer">Zipformer（本地流式）</string>
     <string name="label_sf_api_key">API Key（Bearer）</string>
     <string name="label_sf_model_select">选择模型</string>
     <string name="sf_model_default_display">FunAudioLLM/SenseVoiceSmall</string>
@@ -548,6 +549,39 @@
     <string name="error_paraformer_model_missing">缺少 Paraformer 模型文件，请稍后在设置中配置或下载</string>
     <string name="label_pf_preload">首次显示时加载模型</string>
     <string name="pf_model_info">注：\n1. Paraformer 模型拥有两个版本（中英和中英粤），其中中文还另支持部分方言\n2. 每个版本的下载包都为 1GB，其中都包含 int8 和 fp32 两个量化版本的模型文件，在同版本的 int8 和 fp32 之间切换无需重新下载</string>
+
+    <!-- Zipformer (Local streaming) -->
+    <string name="zipformer_section_title">Zipformer（本地流式）</string>
+    <string name="label_zf_model_variant">Zipformer 模型版本</string>
+    <string name="label_zf_threads">推理线程数</string>
+    <string name="label_zf_keep_alive">模型保活</string>
+    <string name="label_zf_preload">首次显示时加载模型</string>
+    <string name="label_zf_use_itn">启用 ITN（反向文本规范化）</string>
+    <string name="btn_zf_download_model">下载 Zipformer 模型</string>
+    <string name="btn_zf_clear_model">清除 Zipformer 模型</string>
+    <string name="zf_download_status_done">模型已安装</string>
+    <string name="zf_download_status_downloading">下载中… %1$d%%</string>
+    <string name="zf_download_status_extracting">解压中…时间预计较长,请耐心等待</string>
+    <string name="zf_download_status_failed">下载或解压失败</string>
+    <string name="zf_download_started_in_bg">已开始后台下载，请到通知栏查看进度</string>
+    <string name="zf_clear_confirm_title">确认清除模型？</string>
+    <string name="zf_clear_confirm_message">将删除已下载的 Zipformer 模型文件，可稍后重新下载。是否继续？</string>
+    <string name="zf_clear_done">已清除模型</string>
+    <string name="zf_clear_failed">清除失败</string>
+    <!-- Variants -->
+    <string name="zf_variant_zh_xl_int8_20250630">中文（XL · int8）</string>
+    <string name="zf_variant_zh_xl_fp16_20250630">中文（XL · fp16）</string>
+    <string name="zf_variant_zh_int8_20250630">中文（int8）</string>
+    <string name="zf_variant_zh_fp16_20250630">中文（fp16）</string>
+    <string name="zf_variant_bi_int8_20230220">中英（int8）</string>
+    <string name="zf_variant_bi_fp32_20230220">中英（fp32）</string>
+    <string name="zf_variant_small_bi_int8_20230216">小型中英（int8）</string>
+    <string name="zf_variant_small_bi_fp32_20230216">小型中英（fp32）</string>
+    <!-- Notifications -->
+    <string name="notif_zf_title_zh_xl">Zipformer 中文 XL</string>
+    <string name="notif_zf_title_zh">Zipformer 中文</string>
+    <string name="notif_zf_title_bi">Zipformer 中英</string>
+    <string name="notif_zf_title_small_bi">Zipformer 小型中英</string>
 
     <!-- SyncClipboard settings -->
     <string name="section_sync_clipboard">剪贴板同步</string>

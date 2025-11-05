@@ -9,7 +9,8 @@ enum class AsrVendor(val id: String) {
     Gemini("gemini"),
     Soniox("soniox"),
     SenseVoice("sensevoice"),
-    Paraformer("paraformer");
+    Paraformer("paraformer"),
+    Zipformer("zipformer");
 
     companion object {
         fun fromId(id: String?): AsrVendor = when (id?.lowercase()) {
@@ -21,6 +22,7 @@ enum class AsrVendor(val id: String) {
             Soniox.id -> Soniox
             SenseVoice.id -> SenseVoice
             Paraformer.id -> Paraformer
+            Zipformer.id -> Zipformer
             else -> Volc
         }
     }

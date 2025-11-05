@@ -245,6 +245,7 @@ class AboutActivity : AppCompatActivity() {
     AsrVendor.Soniox -> getString(R.string.vendor_soniox)
     AsrVendor.SenseVoice -> getString(R.string.vendor_sensevoice)
     AsrVendor.Paraformer -> getString(R.string.vendor_paraformer)
+    AsrVendor.Zipformer -> getString(R.string.vendor_zipformer)
   }
 
   private fun addInfoLine(container: android.view.ViewGroup, text: String) {

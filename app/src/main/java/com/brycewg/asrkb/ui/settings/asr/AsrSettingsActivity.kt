@@ -63,6 +63,7 @@ class AsrSettingsActivity : AppCompatActivity() {
     private lateinit var groupSoniox: View
     private lateinit var groupSenseVoice: View
     private lateinit var groupParaformer: View
+    private lateinit var groupZipformer: View
 
     // Vendor title views
     private lateinit var titleVolc: View
@@ -74,6 +75,7 @@ class AsrSettingsActivity : AppCompatActivity() {
     private lateinit var titleSoniox: View
     private lateinit var titleSenseVoice: View
     private lateinit var titleParaformer: View
+    private lateinit var titleZipformer: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,6 +110,7 @@ class AsrSettingsActivity : AppCompatActivity() {
         super.onResume()
         updateSvDownloadUiVisibility()
         updatePfDownloadUiVisibility()
+        updateZfDownloadUiVisibility()
     }
 
     private fun setupToolbar() {
@@ -137,6 +140,7 @@ class AsrSettingsActivity : AppCompatActivity() {
         groupSoniox = findViewById(R.id.groupSoniox)
         groupSenseVoice = findViewById(R.id.groupSenseVoice)
         groupParaformer = findViewById(R.id.groupParaformer)
+        groupZipformer = findViewById(R.id.groupZipformer)
 
         // Vendor titles
         titleVolc = findViewById(R.id.titleVolc)
@@ -148,19 +152,20 @@ class AsrSettingsActivity : AppCompatActivity() {
         titleSoniox = findViewById(R.id.titleSoniox)
         titleSenseVoice = findViewById(R.id.titleSenseVoice)
         titleParaformer = findViewById(R.id.titleParaformer)
+        titleZipformer = findViewById(R.id.titleZipformer)
     }
 
     private fun setupVendorSelection() {
         val vendorOrder = listOf(
             AsrVendor.Volc, AsrVendor.SiliconFlow, AsrVendor.ElevenLabs,
             AsrVendor.OpenAI, AsrVendor.DashScope, AsrVendor.Gemini,
-            AsrVendor.Soniox, AsrVendor.SenseVoice, AsrVendor.Paraformer
+            AsrVendor.Soniox, AsrVendor.SenseVoice, AsrVendor.Paraformer, AsrVendor.Zipformer
         )
         val vendorItems = listOf(
             getString(R.string.vendor_volc), getString(R.string.vendor_sf),
             getString(R.string.vendor_eleven), getString(R.string.vendor_openai),
             getString(R.string.vendor_dashscope), getString(R.string.vendor_gemini),
-            getString(R.string.vendor_soniox), getString(R.string.vendor_sensevoice), getString(R.string.vendor_paraformer)
+            getString(R.string.vendor_soniox), getString(R.string.vendor_sensevoice), getString(R.string.vendor_paraformer), getString(R.string.vendor_zipformer)
         )
 
         tvAsrVendor.setOnClickListener { v ->
@@ -226,6 +231,7 @@ class AsrSettingsActivity : AppCompatActivity() {
         setupSonioxSettings()
         setupSenseVoiceSettings()
         setupParaformerSettings()
+        setupZipformerSettings()
     }
 
     private fun setupVolcengineSettings() {
@@ -955,6 +961,211 @@ class AsrSettingsActivity : AppCompatActivity() {
         }
     }
 
+    // ===== Zipformer (Local streaming) =====
+    private fun setupZipformerSettings() {
+        // 变体选择（八种）
+        val tvZfVariant = findViewById<TextView>(R.id.tvZfModelVariantValue)
+        val variantLabels = listOf(
+            getString(R.string.zf_variant_zh_xl_int8_20250630),
+            getString(R.string.zf_variant_zh_xl_fp16_20250630),
+            getString(R.string.zf_variant_zh_int8_20250630),
+            getString(R.string.zf_variant_zh_fp16_20250630),
+            getString(R.string.zf_variant_bi_int8_20230220),
+            getString(R.string.zf_variant_bi_fp32_20230220),
+            getString(R.string.zf_variant_small_bi_int8_20230216),
+            getString(R.string.zf_variant_small_bi_fp32_20230216)
+        )
+        val variantCodes = listOf(
+            "zh-xl-int8-20250630",
+            "zh-xl-fp16-20250630",
+            "zh-int8-20250630",
+            "zh-fp16-20250630",
+            "bi-20230220-int8",
+            "bi-20230220-fp32",
+            "bi-small-20230216-int8",
+            "bi-small-20230216-fp32"
+        )
+        fun updateVariantSummary() {
+            val idx = variantCodes.indexOf(prefs.zfModelVariant).coerceAtLeast(0)
+            tvZfVariant.text = variantLabels[idx]
+        }
+        updateVariantSummary()
+        tvZfVariant.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            val cur = variantCodes.indexOf(prefs.zfModelVariant).coerceAtLeast(0)
+            showSingleChoiceDialog(R.string.label_zf_model_variant, variantLabels.toTypedArray(), cur) { which ->
+                val code = variantCodes.getOrNull(which) ?: "zh-xl-int8-20250630"
+                if (code != prefs.zfModelVariant) {
+                    viewModel.updateZfModelVariant(code)
+                }
+                updateVariantSummary()
+                updateZfDownloadUiVisibility()
+            }
+        }
+
+        // 保留时长
+        val tvKeep = findViewById<TextView>(R.id.tvZfKeepAliveValue)
+        fun updateKeepAliveSummary() {
+            val values = listOf(0, 5, 15, 30, -1)
+            val labels = listOf(
+                getString(R.string.sv_keep_alive_immediate),
+                getString(R.string.sv_keep_alive_5m),
+                getString(R.string.sv_keep_alive_15m),
+                getString(R.string.sv_keep_alive_30m),
+                getString(R.string.sv_keep_alive_always)
+            )
+            val idx = values.indexOf(prefs.zfKeepAliveMinutes).let { if (it >= 0) it else values.size - 1 }
+            tvKeep.text = labels[idx]
+        }
+        updateKeepAliveSummary()
+        tvKeep.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            val labels = arrayOf(
+                getString(R.string.sv_keep_alive_immediate),
+                getString(R.string.sv_keep_alive_5m),
+                getString(R.string.sv_keep_alive_15m),
+                getString(R.string.sv_keep_alive_30m),
+                getString(R.string.sv_keep_alive_always)
+            )
+            val values = listOf(0, 5, 15, 30, -1)
+            val cur = values.indexOf(prefs.zfKeepAliveMinutes).let { if (it >= 0) it else values.size - 1 }
+            showSingleChoiceDialog(R.string.label_zf_keep_alive, labels, cur) { which ->
+                val vv = values.getOrNull(which) ?: -1
+                if (vv != prefs.zfKeepAliveMinutes) {
+                    prefs.zfKeepAliveMinutes = vv
+                }
+                updateKeepAliveSummary()
+            }
+        }
+
+        // 线程数滑块（1-8）
+        findViewById<com.google.android.material.slider.Slider>(R.id.sliderZfThreads).apply {
+            value = prefs.zfNumThreads.coerceIn(1, 8).toFloat()
+            addOnChangeListener { _, value, fromUser ->
+                if (fromUser) {
+                    val v = value.toInt().coerceIn(1, 8)
+                    if (v != prefs.zfNumThreads) {
+                        viewModel.updateZfNumThreads(v)
+                    }
+                }
+            }
+            addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
+                override fun onStartTrackingTouch(slider: com.google.android.material.slider.Slider) = hapticTapIfEnabled(slider)
+                override fun onStopTrackingTouch(slider: com.google.android.material.slider.Slider) = hapticTapIfEnabled(slider)
+            })
+        }
+
+        // 首次显示时加载模型
+        findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchZfPreload).apply {
+            isChecked = prefs.zfPreloadEnabled
+            setOnCheckedChangeListener { btn, isChecked ->
+                hapticTapIfEnabled(btn)
+                viewModel.updateZfPreload(isChecked)
+            }
+        }
+
+        // ITN 开关
+        findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchZfItn).apply {
+            isChecked = prefs.zfUseItn
+            setOnCheckedChangeListener { btn, isChecked ->
+                hapticTapIfEnabled(btn)
+                viewModel.updateZfUseItn(isChecked)
+            }
+        }
+
+        setupZfDownloadButtons()
+    }
+
+    private fun setupZfDownloadButtons() {
+        val btnDl = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfDownloadModel)
+        val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfClearModel)
+        val tvStatus = findViewById<TextView>(R.id.tvZfDownloadStatus)
+        btnDl.setOnClickListener { v ->
+            v.isEnabled = false
+            tvStatus.text = ""
+            val sources = arrayOf(
+                getString(R.string.download_source_github_official),
+                getString(R.string.download_source_mirror_ghproxy),
+                getString(R.string.download_source_mirror_gitmirror),
+                getString(R.string.download_source_mirror_gh_proxynet)
+            )
+            val variant = prefs.zfModelVariant
+            val urlOfficial = when (variant) {
+                "zh-xl-int8-20250630" -> "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-zh-xlarge-int8-2025-06-30.tar.bz2"
+                "zh-xl-fp16-20250630" -> "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-zh-xlarge-fp16-2025-06-30.tar.bz2"
+                "zh-int8-20250630" -> "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-zh-int8-2025-06-30.tar.bz2"
+                "zh-fp16-20250630" -> "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-zh-fp16-2025-06-30.tar.bz2"
+                "bi-20230220-int8", "bi-20230220-fp32" -> "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20.tar.bz2"
+                else -> "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-streaming-zipformer-small-bilingual-zh-en-2023-02-16.tar.bz2"
+            }
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.download_source_title)
+                .setItems(sources) { dlg, which ->
+                    dlg.dismiss()
+                    val url = when (which) {
+                        1 -> "https://ghproxy.net/$urlOfficial"
+                        2 -> "https://hub.gitmirror.com/$urlOfficial"
+                        3 -> "https://gh-proxy.net/$urlOfficial"
+                        else -> urlOfficial
+                    }
+                    try {
+                        ModelDownloadService.startDownload(this, url, variant, "zipformer")
+                        tvStatus.text = getString(R.string.zf_download_started_in_bg)
+                    } catch (e: Throwable) {
+                        android.util.Log.e(TAG, "Failed to start zipformer download", e)
+                        tvStatus.text = getString(R.string.zf_download_status_failed)
+                    } finally { v.isEnabled = true }
+                }
+                .setOnDismissListener { v.isEnabled = true }
+                .show()
+        }
+
+        btnClear.setOnClickListener { v ->
+            androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.zf_clear_confirm_title)
+                .setMessage(R.string.zf_clear_confirm_message)
+                .setPositiveButton(android.R.string.ok) { d, _ ->
+                    d.dismiss()
+                    v.isEnabled = false
+                    lifecycleScope.launch {
+                        try {
+                            val base = getExternalFilesDir(null) ?: filesDir
+                            val root = java.io.File(base, "zipformer")
+                            val outDir = when {
+                                prefs.zfModelVariant.startsWith("zh-xl-") -> java.io.File(root, "zh-xlarge-2025-06-30")
+                                prefs.zfModelVariant.startsWith("zh-") -> java.io.File(root, "zh-2025-06-30")
+                                prefs.zfModelVariant.startsWith("bi-small-") -> java.io.File(root, "small-bilingual-zh-en-2023-02-16")
+                                else -> java.io.File(root, "bilingual-zh-en-2023-02-20")
+                            }
+                            if (outDir.exists()) withContext(Dispatchers.IO) { outDir.deleteRecursively() }
+                            tvStatus.text = getString(R.string.zf_clear_done)
+                        } catch (e: Throwable) {
+                            android.util.Log.e(TAG, "Failed to clear zipformer model", e)
+                            tvStatus.text = getString(R.string.zf_clear_failed)
+                        } finally {
+                            v.isEnabled = true
+                            updateZfDownloadUiVisibility()
+                        }
+                    }
+                }
+                .setNegativeButton(R.string.btn_cancel, null)
+                .create()
+                .show()
+        }
+    }
+
+    private fun updateZfDownloadUiVisibility() {
+        val ready = viewModel.checkZfModelDownloaded(this)
+        val btn = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfDownloadModel)
+        val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfClearModel)
+        val tv = findViewById<TextView>(R.id.tvZfDownloadStatus)
+        btn.visibility = if (ready) View.GONE else View.VISIBLE
+        btnClear.visibility = if (ready) View.VISIBLE else View.GONE
+        if (ready && tv.text.isNullOrBlank()) {
+            tv.text = getString(R.string.zf_download_status_done)
+        }
+    }
+
     private fun setupSvModelVariantSelection() {
         val variantLabels = listOf(
             getString(R.string.sv_model_small_int8),
@@ -1160,13 +1371,13 @@ class AsrSettingsActivity : AppCompatActivity() {
         val vendorOrder = listOf(
             AsrVendor.Volc, AsrVendor.SiliconFlow, AsrVendor.ElevenLabs,
             AsrVendor.OpenAI, AsrVendor.DashScope, AsrVendor.Gemini,
-            AsrVendor.Soniox, AsrVendor.SenseVoice, AsrVendor.Paraformer
+            AsrVendor.Soniox, AsrVendor.SenseVoice, AsrVendor.Paraformer, AsrVendor.Zipformer
         )
         val vendorItems = listOf(
             getString(R.string.vendor_volc), getString(R.string.vendor_sf),
             getString(R.string.vendor_eleven), getString(R.string.vendor_openai),
             getString(R.string.vendor_dashscope), getString(R.string.vendor_gemini),
-            getString(R.string.vendor_soniox), getString(R.string.vendor_sensevoice), getString(R.string.vendor_paraformer)
+            getString(R.string.vendor_soniox), getString(R.string.vendor_sensevoice), getString(R.string.vendor_paraformer), getString(R.string.vendor_zipformer)
         )
         val idx = vendorOrder.indexOf(vendor).coerceAtLeast(0)
         tvAsrVendor.text = vendorItems[idx]
@@ -1182,7 +1393,8 @@ class AsrSettingsActivity : AppCompatActivity() {
             AsrVendor.Gemini to listOf(titleGemini, groupGemini),
             AsrVendor.Soniox to listOf(titleSoniox, groupSoniox),
             AsrVendor.SenseVoice to listOf(titleSenseVoice, groupSenseVoice),
-            AsrVendor.Paraformer to listOf(titleParaformer, groupParaformer)
+            AsrVendor.Paraformer to listOf(titleParaformer, groupParaformer),
+            AsrVendor.Zipformer to listOf(titleZipformer, groupZipformer)
         )
         visMap.forEach { (vendor, views) ->
             val vis = if (vendor == state.selectedVendor) View.VISIBLE else View.GONE

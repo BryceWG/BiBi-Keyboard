@@ -171,16 +171,20 @@ class ModelDownloadService : Service() {
       // 验证并安装模型
       verifyAndInstallModel(modelDir, variant, modelType)
 
-      notificationHandler.notifySuccess(
-        if (modelType == "paraformer") getString(R.string.pf_download_status_done)
-        else getString(R.string.sv_download_status_done)
-      )
+      val doneText = when (modelType) {
+        "paraformer" -> getString(R.string.pf_download_status_done)
+        "zipformer" -> getString(R.string.zf_download_status_done)
+        else -> getString(R.string.sv_download_status_done)
+      }
+      notificationHandler.notifySuccess(doneText)
     } catch (t: Throwable) {
       Log.e(TAG, "Download task failed for key=$key, url=$url", t)
-      notificationHandler.notifyFailed(
-        if (modelType == "paraformer") getString(R.string.pf_download_status_failed)
-        else getString(R.string.sv_download_status_failed)
-      )
+      val failText = when (modelType) {
+        "paraformer" -> getString(R.string.pf_download_status_failed)
+        "zipformer" -> getString(R.string.zf_download_status_failed)
+        else -> getString(R.string.sv_download_status_failed)
+      }
+      notificationHandler.notifyFailed(failText)
     } finally {
       tasks.remove(key)
       notificationHandlers.remove(key)
@@ -267,7 +271,11 @@ class ModelDownloadService : Service() {
 
     // 输出目录
     val base = getExternalFilesDir(null) ?: filesDir
-    val outRoot = File(base, if (modelType == "paraformer") "paraformer" else "sensevoice")
+    val outRoot = when (modelType) {
+      "paraformer" -> File(base, "paraformer")
+      "zipformer" -> File(base, "zipformer")
+      else -> File(base, "sensevoice")
+    }
     val tmpDir = File(outRoot, ".tmp_extract_${key.toSafeFileName()}_${System.currentTimeMillis()}")
 
     if (tmpDir.exists()) {
@@ -306,6 +314,16 @@ class ModelDownloadService : Service() {
       if (!((encInt8.exists() && decInt8.exists()) || (encF32.exists() && decF32.exists()))) {
         throw IllegalStateException("paraformer files missing after extract")
       }
+    } else if (modelType == "zipformer") {
+      val files = modelDir.listFiles() ?: emptyArray()
+      fun exists(regex: Regex): Boolean = files.any { it.isFile && regex.matches(it.name) }
+      val hasTokens = File(modelDir, "tokens.txt").exists()
+      val hasEncoder = exists(Regex("^encoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+      val hasDecoder = exists(Regex("^decoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$")) || exists(Regex("^decoder\\.onnx$"))
+      val hasJoiner = exists(Regex("^joiner(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+      if (!(hasTokens && hasEncoder && hasDecoder && hasJoiner)) {
+        throw IllegalStateException("zipformer files missing after extract (pattern)")
+      }
     } else {
       if (!(File(modelDir, "model.int8.onnx").exists() || File(modelDir, "model.onnx").exists())) {
         throw IllegalStateException("sensevoice files missing after extract")
@@ -316,13 +334,26 @@ class ModelDownloadService : Service() {
 
     // 确定最终输出目录
     val base = getExternalFilesDir(null) ?: filesDir
-    val outFinal = if (modelType == "paraformer") {
-      val outRoot = File(base, "paraformer")
-      val group = if (variant.startsWith("trilingual")) "trilingual" else "bilingual"
-      File(outRoot, group)
-    } else {
-      val outRoot = File(base, "sensevoice")
-      if (variant == "small-full") File(outRoot, "small-full") else File(outRoot, "small-int8")
+    val outFinal = when (modelType) {
+      "paraformer" -> {
+        val outRoot = File(base, "paraformer")
+        val group = if (variant.startsWith("trilingual")) "trilingual" else "bilingual"
+        File(outRoot, group)
+      }
+      "zipformer" -> {
+        val outRoot = File(base, "zipformer")
+        val groupDir = when {
+          variant.startsWith("zh-xl-") -> "zh-xlarge-2025-06-30"
+          variant.startsWith("zh-") -> "zh-2025-06-30"
+          variant.startsWith("bi-small-") -> "small-bilingual-zh-en-2023-02-16"
+          else -> "bilingual-zh-en-2023-02-20"
+        }
+        File(outRoot, groupDir)
+      }
+      else -> {
+        val outRoot = File(base, "sensevoice")
+        if (variant == "small-full") File(outRoot, "small-full") else File(outRoot, "small-int8")
+      }
     }
 
     // 原子替换
@@ -527,10 +558,11 @@ class NotificationHandler(
    * 通知下载进度（带节流）
    */
   fun notifyDownloadProgress(progress: Int, cancelIntent: PendingIntent) {
-    val text = if (modelType == "paraformer")
-      context.getString(R.string.pf_download_status_downloading, progress)
-    else
-      context.getString(R.string.sv_download_status_downloading, progress)
+    val text = when (modelType) {
+      "paraformer" -> context.getString(R.string.pf_download_status_downloading, progress)
+      "zipformer" -> context.getString(R.string.zf_download_status_downloading, progress)
+      else -> context.getString(R.string.sv_download_status_downloading, progress)
+    }
     notifyProgress(
       progress = progress,
       text = text,
@@ -546,10 +578,11 @@ class NotificationHandler(
    * 通知正在解压（不定进度）
    */
   fun notifyExtracting() {
-    val text = if (modelType == "paraformer")
-      context.getString(R.string.pf_download_status_extracting)
-    else
-      context.getString(R.string.sv_download_status_extracting)
+    val text = when (modelType) {
+      "paraformer" -> context.getString(R.string.pf_download_status_extracting)
+      "zipformer" -> context.getString(R.string.zf_download_status_extracting)
+      else -> context.getString(R.string.sv_download_status_extracting)
+    }
     notifyProgress(
       progress = 0,
       text = text,
@@ -592,9 +625,11 @@ class NotificationHandler(
   }
 
   fun getFailedText(): String {
-    return if (modelType == "paraformer")
-      context.getString(R.string.pf_download_status_failed)
-    else context.getString(R.string.sv_download_status_failed)
+    return when (modelType) {
+      "paraformer" -> context.getString(R.string.pf_download_status_failed)
+      "zipformer" -> context.getString(R.string.zf_download_status_failed)
+      else -> context.getString(R.string.sv_download_status_failed)
+    }
   }
 
   private fun notifyProgress(
@@ -667,15 +702,26 @@ class NotificationHandler(
   }
 
   private fun getTitleForVariant(): String {
-    return if (modelType == "paraformer") {
-      if (variant.startsWith("trilingual"))
-        context.getString(R.string.notif_pf_title_trilingual)
-      else
-        context.getString(R.string.notif_pf_title_bilingual)
-    } else {
-      when (variant) {
-        "small-full" -> context.getString(R.string.notif_model_title_full)
-        else -> context.getString(R.string.notif_model_title_int8)
+    return when (modelType) {
+      "paraformer" -> {
+        if (variant.startsWith("trilingual"))
+          context.getString(R.string.notif_pf_title_trilingual)
+        else
+          context.getString(R.string.notif_pf_title_bilingual)
+      }
+      "zipformer" -> {
+        when {
+          variant.startsWith("zh-xl-") -> context.getString(R.string.notif_zf_title_zh_xl)
+          variant.startsWith("zh-") -> context.getString(R.string.notif_zf_title_zh)
+          variant.startsWith("bi-small-") -> context.getString(R.string.notif_zf_title_small_bi)
+          else -> context.getString(R.string.notif_zf_title_bi)
+        }
+      }
+      else -> {
+        when (variant) {
+          "small-full" -> context.getString(R.string.notif_model_title_full)
+          else -> context.getString(R.string.notif_model_title_int8)
+        }
       }
     }
   }

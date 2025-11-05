@@ -438,6 +438,9 @@ class AsrSessionManager(
             AsrVendor.Paraformer -> {
                 ParaformerStreamAsrEngine(context, serviceScope, prefs, this)
             }
+            AsrVendor.Zipformer -> {
+                ZipformerStreamAsrEngine(context, serviceScope, prefs, this)
+            }
         }
     }
 
