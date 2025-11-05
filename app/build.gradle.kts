@@ -12,8 +12,8 @@ android {
         applicationId = "com.brycewg.asrkb"
         minSdk =29
         targetSdk = 35
-        versionCode = 94
-        versionName = "3.4.8"
+        versionCode = 95
+        versionName = "3.5.0"
 
         // 仅打包 arm64-v8a 以控制体积；可按需扩展
         ndk {
@@ -106,6 +106,12 @@ android {
                 "**/libonnxruntime4j_jni.so",
                 "**/libsherpa-onnx-c-api.so",
                 "**/libsherpa-onnx-cxx-api.so"
+            )
+        }
+        // 移除 Lombok 的 ServiceLoader 声明，避免 R8 对缺失实现类的告警
+        resources {
+            excludes += listOf(
+                "META-INF/services/lombok.*"
             )
         }
     }

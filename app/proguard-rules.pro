@@ -72,6 +72,10 @@
 -keep class com.alibaba.dashscope.** { *; }
 -dontwarn com.alibaba.dashscope.**
 
+# Lombok（仅编译期使用；运行时不需要）
+-dontwarn lombok.**
+-dontwarn org.projectlombok.**
+
 # OkHttp & WebSocket
 -dontwarn okhttp3.**
 -dontwarn okio.**
