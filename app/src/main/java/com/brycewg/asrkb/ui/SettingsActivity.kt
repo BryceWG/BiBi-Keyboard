@@ -534,28 +534,47 @@ class SettingsActivity : AppCompatActivity() {
             messageBuilder.toString()
         }
 
-        MaterialAlertDialogBuilder(this)
+        val fullMessage = android.text.SpannableStringBuilder().apply {
+            append(messageText)
+            append("\n\n")
+            val start = length
+            append(getString(R.string.btn_view_release_page))
+            val end = length
+            setSpan(object : android.text.style.ClickableSpan() {
+                override fun onClick(widget: android.view.View) {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl))
+                        startActivity(intent)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to open release page", e)
+                        Toast.makeText(
+                            this@SettingsActivity,
+                            getString(R.string.error_open_browser),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            // 加粗并着色以示为操作项（使用默认链接样式即可，避免直接取主题色）
+            setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(android.text.style.UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.update_dialog_title)
-            .setMessage(messageText)
+            .setMessage(fullMessage)
             .setPositiveButton(R.string.btn_download) { _, _ ->
                 showDownloadSourceDialog(result.downloadUrl, result.latestVersion)
             }
-            .setNeutralButton(R.string.btn_view_release_page) { _, _ ->
-                // 跳转到 GitHub Release 页面
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(result.downloadUrl))
-                    startActivity(intent)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to open release page", e)
-                    Toast.makeText(
-                        this,
-                        getString(R.string.error_open_browser),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
             .setNegativeButton(R.string.btn_cancel, null)
-            .show()
+            .create()
+
+        dialog.setOnShowListener {
+            // 使消息内的“查看 Release 页”可点击
+            val msgView = dialog.findViewById<TextView>(android.R.id.message)
+            msgView?.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+        }
+        dialog.show()
     }
 
     /**

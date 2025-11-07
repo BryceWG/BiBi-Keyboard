@@ -46,9 +46,11 @@
     <string name="about_phosphor_title">phosphor-icons/homepage</string>
     <string name="about_phosphor_desc">アプリケーション全体で使用されるほぼすべてのアイコンを提供します</string>
 
+    <string name="about_wavelineview_desc">録音波形アニメーションの実装方案を提供し、オーディオ可視化効果をよりスムーズで美しくします。</string>
     <string name="unit_chars">文字</string>
     <string name="unit_0_min">0分</string>
     <string name="fmt_h_m">%1$d時間%2$d分</string>
     <string name="fmt_m_s">%1$d分%2$d秒</string>
     <string name="fmt_s">%1$d秒</string>
+    <string name="about_wavelineview_title">Jay-Goo/WaveLineView</string>
 </resources>
