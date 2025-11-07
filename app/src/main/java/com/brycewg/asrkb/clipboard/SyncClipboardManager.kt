@@ -48,6 +48,7 @@ class SyncClipboardManager(
   interface Listener {
     fun onPulledNewContent(text: String)
     fun onUploadSuccess()
+    fun onUploadFailed(reason: String? = null)
   }
 
   private val clipboard by lazy { context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager }
@@ -233,11 +234,21 @@ class SyncClipboardManager(
           true
         } else {
           Log.w(TAG, "Upload failed with status: ${resp.code}")
+          try {
+            listener?.onUploadFailed("HTTP ${resp.code}")
+          } catch (e: Throwable) {
+            Log.e(TAG, "Failed to notify upload failed listener", e)
+          }
           false
         }
       }
     } catch (e: Throwable) {
       Log.e(TAG, "Failed to upload clipboard text", e)
+      try {
+        listener?.onUploadFailed(e.message)
+      } catch (t: Throwable) {
+        Log.e(TAG, "Failed to notify upload failed listener (exception)", t)
+      }
       false
     }
   }

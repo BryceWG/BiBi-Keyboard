@@ -13,6 +13,7 @@
     <string name="sc_test_success">Pull succeeded</string>
     <string name="sc_test_failed">Pull failed. Please check URL and credentials.</string>
     <string name="sc_status_uploaded">Clipboard uploaded successfully</string>
+    <string name="sc_status_upload_failed">Clipboard upload failed</string>
     <string name="btn_sc_project_home">Project Home</string>
     <string name="sc_open_browser_failed">Cannot open browser</string>
     <string name="hint_sc_server_base_placeholder">https://your-server.com/path</string>

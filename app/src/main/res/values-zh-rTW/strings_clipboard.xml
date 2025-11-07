@@ -13,6 +13,7 @@
     <string name="sc_test_success">拉取成功</string>
     <string name="sc_test_failed">拉取失敗，請檢查位址與憑證</string>
     <string name="sc_status_uploaded">成功上傳剪貼簿</string>
+    <string name="sc_status_upload_failed">上傳剪貼簿失敗</string>
     <string name="btn_sc_project_home">專案首頁</string>
     <string name="sc_open_browser_failed">無法開啟瀏覽器</string>
     <string name="hint_sc_server_base_placeholder">https://your-server.com/path</string>

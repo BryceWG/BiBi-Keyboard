@@ -13,6 +13,7 @@
     <string name="sc_test_success">拉取成功</string>
     <string name="sc_test_failed">拉取失败，请检查地址与凭证</string>
     <string name="sc_status_uploaded">成功上传粘贴板</string>
+    <string name="sc_status_upload_failed">上传粘贴板失败</string>
     <string name="btn_sc_project_home">项目主页</string>
     <string name="sc_open_browser_failed">无法打开浏览器</string>
     <string name="hint_sc_server_base_placeholder">https://your-server.com/path</string>

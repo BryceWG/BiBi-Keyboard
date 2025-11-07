@@ -15,6 +15,9 @@ import android.view.MotionEvent
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
+import android.content.ClipboardManager
+import android.content.ClipData
 import android.widget.ImageButton
 import android.widget.TextView
 import android.view.inputmethod.InputMethodManager
@@ -133,6 +136,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
 
     // ========== 剪贴板和其他辅助功能 ==========
     private var clipboardPreviewTimeout: Runnable? = null
+    private var clipboardManager: ClipboardManager? = null
+    private var clipboardChangeListener: ClipboardManager.OnPrimaryClipChangedListener? = null
+    @Volatile private var lastShownClipboardHash: String? = null
     private var prefsReceiver: BroadcastReceiver? = null
     private var syncClipboardManager: SyncClipboardManager? = null
     // 本地模型首次出现预热仅触发一次
@@ -308,6 +314,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         // 启动剪贴板同步
         startClipboardSync()
 
+        // 监听系统剪贴板变更，IME 可见期间弹出预览
+        startClipboardPreviewListener()
+
         // 预热耳机路由（键盘显示）
         try { BluetoothRouteManager.setImeActive(this, true) } catch (t: Throwable) { android.util.Log.w("AsrKeyboardService", "BluetoothRouteManager setImeActive(true)", t) }
 
@@ -354,6 +363,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         try {
             syncClipboardManager?.stop()
         } catch (_: Throwable) { }
+
+        // 停止剪贴板预览监听
+        stopClipboardPreviewListener()
 
         hideAiEditPanel()
 
@@ -415,6 +427,20 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     override fun onStatusMessage(message: String) {
         clearStatusTextStyle()
         txtStatusText?.text = message
+        // 默认：状态文本可点击复制（便于调试提取报错信息）
+        val tv = txtStatusText
+        tv?.isClickable = true
+        tv?.isFocusable = true
+        tv?.setOnClickListener { v ->
+            performKeyHaptic(v)
+            try {
+                val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                cm.setPrimaryClip(ClipData.newPlainText("ASR Status", message))
+                Toast.makeText(this, getString(R.string.toast_copied), Toast.LENGTH_SHORT).show()
+            } catch (t: Throwable) {
+                android.util.Log.w("AsrKeyboardService", "Copy status to clipboard failed", t)
+            }
+        }
     }
 
     override fun onVibrate() {
@@ -426,27 +452,18 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     }
 
     override fun onShowClipboardPreview(preview: ClipboardPreview) {
-        val tv = txtStatus ?: return
+        val tv = txtStatusText ?: return
         tv.text = preview.displaySnippet
 
-        // 限制粘贴板内容为单行显示,避免破坏 UI 布局
+        // 限制粘贴板内容为单行显示，避免破坏 UI 布局（txtStatusText 默认已单行，这里冗余保证）
         try {
             tv.maxLines = 1
             tv.isSingleLine = true
         } catch (_: Throwable) { }
 
-        // 显示圆角遮罩
-        try {
-            tv.setBackgroundResource(R.drawable.bg_status_chip)
-        } catch (_: Throwable) { }
-
-        // 设置内边距
-        try {
-            val d = tv.resources.displayMetrics.density
-            val ph = (12f * d + 0.5f).toInt()
-            val pv = (4f * d + 0.5f).toInt()
-            tv.setPaddingRelative(ph, pv, ph, pv)
-        } catch (_: Throwable) { }
+        // 取消圆角遮罩与额外内边距：使用中心按钮原生背景
+        try { tv.background = null } catch (_: Throwable) { }
+        try { tv.setPaddingRelative(0, 0, 0, 0) } catch (_: Throwable) { }
 
         // 启用点击粘贴
         tv.isClickable = true
@@ -454,6 +471,20 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         tv.setOnClickListener { v ->
             performKeyHaptic(v)
             actionHandler.handleClipboardPreviewClick(currentInputConnection)
+        }
+
+        // 若当前处于录音波形显示，临时切换为文本以展示预览
+        try {
+            txtStatusText?.visibility = View.VISIBLE
+            waveformView?.visibility = View.GONE
+            waveformView?.stop()
+        } catch (_: Throwable) { }
+
+        // 标记最近一次展示的剪贴板内容，避免重复触发
+        try {
+            lastShownClipboardHash = sha256Hex(preview.fullText)
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "hash preview text failed", t)
         }
 
         // 超时自动恢复
@@ -466,7 +497,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     }
 
     override fun onHideClipboardPreview() {
-        val tv = txtStatus ?: return
+        val tv = txtStatusText ?: return
         clipboardPreviewTimeout?.let { tv.removeCallbacks(it) }
         clipboardPreviewTimeout = null
 
@@ -476,8 +507,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
             tv.setOnClickListener(null)
             tv.background = null
             tv.setPaddingRelative(0, 0, 0, 0)
-            tv.maxLines = 3
-            tv.isSingleLine = false
+            // 保持单行显示以匹配中心信息栏设计
+            tv.maxLines = 1
+            tv.isSingleLine = true
         } catch (_: Throwable) { }
 
         // 恢复默认状态文案
@@ -1064,16 +1096,16 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
      * 确保普通状态文本不会显示粘贴板预览的样式
      */
     private fun clearStatusTextStyle() {
-        val tv = txtStatus ?: return
+        val tv = txtStatusText ?: return
         try {
             tv.isClickable = false
             tv.isFocusable = false
             tv.setOnClickListener(null)
             tv.background = null
             tv.setPaddingRelative(0, 0, 0, 0)
-            // 恢复多行显示
-            tv.maxLines = 3
-            tv.isSingleLine = false
+            // 中心信息栏保持单行，以避免布局跳动
+            tv.maxLines = 1
+            tv.isSingleLine = true
         } catch (_: Throwable) { }
     }
 
@@ -1192,6 +1224,22 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
             } catch (t: Throwable) {
                 android.util.Log.e("AsrKeyboardService", "Fallback copy failed", t)
             }
+        }
+
+        // 显示剪贴板预览：优先使用当前选中文本，否则读取系统剪贴板
+        try {
+            val selected = inputHelper.getSelectedText(ic, 0)?.toString()
+            val text = if (!selected.isNullOrEmpty()) {
+                selected
+            } else {
+                val cm = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                cm.primaryClip?.getItemAt(0)?.coerceToText(this)?.toString()
+            }
+            if (!text.isNullOrEmpty()) {
+                actionHandler.showClipboardPreview(text)
+            }
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "Show clipboard preview after copy failed", t)
         }
     }
 
@@ -1356,15 +1404,16 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     }
 
     override fun onShowRetryChip(label: String) {
-        val tv = txtStatus ?: return
+        val tv = txtStatusText ?: return
         tv.text = label
-        // 使用与剪贴板预览相同的芯片样式
-        try { tv.setBackgroundResource(R.drawable.bg_status_chip) } catch (_: Throwable) { }
+        // 移除芯片样式，仅保持可点击
+        try { tv.background = null } catch (_: Throwable) { }
+        try { tv.setPaddingRelative(0, 0, 0, 0) } catch (_: Throwable) { }
+        // 在中心信息栏展示，并临时隐藏波形
         try {
-            val d = tv.resources.displayMetrics.density
-            val ph = (12f * d + 0.5f).toInt()
-            val pv = (4f * d + 0.5f).toInt()
-            tv.setPaddingRelative(ph, pv, ph, pv)
+            txtStatusText?.visibility = View.VISIBLE
+            waveformView?.visibility = View.GONE
+            waveformView?.stop()
         } catch (_: Throwable) { }
         tv.isClickable = true
         tv.isFocusable = true
@@ -1575,10 +1624,17 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
                             }
 
                             override fun onUploadSuccess() {
+                                // 成功时不提示
+                            }
+
+                            override fun onUploadFailed(reason: String?) {
                                 try {
                                     rootView?.post {
-                                        clearStatusTextStyle()
-                                        txtStatusText?.text = getString(R.string.sc_status_uploaded)
+                                        // 失败时短暂提示，然后恢复到剪贴板预览，方便点击粘贴
+                                        onStatusMessage(getString(R.string.sc_status_upload_failed))
+                                        txtStatusText?.postDelayed({
+                                            try { actionHandler.reShowClipboardPreviewIfAny() } catch (_: Throwable) { }
+                                        }, 900)
                                     }
                                 } catch (_: Throwable) { }
                             }
@@ -1786,6 +1842,66 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         } catch (_: Throwable) {
             // 使用 Material3 标准浅色 Surface 作为最终回退
             0xFFFFFBFE.toInt()
+        }
+    }
+
+    // ========== 剪贴板预览监听 ==========
+
+    private fun startClipboardPreviewListener() {
+        try {
+            if (clipboardManager == null) {
+                clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            }
+            if (clipboardChangeListener == null) {
+                clipboardChangeListener = ClipboardManager.OnPrimaryClipChangedListener {
+                    try {
+                        val text = readClipboardText() ?: return@OnPrimaryClipChangedListener
+                        val h = try { sha256Hex(text) } catch (_: Throwable) { text }
+                        if (h == lastShownClipboardHash) return@OnPrimaryClipChangedListener
+                        lastShownClipboardHash = h
+                        rootView?.post { actionHandler.showClipboardPreview(text) }
+                    } catch (t: Throwable) {
+                        android.util.Log.w("AsrKeyboardService", "clipboard change preview failed", t)
+                    }
+                }
+            }
+            clipboardManager?.addPrimaryClipChangedListener(clipboardChangeListener!!)
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "startClipboardPreviewListener failed", t)
+        }
+    }
+
+    private fun stopClipboardPreviewListener() {
+        try {
+            clipboardManager?.removePrimaryClipChangedListener(clipboardChangeListener)
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "stopClipboardPreviewListener failed", t)
+        }
+    }
+
+    private fun readClipboardText(): String? {
+        return try {
+            val cm = clipboardManager ?: return null
+            val clip = cm.primaryClip ?: return null
+            if (clip.itemCount <= 0) return null
+            val item = clip.getItemAt(0)
+            item.coerceToText(this)?.toString()?.takeIf { it.isNotEmpty() }
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "readClipboardText failed", t)
+            null
+        }
+    }
+
+    private fun sha256Hex(s: String): String {
+        return try {
+            val md = java.security.MessageDigest.getInstance("SHA-256")
+            val bytes = md.digest(s.toByteArray(Charsets.UTF_8))
+            val sb = StringBuilder(bytes.size * 2)
+            for (b in bytes) sb.append(String.format("%02x", b))
+            sb.toString()
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "sha256 failed", t)
+            s // fallback: use raw text as hash key
         }
     }
 

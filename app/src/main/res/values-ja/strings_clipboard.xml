@@ -14,6 +14,7 @@
     <string name="sc_test_success">プル成功</string>
     <string name="sc_test_failed">プル失敗。URLと認証情報を確認してください。</string>
     <string name="sc_status_uploaded">クリップボードが正常にアップロードされました</string>
+    <string name="sc_status_upload_failed">クリップボードのアップロードに失敗しました</string>
     <string name="btn_sc_project_home">プロジェクトホーム</string>
     <string name="sc_open_browser_failed">ブラウザを開けません</string>
     <string name="hint_sc_server_base_placeholder">https://your-server.com/path</string>
