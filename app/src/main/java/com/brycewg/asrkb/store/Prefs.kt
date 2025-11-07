@@ -728,6 +728,23 @@ class Prefs(context: Context) {
         get() = (sp.getString(KEY_PUNCT_4, DEFAULT_PUNCT_4) ?: DEFAULT_PUNCT_4).trim()
         set(value) = sp.edit { putString(KEY_PUNCT_4, value.trim()) }
 
+    // 自定义扩展按钮（4个位置，存储动作类型ID）
+    var extBtn1: com.brycewg.asrkb.ime.ExtensionButtonAction
+        get() = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(sp.getString(KEY_EXT_BTN_1, null))
+        set(value) = sp.edit { putString(KEY_EXT_BTN_1, value.id) }
+
+    var extBtn2: com.brycewg.asrkb.ime.ExtensionButtonAction
+        get() = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(sp.getString(KEY_EXT_BTN_2, null))
+        set(value) = sp.edit { putString(KEY_EXT_BTN_2, value.id) }
+
+    var extBtn3: com.brycewg.asrkb.ime.ExtensionButtonAction
+        get() = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(sp.getString(KEY_EXT_BTN_3, null))
+        set(value) = sp.edit { putString(KEY_EXT_BTN_3, value.id) }
+
+    var extBtn4: com.brycewg.asrkb.ime.ExtensionButtonAction
+        get() = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(sp.getString(KEY_EXT_BTN_4, null))
+        set(value) = sp.edit { putString(KEY_EXT_BTN_4, value.id) }
+
     // 历史语音识别总字数（仅统计最终提交到编辑器的识别结果；AI编辑不计入）
     var totalAsrChars: Long
         get() = sp.getLong(KEY_TOTAL_ASR_CHARS, 0L).coerceAtLeast(0L)
@@ -1020,6 +1037,10 @@ class Prefs(context: Context) {
         private const val KEY_PUNCT_2 = "punct_2"
         private const val KEY_PUNCT_3 = "punct_3"
         private const val KEY_PUNCT_4 = "punct_4"
+        private const val KEY_EXT_BTN_1 = "ext_btn_1"
+        private const val KEY_EXT_BTN_2 = "ext_btn_2"
+        private const val KEY_EXT_BTN_3 = "ext_btn_3"
+        private const val KEY_EXT_BTN_4 = "ext_btn_4"
         private const val KEY_TOTAL_ASR_CHARS = "total_asr_chars"
         // SenseVoice（本地 ASR）
         private const val KEY_SV_MODEL_DIR = "sv_model_dir"
@@ -1215,6 +1236,11 @@ class Prefs(context: Context) {
         o.put(KEY_PUNCT_2, punct2)
         o.put(KEY_PUNCT_3, punct3)
         o.put(KEY_PUNCT_4, punct4)
+        // 自定义扩展按钮
+        o.put(KEY_EXT_BTN_1, extBtn1.id)
+        o.put(KEY_EXT_BTN_2, extBtn2.id)
+        o.put(KEY_EXT_BTN_3, extBtn3.id)
+        o.put(KEY_EXT_BTN_4, extBtn4.id)
         // 统计信息
         o.put(KEY_TOTAL_ASR_CHARS, totalAsrChars)
         // 使用统计（聚合）与首次使用日期
@@ -1351,6 +1377,11 @@ class Prefs(context: Context) {
             optString(KEY_PUNCT_2)?.let { punct2 = it }
             optString(KEY_PUNCT_3)?.let { punct3 = it }
             optString(KEY_PUNCT_4)?.let { punct4 = it }
+            // 自定义扩展按钮（可选）
+            optString(KEY_EXT_BTN_1)?.let { extBtn1 = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(it) }
+            optString(KEY_EXT_BTN_2)?.let { extBtn2 = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(it) }
+            optString(KEY_EXT_BTN_3)?.let { extBtn3 = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(it) }
+            optString(KEY_EXT_BTN_4)?.let { extBtn4 = com.brycewg.asrkb.ime.ExtensionButtonAction.fromId(it) }
             // 统计信息（可选）
             if (o.has(KEY_TOTAL_ASR_CHARS)) {
                 // 使用 optLong，若类型为字符串/浮点将尽力转换

@@ -357,6 +357,115 @@ class KeyboardActionHandler(
     }
 
     /**
+     * 处理扩展按钮动作（统一入口）
+     * @return ExtensionButtonActionResult 包含是否成功和可选的回调需求
+     */
+    fun handleExtensionButtonClick(
+        action: com.brycewg.asrkb.ime.ExtensionButtonAction,
+        ic: InputConnection?
+    ): ExtensionButtonActionResult {
+        if (ic == null) return ExtensionButtonActionResult.FAILED
+
+        return when (action) {
+            com.brycewg.asrkb.ime.ExtensionButtonAction.NONE -> {
+                ExtensionButtonActionResult.SUCCESS
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.SELECT -> {
+                // 切换选择模式（需要 IME 支持）
+                ExtensionButtonActionResult.NEED_TOGGLE_SELECTION
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.SELECT_ALL -> {
+                try {
+                    ic.performContextMenuAction(android.R.id.selectAll)
+                    ExtensionButtonActionResult.SUCCESS
+                } catch (t: Throwable) {
+                    Log.w(TAG, "SELECT_ALL failed", t)
+                    ExtensionButtonActionResult.FAILED
+                }
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.COPY -> {
+                try {
+                    ic.performContextMenuAction(android.R.id.copy)
+                    uiListener?.onStatusMessage(context.getString(R.string.status_copied))
+                    ExtensionButtonActionResult.SUCCESS
+                } catch (t: Throwable) {
+                    Log.w(TAG, "COPY failed", t)
+                    ExtensionButtonActionResult.FAILED
+                }
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.PASTE -> {
+                try {
+                    ic.performContextMenuAction(android.R.id.paste)
+                    uiListener?.onStatusMessage(context.getString(R.string.status_pasted))
+                    ExtensionButtonActionResult.SUCCESS
+                } catch (t: Throwable) {
+                    Log.w(TAG, "PASTE failed", t)
+                    ExtensionButtonActionResult.FAILED
+                }
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.CURSOR_LEFT -> {
+                // 支持长按连发
+                ExtensionButtonActionResult.NEED_CURSOR_LEFT
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.CURSOR_RIGHT -> {
+                // 支持长按连发
+                ExtensionButtonActionResult.NEED_CURSOR_RIGHT
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.MOVE_START -> {
+                try {
+                    // 移动到文本开头
+                    val before = inputHelper.getTextBeforeCursor(ic, 100000)?.length ?: 0
+                    if (before > 0) {
+                        ic.setSelection(0, 0)
+                    }
+                    ExtensionButtonActionResult.SUCCESS
+                } catch (t: Throwable) {
+                    Log.w(TAG, "MOVE_START failed", t)
+                    ExtensionButtonActionResult.FAILED
+                }
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.MOVE_END -> {
+                try {
+                    // 移动到文本结尾
+                    val before = inputHelper.getTextBeforeCursor(ic, 100000)?.toString() ?: ""
+                    val after = inputHelper.getTextAfterCursor(ic, 100000)?.toString() ?: ""
+                    val total = before.length + after.length
+                    ic.setSelection(total, total)
+                    ExtensionButtonActionResult.SUCCESS
+                } catch (t: Throwable) {
+                    Log.w(TAG, "MOVE_END failed", t)
+                    ExtensionButtonActionResult.FAILED
+                }
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.NUMPAD -> {
+                // 显示数字符号键盘（需要 IME 支持）
+                ExtensionButtonActionResult.NEED_SHOW_NUMPAD
+            }
+            com.brycewg.asrkb.ime.ExtensionButtonAction.UNDO -> {
+                val success = handleUndo(ic)
+                if (success) {
+                    ExtensionButtonActionResult.SUCCESS
+                } else {
+                    uiListener?.onStatusMessage(context.getString(R.string.status_nothing_to_undo))
+                    ExtensionButtonActionResult.FAILED
+                }
+            }
+        }
+    }
+
+    /**
+     * 扩展按钮动作结果
+     */
+    enum class ExtensionButtonActionResult {
+        SUCCESS,                    // 成功完成
+        FAILED,                     // 失败
+        NEED_TOGGLE_SELECTION,      // 需要 IME 切换选择模式
+        NEED_CURSOR_LEFT,           // 需要 IME 处理左移（支持长按）
+        NEED_CURSOR_RIGHT,          // 需要 IME 处理右移（支持长按）
+        NEED_SHOW_NUMPAD            // 需要 IME 显示数字键盘
+    }
+
+    /**
      * 保存撤销快照（在执行变更操作前调用）
      */
     fun saveUndoSnapshot(ic: InputConnection?, force: Boolean = false) {

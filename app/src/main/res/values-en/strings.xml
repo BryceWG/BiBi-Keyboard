@@ -104,6 +104,29 @@
   <string name="btn_test_input">Test Input</string>
 
   <!-- ============================================== -->
+  <!-- Extension Button Configuration -->
+  <!-- ============================================== -->
+  <string name="label_extension_buttons">Extension Buttons Configuration</string>
+  <string name="ext_btn_default_summary">Select, Copy, Paste, Numpad</string>
+  <string name="ext_btn_none_selected">Not selected</string>
+  <string name="ext_btn_must_select_4">Please select exactly 4 buttons</string>
+  <string name="ext_btn_max_4">Maximum 4 buttons</string>
+  <string name="ext_btn_none">Disabled</string>
+  <string name="ext_btn_select">Selection Mode</string>
+  <string name="ext_btn_select_all">Select All</string>
+  <string name="ext_btn_copy">Copy</string>
+  <string name="ext_btn_paste">Paste</string>
+  <string name="ext_btn_cursor_left">Move Left</string>
+  <string name="ext_btn_cursor_right">Move Right</string>
+  <string name="ext_btn_move_start">Move to Start</string>
+  <string name="ext_btn_move_end">Move to End</string>
+  <string name="ext_btn_numpad">Numpad</string>
+  <string name="ext_btn_undo">Undo</string>
+  <string name="status_copied">Copied</string>
+  <string name="status_pasted">Pasted</string>
+  <string name="status_nothing_to_undo">Nothing to undo</string>
+
+  <!-- ============================================== -->
   <!-- General Buttons -->
   <!-- ============================================== -->
   <string name="toast_setup_all_done">All set</string>

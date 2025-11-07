@@ -198,6 +198,27 @@
           android:layout_height="wrap_content"
           android:visibility="gone" />
 
+        <!-- 扩展按钮配置 -->
+        <TextView
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="16dp"
+          android:textColor="?attr/colorOnSurface"
+          android:textStyle="bold"
+          android:text="@string/label_extension_buttons" />
+
+        <TextView
+          android:id="@+id/tvExtensionButtonsValue"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:paddingTop="8dp"
+          android:paddingBottom="8dp"
+          android:clickable="true"
+          android:focusable="true"
+          android:foreground="?attr/selectableItemBackground"
+          android:textColor="?attr/colorOnSurfaceVariant"
+          android:text="@string/ext_btn_default_summary" />
+
       </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
   </androidx.core.widget.NestedScrollView>

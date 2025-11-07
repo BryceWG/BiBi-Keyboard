@@ -104,6 +104,29 @@
   <string name="btn_test_input">測試輸入</string>
 
   <!-- ============================================== -->
+  <!-- 擴展按鈕配置 -->
+  <!-- ============================================== -->
+  <string name="label_extension_buttons">擴展按鈕配置</string>
+  <string name="ext_btn_default_summary">選擇、複製、貼上、數字鍵盤</string>
+  <string name="ext_btn_none_selected">未選擇</string>
+  <string name="ext_btn_must_select_4">請選擇恰好 4 個按鈕</string>
+  <string name="ext_btn_max_4">最多選擇 4 個按鈕</string>
+  <string name="ext_btn_none">停用</string>
+  <string name="ext_btn_select">選擇模式</string>
+  <string name="ext_btn_select_all">全選</string>
+  <string name="ext_btn_copy">複製</string>
+  <string name="ext_btn_paste">貼上</string>
+  <string name="ext_btn_cursor_left">左移</string>
+  <string name="ext_btn_cursor_right">右移</string>
+  <string name="ext_btn_move_start">移至開頭</string>
+  <string name="ext_btn_move_end">移至結尾</string>
+  <string name="ext_btn_numpad">數字鍵盤</string>
+  <string name="ext_btn_undo">復原</string>
+  <string name="status_copied">已複製</string>
+  <string name="status_pasted">已貼上</string>
+  <string name="status_nothing_to_undo">無可復原的操作</string>
+
+  <!-- ============================================== -->
   <!-- 通用按鈕 -->
   <!-- ============================================== -->
   <string name="toast_setup_all_done">已完成所有設定</string>

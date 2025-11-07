@@ -187,6 +187,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
                     val v = rootView
                     if (v != null) {
                         applyKeyboardHeightScale(v)
+                        applyExtensionButtonConfig()
                         v.requestLayout()
                     }
                 }
@@ -242,6 +243,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         // 应用偏好设置
         applyKeyboardHeightScale(view)
         applyPunctuationLabels()
+        applyExtensionButtonConfig()
 
         // 更新初始 UI 状态
         refreshPermissionUi()
@@ -289,6 +291,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         // 刷新 UI
         btnImeSwitcher?.visibility = View.VISIBLE
         applyPunctuationLabels()
+        applyExtensionButtonConfig()
         refreshPermissionUi()
         hideAiEditPanel()
         hideNumpadPanel()
@@ -918,23 +921,11 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
             actionHandler.commitText(currentInputConnection, prefs.punct4)
         }
 
-        // 扩展按钮（占位，暂无功能）
-        btnExt1?.setOnClickListener { v ->
-            performKeyHaptic(v)
-            // TODO: 添加具体功能
-        }
-        btnExt2?.setOnClickListener { v ->
-            performKeyHaptic(v)
-            // TODO: 添加具体功能
-        }
-        btnExt3?.setOnClickListener { v ->
-            performKeyHaptic(v)
-            // TODO: 添加具体功能
-        }
-        btnExt4?.setOnClickListener { v ->
-            performKeyHaptic(v)
-            // TODO: 添加具体功能
-        }
+        // 扩展按钮（可自定义功能）
+        setupExtensionButton(btnExt1, prefs.extBtn1)
+        setupExtensionButton(btnExt2, prefs.extBtn2)
+        setupExtensionButton(btnExt3, prefs.extBtn3)
+        setupExtensionButton(btnExt4, prefs.extBtn4)
 
         // 中央扩展按钮（占位，暂无功能）
         btnExtCenter1?.setOnClickListener { v ->
@@ -1504,6 +1495,116 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         btnPunct2?.text = prefs.punct2
         btnPunct3?.text = prefs.punct3
         btnPunct4?.text = prefs.punct4
+    }
+
+    /**
+     * 设置单个扩展按钮的功能
+     */
+    private fun setupExtensionButton(btn: ImageButton?, action: ExtensionButtonAction) {
+        if (btn == null) return
+
+        // 设置图标
+        try {
+            btn.setImageResource(action.iconResId)
+        } catch (t: Throwable) {
+            android.util.Log.w("AsrKeyboardService", "Failed to set extension button icon", t)
+        }
+
+        // 根据动作类型设置行为
+        when (action) {
+            ExtensionButtonAction.NONE -> {
+                btn.visibility = View.GONE
+            }
+            ExtensionButtonAction.CURSOR_LEFT, ExtensionButtonAction.CURSOR_RIGHT -> {
+                // 光标移动需要长按连发
+                btn.visibility = View.VISIBLE
+                setupCursorButtonRepeat(btn, action)
+            }
+            else -> {
+                // 普通按钮：点击即可
+                btn.visibility = View.VISIBLE
+                btn.setOnClickListener { v ->
+                    performKeyHaptic(v)
+                    handleExtensionButtonAction(action)
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理扩展按钮动作
+     */
+    private fun handleExtensionButtonAction(action: ExtensionButtonAction) {
+        val result = actionHandler.handleExtensionButtonClick(action, currentInputConnection)
+
+        when (result) {
+            KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS -> {
+                // 成功，不需要额外处理
+            }
+            KeyboardActionHandler.ExtensionButtonActionResult.FAILED -> {
+                // 失败，已在 actionHandler 中处理
+            }
+            KeyboardActionHandler.ExtensionButtonActionResult.NEED_TOGGLE_SELECTION -> {
+                // 切换选择模式（需要显示 AI 编辑面板）
+                showAiEditPanel()
+                toggleSelectionMode()
+            }
+            KeyboardActionHandler.ExtensionButtonActionResult.NEED_SHOW_NUMPAD -> {
+                // 显示数字键盘
+                showNumpadPanel()
+            }
+            KeyboardActionHandler.ExtensionButtonActionResult.NEED_CURSOR_LEFT,
+            KeyboardActionHandler.ExtensionButtonActionResult.NEED_CURSOR_RIGHT -> {
+                // 光标移动已在长按处理中完成
+            }
+        }
+    }
+
+    /**
+     * 设置光标移动按钮的长按连发
+     */
+    private fun setupCursorButtonRepeat(btn: ImageButton, action: ExtensionButtonAction) {
+        val initialDelay = 350L
+        val repeatInterval = 50L
+        var repeatRunnable: Runnable? = null
+
+        btn.setOnTouchListener { v, ev ->
+            when (ev.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    performKeyHaptic(v)
+                    // 立即移动一次
+                    val delta = if (action == ExtensionButtonAction.CURSOR_LEFT) -1 else 1
+                    moveCursorBy(delta)
+
+                    // 设置连发
+                    repeatRunnable?.let { v.removeCallbacks(it) }
+                    val r = Runnable {
+                        moveCursorBy(delta)
+                        repeatRunnable?.let { v.postDelayed(it, repeatInterval) }
+                    }
+                    repeatRunnable = r
+                    v.postDelayed(r, initialDelay)
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    repeatRunnable?.let { v.removeCallbacks(it) }
+                    repeatRunnable = null
+                    v.performClick()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    /**
+     * 应用扩展按钮配置（更新图标和可见性）
+     */
+    private fun applyExtensionButtonConfig() {
+        setupExtensionButton(btnExt1, prefs.extBtn1)
+        setupExtensionButton(btnExt2, prefs.extBtn2)
+        setupExtensionButton(btnExt3, prefs.extBtn3)
+        setupExtensionButton(btnExt4, prefs.extBtn4)
     }
 
     private fun vibrateTick() {

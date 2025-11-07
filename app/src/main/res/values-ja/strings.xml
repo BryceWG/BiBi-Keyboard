@@ -105,6 +105,29 @@
   <string name="btn_test_input">テスト入力</string>
 
   <!-- ============================================== -->
+  <!-- 拡張ボタン設定 -->
+  <!-- ============================================== -->
+  <string name="label_extension_buttons">拡張ボタン設定</string>
+  <string name="ext_btn_default_summary">選択、コピー、貼り付け、数字キーボード</string>
+  <string name="ext_btn_none_selected">未選択</string>
+  <string name="ext_btn_must_select_4">正確に4つのボタンを選択してください</string>
+  <string name="ext_btn_max_4">最大4つのボタン</string>
+  <string name="ext_btn_none">無効</string>
+  <string name="ext_btn_select">選択モード</string>
+  <string name="ext_btn_select_all">すべて選択</string>
+  <string name="ext_btn_copy">コピー</string>
+  <string name="ext_btn_paste">貼り付け</string>
+  <string name="ext_btn_cursor_left">左に移動</string>
+  <string name="ext_btn_cursor_right">右に移動</string>
+  <string name="ext_btn_move_start">先頭に移動</string>
+  <string name="ext_btn_move_end">末尾に移動</string>
+  <string name="ext_btn_numpad">数字キーボード</string>
+  <string name="ext_btn_undo">取り消す</string>
+  <string name="status_copied">コピーしました</string>
+  <string name="status_pasted">貼り付けました</string>
+  <string name="status_nothing_to_undo">取り消す操作がありません</string>
+
+  <!-- ============================================== -->
   <!-- 通用按钮 -->
   <!-- ============================================== -->
   <string name="toast_setup_all_done">すべて設定完了</string>
