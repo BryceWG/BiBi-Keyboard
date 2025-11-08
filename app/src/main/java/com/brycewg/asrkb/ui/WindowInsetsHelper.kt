@@ -6,6 +6,7 @@ import androidx.core.graphics.Insets
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import kotlin.math.max
 
 /**
  * Window Insets 处理工具类
@@ -33,13 +34,15 @@ object WindowInsetsHelper {
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(rootView) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomInset = max(sysBars.bottom, ime.bottom)
 
             v.updatePadding(
-                top = if (applyTop) initialPadding.top + insets.top else initialPadding.top,
-                bottom = if (applyBottom) initialPadding.bottom + insets.bottom else initialPadding.bottom,
-                left = initialPadding.left + insets.left,
-                right = initialPadding.right + insets.right
+                top = if (applyTop) initialPadding.top + sysBars.top else initialPadding.top,
+                bottom = if (applyBottom) initialPadding.bottom + bottomInset else initialPadding.bottom,
+                left = initialPadding.left + sysBars.left,
+                right = initialPadding.right + sysBars.right
             )
 
             windowInsets
@@ -78,9 +81,11 @@ object WindowInsetsHelper {
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val sysBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = windowInsets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomInset = max(sysBars.bottom, ime.bottom)
             v.updatePadding(
-                bottom = initialPadding.bottom + insets.bottom
+                bottom = initialPadding.bottom + bottomInset
             )
             windowInsets
         }
