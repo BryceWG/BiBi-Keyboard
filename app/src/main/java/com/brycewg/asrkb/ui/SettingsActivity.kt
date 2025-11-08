@@ -25,6 +25,8 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.brycewg.asrkb.R
+import com.brycewg.asrkb.UiColors
+import com.brycewg.asrkb.UiColorTokens
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.setup.SetupState
 import com.brycewg.asrkb.ui.setup.SetupStateMachine
@@ -677,19 +679,19 @@ class SettingsActivity : AppCompatActivity() {
 
         val noticeEnd = noticeStart + notice.length
 
-        // 根据级别选择颜色（使用 Material3 动态颜色）
+        // 根据级别选择颜色（统一使用 UiColors 获取 Monet 动态颜色）
         val color = when (level) {
             UpdateChecker.NoticeLevel.INFO -> {
                 // 使用 tertiary 颜色（Monet 第三色）
-                getThemeColor(com.google.android.material.R.attr.colorTertiary, 0xFF6750A4.toInt())
+                UiColors.get(this, UiColorTokens.tertiary)
             }
             UpdateChecker.NoticeLevel.WARNING -> {
                 // 使用 secondary 颜色（Monet 第二色）
-                getThemeColor(com.google.android.material.R.attr.colorSecondary, 0xFFE8DEF8.toInt())
+                UiColors.secondary(this)
             }
             UpdateChecker.NoticeLevel.CRITICAL -> {
                 // 使用 error 颜色
-                getThemeColor(android.R.attr.colorError, 0xFFB3261E.toInt())
+                UiColors.error(this)
             }
         }
 
@@ -708,22 +710,6 @@ class SettingsActivity : AppCompatActivity() {
         )
 
         return spannable
-    }
-
-    /**
-     * 从主题属性获取颜色
-     *
-     * @param attrId 属性 ID
-     * @param defaultColor 默认颜色（如果属性不存在）
-     * @return 颜色值
-     */
-    private fun getThemeColor(attrId: Int, defaultColor: Int): Int {
-        val typedValue = android.util.TypedValue()
-        return if (theme.resolveAttribute(attrId, typedValue, true)) {
-            typedValue.data
-        } else {
-            defaultColor
-        }
     }
 
     /**
