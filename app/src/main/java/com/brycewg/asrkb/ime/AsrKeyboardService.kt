@@ -744,88 +744,171 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
                     data = mapOf(
                         "tapToggle" to true,
                         "state" to actionHandler.getCurrentState()::class.java.simpleName,
-                        "running" to asrManager.isRunning()
+                        "running" to asrManager.isRunning(),
+                        "aiPanel" to isAiEditPanelVisible
                     )
                 )
             } catch (_: Throwable) { }
-            actionHandler.handleMicTapToggle()
+            if (isAiEditPanelVisible) {
+                // 在 AI 编辑面板中：点按触发 AI 编辑录音/停止
+                actionHandler.handleAiEditClick(currentInputConnection)
+            } else {
+                // 主界面：点按切换普通听写
+                actionHandler.handleMicTapToggle()
+            }
         }
 
         btnMic?.setOnTouchListener { v, event ->
             if (prefs.micTapToggleEnabled) return@setOnTouchListener false
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    performKeyHaptic(v)
-                    if (!checkAsrReady()) {
+            if (isAiEditPanelVisible) {
+                // AI 编辑面板：长按按下开始 AI 编辑录音，松开停止并进入 AI 编辑
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        performKeyHaptic(v)
+                        if (!checkAsrReady()) {
+                            try {
+                                DebugLogManager.log(
+                                    category = "ime",
+                                    event = "mic_down_blocked",
+                                    data = mapOf(
+                                        "tapToggle" to false,
+                                        "aiPanel" to true,
+                                        "state" to actionHandler.getCurrentState()::class.java.simpleName
+                                    )
+                                )
+                            } catch (_: Throwable) { }
+                            v.performClick()
+                            return@setOnTouchListener true
+                        }
                         try {
                             DebugLogManager.log(
                                 category = "ime",
-                                event = "mic_down_blocked",
+                                event = "ai_mic_down",
+                                data = mapOf(
+                                    "tapToggle" to false,
+                                    "state" to actionHandler.getCurrentState()::class.java.simpleName,
+                                    "running" to asrManager.isRunning()
+                                )
+                            )
+                        } catch (_: Throwable) { }
+                        // 进入 AI 编辑录音
+                        actionHandler.handleAiEditClick(currentInputConnection)
+                        true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        try {
+                            DebugLogManager.log(
+                                category = "ime",
+                                event = "ai_mic_up",
+                                data = mapOf(
+                                    "tapToggle" to false,
+                                    "state" to actionHandler.getCurrentState()::class.java.simpleName,
+                                    "running" to asrManager.isRunning()
+                                )
+                            )
+                        } catch (_: Throwable) { }
+                        // 若仍处于 AI 编辑录音，则停止并进入处理；否则不重复触发开始
+                        if (actionHandler.getCurrentState() is KeyboardState.AiEditListening) {
+                            actionHandler.handleAiEditClick(currentInputConnection)
+                        }
+                        v.performClick()
+                        true
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                        try {
+                            DebugLogManager.log(
+                                category = "ime",
+                                event = "ai_mic_cancel",
                                 data = mapOf(
                                     "tapToggle" to false,
                                     "state" to actionHandler.getCurrentState()::class.java.simpleName
                                 )
                             )
                         } catch (_: Throwable) { }
+                        if (actionHandler.getCurrentState() is KeyboardState.AiEditListening) {
+                            actionHandler.handleAiEditClick(currentInputConnection)
+                        }
                         v.performClick()
-                        return@setOnTouchListener true
+                        true
                     }
-                    micDownRawY = try { event.rawY } catch (_: Throwable) { event.y }
-                    try {
-                        DebugLogManager.log(
-                            category = "ime",
-                            event = "mic_down",
-                            data = mapOf(
-                                "tapToggle" to false,
-                                "y" to micDownRawY,
-                                "state" to actionHandler.getCurrentState()::class.java.simpleName,
-                                "running" to asrManager.isRunning()
-                            )
-                        )
-                    } catch (_: Throwable) { }
-                    actionHandler.handleMicPressDown()
-                    true
+                    else -> false
                 }
-                MotionEvent.ACTION_UP -> {
-                    val slop = try { ViewConfiguration.get(v.context).scaledTouchSlop } catch (_: Throwable) { 16 }
-                    val upY = try { event.rawY } catch (_: Throwable) { event.y }
-                    val dy = (micDownRawY - upY)
-                    val autoEnter = prefs.micSwipeUpAutoEnterEnabled && dy > slop
-                    try {
-                        DebugLogManager.log(
-                            category = "ime",
-                            event = "mic_up",
-                            data = mapOf(
-                                "tapToggle" to false,
-                                "dy" to dy,
-                                "slop" to slop,
-                                "autoEnter" to autoEnter,
-                                "state" to actionHandler.getCurrentState()::class.java.simpleName,
-                                "running" to asrManager.isRunning()
+            } else {
+                // 主界面：长按普通听写
+                when (event.actionMasked) {
+                    MotionEvent.ACTION_DOWN -> {
+                        performKeyHaptic(v)
+                        if (!checkAsrReady()) {
+                            try {
+                                DebugLogManager.log(
+                                    category = "ime",
+                                    event = "mic_down_blocked",
+                                    data = mapOf(
+                                        "tapToggle" to false,
+                                        "state" to actionHandler.getCurrentState()::class.java.simpleName
+                                    )
+                                )
+                            } catch (_: Throwable) { }
+                            v.performClick()
+                            return@setOnTouchListener true
+                        }
+                        micDownRawY = try { event.rawY } catch (_: Throwable) { event.y }
+                        try {
+                            DebugLogManager.log(
+                                category = "ime",
+                                event = "mic_down",
+                                data = mapOf(
+                                    "tapToggle" to false,
+                                    "y" to micDownRawY,
+                                    "state" to actionHandler.getCurrentState()::class.java.simpleName,
+                                    "running" to asrManager.isRunning()
+                                )
                             )
-                        )
-                    } catch (_: Throwable) { }
-                    actionHandler.handleMicPressUp(autoEnter)
-                    v.performClick()
-                    true
-                }
-                MotionEvent.ACTION_CANCEL -> {
-                    try {
-                        DebugLogManager.log(
-                            category = "ime",
-                            event = "mic_cancel",
-                            data = mapOf(
-                                "tapToggle" to false,
-                                "state" to actionHandler.getCurrentState()::class.java.simpleName,
-                                "running" to asrManager.isRunning()
+                        } catch (_: Throwable) { }
+                        actionHandler.handleMicPressDown()
+                        true
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        val slop = try { ViewConfiguration.get(v.context).scaledTouchSlop } catch (_: Throwable) { 16 }
+                        val upY = try { event.rawY } catch (_: Throwable) { event.y }
+                        val dy = (micDownRawY - upY)
+                        val autoEnter = prefs.micSwipeUpAutoEnterEnabled && dy > slop
+                        try {
+                            DebugLogManager.log(
+                                category = "ime",
+                                event = "mic_up",
+                                data = mapOf(
+                                    "tapToggle" to false,
+                                    "dy" to dy,
+                                    "slop" to slop,
+                                    "autoEnter" to autoEnter,
+                                    "state" to actionHandler.getCurrentState()::class.java.simpleName,
+                                    "running" to asrManager.isRunning()
+                                )
                             )
-                        )
-                    } catch (_: Throwable) { }
-                    actionHandler.handleMicPressUp(false)
-                    v.performClick()
-                    true
+                        } catch (_: Throwable) { }
+                        actionHandler.handleMicPressUp(autoEnter)
+                        v.performClick()
+                        true
+                    }
+                    MotionEvent.ACTION_CANCEL -> {
+                        try {
+                            DebugLogManager.log(
+                                category = "ime",
+                                event = "mic_cancel",
+                                data = mapOf(
+                                    "tapToggle" to false,
+                                    "state" to actionHandler.getCurrentState()::class.java.simpleName,
+                                    "running" to asrManager.isRunning()
+                                )
+                            )
+                        } catch (_: Throwable) { }
+                        actionHandler.handleMicPressUp(false)
+                        v.performClick()
+                        true
+                    }
+                    else -> false
                 }
-                else -> false
             }
         }
 
