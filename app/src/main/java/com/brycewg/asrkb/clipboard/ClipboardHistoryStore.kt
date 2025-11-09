@@ -1,7 +1,5 @@
 package com.brycewg.asrkb.clipboard
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.util.Log
 import com.brycewg.asrkb.store.Prefs
@@ -156,56 +154,14 @@ class ClipboardHistoryStore(private val context: Context, private val prefs: Pre
     }
 
     /**
-     * 粘贴到目标输入框：将文本放入剪贴板并尝试调用系统“粘贴”，
-     * 若目标控件不支持（performContextMenuAction 返回 false）或异常，则回退到 commitText。
-     * 始终尽力恢复原剪贴板内容。
+     * 粘贴到目标输入框
      */
     fun pasteInto(ic: android.view.inputmethod.InputConnection?, text: String) {
         if (ic == null) return
-        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val prev = cm.primaryClip
-        var placedTempClip = false
         try {
-            val clip = ClipData.newPlainText("ClipboardItem", text)
-            cm.setPrimaryClip(clip)
-            placedTempClip = true
-
-            val ok = try {
-                ic.performContextMenuAction(android.R.id.paste)
-            } catch (e: Throwable) {
-                Log.w(TAG, "performContextMenuAction exception, fallback to commitText", e)
-                false
-            }
-            if (!ok) {
-                try {
-                    ic.commitText(text, 1)
-                } catch (e: Throwable) {
-                    Log.e(TAG, "commitText failed", e)
-                }
-            }
-        } catch (t: Throwable) {
-            Log.w(TAG, "pasteInto failed before paste, trying direct commitText", t)
-            try {
-                ic.commitText(text, 1)
-            } catch (e: Throwable) {
-                Log.e(TAG, "commitText fallback failed", e)
-            }
-        } finally {
-            if (placedTempClip) {
-                try {
-                    if (prev != null) {
-                        cm.setPrimaryClip(prev)
-                    } else {
-                        try {
-                            cm.clearPrimaryClip()
-                        } catch (e: Throwable) {
-                            Log.w(TAG, "clearPrimaryClip failed", e)
-                        }
-                    }
-                } catch (e: Throwable) {
-                    Log.w(TAG, "restore previous clipboard failed", e)
-                }
-            }
+            ic.commitText(text, 1)
+        } catch (e: Throwable) {
+            Log.e(TAG, "commitText failed", e)
         }
     }
 }
