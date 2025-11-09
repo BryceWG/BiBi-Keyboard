@@ -32,6 +32,12 @@ object AsrFinalFilters {
       Log.w(TAG, "trimTrailingPunct failed", t)
     }
 
+    // Pro 门面：正则表达式后处理（若开启）
+    out = try { ProRegexFacade.applyIfEnabled(context, out) } catch (t: Throwable) {
+      Log.w(TAG, "regex post-processing failed", t)
+      out
+    }
+
     out = try { ProTradFacade.maybeToTraditional(context, out) } catch (t: Throwable) {
       Log.w(TAG, "traditional convert failed", t)
       out
@@ -111,6 +117,12 @@ object AsrFinalFilters {
       processed
     }
 
+    // 正则表达式后处理（Pro 门面；OSS 为 no-op）
+    processed = try { ProRegexFacade.applyIfEnabled(context, processed) } catch (t: Throwable) {
+      Log.w(TAG, "regex post-processing failed", t)
+      processed
+    }
+
     // 繁体转换（Pro/OSS 门面）
     processed = try {
       ProTradFacade.maybeToTraditional(context, processed)
@@ -121,4 +133,6 @@ object AsrFinalFilters {
 
     return LlmPostProcessor.LlmProcessResult(ok = ok, text = processed, errorMessage = err, httpCode = http)
   }
+
+  // 正则后处理逻辑已移至 ProRegexFacade（pro/oss 双实现），避免在 main 泄露 Pro 逻辑。
 }
