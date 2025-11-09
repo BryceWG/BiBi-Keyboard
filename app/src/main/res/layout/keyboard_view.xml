@@ -239,7 +239,7 @@
             android:tint="?attr/colorOnSurfaceVariant" />
 
         <!-- 合并标点键 A（点按=第1个，上滑=第2个） -->
-        <FrameLayout
+        <com.brycewg.asrkb.ui.widgets.PunctKeyView
             android:id="@+id/btnPunct2"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -254,32 +254,10 @@
             android:stateListAnimator="@animator/key_button_state_list"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/btnPunct1"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- 次级符号（上滑触发），顶部小字 -->
-            <TextView
-                android:id="@+id/btnPunct2Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|center_horizontal"
-                android:gravity="center"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="10sp"
-                android:includeFontPadding="false" />
-
-            <!-- 主符号（点按触发），居中显示 -->
-            <TextView
-                android:id="@+id/btnPunct2Primary"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="18sp"
-                android:includeFontPadding="false" />
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- 合并标点键 B（点按=第3个，上滑=第4个） -->
-        <FrameLayout
+        <com.brycewg.asrkb.ui.widgets.PunctKeyView
             android:id="@+id/btnPunct3"
             android:layout_width="40dp"
             android:layout_height="40dp"
@@ -294,29 +272,7 @@
             android:stateListAnimator="@animator/key_button_state_list"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnPunct4"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <!-- 次级符号（上滑触发），顶部小字 -->
-            <TextView
-                android:id="@+id/btnPunct3Secondary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|center_horizontal"
-                android:gravity="center"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="10sp"
-                android:includeFontPadding="false" />
-
-            <!-- 主符号（点按触发），居中显示 -->
-            <TextView
-                android:id="@+id/btnPunct3Primary"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="18sp"
-                android:includeFontPadding="false" />
-        </FrameLayout>
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- 右侧占位按键（常规按钮类型，后续赋予功能） -->
         <ImageButton
@@ -334,7 +290,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:src="@drawable/chats_teardrop_toggle"
+            android:src="@drawable/circles_four_toggle"
             android:tint="?attr/colorOnSurfaceVariant" />
 
         <!-- 中央按钮 -->

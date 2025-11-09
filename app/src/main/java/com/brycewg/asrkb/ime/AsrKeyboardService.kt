@@ -122,13 +122,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     private var btnHide: ImageButton? = null
     private var btnImeSwitcher: ImageButton? = null
     private var btnPunct1: ImageButton? = null
-    private var btnPunct2: View? = null
-    private var btnPunct3: View? = null
+    private var btnPunct2: com.brycewg.asrkb.ui.widgets.PunctKeyView? = null
+    private var btnPunct3: com.brycewg.asrkb.ui.widgets.PunctKeyView? = null
     private var btnPunct4: ImageButton? = null
-    private var btnPunct2Primary: TextView? = null
-    private var btnPunct2Secondary: TextView? = null
-    private var btnPunct3Primary: TextView? = null
-    private var btnPunct3Secondary: TextView? = null
     private var rowExtension: ConstraintLayout? = null
     private var btnExt1: ImageButton? = null
     private var btnExt2: ImageButton? = null
@@ -555,10 +551,6 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         btnPunct2 = view.findViewById(R.id.btnPunct2)
         btnPunct3 = view.findViewById(R.id.btnPunct3)
         btnPunct4 = view.findViewById(R.id.btnPunct4)
-        btnPunct2Primary = view.findViewById(R.id.btnPunct2Primary)
-        btnPunct2Secondary = view.findViewById(R.id.btnPunct2Secondary)
-        btnPunct3Primary = view.findViewById(R.id.btnPunct3Primary)
-        btnPunct3Secondary = view.findViewById(R.id.btnPunct3Secondary)
         rowExtension = view.findViewById<ConstraintLayout>(R.id.rowExtension)
         btnExt1 = view.findViewById(R.id.btnExt1)
         btnExt2 = view.findViewById(R.id.btnExt2)
@@ -1703,11 +1695,9 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
 
 
     private fun applyPunctuationLabels() {
-        // 新布局：中间两个按键显示两行标签
-        btnPunct2Primary?.text = prefs.punct1
-        btnPunct2Secondary?.text = prefs.punct2
-        btnPunct3Primary?.text = prefs.punct3
-        btnPunct3Secondary?.text = prefs.punct4
+        // 新布局：中间两个按键显示两行标签，由自定义视图绘制
+        btnPunct2?.setTexts(prefs.punct1, prefs.punct2)
+        btnPunct3?.setTexts(prefs.punct3, prefs.punct4)
     }
 
     /**
