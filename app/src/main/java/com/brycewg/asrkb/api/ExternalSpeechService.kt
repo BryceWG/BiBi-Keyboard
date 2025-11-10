@@ -426,7 +426,11 @@ class ExternalSpeechService : Service() {
                 // 执行带 AI 的完整后处理链（IO 在线程内切换）
                 CoroutineScope(Dispatchers.Main).launch {
                     val out = try {
-                        com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(context, prefs, text).text.ifBlank { text }
+                        val processed = com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(context, prefs, text).text
+                        if (processed.isBlank()) {
+                            // AI 返回空：回退到简单后处理（包含正则/繁体）
+                            try { com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text) } catch (_: Throwable) { text }
+                        } else processed
                     } catch (t: Throwable) {
                         Log.w(TAG, "applyWithAi failed, fallback to simple", t)
                         try { com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text) } catch (_: Throwable) { text }

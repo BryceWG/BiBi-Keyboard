@@ -1088,7 +1088,17 @@ class KeyboardActionHandler(
         if (postprocFailed) {
             uiListener?.onStatusMessage(context.getString(R.string.status_llm_failed_used_raw))
         }
-        val finalOut = res.text.ifBlank { preTrimRaw }
+        val finalOut = if (res.text.isBlank()) {
+            // 若 AI 返回空文本，回退到简单后处理（包含正则/繁体），而非仅使用预修剪文本
+            try {
+                com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text)
+            } catch (t: Throwable) {
+                Log.w(TAG, "applySimple fallback after blank AI result failed", t)
+                preTrimRaw
+            }
+        } else {
+            res.text
+        }
 
         // 若已被取消，不再提交
         if (seq != opSeq) return
@@ -1327,16 +1337,24 @@ class KeyboardActionHandler(
             return
         }
 
+        // 统一套用简单后处理（正则/繁体等）
+        val editedFinal = try {
+            com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, edited)
+        } catch (t: Throwable) {
+            Log.w(TAG, "applySimple on AI-edited text failed", t)
+            edited
+        }
+
         // 执行替换
         if (seq != opSeq) return
         if (state.targetIsSelection) {
             // 替换选中文本
-            inputHelper.commitText(ic, edited)
+            inputHelper.commitText(ic, editedFinal)
         } else {
             // 替换最后一次 ASR 提交的文本
-            if (inputHelper.replaceText(ic, original, edited)) {
+            if (inputHelper.replaceText(ic, original, editedFinal)) {
                 // 更新最后提交的文本为编辑后的结果
-                sessionContext = sessionContext.copy(lastAsrCommitText = edited)
+                sessionContext = sessionContext.copy(lastAsrCommitText = editedFinal)
             } else {
                 uiListener?.onStatusMessage(context.getString(R.string.status_last_asr_not_found))
                 uiListener?.onVibrate()
