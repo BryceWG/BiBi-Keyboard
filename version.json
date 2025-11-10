@@ -1,10 +1,10 @@
 {
-  "version": "3.6.6",
-  "version_code": 106,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.6.6",
-  "release_notes": "本次更新包含 6 个提交:\n- build: 更新版本号\n- pro(asr): 为联动时的火山引擎渠道添加双重识别支持\n- fix(asr): 联动调用时添加识别统计和历史记录\n- feat(ai): 添加按字数阈值自动跳过AI后处理功能\n- fix(asr): 修复语音预设失效问题\n- fix(ui): 修复悬浮球在带系统栏设备上的位置越界问题",
+  "version": "3.6.7",
+  "version_code": 107,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.6.7",
+  "release_notes": "本次更新包含 4 个提交:\n- build: 更新版本号至 3.6.7\n- pro(update): 为 Pro 版本添加专门的更新对话框\n- feat(input): 添加外部输入法联动使用指引并优化使用指南内容\n- fix(asr): 优化AI后处理返回空文本时的回退逻辑",
   "important_notice": "本次更新支持了从小企鹅输入法调用言犀的语音识别能力。使用方式：\n1. 下载修改版的Fcitx(0.1.2beta3)：https://github.com/BryceWG/fcitx5-android-lexi-keyboard/releases，需要卸载之前的Fcitx，注意数据备份\n 2. 打开Fcitx设置-虚拟键盘-空格键长按行为-语音输入（AIDL）\n 3. 在Lexi Keyboard设置(3.6.2以上)-输入设置-允许外部输入法联动（AIDL），新版无需启用悬浮球和无障碍功能\n 4. 在小企鹅输入法面板，长按空格键即可语音输入",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-10T03:50:27Z"
+  "update_time": "2025-11-10T15:00:20Z"
 }
