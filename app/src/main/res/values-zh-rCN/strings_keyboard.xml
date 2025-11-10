@@ -1,0 +1,58 @@
+<resources>
+    <!-- 键盘相关字符串 - Keyboard related strings -->
+
+    <!-- Content Descriptions -->
+    <string name="cd_mic">麦克风</string>
+    <string name="cd_settings">设置</string>
+    <string name="cd_enter">回车</string>
+    <string name="cd_backspace">退格</string>
+    <string name="cd_switch_ime">切换输入法</string>
+    <string name="cd_postproc_toggle">AI后处理</string>
+    <string name="cd_ai_edit">AI编辑</string>
+    <string name="cd_hide">收起键盘</string>
+    <string name="cd_prompt_picker">切换后处理 Prompt</string>
+    <string name="cd_vendor_picker">切换 ASR 供应商</string>
+    <string name="cd_punct_btn_1">自定义按键 1</string>
+    <string name="cd_punct_btn_2">自定义按键 2</string>
+    <string name="cd_punct_btn_3">自定义按键 3</string>
+    <string name="cd_punct_btn_4">自定义按键 4</string>
+
+    <!-- Extension buttons content descriptions -->
+    <string name="desc_extension_button_1">扩展按钮 1</string>
+    <string name="desc_extension_button_2">扩展按钮 2</string>
+    <string name="desc_extension_button_3">扩展按钮 3</string>
+    <string name="desc_extension_button_4">扩展按钮 4</string>
+    <string name="desc_extension_center_button_1">扩展中央按钮 1</string>
+    <string name="desc_extension_center_button_2">扩展中央按钮 2</string>
+
+    <!-- Edit panel content descriptions -->
+    <string name="cd_return_main">返回主键盘</string>
+    <string name="cd_apply_preset_prompt">应用预设 Prompt</string>
+    <string name="cd_cursor_left">光标左移</string>
+    <string name="cd_cursor_right">光标右移</string>
+    <string name="cd_numpad">数字小键盘</string>
+    <string name="cd_numpad_back">返回编辑面板</string>
+    <string name="cd_space">空格</string>
+    <string name="cd_punct_lang_toggle">切换中/英文标点</string>
+    <string name="cd_select_toggle">切换选择模式</string>
+    <string name="cd_select_all">全选</string>
+    <string name="cd_copy">复制</string>
+    <string name="cd_paste">粘贴</string>
+    <string name="cd_move_home">移到开头</string>
+    <string name="cd_move_end">移到末尾</string>
+    <string name="cd_undo">撤回</string>
+
+    <!-- Keyboard height -->
+    <string name="label_keyboard_height">键盘比例</string>
+    <string name="keyboard_height_small">小</string>
+    <string name="keyboard_height_medium">中</string>
+    <string name="keyboard_height_large">大</string>
+
+    <!-- Keyboard bottom padding -->
+    <string name="label_keyboard_bottom_padding">键盘底部间距</string>
+    <string name="keyboard_bottom_padding_value">%d dp</string>
+
+    <!-- Keyboard layout option -->
+    <string name="label_fcitx5_return_on_switcher">输入法切换键功能改为返回上个输入法</string>
+    <string name="label_hide_recent_task_card">后台隐藏任务卡片</string>
+</resources>

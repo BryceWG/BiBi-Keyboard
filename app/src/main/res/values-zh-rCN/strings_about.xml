@@ -1,0 +1,56 @@
+<resources>
+    <!-- 关于页面相关字符串 - About page related strings -->
+
+    <!-- About -->
+    <string name="btn_about">关于</string>
+    <string name="about_title">关于</string>
+    <string name="about_app_name">应用名称：%1$s</string>
+    <string name="about_version">版本：%1$s</string>
+    <string name="about_package">包名：%1$s</string>
+    <string name="about_open_github">查看项目主页</string>
+    <string name="about_project_url">https://github.com/BryceWG/LexiSharp-Keyboard</string>
+    <string name="about_desc">简洁高效的语音输入法，支持多家 ASR 与 LLM 后处理</string>
+
+    <string name="label_asr_total_chars">历史语音识别总字数：%1$d</string>
+
+    <!-- Model download notifications -->
+    <string name="notif_channel_model_download">模型下载</string>
+    <string name="notif_channel_model_download_desc">本地模型下载与解压进度通知</string>
+    <string name="notif_model_summary_title">模型下载</string>
+    <string name="notif_model_summary_text">正在后台下载/解压本地模型</string>
+
+    <!-- About: Usage stats -->
+    <string name="about_stats_title">使用统计</string>
+    <string name="about_days_with_you">言犀键盘已陪伴你 %1$d 天</string>
+    <string name="about_total_audio">总音频时长：%1$s</string>
+    <string name="about_avg_line">平均音频时长：%1$s  ·  平均字数：%2$d  ·  平均速度：%3$s 字/分钟</string>
+    <string name="about_daily_weekly_avg">每日平均（近7天）：%1$d 字、%2$s；每周平均（近4周）：%3$d 字、%4$s</string>
+    <string name="about_by_vendor">按供应商</string>
+    <string name="about_proc_prefix">处理耗时</string>
+    <string name="about_last_7_days">最近 7 天（字数）</string>
+    <string name="about_empty_stats_placeholder">暂无统计数据</string>
+
+    <!-- 开源致谢 -->
+    <string name="about_acknowledgements_title">开源致谢</string>
+    <string name="about_acknowledgements_desc">本项目基于以下优秀的开源项目构建，在此向这些项目的开发者表示诚挚的感谢：</string>
+    <string name="about_view_full_licenses">查看完整许可证</string>
+    <string name="about_licenses_dialog_title">第三方许可证</string>
+
+    <string name="about_sherpa_onnx_title">k2-fsa/sherpa-onnx</string>
+    <string name="about_sherpa_onnx_desc">提供了本地 ASR 模型的技术方案支持，使离线语音识别成为可能</string>
+
+    <string name="about_syncclipboard_title">Jeric-X/SyncClipboard</string>
+    <string name="about_syncclipboard_desc">提供了剪贴板同步的后端服务支持（非软件本地运行，需要服务器）</string>
+
+    <string name="about_phosphor_title">phosphor-icons/homepage</string>
+    <string name="about_phosphor_desc">提供了软件内几乎所有的图标资源</string>
+
+    <string name="about_wavelineview_title">Jay-Goo/WaveLineView</string>
+    <string name="about_wavelineview_desc">提供了录音波形动画的实现方案，使音频可视化效果更加流畅美观</string>
+
+    <string name="unit_chars">字</string>
+    <string name="unit_0_min">0 分钟</string>
+    <string name="fmt_h_m">%1$d 小时 %2$d 分钟</string>
+    <string name="fmt_m_s">%1$d 分钟 %2$d 秒</string>
+    <string name="fmt_s">%1$d 秒</string>
+</resources>

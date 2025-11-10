@@ -1,42 +1,42 @@
 <resources>
-    <!-- 更新检查相关字符串 - Update check related strings -->
+    <!-- Update check related strings -->
 
-    <string name="btn_check_update">检查更新</string>
+    <string name="btn_check_update">Check for Updates</string>
 
     <!-- Update check -->
-    <string name="update_checking">正在检查更新…</string>
-    <string name="update_no_update">已是最新版本</string>
-    <string name="update_check_failed">检查更新失败：%1$s</string>
-    <string name="update_dialog_title">发现新版本</string>
-    <string name="update_dialog_message">当前版本：%1$s\n最新版本：%2$s\n\n是否前往下载？</string>
-    <string name="current_version_info_title">当前版本信息</string>
-    <string name="current_version_message">当前版本：%1$s\n\n已是最新版本！</string>
-    <string name="btn_download">前往下载</string>
-    <string name="btn_view_release_page">查看 Release 页</string>
-    <string name="btn_manual_check">手动查看</string>
-    <string name="btn_cancel">取消</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_no_update">You are using the latest version</string>
+    <string name="update_check_failed">Update check failed: %1$s</string>
+    <string name="update_dialog_title">New Version Available</string>
+    <string name="update_dialog_message">Current version: %1$s\nLatest version: %2$s\n\nWould you like to download?</string>
+    <string name="current_version_info_title">Current Version Info</string>
+    <string name="current_version_message">Current version: %1$s\n\nYou are using the latest version!</string>
+    <string name="btn_download">Download</string>
+    <string name="btn_view_release_page">View Release Page</string>
+    <string name="btn_manual_check">Manual Check</string>
+    <string name="btn_cancel">Cancel</string>
 
-    <string name="download_source_title">选择下载源</string>
-    <string name="download_source_github_official">GitHub 官方</string>
-    <string name="download_source_mirror_ghproxy">GitHub 镜像 (ghproxy.net)</string>
-    <string name="download_source_mirror_gitmirror">GitHub 镜像 (hub.gitmirror.com)</string>
-    <string name="download_source_mirror_gh_proxynet">GitHub 镜像 (gh-proxy.net)</string>
-    <string name="update_timestamp_label">更新时间：%1$s</string>
-    <string name="update_release_notes_label">更新说明：\n%1$s</string>
-    <string name="error_open_browser">无法打开浏览器</string>
+    <string name="download_source_title">Select Download Source</string>
+    <string name="download_source_github_official">GitHub (official)</string>
+    <string name="download_source_mirror_ghproxy">GitHub mirror (ghproxy.net)</string>
+    <string name="download_source_mirror_gitmirror">GitHub mirror (hub.gitmirror.com)</string>
+    <string name="download_source_mirror_gh_proxynet">GitHub mirror (gh-proxy.net)</string>
+    <string name="update_timestamp_label">Release time: %1$s</string>
+    <string name="update_release_notes_label">Release notes:\n%1$s</string>
+    <string name="error_open_browser">Unable to open browser</string>
 
-    <!-- APK 下载与安装 -->
-    <string name="apk_download_notification_title">下载更新</string>
-    <string name="apk_download_notification_channel_name">应用更新下载</string>
-    <string name="apk_download_notification_channel_desc">下载应用更新包并自动安装</string>
-    <string name="apk_download_preparing">正在准备下载…</string>
-    <string name="apk_download_progress">下载中 %1$d%% (%2$d MB / %3$d MB)</string>
-    <string name="apk_download_complete">下载完成，正在准备安装…</string>
-    <string name="apk_download_complete_click_to_install">下载完成，点击安装</string>
-    <string name="apk_download_failed">下载失败：%1$s</string>
-    <string name="apk_download_started">已开始下载更新包</string>
-    <string name="apk_download_start_failed">启动下载失败</string>
-    <string name="apk_install_permission_required_title">需要安装权限</string>
-    <string name="apk_install_permission_required_message">请在系统设置中允许安装来自此来源的应用</string>
-    <string name="apk_install_failed">安装失败，请手动安装</string>
+    <!-- APK download and installation -->
+    <string name="apk_download_notification_title">Downloading update</string>
+    <string name="apk_download_notification_channel_name">App update download</string>
+    <string name="apk_download_notification_channel_desc">Download app update package and install automatically</string>
+    <string name="apk_download_preparing">Preparing download…</string>
+    <string name="apk_download_progress">Downloading %1$d%% (%2$d MB / %3$d MB)</string>
+    <string name="apk_download_complete">Download complete, preparing to install…</string>
+    <string name="apk_download_complete_click_to_install">Download complete, tap to install</string>
+    <string name="apk_download_failed">Download failed: %1$s</string>
+    <string name="apk_download_started">Update download started</string>
+    <string name="apk_download_start_failed">Failed to start download</string>
+    <string name="apk_install_permission_required_title">Installation permission required</string>
+    <string name="apk_install_permission_required_message">Please allow installation from this source in system settings</string>
+    <string name="apk_install_failed">Installation failed, please install manually</string>
 </resources>

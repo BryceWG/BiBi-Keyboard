@@ -1,56 +1,56 @@
 <resources>
-    <!-- 关于页面相关字符串 - About page related strings -->
+    <!-- About page related strings -->
 
     <!-- About -->
-    <string name="btn_about">关于</string>
-    <string name="about_title">关于</string>
-    <string name="about_app_name">应用名称：%1$s</string>
-    <string name="about_version">版本：%1$s</string>
-    <string name="about_package">包名：%1$s</string>
-    <string name="about_open_github">查看项目主页</string>
+    <string name="btn_about">About</string>
+    <string name="about_title">About</string>
+    <string name="about_app_name">App name: %1$s</string>
+    <string name="about_version">Version: %1$s</string>
+    <string name="about_package">Package: %1$s</string>
+    <string name="about_open_github">Open Project Page</string>
     <string name="about_project_url">https://github.com/BryceWG/LexiSharp-Keyboard</string>
-    <string name="about_desc">简洁高效的语音输入法，支持多家 ASR 与 LLM 后处理</string>
+    <string name="about_desc">A lightweight voice input IME with multi-vendor ASR and LLM post-processing</string>
 
-    <string name="label_asr_total_chars">历史语音识别总字数：%1$d</string>
+    <string name="label_asr_total_chars">Total characters from speech recognition: %1$d</string>
 
     <!-- Model download notifications -->
-    <string name="notif_channel_model_download">模型下载</string>
-    <string name="notif_channel_model_download_desc">本地模型下载与解压进度通知</string>
-    <string name="notif_model_summary_title">模型下载</string>
-    <string name="notif_model_summary_text">正在后台下载/解压本地模型</string>
+    <string name="notif_channel_model_download">Model Downloads</string>
+    <string name="notif_channel_model_download_desc">Progress of local model download and extraction</string>
+    <string name="notif_model_summary_title">Model Downloads</string>
+    <string name="notif_model_summary_text">Downloading/extracting models in background</string>
 
     <!-- About: Usage stats -->
-    <string name="about_stats_title">使用统计</string>
-    <string name="about_days_with_you">言犀键盘已陪伴你 %1$d 天</string>
-    <string name="about_total_audio">总音频时长：%1$s</string>
-    <string name="about_avg_line">平均音频时长：%1$s  ·  平均字数：%2$d  ·  平均速度：%3$s 字/分钟</string>
-    <string name="about_daily_weekly_avg">每日平均（近7天）：%1$d 字、%2$s；每周平均（近4周）：%3$d 字、%4$s</string>
-    <string name="about_by_vendor">按供应商</string>
-    <string name="about_proc_prefix">处理耗时</string>
-    <string name="about_last_7_days">最近 7 天（字数）</string>
-    <string name="about_empty_stats_placeholder">暂无统计数据</string>
+    <string name="about_stats_title">Usage Stats</string>
+    <string name="about_days_with_you">LexiSharp has been with you for %1$d days</string>
+    <string name="about_total_audio">Total audio time: %1$s</string>
+    <string name="about_avg_line">Avg audio: %1$s  ·  Avg chars: %2$d  ·  Avg speed: %3$s chars/min</string>
+    <string name="about_daily_weekly_avg">Daily avg (last 7d): %1$d chars, %2$s; Weekly avg (last 4w): %3$d chars, %4$s</string>
+    <string name="about_by_vendor">By provider</string>
+    <string name="about_proc_prefix">processing time</string>
+    <string name="about_last_7_days">Last 7 days (chars)</string>
+    <string name="about_empty_stats_placeholder">No data yet</string>
 
-    <!-- 开源致谢 -->
-    <string name="about_acknowledgements_title">开源致谢</string>
-    <string name="about_acknowledgements_desc">本项目基于以下优秀的开源项目构建，在此向这些项目的开发者表示诚挚的感谢：</string>
-    <string name="about_view_full_licenses">查看完整许可证</string>
-    <string name="about_licenses_dialog_title">第三方许可证</string>
+    <!-- Open Source Acknowledgements -->
+    <string name="about_acknowledgements_title">Acknowledgements</string>
+    <string name="about_acknowledgements_desc">This project is built upon the following excellent open source projects. We sincerely thank their developers:</string>
+    <string name="about_view_full_licenses">View Full Licenses</string>
+    <string name="about_licenses_dialog_title">Third-Party Licenses</string>
 
     <string name="about_sherpa_onnx_title">k2-fsa/sherpa-onnx</string>
-    <string name="about_sherpa_onnx_desc">提供了本地 ASR 模型的技术方案支持，使离线语音识别成为可能</string>
+    <string name="about_sherpa_onnx_desc">Provides technical solution for local ASR models, enabling offline speech recognition</string>
 
     <string name="about_syncclipboard_title">Jeric-X/SyncClipboard</string>
-    <string name="about_syncclipboard_desc">提供了剪贴板同步的后端服务支持（非软件本地运行，需要服务器）</string>
+    <string name="about_syncclipboard_desc">Provides backend service for clipboard synchronization (not running locally, requires server)</string>
 
     <string name="about_phosphor_title">phosphor-icons/homepage</string>
-    <string name="about_phosphor_desc">提供了软件内几乎所有的图标资源</string>
+    <string name="about_phosphor_desc">Provides almost all icons used throughout the application</string>
 
     <string name="about_wavelineview_title">Jay-Goo/WaveLineView</string>
-    <string name="about_wavelineview_desc">提供了录音波形动画的实现方案，使音频可视化效果更加流畅美观</string>
+    <string name="about_wavelineview_desc">Provides beautiful wave animation implementation for audio visualization, making recording experience more fluid and visually appealing</string>
 
-    <string name="unit_chars">字</string>
-    <string name="unit_0_min">0 分钟</string>
-    <string name="fmt_h_m">%1$d 小时 %2$d 分钟</string>
-    <string name="fmt_m_s">%1$d 分钟 %2$d 秒</string>
-    <string name="fmt_s">%1$d 秒</string>
+    <string name="unit_chars">chars</string>
+    <string name="unit_0_min">0 min</string>
+    <string name="fmt_h_m">%1$d h %2$d m</string>
+    <string name="fmt_m_s">%1$d m %2$d s</string>
+    <string name="fmt_s">%1$d s</string>
 </resources>

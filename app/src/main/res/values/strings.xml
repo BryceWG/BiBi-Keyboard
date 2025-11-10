@@ -1,180 +1,180 @@
 <resources>
   <!-- ============================================== -->
-  <!-- 基础信息 -->
+  <!-- Basic Information -->
   <!-- ============================================== -->
-  <string name="app_name">言犀键盘</string>
+  <string name="app_name">LexiSharp Keyboard</string>
 
   <!-- ============================================== -->
-  <!-- 键盘状态信息 -->
+  <!-- Keyboard Status Information -->
   <!-- ============================================== -->
-  <string name="status_idle">就绪</string>
-  <string name="status_listening">正在聆听…</string>
-  <string name="status_recognizing">识别中…</string>
-  <string name="status_ai_processing">AI后处理中…</string>
-  <string name="status_ai_edit_listening">请说出编辑指令…</string>
-  <string name="status_ai_editing">AI编辑中…</string>
-  <string name="status_cancelled">已取消</string>
-  <string name="status_last_request_ms">上次识别耗时：%1$d ms</string>
-  <string name="status_reverted_to_raw">已切换为原始识别结果</string>
-  <string name="status_undone">已撤回最近改动</string>
-  <string name="status_llm_empty_result">AI编辑失败：未返回结果</string>
-  <string name="status_last_asr_not_found">未找到上一次识别文本，已取消替换</string>
-  <string name="hint_need_llm_keys">需要配置 AI 后处理参数</string>
-  <string name="hint_cannot_read_text">当前应用的文本不可读取</string>
-  <string name="status_llm_failed_used_raw">AI后处理失败，已使用原文</string>
-  <string name="status_llm_edit_failed">AI编辑失败，请重试</string>
-  <string name="hint_need_permission">需要麦克风权限以进行语音输入</string>
-  <string name="status_postproc">AI后处理：%1$s</string>
+  <string name="status_idle">Ready</string>
+  <string name="status_listening">Listening…</string>
+  <string name="status_recognizing">Recognizing…</string>
+  <string name="status_ai_processing">AI post-processing…</string>
+  <string name="status_ai_edit_listening">Speak your edit instruction…</string>
+  <string name="status_ai_editing">AI editing…</string>
+  <string name="status_cancelled">Canceled</string>
+  <string name="status_last_request_ms">Last request time: %1$d ms</string>
+  <string name="status_reverted_to_raw">Reverted to raw transcript</string>
+  <string name="status_undone">Undone last change</string>
+  <string name="status_llm_empty_result">AI edit failed: no result</string>
+  <string name="status_last_asr_not_found">Last ASR result not found; canceled</string>
+  <string name="hint_need_llm_keys">Configure AI post-processing first</string>
+  <string name="hint_cannot_read_text">Current app text is not readable</string>
+  <string name="status_llm_failed_used_raw">AI post-process failed; used raw text</string>
+  <string name="status_llm_edit_failed">AI edit failed. Please try again</string>
+  <string name="hint_need_permission">Microphone permission is required for voice input</string>
+  <string name="status_postproc">AI Post-process: %1$s</string>
 
-  <string name="toggle_on">开启</string>
-  <string name="toggle_off">关闭</string>
+  <string name="toggle_on">ON</string>
+  <string name="toggle_off">OFF</string>
 
-  <string name="label_ai_edit_default_use_last_asr">AI编辑默认范围改为上次识别结果</string>
-  <string name="label_mic_swipe_up_auto_enter">松手上滑后自动发送</string>
-  <string name="label_auto_start_recording_on_show">启动键盘面板时自动开始录音</string>
-  <string name="btn_retry">连接失败, 重试?</string>
+  <string name="label_ai_edit_default_use_last_asr">AI edit default scope: use last transcript</string>
+  <string name="label_mic_swipe_up_auto_enter">Swipe up on release to send</string>
+  <string name="label_auto_start_recording_on_show">Auto start recording when keyboard appears</string>
+  <string name="btn_retry">Connect failed, retry?</string>
 
   <!-- ============================================== -->
-  <!-- 设置相关 -->
+  <!-- Settings Related -->
   <!-- ============================================== -->
-  <string name="settings_instructions">首次使用步骤：\n1. 点击"启用键盘"，在系统设置中启用 言犀键盘\n2. 点击"选择键盘"，切换到 言犀键盘\n3. 授予麦克风权限后，回到任意输入框，长按键盘上的麦克风按钮即可体验\n\n为获得更稳定的后台服务体验，建议在系统设置中为本应用授予以下权限：\n• 后台自启动\n• 后台运行（保活）\n• 后台弹出界面\n\n本软件是开源项目，保证不会上传任何隐私数据。</string>
-  <string name="btn_one_click_setup">一键设置</string>
+  <string name="settings_instructions">First-time setup:\n1. Tap \"Enable Keyboard\" and enable LexiSharp Keyboard in system settings\n2. Tap \"Choose Keyboard\" to switch to LexiSharp Keyboard\n3. Grant microphone permission, then long‑press the mic button on the keyboard to try\n\nFor better background service stability, it\'s recommended to grant the following permissions in system settings:\n• Auto-start in background\n• Background running (keep alive)\n• Show pop-up windows while running in the background\n\nThis is an open-source app that guarantees no privacy data will be uploaded.</string>
+  <string name="btn_one_click_setup">One-click Setup</string>
 
-  <string name="settings_title">言犀键盘设置</string>
-  <string name="title_input_settings">输入设置</string>
-  <string name="title_asr_settings">ASR 设置</string>
-  <string name="title_ai_settings">AI 后处理设置</string>
-  <string name="title_other_settings">其他设置</string>
+  <string name="settings_title">LexiSharp Keyboard Settings</string>
+  <string name="title_input_settings">Input Settings</string>
+  <string name="title_asr_settings">ASR Settings</string>
+  <string name="title_ai_settings">AI Post-processing Settings</string>
+  <string name="title_other_settings">Other Settings</string>
 
   <string name="label_app_key">X-Api-App-Key</string>
   <string name="label_access_key">X-Api-Access-Key</string>
-  <string name="label_asr_vendor">ASR 服务商</string>
+  <string name="label_asr_vendor">ASR Provider</string>
 
   <!-- ============================================== -->
-  <!-- 自定义标点 -->
+  <!-- Custom Punctuation -->
   <!-- ============================================== -->
-  <string name="custom_punct_section_title">自定义标点按钮</string>
-  <string name="label_custom_punct_1">按钮1（字符或标点）</string>
-  <string name="label_custom_punct_2">按钮2（字符或标点）</string>
-  <string name="label_custom_punct_3">按钮3（字符或标点）</string>
-  <string name="label_custom_punct_4">按钮4（字符或标点）</string>
+  <string name="custom_punct_section_title">Custom Punctuation Buttons</string>
+  <string name="label_custom_punct_1">Button 1 (char or punctuation)</string>
+  <string name="label_custom_punct_2">Button 2 (char or punctuation)</string>
+  <string name="label_custom_punct_3">Button 3 (char or punctuation)</string>
+  <string name="label_custom_punct_4">Button 4 (char or punctuation)</string>
 
   <!-- ============================================== -->
-  <!-- 语音预设 -->
+  <!-- Speech Presets -->
   <!-- ============================================== -->
-  <string name="label_speech_preset_section">语音预置信息</string>
-  <string name="speech_preset_empty_placeholder">尚未添加预置信息</string>
-  <string name="speech_preset_untitled">未命名预置信息</string>
-  <string name="hint_speech_preset_name">预置信息名称</string>
-  <string name="hint_speech_preset_content">预置信息内容</string>
-  <string name="btn_speech_preset_add">新增预置信息</string>
-  <string name="btn_speech_preset_delete">删除当前预置</string>
-  <string name="speech_preset_default_name">预置信息%1$d</string>
-  <string name="toast_speech_preset_added">已新增预置信息</string>
-  <string name="toast_speech_preset_deleted">已删除预置信息</string>
-  <string name="dialog_speech_preset_delete_title">删除预置信息</string>
-  <string name="dialog_speech_preset_delete_message">确定删除"%1$s"吗？</string>
-  <string name="speech_preset_intro">当语音识别结果与某个"名称"完全一致时，将自动替换为其"内容"。适合常用短语、签名、地址、工号等快速输入。匹配规则：先严格大小写匹配，未命中则忽略大小写匹配；仅当整段文本与名称相同才会触发。可能需要开启去除句尾标点</string>
+  <string name="label_speech_preset_section">Speech Presets</string>
+  <string name="speech_preset_empty_placeholder">No presets yet</string>
+  <string name="speech_preset_untitled">Untitled preset</string>
+  <string name="hint_speech_preset_name">Preset name</string>
+  <string name="hint_speech_preset_content">Preset content</string>
+  <string name="btn_speech_preset_add">Add Preset</string>
+  <string name="btn_speech_preset_delete">Delete Preset</string>
+  <string name="speech_preset_default_name">Preset %1$d</string>
+  <string name="toast_speech_preset_added">Preset added</string>
+  <string name="toast_speech_preset_deleted">Preset deleted</string>
+  <string name="dialog_speech_preset_delete_title">Delete Preset</string>
+  <string name="dialog_speech_preset_delete_message">Delete \"%1$s\"?</string>
+  <string name="speech_preset_intro">When the ASR result exactly equals a preset Name, it will be replaced by its Content. Useful for quick phrases, signatures, addresses, IDs. Matching: first case-sensitive, then case-insensitive if not matched; triggers only when the entire text equals the Name. May need to enable Trim trailing punctuation.</string>
 
   <!-- ============================================== -->
-  <!-- 语言设置 -->
+  <!-- Language Settings -->
   <!-- ============================================== -->
-  <string name="label_language">应用语言</string>
-  <string name="lang_follow_system">跟随系统</string>
-  <string name="lang_zh_cn">简体中文</string>
-  <string name="lang_zh_tw">繁体中文</string>
-  <string name="lang_ja">日语</string>
+  <string name="label_language">App Language</string>
+  <string name="lang_follow_system">Follow System</string>
+  <string name="lang_zh_cn">Simplified Chinese</string>
+  <string name="lang_zh_tw">Traditional Chinese</string>
+  <string name="lang_ja">Japanese</string>
   <string name="lang_en">English</string>
 
   <!-- ============================================== -->
-  <!-- 通用提示 -->
+  <!-- General Toasts -->
   <!-- ============================================== -->
-  <string name="toast_preset_added">已新增预设</string>
-  <string name="toast_preset_deleted">已删除预设</string>
-  <string name="untitled_preset">未命名预设</string>
-  <string name="switched_preset">已切换：%1$s</string>
+  <string name="toast_preset_added">Preset added</string>
+  <string name="toast_preset_deleted">Preset deleted</string>
+  <string name="untitled_preset">Untitled preset</string>
+  <string name="switched_preset">Switched: %1$s</string>
 
   <!-- ============================================== -->
-  <!-- 输入相关 -->
+  <!-- Input Related -->
   <!-- ============================================== -->
-  <string name="label_trim_trailing_punct">完成后去除句末标点与 emoji</string>
-  <string name="label_mic_haptic">按键与悬浮球振动反馈</string>
-  <string name="label_mic_tap_toggle">语音键盘使用点按控制</string>
-  <string name="label_test_input">测试输入（用于体验输入法）</string>
-  <string name="btn_test_input">测试输入</string>
+  <string name="label_trim_trailing_punct">Remove trailing punctuation and emoji on finish</string>
+  <string name="label_mic_haptic">Haptic feedback for keys and floating ball</string>
+  <string name="label_mic_tap_toggle">Use tap to control recording</string>
+  <string name="label_test_input">Test input (try the IME here)</string>
+  <string name="btn_test_input">Test Input</string>
 
   <!-- ============================================== -->
-  <!-- 扩展按钮配置 -->
+  <!-- Extension Button Configuration -->
   <!-- ============================================== -->
-  <string name="label_extension_buttons">扩展按钮配置</string>
-  <string name="ext_btn_default_summary">撤销、全选、复制、剪贴板</string>
-  <string name="ext_btn_none_selected">未选择</string>
-  <string name="ext_btn_must_select_4">请选择恰好 4 个按钮</string>
-  <string name="ext_btn_max_4">最多选择 4 个按钮</string>
-  <string name="ext_btn_none">禁用</string>
-  <string name="ext_btn_select">选择模式</string>
-  <string name="ext_btn_select_all">全选</string>
-  <string name="ext_btn_copy">复制</string>
-  <string name="ext_btn_paste">粘贴</string>
-  <string name="ext_btn_cursor_left">左移</string>
-  <string name="ext_btn_cursor_right">右移</string>
-  <string name="ext_btn_move_start">移至开头</string>
-  <string name="ext_btn_move_end">移至结尾</string>
-  <string name="ext_btn_numpad">数字键盘</string>
-  <string name="ext_btn_undo">撤销</string>
-  <string name="status_copied">已复制</string>
-  <string name="status_pasted">已粘贴</string>
-  <string name="status_nothing_to_undo">无可撤销的操作</string>
+  <string name="label_extension_buttons">Extension Buttons Configuration</string>
+  <string name="ext_btn_default_summary">Undo, Select All, Copy, Clipboard</string>
+  <string name="ext_btn_none_selected">Not selected</string>
+  <string name="ext_btn_must_select_4">Please select exactly 4 buttons</string>
+  <string name="ext_btn_max_4">Maximum 4 buttons</string>
+  <string name="ext_btn_none">Disabled</string>
+  <string name="ext_btn_select">Selection Mode</string>
+  <string name="ext_btn_select_all">Select All</string>
+  <string name="ext_btn_copy">Copy</string>
+  <string name="ext_btn_paste">Paste</string>
+  <string name="ext_btn_cursor_left">Move Left</string>
+  <string name="ext_btn_cursor_right">Move Right</string>
+  <string name="ext_btn_move_start">Move to Start</string>
+  <string name="ext_btn_move_end">Move to End</string>
+  <string name="ext_btn_numpad">Numpad</string>
+  <string name="ext_btn_undo">Undo</string>
+  <string name="status_copied">Copied</string>
+  <string name="status_pasted">Pasted</string>
+  <string name="status_nothing_to_undo">Nothing to undo</string>
 
   <!-- ============================================== -->
-  <!-- 通用按钮 -->
+  <!-- General Buttons -->
   <!-- ============================================== -->
-  <string name="toast_setup_all_done">已完成所有设置</string>
-  <string name="toast_setup_enable_keyboard_first">请在系统设置中启用键盘后返回</string>
-  <string name="toast_setup_choose_keyboard">请选择"言犀键盘"为当前输入法</string>
-  <string name="btn_get_api_key_guide">去查看配置教程</string>
+  <string name="toast_setup_all_done">All set</string>
+  <string name="toast_setup_enable_keyboard_first">Enable the keyboard in system settings, then come back</string>
+  <string name="toast_setup_choose_keyboard">Please select "LexiSharp Keyboard" as the current input method</string>
+  <string name="btn_get_api_key_guide">View Configuration Guide</string>
 
   <!-- ============================================== -->
-  <!-- 录音判停设置 -->
+  <!-- Silence Auto-stop Settings -->
   <!-- ============================================== -->
-  <string name="section_silence_autostop">录音判停设置</string>
-  <string name="label_auto_stop_silence">无人说话自动停止录音</string>
-  <string name="label_silence_window_ms">判停时间阈值（毫秒）</string>
-  <string name="label_silence_sensitivity">灵敏度（1-10，越高越敏感）</string>
+  <string name="section_silence_autostop">Auto-stop on Silence</string>
+  <string name="label_auto_stop_silence">Auto stop when no speech</string>
+  <string name="label_silence_window_ms">Stop window (ms)</string>
+  <string name="label_silence_sensitivity">Sensitivity (1-10; higher = more sensitive)</string>
 
   <!-- ============================================== -->
-  <!-- 其他通用设置 -->
+  <!-- Other General Settings -->
   <!-- ============================================== -->
-  <string name="label_audio_ducking_on_record">录音时音频避让</string>
-  <string name="label_headset_mic_priority">优先尝试使用耳机的麦克风(实验性)</string>
-  <!-- 外部输入法联动（AIDL） -->
-  <string name="label_external_ime_link_aidl">允许外部输入法联动（AIDL）</string>
-  <string name="external_aidl_guide_title">如何使用联动功能</string>
-  <string name="external_aidl_guide_message">支持了从小企鹅输入法调用言犀的语音识别能力。使用方式：\n\n1. 下载修改版的 Fcitx：https://github.com/BryceWG/fcitx5-android-lexi-keyboard/releases，需要卸载之前的 Fcitx，注意数据备份\n\n2. 打开 Fcitx 设置 - 虚拟键盘 - 空格键长按行为 - 语音输入(AIDL)\n\n3. 更新言犀到 3.6.2 以上，在言犀设置 - 输入设置 - 允许外部输入法联动(AIDL)，无需启用悬浮球和无障碍功能\n\n4. 在小企鹅输入法面板，长按空格键即可语音输入。</string>
-  <string name="external_aidl_guide_btn_close">关闭</string>
-  <string name="external_aidl_guide_btn_no_remind">不再提醒</string>
-  <string name="external_aidl_guide_btn_open_release">打开Release页</string>
-  <string name="external_aidl_guide_open_failed">无法打开浏览器，请手动访问</string>
-  <string name="label_return_prev_ime_on_hide">键盘收起后切回上一个输入法</string>
-  <string name="toast_bt_connect_permission_required">需要蓝牙连接权限以使用耳机麦克风</string>
-  <string name="toast_bt_connect_permission_denied">已拒绝蓝牙连接权限，将停用耳机麦克风优先</string>
-  <string name="toast_vad_sensitivity_applied">已应用 VAD 灵敏度，将在下次录音生效</string>
+  <string name="label_audio_ducking_on_record">Audio ducking during recording</string>
+  <string name="label_headset_mic_priority">Prefer headset microphone (experimental)</string>
+  <!-- External IME linking (AIDL) -->
+  <string name="label_external_ime_link_aidl">Allow external IME linking (AIDL)</string>
+  <string name="external_aidl_guide_title">How to Use the Linking Feature</string>
+  <string name="external_aidl_guide_message">This feature enables voice recognition from Fcitx (Little Penguin) input method. Usage:\n\n1. Download the modified Fcitx: https://github.com/BryceWG/fcitx5-android-lexi-keyboard/releases (uninstall the original Fcitx first and backup your data)\n\n2. Open Fcitx Settings - Virtual Keyboard - Long-press Space Bar Behavior - Voice Input (AIDL)\n\n3. Update LexiSharp to 3.6.2 or later, enable Settings - Input Settings - Allow external IME linking (AIDL), no need to enable floating ball or accessibility service\n\n4. In Fcitx keyboard panel, long-press the space bar to activate voice input.</string>
+  <string name="external_aidl_guide_btn_close">Close</string>
+  <string name="external_aidl_guide_btn_no_remind">Don\'t remind again</string>
+  <string name="external_aidl_guide_btn_open_release">Open Release Page</string>
+  <string name="external_aidl_guide_open_failed">Cannot open browser, please visit manually</string>
+  <string name="label_return_prev_ime_on_hide">Switch back to previous IME when hidden</string>
+  <string name="toast_bt_connect_permission_required">Bluetooth connect permission is required to use headset mic</string>
+  <string name="toast_bt_connect_permission_denied">Bluetooth connect permission denied; headset priority disabled</string>
+  <string name="toast_vad_sensitivity_applied">VAD sensitivity updated; will apply to the next recording</string>
 
-  <!-- 隐私与数据开关 -->
-  <string name="label_disable_asr_history">关闭识别历史记录</string>
-  <string name="label_disable_usage_stats">关闭数据统计记录</string>
-  <string name="dialog_disable_asr_history_title">确认关闭识别历史？</string>
-  <string name="dialog_disable_asr_history_message">关闭后将清除历史记录，且不再保存新的识别历史。是否确认关闭该功能？</string>
-  <string name="dialog_disable_usage_stats_title">确认关闭数据统计？</string>
-  <string name="dialog_disable_usage_stats_message">关闭后将清除统计数据（总字数与使用统计），且不再记录新的统计。是否确认关闭该功能？</string>
-  <string name="btn_confirm">确认</string>
-  <string name="toast_cleared_history">已清除识别历史</string>
-  <string name="toast_cleared_stats">已清除统计数据</string>
+  <!-- Privacy & Data toggles -->
+  <string name="label_disable_asr_history">Disable ASR history</string>
+  <string name="label_disable_usage_stats">Disable usage statistics</string>
+  <string name="dialog_disable_asr_history_title">Disable ASR history?</string>
+  <string name="dialog_disable_asr_history_message">This will clear existing history and stop saving new ASR history. Are you sure to disable this feature?</string>
+  <string name="dialog_disable_usage_stats_title">Disable usage statistics?</string>
+  <string name="dialog_disable_usage_stats_message">This will clear statistics (total characters and aggregated stats) and stop recording new stats. Are you sure to disable this feature?</string>
+  <string name="btn_confirm">Confirm</string>
+  <string name="toast_cleared_history">History cleared</string>
+  <string name="toast_cleared_stats">Statistics cleared</string>
 
   <!-- ============================================== -->
-  <!-- 通用 Toast -->
+  <!-- General Toasts -->
   <!-- ============================================== -->
-  <string name="toast_accessibility_enabled">无障碍服务已启用，现在可以自动插入文本了</string>
-  <string name="toast_silence_autostop_on">已开启录音判停</string>
-  <string name="toast_silence_autostop_off">已关闭录音判停</string>
+  <string name="toast_accessibility_enabled">Accessibility service enabled. Auto-insert is now available.</string>
+  <string name="toast_silence_autostop_on">Auto-stop on silence enabled</string>
+  <string name="toast_silence_autostop_off">Auto-stop on silence disabled</string>
 </resources>

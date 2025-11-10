@@ -1,30 +1,30 @@
 <resources>
-    <!-- 使用指南相关字符串 - User guide related strings -->
+    <!-- User guide related strings -->
 
-    <string name="btn_show_guide">查看使用指南</string>
-    <string name="btn_close">关闭</string>
-    <string name="btn_close_with_seconds">关闭(%1$ds)</string>
-    <string name="title_quick_guide">快速上手教程</string>
+    <string name="btn_show_guide">View Quick Guide</string>
+    <string name="btn_close">Close</string>
+    <string name="btn_close_with_seconds">Close (%1$ds)</string>
+    <string name="title_quick_guide">Quick Start Guide</string>
 
     <!-- Enhanced Quick Guide -->
-    <string name="guide_subtitle">让语音输入更简单高效</string>
-    <string name="guide_main_keyboard_title">主键盘布局</string>
-    <string name="guide_main_keyboard_desc">主键盘界面，包含麦克风、后处理开关、编辑面板入口等功能</string>
-    <string name="guide_edit_panel_title">编辑面板</string>
-    <string name="guide_edit_panel_desc">强大的文本编辑功能，支持光标移动、文本选择、复制粘贴、AI处理等</string>
-    <string name="guide_numpad_title">数字符号键盘</string>
-    <string name="guide_numpad_desc">数字和标点符号输入面板，支持中英文标点切换</string>
-    <string name="guide_core_features_title">核心功能</string>
-    <string name="guide_long_press_title">长按录音</string>
-    <string name="guide_long_press_desc">长按麦克风按钮开始录音，松开自动转录</string>
-    <string name="guide_ai_processing_title">AI智能后处理</string>
-    <string name="guide_ai_processing_desc">支持多种预设模板，让识别结果更准确</string>
-    <string name="guide_floating_title">悬浮球功能</string>
-    <string name="guide_floating_desc">快速切换输入法或进行悬浮球语音识别</string>
-    <string name="guide_detailed_features_title">详细功能说明</string>
-    <string name="guide_detailed_features_content">【主键盘功能】\n• 麦克风按钮（中央）：长按录音，松开后进行语音转录\n• 编辑面板入口（左上角）：点击进入编辑面板\n• 启用后处理：开启/关闭 AI 后处理功能\n• 收起键盘：隐藏键盘界面\n• 退格键：上滑或左滑删除所有内容，下滑撤回最近改动\n• 设置键：打开应用设置界面\n• 切换输入法：快速切换到其他输入法\n• 回车键：发送换行\n• 自定义标点键：下方四个可自定义的标点符号按键\n\n【编辑面板功能】\n• 麦克风按钮（中央）：长按录音输入语音指令，LLM 会根据指令修改内容（AI 编辑功能）\n• 返回主键盘：退出编辑面板\n• 应用预设 Prompt：选择 AI 处理模板并处理当前文本\n• 光标移动：左移/右移光标，支持长按连续移动\n• 移至开头/结尾：快速移动光标到文本首尾\n• 选择模式：开启后光标移动会选中文本\n• 全选：选中所有文本\n• 复制/粘贴：文本复制粘贴功能\n• 退格：删除字符，支持手势（同主键盘）\n• 数字符号键盘：切换到数字符号输入面板\n\n【数字符号键盘】\n• 数字行：0-9 数字快速输入\n• 标点符号：两行常用标点符号\n• 中英文切换：切换中文/英文标点符号\n• 空格/回车/退格：基础输入功能\n• 返回编辑面板：退出数字键盘</string>
-    <string name="guide_first_time_title">首次使用</string>
-    <string name="guide_mic_icon_desc">麦克风图标</string>
-    <string name="guide_ai_icon_desc">AI处理图标</string>
-    <string name="guide_floating_icon_desc">悬浮球图标</string>
+    <string name="guide_subtitle">Making voice input simpler and more efficient</string>
+    <string name="guide_main_keyboard_title">Main Keyboard Layout</string>
+    <string name="guide_main_keyboard_desc">Main keyboard interface with microphone, post-processing toggle, edit panel entry, and more</string>
+    <string name="guide_edit_panel_title">Edit Panel</string>
+    <string name="guide_edit_panel_desc">Powerful text editing features including cursor movement, text selection, copy/paste, AI processing, and more</string>
+    <string name="guide_numpad_title">Number &amp; Symbol Keyboard</string>
+    <string name="guide_numpad_desc">Number and punctuation input panel with Chinese/English punctuation toggle</string>
+    <string name="guide_core_features_title">Core Features</string>
+    <string name="guide_long_press_title">Press and Hold to Record</string>
+    <string name="guide_long_press_desc">Press and hold the microphone button to start recording, release to transcribe</string>
+    <string name="guide_ai_processing_title">AI Smart Post-processing</string>
+    <string name="guide_ai_processing_desc">Support multiple preset templates to make recognition results more accurate</string>
+    <string name="guide_floating_title">Floating Ball Features</string>
+    <string name="guide_floating_desc">Quick switch input methods or perform floating ball voice recognition</string>
+    <string name="guide_detailed_features_title">Detailed Feature Description</string>
+    <string name="guide_detailed_features_content">【Main Keyboard Features】\n• Microphone Button (center): Press and hold to record, release to transcribe speech to text\n• Edit Panel Entry (top-left): Tap to enter edit panel\n• Enable Post-processing: Toggle AI post-processing on/off\n• Hide Keyboard: Minimize keyboard interface\n• Backspace: Swipe up/left to delete all, swipe down to undo last change\n• Settings: Open application settings\n• Switch Input Method: Quick switch to other keyboards\n• Enter: Send newline\n• Custom Punctuation: Four customizable punctuation keys at bottom\n\n【Edit Panel Features】\n• Microphone Button (center): Press and hold to record voice commands, LLM will modify content based on commands (AI Edit feature)\n• Back to Main: Exit edit panel\n• Apply Preset Prompt: Select AI template and process current text\n• Cursor Movement: Move cursor left/right, long-press for continuous movement\n• Move to Start/End: Quick jump to text beginning/end\n• Selection Mode: Enable to select text while moving cursor\n• Select All: Select all text\n• Copy/Paste: Text copy and paste functions\n• Backspace: Delete characters, supports gestures (same as main keyboard)\n• Number &amp; Symbol Keyboard: Switch to number/symbol input panel\n\n【Number &amp; Symbol Keyboard】\n• Number Row: Quick input for digits 0-9\n• Punctuation Symbols: Two rows of common punctuation marks\n• CN/EN Toggle: Switch between Chinese/English punctuation\n• Space/Enter/Backspace: Basic input functions\n• Back to Edit Panel: Exit number keyboard</string>
+    <string name="guide_first_time_title">First Time Use</string>
+    <string name="guide_mic_icon_desc">Microphone icon</string>
+    <string name="guide_ai_icon_desc">AI processing icon</string>
+    <string name="guide_floating_icon_desc">Floating ball icon</string>
 </resources>

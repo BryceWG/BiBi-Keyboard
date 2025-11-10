@@ -1,0 +1,30 @@
+<resources>
+    <!-- 备份设置相关字符串 - Backup settings related strings -->
+
+    <!-- Backup settings -->
+    <string name="title_backup_settings">配置备份</string>
+    <string name="btn_open_backup_settings">配置备份</string>
+    <string name="section_file_backup">文件备份</string>
+    <string name="btn_export_to_file">导出到文件</string>
+    <string name="btn_import_from_file">从文件导入</string>
+    <string name="section_webdav_sync">WebDAV 同步</string>
+    <string name="hint_webdav_url">WebDAV URL（如：https://dav.example.com）</string>
+    <string name="hint_webdav_username">用户名（可选）</string>
+    <string name="hint_webdav_password">密码（可选）</string>
+    <string name="btn_webdav_upload">上传到 WebDAV</string>
+    <string name="btn_webdav_download">从 WebDAV 恢复</string>
+
+    <string name="toast_webdav_upload_success">已上传到 WebDAV</string>
+    <string name="toast_webdav_upload_failed">上传失败：%1$s</string>
+    <string name="toast_webdav_download_success">已从 WebDAV 导入并应用</string>
+    <string name="toast_webdav_download_failed">下载/导入失败：%1$s</string>
+    <string name="toast_webdav_url_required">请先填写 WebDAV 服务器基础URL</string>
+    <string name="toast_webdav_directory_created">已创建 LexiSharp 目录</string>
+
+    <string name="toast_export_success">已导出：%1$s</string>
+    <string name="toast_export_failed">导出失败</string>
+    <string name="toast_import_success">导入成功，已应用</string>
+    <string name="toast_import_failed">导入失败或格式不正确</string>
+
+    <string name="tip_backup_contains_secrets">注意：备份包含密钥与凭证，仅用于个人备份，请妥善保管。</string>
+</resources>

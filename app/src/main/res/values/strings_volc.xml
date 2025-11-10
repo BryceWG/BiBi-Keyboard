@@ -1,35 +1,35 @@
 <resources>
-    <!-- Volcengine (Volcano Engine) ASR 配置字符串 -->
-    <string name="volc_section_title">Volcano Engine 鉴权参数</string>
-    <string name="vendor_volc">Volcano Engine（豆包语音）</string>
+    <!-- Volcengine (Volcano Engine) ASR configuration strings -->
+    <string name="volc_section_title">Volcano Engine Credentials</string>
+    <string name="vendor_volc">Volcano Engine</string>
 
     <!-- Volc configuration -->
-    <string name="label_volc_streaming">使用流式识别（WebSocket）</string>
-    <string name="label_volc_bidi_streaming">启用双向流式</string>
-    <string name="label_volc_ddc">启用语义顺滑（实验性）</string>
-    <string name="label_volc_vad">启用 VAD 分句（实验性）</string>
-    <string name="label_volc_nonstream">启用二遍识别（实验性）</string>
-    <string name="label_volc_first_char_accel">首字加速（实验性）</string>
-    <string name="label_volc_language">识别语言（用于二遍识别）</string>
+    <string name="label_volc_streaming">Use streaming recognition (WebSocket)</string>
+    <string name="label_volc_bidi_streaming">Enable bidirectional streaming</string>
+    <string name="label_volc_ddc">Enable semantic smoothing (experimental)</string>
+    <string name="label_volc_vad">Enable VAD segmentation (experimental)</string>
+    <string name="label_volc_nonstream">Enable two-pass recognition (experimental)</string>
+    <string name="label_volc_first_char_accel">First token acceleration (experimental)</string>
+    <string name="label_volc_language">Recognition language (for nonstream)</string>
 
     <!-- Volc modes hint -->
-    <string name="volc_modes_hint">模式说明：\n
-1. 文件识别（极速版）：录完再上传，稳定，首字延迟较高；网络差时更稳。\n
-2. 流式识别（默认）：边录边传，停止后很快返回最终结果，不显示增量预览。\n
-3. 双向流式（体验最好）：边录边传并实时返回增量预览，首字与尾字时延更低，需要稳定网络。</string>
+    <string name="volc_modes_hint">Modes:\n
+1. File recognition (Fast): upload after recording; stable, but higher first-token latency; more robust on poor networks.\n
+2. Streaming (default): upload while recording; returns the final result quickly after stop; no incremental preview.\n
+3. Bidirectional streaming (best experience): upload while recording with real-time incremental preview; lower first/last token latency; requires a stable network.</string>
 
     <!-- Volc language options -->
-    <string name="volc_lang_auto">自动（中英文与方言）</string>
-    <string name="volc_lang_en_us">英语 (en-US)</string>
-    <string name="volc_lang_ja_jp">日语 (ja-JP)</string>
-    <string name="volc_lang_id_id">印尼语 (id-ID)</string>
-    <string name="volc_lang_es_mx">西班牙语 (es-MX)</string>
-    <string name="volc_lang_pt_br">葡萄牙语 (pt-BR)</string>
-    <string name="volc_lang_de_de">德语 (de-DE)</string>
-    <string name="volc_lang_fr_fr">法语 (fr-FR)</string>
-    <string name="volc_lang_ko_kr">韩语 (ko-KR)</string>
-    <string name="volc_lang_fil_ph">菲律宾语 (fil-PH)</string>
-    <string name="volc_lang_ms_my">马来语 (ms-MY)</string>
-    <string name="volc_lang_th_th">泰语 (th-TH)</string>
-    <string name="volc_lang_ar_sa">阿拉伯语 (ar-SA)</string>
+    <string name="volc_lang_auto">Auto (Chinese/English + dialects)</string>
+    <string name="volc_lang_en_us">English (en-US)</string>
+    <string name="volc_lang_ja_jp">Japanese (ja-JP)</string>
+    <string name="volc_lang_id_id">Indonesian (id-ID)</string>
+    <string name="volc_lang_es_mx">Spanish (es-MX)</string>
+    <string name="volc_lang_pt_br">Portuguese (pt-BR)</string>
+    <string name="volc_lang_de_de">German (de-DE)</string>
+    <string name="volc_lang_fr_fr">French (fr-FR)</string>
+    <string name="volc_lang_ko_kr">Korean (ko-KR)</string>
+    <string name="volc_lang_fil_ph">Filipino (fil-PH)</string>
+    <string name="volc_lang_ms_my">Malay (ms-MY)</string>
+    <string name="volc_lang_th_th">Thai (th-TH)</string>
+    <string name="volc_lang_ar_sa">Arabic (ar-SA)</string>
 </resources>

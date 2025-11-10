@@ -1,48 +1,48 @@
 <resources>
-    <!-- 识别历史相关字符串 - ASR history related strings -->
+    <!-- ASR history related strings -->
 
-    <string name="btn_open_asr_history">识别历史</string>
+    <string name="btn_open_asr_history">History</string>
 
     <!-- ASR History -->
-    <string name="title_asr_history">识别历史</string>
-    <string name="hint_search_history">搜索识别文本…</string>
-    <string name="history_section_2h">2 小时内</string>
-    <string name="history_section_today">今天</string>
-    <string name="history_section_7d">近一周</string>
-    <string name="history_section_30d">近一个月</string>
-    <string name="history_section_older">更早</string>
-    <string name="label_vendor">供应商</string>
-    <string name="label_source">来源</string>
-    <string name="source_ime">键盘</string>
-    <string name="source_floating">悬浮球</string>
-    <string name="source_ime_full">键盘输入</string>
-    <string name="source_floating_full">悬浮球输入</string>
-    <string name="label_ai_processed">AI 处理</string>
-    <string name="label_chars_count">字数:%1$d</string>
-    <string name="label_audio_duration_s">用时:%1$.1f 秒</string>
-    <!-- 历史列表：总用时与处理耗时（非流式） -->
-    <string name="meta_total_seconds">总用时%1$.1fs</string>
-    <string name="meta_proc_seconds">处理耗时%1$.1fs</string>
-    <string name="ai_processed_yes">已后处理</string>
-    <string name="ai_processed_no">未后处理</string>
-    <string name="label_timestamp">时间</string>
-    <string name="label_time">时间范围</string>
-    <string name="filter_time_all">不限</string>
-    <string name="filter_all">不限</string>
-    <string name="btn_copy">复制</string>
-    <string name="toast_copied">已复制</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
-    <string name="menu_filter">筛选</string>
-    <string name="menu_select_all">全选</string>
-    <string name="menu_clear_selection">取消全选</string>
-    <string name="menu_delete_selected">删除选中</string>
-    <string name="dialog_filter_title">筛选</string>
-    <string name="dialog_filter_ok">确定</string>
-    <string name="dialog_filter_cancel">取消</string>
-    <string name="dialog_filter_reset">重置</string>
-    <string name="dialog_delete_selected_title">删除确认</string>
-    <string name="dialog_delete_selected_msg">确定删除选中的 %1$d 条记录吗？此操作不可撤销。</string>
-    <string name="toast_deleted">已删除 %1$d 条记录</string>
-    <string name="empty_history">暂无识别历史</string>
+    <string name="title_asr_history">ASR History</string>
+    <string name="hint_search_history">Search transcripts…</string>
+    <string name="history_section_2h">Within 2 hours</string>
+    <string name="history_section_today">Today</string>
+    <string name="history_section_7d">Last 7 days</string>
+    <string name="history_section_30d">Last 30 days</string>
+    <string name="history_section_older">Older</string>
+    <string name="label_vendor">Vendor</string>
+    <string name="label_source">Source</string>
+    <string name="source_ime">Keyboard</string>
+    <string name="source_floating">Floating</string>
+    <string name="source_ime_full">Keyboard input</string>
+    <string name="source_floating_full">Floating input</string>
+    <string name="label_ai_processed">AI Processed</string>
+    <string name="label_chars_count">Text:%1$d</string>
+    <string name="label_audio_duration_s">Duration:%1$.1f s</string>
+    <!-- History list: total duration and processing duration (non-streaming) -->
+    <string name="meta_total_seconds">total %1$.1fs</string>
+    <string name="meta_proc_seconds">processing time %1$.1fs</string>
+    <string name="ai_processed_yes">Post-processed</string>
+    <string name="ai_processed_no">Not post-processed</string>
+    <string name="label_timestamp">Time</string>
+    <string name="label_time">Time Range</string>
+    <string name="filter_time_all">All</string>
+    <string name="filter_all">All</string>
+    <string name="btn_copy">Copy</string>
+    <string name="toast_copied">Copied</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="menu_filter">Filter</string>
+    <string name="menu_select_all">Select all</string>
+    <string name="menu_clear_selection">Clear selection</string>
+    <string name="menu_delete_selected">Delete selected</string>
+    <string name="dialog_filter_title">Filter</string>
+    <string name="dialog_filter_ok">OK</string>
+    <string name="dialog_filter_cancel">Cancel</string>
+    <string name="dialog_filter_reset">Reset</string>
+    <string name="dialog_delete_selected_title">Confirm Delete</string>
+    <string name="dialog_delete_selected_msg">Delete %1$d selected items? This action cannot be undone.</string>
+    <string name="toast_deleted">Deleted %1$d item(s)</string>
+    <string name="empty_history">No history yet</string>
 </resources>

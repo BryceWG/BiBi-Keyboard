@@ -1,29 +1,29 @@
 <resources>
-    <!-- DashScope (阿里云百炼) ASR 配置字符串 -->
-    <string name="dash_section_title">阿里云百炼 ASR 参数</string>
-    <string name="vendor_dashscope">阿里云百炼（DashScope）</string>
+    <!-- DashScope (Alibaba Cloud DashScope) ASR configuration strings -->
+    <string name="dash_section_title">Alibaba Cloud DashScope ASR Parameters</string>
+    <string name="vendor_dashscope">Alibaba Cloud DashScope</string>
 
     <!-- DashScope configuration -->
-    <string name="label_dash_api_key">DashScope API Key（Bearer）</string>
-    <string name="label_dash_prompt">自定义提示词/识别上下文（可选）</string>
-    <string name="label_dash_language">识别语言（可选，已知语种可提升准确率）</string>
-    <string name="label_dash_streaming">使用 DashScope 流式识别（WebSocket）</string>
-    <string name="dash_streaming_note">流式识别使用 Fun‑ASR 模型，非流式使用 Qwen‑ASR‑Flash 模型\n流式模式不支持自定义 Prompt、地域设置、识别语言设置</string>
-    <string name="dash_lang_auto">自动（启用语种识别）</string>
-    <string name="label_dash_region">DashScope 地域</string>
-    <string name="dash_region_cn">中国大陆（aliyuncs.com）</string>
-    <string name="dash_region_intl">新加坡/国际（dashscope-intl.aliyuncs.com）</string>
+    <string name="label_dash_api_key">DashScope API Key (Bearer)</string>
+    <string name="label_dash_prompt">Custom prompt / context (optional)</string>
+    <string name="label_dash_language">Recognition language (optional; improves accuracy if known)</string>
+    <string name="label_dash_streaming">Use DashScope streaming (WebSocket)</string>
+    <string name="dash_streaming_note">Streaming uses the Fun‑ASR model; non‑streaming uses the Qwen‑ASR‑Flash model\nStreaming mode does not support custom Prompt, region selection, or language setting</string>
+    <string name="dash_lang_auto">Auto (enable language ID)</string>
+    <string name="label_dash_region">DashScope Region</string>
+    <string name="dash_region_cn">Mainland China (aliyuncs.com)</string>
+    <string name="dash_region_intl">Singapore/International (dashscope-intl.aliyuncs.com)</string>
 
     <!-- DashScope language options -->
-    <string name="dash_lang_zh">中文 (zh)</string>
-    <string name="dash_lang_en">英语 (en)</string>
-    <string name="dash_lang_ja">日语 (ja)</string>
-    <string name="dash_lang_de">德语 (de)</string>
-    <string name="dash_lang_ko">韩语 (ko)</string>
-    <string name="dash_lang_ru">俄语 (ru)</string>
-    <string name="dash_lang_fr">法语 (fr)</string>
-    <string name="dash_lang_pt">葡萄牙语 (pt)</string>
-    <string name="dash_lang_ar">阿拉伯语 (ar)</string>
-    <string name="dash_lang_it">意大利语 (it)</string>
-    <string name="dash_lang_es">西班牙语 (es)</string>
+    <string name="dash_lang_zh">Chinese (zh)</string>
+    <string name="dash_lang_en">English (en)</string>
+    <string name="dash_lang_ja">Japanese (ja)</string>
+    <string name="dash_lang_de">German (de)</string>
+    <string name="dash_lang_ko">Korean (ko)</string>
+    <string name="dash_lang_ru">Russian (ru)</string>
+    <string name="dash_lang_fr">French (fr)</string>
+    <string name="dash_lang_pt">Portuguese (pt)</string>
+    <string name="dash_lang_ar">Arabic (ar)</string>
+    <string name="dash_lang_it">Italian (it)</string>
+    <string name="dash_lang_es">Spanish (es)</string>
 </resources>

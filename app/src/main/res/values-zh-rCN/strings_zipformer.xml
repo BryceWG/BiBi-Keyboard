@@ -1,0 +1,44 @@
+<resources>
+    <!-- Zipformer 本地流式 ASR 配置字符串 -->
+    <string name="zipformer_section_title">Zipformer（本地流式）</string>
+    <string name="vendor_zipformer">Zipformer（本地流式）</string>
+
+    <!-- Zipformer configuration -->
+    <string name="label_zf_model_variant">Zipformer 模型版本</string>
+    <string name="label_zf_threads">推理线程数</string>
+    <string name="label_zf_keep_alive">模型保活</string>
+    <string name="label_zf_preload">首次显示时加载模型</string>
+    <string name="label_zf_use_itn">启用 ITN（反向文本规范化）</string>
+    <string name="btn_zf_download_model">下载 Zipformer 模型</string>
+    <string name="btn_zf_clear_model">清除 Zipformer 模型</string>
+    <string name="zf_model_info">Zipformer 提供 4 类模型共 8 个版本：\n
+1. 中文 XL 版：仅支持中文和部分方言，拥有 int8（570MB）和 fp16（1.25GB）两个版本，需要分别下载\n
+2. 中文标准版：仅支持中文和部分方言，拥有 int8（125MB）和 fp16（270MB）两个版本，需要分别下载\n
+3. 中英标准版：支持中文与英语，拥有 int8 和 fp32 两个版本。两个量化版本只需下载一次，总体积 490MB\n
+4. 小型中英版：支持中文与英语，拥有 int8 和 fp32 两个版本。两个量化版本只需下载一次，总体积 440MB</string>
+    <string name="zf_download_status_done">模型已安装</string>
+    <string name="zf_download_status_downloading">下载中… %1$d%%</string>
+    <string name="zf_download_status_extracting_progress">解压中… %1$d%%</string>
+    <string name="zf_download_status_failed">下载或解压失败</string>
+    <string name="zf_download_started_in_bg">已开始后台下载，请到通知栏查看进度</string>
+    <string name="zf_clear_confirm_title">确认清除模型？</string>
+    <string name="zf_clear_confirm_message">将删除已下载的 Zipformer 模型文件，可稍后重新下载。是否继续？</string>
+    <string name="zf_clear_done">已清除模型</string>
+    <string name="zf_clear_failed">清除失败</string>
+
+    <!-- Zipformer model variants -->
+    <string name="zf_variant_zh_xl_int8_20250630">中文（XL · int8）</string>
+    <string name="zf_variant_zh_xl_fp16_20250630">中文（XL · fp16）</string>
+    <string name="zf_variant_zh_int8_20250630">中文（int8）</string>
+    <string name="zf_variant_zh_fp16_20250630">中文（fp16）</string>
+    <string name="zf_variant_bi_int8_20230220">中英（int8）</string>
+    <string name="zf_variant_bi_fp32_20230220">中英（fp32）</string>
+    <string name="zf_variant_small_bi_int8_20230216">小型中英（int8）</string>
+    <string name="zf_variant_small_bi_fp32_20230216">小型中英（fp32）</string>
+
+    <!-- Model download notifications -->
+    <string name="notif_zf_title_zh_xl">Zipformer 中文 XL</string>
+    <string name="notif_zf_title_zh">Zipformer 中文</string>
+    <string name="notif_zf_title_bi">Zipformer 中英</string>
+    <string name="notif_zf_title_small_bi">Zipformer 小型中英</string>
+</resources>

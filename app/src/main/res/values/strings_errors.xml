@@ -1,32 +1,32 @@
 <resources>
-    <!-- 错误提示相关字符串 - Error messages related strings -->
+    <!-- Error messages related strings -->
 
     <!-- Errors (ASR engines) -->
-    <string name="error_record_permission_denied">录音权限未授予</string>
-    <string name="error_audio_init_failed">录音初始化失败</string>
-    <string name="error_audio_error">录音错误: %1$s</string>
-    <string name="error_audio_empty">空音频</string>
-    <string name="error_missing_gemini_key">未配置 Gemini API Key</string>
-    <string name="error_missing_dashscope_key">未配置 DashScope API Key</string>
-    <string name="error_missing_siliconflow_key">未配置 SiliconFlow API Key</string>
-    <string name="error_missing_eleven_key">未配置 ElevenLabs API Key</string>
-    <string name="error_missing_soniox_key">未配置 Soniox API Key</string>
-    <string name="error_missing_eleven_model_id">未配置 ElevenLabs Model ID（服务端要求必填）</string>
-    <string name="error_request_failed_http">识别请求失败: HTTP %1$d%2$s</string>
-    <string name="error_asr_request_failed_http">ASR 请求失败: HTTP %1$d%2$s</string>
-    <string name="error_dash_getpolicy_failed_http">getPolicy 失败: HTTP %1$d%2$s</string>
-    <string name="error_dash_no_data">getPolicy 响应无 data 字段</string>
-    <string name="error_dash_missing_upload_host">getPolicy 响应缺少 upload_host</string>
-    <string name="error_oss_upload_failed_http">OSS 上传失败: %1$d%2$s</string>
-    <string name="error_asr_empty_result">识别返回为空</string>
-    <string name="error_recognize_failed_with_reason">识别失败: %1$s</string>
+    <string name="error_record_permission_denied">Record audio permission not granted</string>
+    <string name="error_audio_init_failed">Recording initialization failed</string>
+    <string name="error_audio_error">Recording error: %1$s</string>
+    <string name="error_audio_empty">Empty audio</string>
+    <string name="error_missing_gemini_key">Gemini API Key not set</string>
+    <string name="error_missing_dashscope_key">DashScope API Key not set</string>
+    <string name="error_missing_siliconflow_key">SiliconFlow API Key not set</string>
+    <string name="error_missing_eleven_key">ElevenLabs API Key not set</string>
+    <string name="error_missing_soniox_key">Soniox API Key not set</string>
+    <string name="error_missing_eleven_model_id">ElevenLabs Model ID not set (required)</string>
+    <string name="error_request_failed_http">Recognition request failed: HTTP %1$d%2$s</string>
+    <string name="error_asr_request_failed_http">ASR request failed: HTTP %1$d%2$s</string>
+    <string name="error_dash_getpolicy_failed_http">getPolicy failed: HTTP %1$d%2$s</string>
+    <string name="error_dash_no_data">getPolicy response missing data</string>
+    <string name="error_dash_missing_upload_host">getPolicy response missing upload_host</string>
+    <string name="error_oss_upload_failed_http">OSS upload failed: %1$d%2$s</string>
+    <string name="error_asr_empty_result">Empty ASR result</string>
+    <string name="error_recognize_failed_with_reason">Recognition failed: %1$s</string>
 
     <!-- User-facing ASR error toasts (floating + keyboard) -->
-    <string name="asr_error_empty_result">未识别到内容，请再说一遍</string>
-    <string name="asr_error_network_unavailable">网络连接失败，请检查网络后重试</string>
-    <string name="asr_error_network_handshake">网络连接异常（握手失败），请稍后重试或切换网络</string>
-    <string name="asr_error_mic_permission_denied">需要麦克风权限才能识别，请在设置中开启</string>
-    <string name="asr_error_mic_in_use">麦克风正被其他应用使用，请稍后再试</string>
-    <string name="asr_error_auth_invalid">鉴权失败，凭证无效或已过期，请在设置中更新</string>
-    <string name="asr_error_auth_forbidden">权限不足，请检查服务开通状态</string>
+    <string name="asr_error_empty_result">No speech recognized. Please try again.</string>
+    <string name="asr_error_network_unavailable">Network connection failed. Check connection and retry.</string>
+    <string name="asr_error_network_handshake">Connection handshake failed. Try again or switch network.</string>
+    <string name="asr_error_mic_permission_denied">Microphone permission required. Enable it in Settings.</string>
+    <string name="asr_error_mic_in_use">Microphone is in use by another app. Try again later.</string>
+    <string name="asr_error_auth_invalid">Authentication failed. Credentials invalid or expired. Update in Settings.</string>
+    <string name="asr_error_auth_forbidden">Forbidden. Please check your service permissions.</string>
 </resources>

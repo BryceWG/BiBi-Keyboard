@@ -1,29 +1,29 @@
 <resources>
-    <!-- Soniox ASR 配置字符串 -->
-    <string name="soniox_section_title">Soniox 鉴权参数</string>
+    <!-- Soniox ASR configuration strings -->
+    <string name="soniox_section_title">Soniox Credentials</string>
     <string name="vendor_soniox">Soniox</string>
 
     <!-- Soniox configuration -->
-    <string name="label_soniox_streaming">使用 Soniox 流式识别（WebSocket）</string>
-    <string name="label_soniox_language">识别语言（Language Hints）</string>
-    <string name="label_soniox_api_key">API Key（Bearer）</string>
+    <string name="label_soniox_streaming">Use Soniox streaming (WebSocket)</string>
+    <string name="label_soniox_language">Recognition language (Language Hints)</string>
+    <string name="label_soniox_api_key">API Key (Bearer)</string>
 
     <!-- Soniox language options -->
-    <string name="soniox_lang_auto">自动（多语言）</string>
-    <string name="soniox_lang_en">英语 (en)</string>
-    <string name="soniox_lang_zh">中文 (zh)</string>
-    <string name="soniox_lang_ja">日语 (ja)</string>
-    <string name="soniox_lang_ko">韩语 (ko)</string>
-    <string name="soniox_lang_es">西班牙语 (es)</string>
-    <string name="soniox_lang_pt">葡萄牙语 (pt)</string>
-    <string name="soniox_lang_de">德语 (de)</string>
-    <string name="soniox_lang_fr">法语 (fr)</string>
-    <string name="soniox_lang_id">印尼语 (id)</string>
-    <string name="soniox_lang_ru">俄语 (ru)</string>
-    <string name="soniox_lang_ar">阿拉伯语 (ar)</string>
-    <string name="soniox_lang_hi">印地语 (hi)</string>
-    <string name="soniox_lang_vi">越南语 (vi)</string>
-    <string name="soniox_lang_th">泰语 (th)</string>
-    <string name="soniox_lang_ms">马来语 (ms)</string>
-    <string name="soniox_lang_fil">菲律宾语 (fil)</string>
+    <string name="soniox_lang_auto">Auto (multilingual)</string>
+    <string name="soniox_lang_en">English (en)</string>
+    <string name="soniox_lang_zh">Chinese (zh)</string>
+    <string name="soniox_lang_ja">Japanese (ja)</string>
+    <string name="soniox_lang_ko">Korean (ko)</string>
+    <string name="soniox_lang_es">Spanish (es)</string>
+    <string name="soniox_lang_pt">Portuguese (pt)</string>
+    <string name="soniox_lang_de">German (de)</string>
+    <string name="soniox_lang_fr">French (fr)</string>
+    <string name="soniox_lang_id">Indonesian (id)</string>
+    <string name="soniox_lang_ru">Russian (ru)</string>
+    <string name="soniox_lang_ar">Arabic (ar)</string>
+    <string name="soniox_lang_hi">Hindi (hi)</string>
+    <string name="soniox_lang_vi">Vietnamese (vi)</string>
+    <string name="soniox_lang_th">Thai (th)</string>
+    <string name="soniox_lang_ms">Malay (ms)</string>
+    <string name="soniox_lang_fil">Filipino (fil)</string>
 </resources>

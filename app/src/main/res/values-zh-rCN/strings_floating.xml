@@ -1,0 +1,40 @@
+<resources>
+    <!-- 悬浮球相关字符串 - Floating ball related strings -->
+
+    <string name="title_floating_settings">悬浮球设置</string>
+    <string name="label_floating_only_when_ime_visible">仅在键盘显示时显示悬浮球</string>
+    <string name="label_floating_alpha">悬浮球透明度</string>
+    <string name="label_floating_size">悬浮球大小</string>
+    <string name="toast_need_overlay_perm">请在系统设置中授予"在其他应用上层显示"权限以启用悬浮球</string>
+    <string name="label_floating_asr">使用悬浮球进行语音识别</string>
+    <string name="label_floating_write_compat">悬浮球写入文字兼容性模式</string>
+    <string name="desc_floating_write_compat">在部分应用中文本框会出现背景文字被误识别，导致通过无障碍服务插入文字时会附带背景文字的情况。开启此模式后，在目标软件中使用悬浮球时会尝试"全选+粘贴"写入一个不可见字符，以屏蔽背景文字。</string>
+    <string name="label_floating_write_compat_pkgs">兼容目标包名（每行一个）</string>
+    <string name="hint_floating_write_compat_pkgs">请填写完整包名，采用前缀匹配（例如 org.telegram.messenger）。</string>
+    <string name="label_floating_write_paste">悬浮球识别结果仅写入粘贴板</string>
+    <string name="desc_floating_write_paste">仅对下方指定的应用生效：在这些应用内，使用悬浮球语音输入时将结果复制到剪贴板，不尝试通过无障碍 API 插入文字。若列表中包含 all，则全局生效。</string>
+    <string name="label_floating_write_paste_pkgs">目标包名（每行一个）</string>
+    <string name="hint_floating_write_paste_pkgs">请填写完整包名进行精确匹配（例如 com.tencent.mm）。如需全局生效，单独添加一行 all。</string>
+    <string name="toast_need_accessibility_perm">请在系统设置中授予"无障碍服务"权限以支持此功能</string>
+    <string name="cd_floating_asr">悬浮球语音识别</string>
+
+    <!-- Floating ASR status messages -->
+    <string name="floating_asr_error">识别失败: %1$s</string>
+    <string name="floating_asr_copied">已复制到剪贴板</string>
+    <string name="accessibility_service_description">允许言犀键盘悬浮球将语音识别结果自动插入到当前输入框中。不会收集或上传任何数据。</string>
+
+    <!-- Floating radial menu -->
+    <string name="label_radial_switch_asr">切换 ASR 供应商</string>
+    <string name="label_radial_switch_ime">切换输入法</string>
+    <string name="label_radial_move">移动悬浮球</string>
+    <string name="label_radial_postproc">切换 AI 后处理</string>
+    <string name="label_radial_switch_prompt">切换 AI 后处理 Prompt</string>
+    <string name="label_radial_clipboard_upload">上传粘贴板</string>
+    <string name="label_radial_clipboard_pull">拉取粘贴板</string>
+    <string name="label_radial_toggle_silence_autostop">录音判停</string>
+    <string name="label_radial_open_history">查看识别历史</string>
+    <string name="label_choose_asr_vendor">选择 ASR 供应商</string>
+    <string name="toast_move_mode_on">已进入移动模式，再次点击悬浮球退出</string>
+    <string name="label_reset_floating_position">重置悬浮球位置</string>
+    <string name="toast_floating_position_reset">已重置悬浮球位置</string>
+</resources>

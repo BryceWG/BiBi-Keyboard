@@ -1,10 +1,10 @@
 <resources>
     <string name="vendor_openai">OpenAI</string>
-    <string name="openai_section_title">OpenAI 语音转文字</string>
-    <string name="label_openai_asr_endpoint">ASR Endpoint（例如：https://api.openai.com/v1/audio/transcriptions）</string>
-    <string name="label_openai_api_key">API Key（Bearer）</string>
-    <string name="label_openai_model">模型名称（如：gpt-4o-mini-transcribe 或 whisper-1）</string>
-    <string name="label_openai_use_prompt">使用自定义 Prompt（部分模型不支持）</string>
-    <string name="label_openai_prompt">自定义 Prompt（可选）</string>
-    <string name="label_openai_language">识别语言（可选）</string>
+    <string name="openai_section_title">OpenAI Speech-to-Text</string>
+    <string name="label_openai_asr_endpoint">ASR Endpoint (e.g., https://api.openai.com/v1/audio/transcriptions)</string>
+    <string name="label_openai_api_key">API Key (Bearer)</string>
+    <string name="label_openai_model">Model (e.g., gpt-4o-mini-transcribe or whisper-1)</string>
+    <string name="label_openai_use_prompt">Use custom prompt (some models unsupported)</string>
+    <string name="label_openai_prompt">Custom prompt (optional)</string>
+    <string name="label_openai_language">Language (optional)</string>
 </resources>

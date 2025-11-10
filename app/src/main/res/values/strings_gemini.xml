@@ -1,8 +1,8 @@
 <resources>
     <string name="vendor_gemini">Google Gemini</string>
-    <string name="gemini_section_title">Gemini 语音理解</string>
+    <string name="gemini_section_title">Gemini Audio Understanding</string>
     <string name="label_gemini_api_key">Gemini API Key</string>
-    <string name="label_gemini_model">模型（如：gemini-2.5-flash）</string>
-    <string name="label_gemini_prompt">转录提示词（Prompt）</string>
-    <string name="label_gemini_disable_thinking">关闭思考（减少延迟）</string>
+    <string name="label_gemini_model">Model (e.g., gemini-2.5-flash)</string>
+    <string name="label_gemini_prompt">Transcription Prompt</string>
+    <string name="label_gemini_disable_thinking">Disable thinking (reduce latency)</string>
 </resources>

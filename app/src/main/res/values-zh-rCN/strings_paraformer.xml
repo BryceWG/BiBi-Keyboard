@@ -1,0 +1,36 @@
+<resources>
+    <!-- Paraformer 本地流式 ASR 配置字符串 -->
+    <string name="paraformer_section_title">Paraformer（本地）</string>
+    <string name="vendor_paraformer">Paraformer（本地流式）</string>
+
+    <!-- Paraformer configuration -->
+    <string name="label_pf_model_variant">模型版本</string>
+    <string name="label_pf_threads">线程数（1-8）</string>
+    <string name="label_pf_keep_alive">模型内存保留时长</string>
+    <string name="pf_variant_bilingual_int8">中英（int8）</string>
+    <string name="pf_variant_bilingual_fp32">中英（fp32）</string>
+    <string name="pf_variant_trilingual_int8">中英+粤语（int8）</string>
+    <string name="pf_variant_trilingual_fp32">中英+粤语（fp32）</string>
+    <string name="btn_pf_download_model">一键下载 Paraformer 模型</string>
+    <string name="btn_pf_clear_model">清除已下载模型</string>
+    <string name="pf_download_status_downloading">下载中… %1$d%%</string>
+    <string name="pf_download_status_extracting_progress">解压中… %1$d%%</string>
+    <string name="pf_download_status_done">模型已安装</string>
+    <string name="pf_download_status_failed">下载或解压失败</string>
+    <string name="pf_download_started_in_bg">已开始后台下载，请到通知栏查看进度</string>
+    <string name="pf_clear_confirm_title">确认清除模型？</string>
+    <string name="pf_clear_confirm_message">将删除已下载的模型文件，可稍后重新下载。是否继续？</string>
+    <string name="pf_clear_done">已清除模型</string>
+    <string name="pf_clear_failed">清除失败</string>
+    <string name="pf_loading_model">本地模型加载中…</string>
+    <string name="label_pf_preload">首次显示时加载模型</string>
+    <string name="label_pf_use_itn">启用 ITN（数字/标点规范化）</string>
+    <string name="pf_model_info">注：\n1. Paraformer 模型拥有两个版本（中英和中英粤），其中中文还另支持部分方言\n2. 每个版本的下载包都为 1GB，其中都包含 int8 和 fp32 两个量化版本的模型文件，在同版本的 int8 和 fp32 之间切换无需重新下载</string>
+
+    <!-- Error message -->
+    <string name="error_paraformer_model_missing">缺少 Paraformer 模型文件，请稍后在设置中配置或下载</string>
+
+    <!-- Model download notifications -->
+    <string name="notif_pf_title_bilingual">Paraformer 模型（中英）</string>
+    <string name="notif_pf_title_trilingual">Paraformer 模型（中英+粤语）</string>
+</resources>
