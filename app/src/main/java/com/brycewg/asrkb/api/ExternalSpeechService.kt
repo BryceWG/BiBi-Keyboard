@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.IBinder
+import android.os.SystemClock
 import android.os.Parcel
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -181,6 +182,10 @@ class ExternalSpeechService : Service() {
         private val cfg: SpeechConfig?
     ) : StreamingAsrEngine.Listener {
         var engine: StreamingAsrEngine? = null
+        // 统计：录音起止与耗时（用于历史记录展示）
+        private var sessionStartUptimeMs: Long = 0L
+        private var lastAudioMsForStats: Long = 0L
+        private var lastRequestDurationMs: Long? = null
 
         fun prepare(): Boolean {
             // 完全跟随应用内当前设置：供应商与是否流式均以 Prefs 为准
@@ -199,6 +204,14 @@ class ExternalSpeechService : Service() {
 
         fun start() {
             safe { cb.onState(id, STATE_RECORDING, "recording") }
+            try {
+                sessionStartUptimeMs = SystemClock.uptimeMillis()
+                // 新会话开始时重置上次请求耗时，避免串台（流式模式不会更新此值）
+                lastRequestDurationMs = null
+                lastAudioMsForStats = 0L
+            } catch (t: Throwable) {
+                Log.w(TAG, "Failed to mark session start", t)
+            }
             engine?.start()
         }
 
@@ -231,23 +244,66 @@ class ExternalSpeechService : Service() {
                 AsrVendor.Volc -> if (streamingPreferred) {
                     ProAsrHelper.createVolcStreamingEngine(context, scope, prefs, this)
                 } else {
-                    VolcFileAsrEngine(context, scope, prefs, this)
+                    VolcFileAsrEngine(
+                        context,
+                        scope,
+                        prefs,
+                        this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 }
-                AsrVendor.SiliconFlow -> SiliconFlowFileAsrEngine(context, scope, prefs, this)
-                AsrVendor.ElevenLabs -> ElevenLabsFileAsrEngine(context, scope, prefs, this)
-                AsrVendor.OpenAI -> OpenAiFileAsrEngine(context, scope, prefs, this)
+                AsrVendor.SiliconFlow -> SiliconFlowFileAsrEngine(
+                    context, scope, prefs, this,
+                    onRequestDuration = { ms: Long ->
+                        try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                    }
+                )
+                AsrVendor.ElevenLabs -> ElevenLabsFileAsrEngine(
+                    context, scope, prefs, this,
+                    onRequestDuration = { ms: Long ->
+                        try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                    }
+                )
+                AsrVendor.OpenAI -> OpenAiFileAsrEngine(
+                    context, scope, prefs, this,
+                    onRequestDuration = { ms: Long ->
+                        try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                    }
+                )
                 AsrVendor.DashScope -> if (streamingPreferred) {
                     DashscopeStreamAsrEngine(context, scope, prefs, this)
                 } else {
-                    DashscopeFileAsrEngine(context, scope, prefs, this)
+                    DashscopeFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 }
-                AsrVendor.Gemini -> GeminiFileAsrEngine(context, scope, prefs, this)
+                AsrVendor.Gemini -> GeminiFileAsrEngine(
+                    context, scope, prefs, this,
+                    onRequestDuration = { ms: Long ->
+                        try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                    }
+                )
                 AsrVendor.Soniox -> if (streamingPreferred) {
                     SonioxStreamAsrEngine(context, scope, prefs, this)
                 } else {
-                    SonioxFileAsrEngine(context, scope, prefs, this)
+                    SonioxFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 }
-                AsrVendor.SenseVoice -> SenseVoiceFileAsrEngine(context, scope, prefs, this)
+                AsrVendor.SenseVoice -> SenseVoiceFileAsrEngine(
+                    context, scope, prefs, this,
+                    onRequestDuration = { ms: Long ->
+                        try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                    }
+                )
                 AsrVendor.Paraformer -> ParaformerStreamAsrEngine(context, scope, prefs, this)
                 AsrVendor.Zipformer -> ZipformerStreamAsrEngine(context, scope, prefs, this)
             }
@@ -262,7 +318,12 @@ class ExternalSpeechService : Service() {
                 } else {
                     com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                         context, scope, prefs, this,
-                        com.brycewg.asrkb.asr.VolcFileAsrEngine(context, scope, prefs, this)
+                        com.brycewg.asrkb.asr.VolcFileAsrEngine(
+                            context, scope, prefs, this,
+                            onRequestDuration = { ms: Long ->
+                                try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                            }
+                        )
                     )
                 }
                 // 阿里 DashScope：依据设置走流式或非流式
@@ -271,7 +332,12 @@ class ExternalSpeechService : Service() {
                 } else {
                     com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                         context, scope, prefs, this,
-                        com.brycewg.asrkb.asr.DashscopeFileAsrEngine(context, scope, prefs, this)
+                        com.brycewg.asrkb.asr.DashscopeFileAsrEngine(
+                            context, scope, prefs, this,
+                            onRequestDuration = { ms: Long ->
+                                try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                            }
+                        )
                     )
                 }
                 // Soniox：依据设置走流式或非流式
@@ -280,25 +346,50 @@ class ExternalSpeechService : Service() {
                 } else {
                     com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                         context, scope, prefs, this,
-                        com.brycewg.asrkb.asr.SonioxFileAsrEngine(context, scope, prefs, this)
+                        com.brycewg.asrkb.asr.SonioxFileAsrEngine(
+                            context, scope, prefs, this,
+                            onRequestDuration = { ms: Long ->
+                                try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                            }
+                        )
                     )
                 }
                 // 其他云厂商：仅非流式
                 AsrVendor.ElevenLabs -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                     context, scope, prefs, this,
-                    com.brycewg.asrkb.asr.ElevenLabsFileAsrEngine(context, scope, prefs, this)
+                    com.brycewg.asrkb.asr.ElevenLabsFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 )
                 AsrVendor.OpenAI -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                     context, scope, prefs, this,
-                    com.brycewg.asrkb.asr.OpenAiFileAsrEngine(context, scope, prefs, this)
+                    com.brycewg.asrkb.asr.OpenAiFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 )
                 AsrVendor.Gemini -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                     context, scope, prefs, this,
-                    com.brycewg.asrkb.asr.GeminiFileAsrEngine(context, scope, prefs, this)
+                    com.brycewg.asrkb.asr.GeminiFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 )
                 AsrVendor.SiliconFlow -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                     context, scope, prefs, this,
-                    com.brycewg.asrkb.asr.SiliconFlowFileAsrEngine(context, scope, prefs, this)
+                    com.brycewg.asrkb.asr.SiliconFlowFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 )
                 // 本地：Paraformer/Zipformer 固定流式
                 AsrVendor.Paraformer -> com.brycewg.asrkb.asr.ParaformerStreamAsrEngine(context, scope, prefs, this, externalPcmMode = true)
@@ -306,12 +397,27 @@ class ExternalSpeechService : Service() {
                 // SenseVoice：非流式 → 走文件引擎 + 通用适配器
                 AsrVendor.SenseVoice -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                     context, scope, prefs, this,
-                    com.brycewg.asrkb.asr.SenseVoiceFileAsrEngine(context, scope, prefs, this)
+                    com.brycewg.asrkb.asr.SenseVoiceFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
                 )
             }
         }
 
         override fun onFinal(text: String) {
+            // 若尚未收到 onStopped，则以当前时间近似计算一次时长
+            if (lastAudioMsForStats == 0L && sessionStartUptimeMs > 0L) {
+                try {
+                    val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
+                    lastAudioMsForStats = dur
+                    sessionStartUptimeMs = 0L
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to compute audio duration on final", t)
+                }
+            }
             val doAi = try { prefs.postProcessEnabled && prefs.hasLlmKeys() } catch (_: Throwable) { false }
             if (doAi) {
                 // 执行带 AI 的完整后处理链（IO 在线程内切换）
@@ -321,6 +427,32 @@ class ExternalSpeechService : Service() {
                     } catch (t: Throwable) {
                         Log.w(TAG, "applyWithAi failed, fallback to simple", t)
                         try { com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text) } catch (_: Throwable) { text }
+                    }
+                    // 记录使用统计与识别历史（来源标记为 ime；尊重开关）
+                    try {
+                        val audioMs = lastAudioMsForStats
+                        val procMs = lastRequestDurationMs ?: 0L
+                        val chars = try { com.brycewg.asrkb.util.TextSanitizer.countEffectiveChars(out) } catch (_: Throwable) { out.length }
+                        if (!prefs.disableUsageStats) {
+                            prefs.recordUsageCommit("ime", prefs.asrVendor, audioMs, chars, procMs)
+                        }
+                        if (!prefs.disableAsrHistory) {
+                            val store = com.brycewg.asrkb.store.AsrHistoryStore(context)
+                            store.add(
+                                com.brycewg.asrkb.store.AsrHistoryStore.AsrHistoryRecord(
+                                    timestamp = System.currentTimeMillis(),
+                                    text = out,
+                                    vendorId = prefs.asrVendor.id,
+                                    audioMs = audioMs,
+                                    procMs = procMs,
+                                    source = "ime",
+                                    aiProcessed = true,
+                                    charCount = chars
+                                )
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to add ASR history (external, ai)", e)
                     }
                     safe { cb.onFinal(id, out) }
                     safe { cb.onState(id, STATE_IDLE, "final") }
@@ -333,6 +465,32 @@ class ExternalSpeechService : Service() {
                 } catch (t: Throwable) {
                     Log.w(TAG, "applySimple failed, fallback to raw text", t)
                     text
+                }
+                // 记录使用统计与识别历史（来源标记为 ime；尊重开关）
+                try {
+                    val audioMs = lastAudioMsForStats
+                    val procMs = lastRequestDurationMs ?: 0L
+                    val chars = try { com.brycewg.asrkb.util.TextSanitizer.countEffectiveChars(out) } catch (_: Throwable) { out.length }
+                    if (!prefs.disableUsageStats) {
+                        prefs.recordUsageCommit("ime", prefs.asrVendor, audioMs, chars, procMs)
+                    }
+                    if (!prefs.disableAsrHistory) {
+                        val store = com.brycewg.asrkb.store.AsrHistoryStore(context)
+                        store.add(
+                            com.brycewg.asrkb.store.AsrHistoryStore.AsrHistoryRecord(
+                                timestamp = System.currentTimeMillis(),
+                                text = out,
+                                vendorId = prefs.asrVendor.id,
+                                audioMs = audioMs,
+                                procMs = procMs,
+                                source = "ime",
+                                aiProcessed = false,
+                                charCount = chars
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to add ASR history (external, simple)", e)
                 }
                 safe { cb.onFinal(id, out) }
                 safe { cb.onState(id, STATE_IDLE, "final") }
@@ -350,7 +508,20 @@ class ExternalSpeechService : Service() {
 
         override fun onPartial(text: String) { if (text.isNotEmpty()) safe { cb.onPartial(id, text) } }
 
-        override fun onStopped() { safe { cb.onState(id, STATE_PROCESSING, "processing") } }
+        override fun onStopped() {
+            // 计算一次会话录音时长
+            if (sessionStartUptimeMs > 0L) {
+                try {
+                    val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
+                    lastAudioMsForStats = dur
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to compute audio duration on stop", t)
+                } finally {
+                    sessionStartUptimeMs = 0L
+                }
+            }
+            safe { cb.onState(id, STATE_PROCESSING, "processing") }
+        }
 
         override fun onAmplitude(amplitude: Float) { safe { cb.onAmplitude(id, amplitude) } }
     }
