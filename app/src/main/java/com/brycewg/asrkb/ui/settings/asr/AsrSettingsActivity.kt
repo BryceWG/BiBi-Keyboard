@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -43,6 +44,11 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AsrSettingsViewModel
     private lateinit var prefs: Prefs
+
+    // File picker for model import
+    private val modelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { handleModelImport(it) }
+    }
 
     // View references grouped by function
     private lateinit var tvAsrVendor: TextView
@@ -1174,13 +1180,8 @@ class AsrSettingsActivity : AppCompatActivity() {
         }
 
         fun updateDownloadButtonText() {
-            val variant = prefs.svModelVariant
-            val text = if (variant == "small-full") {
-                getString(R.string.btn_sv_download_model_full)
-            } else {
-                getString(R.string.btn_sv_download_model_int8)
-            }
-            btnSvDownload.text = text
+            // 统一使用简洁的按钮文本，不再显示详细信息
+            btnSvDownload.text = getString(R.string.btn_sv_download_model)
         }
 
         updateVariantSummary()
@@ -1261,6 +1262,7 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private fun setupSvDownloadButtons() {
         val btnSvDownload = findViewById<MaterialButton>(R.id.btnSvDownloadModel)
+        val btnSvImport = findViewById<MaterialButton>(R.id.btnSvImportModel)
         val btnSvClear = findViewById<MaterialButton>(R.id.btnSvClearModel)
         val tvSvDownloadStatus = findViewById<TextView>(R.id.tvSvDownloadStatus)
 
@@ -1343,6 +1345,25 @@ class AsrSettingsActivity : AppCompatActivity() {
                 .setNegativeButton(R.string.btn_cancel, null)
                 .create()
                 .show()
+        }
+
+        btnSvImport.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            modelFilePicker.launch("application/x-bzip2")
+        }
+    }
+
+    private fun handleModelImport(uri: Uri) {
+        val tvSvDownloadStatus = findViewById<TextView>(R.id.tvSvDownloadStatus)
+        tvSvDownloadStatus.text = ""
+
+        try {
+            val variant = prefs.svModelVariant
+            ModelDownloadService.startImport(this, uri, variant)
+            tvSvDownloadStatus.text = getString(R.string.sv_import_started_in_bg)
+        } catch (e: Throwable) {
+            android.util.Log.e(TAG, "Failed to start model import", e)
+            tvSvDownloadStatus.text = getString(R.string.sv_import_failed, e.message ?: "Unknown error")
         }
     }
 

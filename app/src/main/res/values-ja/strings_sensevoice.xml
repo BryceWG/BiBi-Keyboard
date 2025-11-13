@@ -16,12 +16,17 @@
     <string name="btn_sv_download_model">SenseVoiceモデルをワンクリックでダウンロード</string>
     <string name="btn_sv_download_model_int8">SenseVoice（small int8、約160MB）をワンクリックでダウンロード</string>
     <string name="btn_sv_download_model_full">SenseVoice（small fp32、約850MB）をワンクリックでダウンロード</string>
+    <string name="btn_sv_import_model">ローカルファイルからモデルをインポート</string>
     <string name="btn_sv_clear_model">ダウンロードしたモデルをクリア</string>
     <string name="sv_download_status_downloading">ダウンロード中…%1$d%%</string>
     <string name="sv_download_status_extracting_progress">展開中… %1$d%%</string>
     <string name="sv_download_status_done">モデルがインストールされました</string>
     <string name="sv_download_status_failed">ダウンロードまたは展開失敗</string>
     <string name="sv_download_started_in_bg">バックグラウンドダウンロードを開始しました。進行状況は通知で確認してください。</string>
+    <string name="sv_import_started_in_bg">バックグラウンドインポートを開始しました。進行状況は通知で確認してください。</string>
+    <string name="sv_import_success">モデルのインポートに成功しました：%1$s</string>
+    <string name="sv_import_failed">モデルのインポートに失敗しました：%1$s</string>
+    <string name="sv_import_status_extracting">インポート中… %1$d%%</string>
     <string name="sv_clear_confirm_title">モデルクリアの確認</string>
     <string name="sv_clear_confirm_message">ダウンロードしたモデルファイルが削除されます。後で再ダウンロードできます。続行しますか？</string>
     <string name="sv_clear_done">モデルがクリアされました</string>
