@@ -47,9 +47,11 @@ class ModelDownloadService : Service() {
     private const val SUMMARY_ID = 1000
 
     private const val ACTION_START = "com.brycewg.asrkb.action.MODEL_DOWNLOAD_START"
+    private const val ACTION_IMPORT = "com.brycewg.asrkb.action.MODEL_IMPORT"
     private const val ACTION_CANCEL = "com.brycewg.asrkb.action.MODEL_DOWNLOAD_CANCEL"
 
     private const val EXTRA_URL = "url"
+    private const val EXTRA_URI = "uri"
     private const val EXTRA_VARIANT = "variant"
     private const val EXTRA_KEY = "key"
     private const val EXTRA_MODEL_TYPE = "modelType" // sensevoice | paraformer
@@ -74,6 +76,17 @@ class ModelDownloadService : Service() {
         putExtra(EXTRA_VARIANT, variant)
         putExtra(EXTRA_KEY, key.toSerializedKey())
         putExtra(EXTRA_MODEL_TYPE, modelType)
+      }
+      ContextCompat.startForegroundService(context, i)
+    }
+
+    fun startImport(context: Context, uri: android.net.Uri, variant: String) {
+      val key = DownloadKey(variant, "import_${uri.lastPathSegment ?: "unknown"}")
+      val i = Intent(context, ModelDownloadService::class.java).apply {
+        action = ACTION_IMPORT
+        putExtra(EXTRA_URI, uri.toString())
+        putExtra(EXTRA_VARIANT, variant)
+        putExtra(EXTRA_KEY, key.toSerializedKey())
       }
       ContextCompat.startForegroundService(context, i)
     }
@@ -112,6 +125,29 @@ class ModelDownloadService : Service() {
           notificationHandlers[key] = notificationHandler
 
           val job = scope.launch { doDownloadTask(key, url, variant, modelType, notificationHandler) }
+          tasks[key] = job
+        }
+      }
+      ACTION_IMPORT -> {
+        val uriString = intent.getStringExtra(EXTRA_URI) ?: return START_NOT_STICKY
+        val uri = android.net.Uri.parse(uriString)
+        val variant = intent.getStringExtra(EXTRA_VARIANT) ?: ""
+        val serializedKey = intent.getStringExtra(EXTRA_KEY) ?: DownloadKey(variant, "import").toSerializedKey()
+        val key = DownloadKey.fromSerializedKey(serializedKey)
+
+        if (!tasks.containsKey(key)) {
+          if (tasks.isEmpty()) startAsForegroundSummary()
+
+          val notificationHandler = NotificationHandler(
+            context = this,
+            notificationManager = nm,
+            key = key,
+            variant = variant,
+            modelType = "auto" // Will be detected from file content
+          )
+          notificationHandlers[key] = notificationHandler
+
+          val job = scope.launch { doImportTask(key, uri, variant, notificationHandler) }
           tasks[key] = job
         }
       }
@@ -203,6 +239,181 @@ class ModelDownloadService : Service() {
       } catch (e: Throwable) {
         Log.w(TAG, "Error deleting cache file: ${cacheFile.path}", e)
       }
+    }
+  }
+
+  /**
+   * 从本地文件导入模型
+   */
+  private suspend fun doImportTask(
+    key: DownloadKey,
+    uri: android.net.Uri,
+    variant: String,
+    notificationHandler: NotificationHandler
+  ) {
+    val cacheFile = File(cacheDir, key.toSafeFileName() + ".tar.bz2")
+
+    try {
+      // 从 Uri 复制文件到缓存目录
+      copyFileFromUri(uri, cacheFile, notificationHandler)
+
+      // 检测模型类型
+      val modelType = detectModelType(cacheFile)
+      if (modelType == null) {
+        throw IllegalStateException(getString(R.string.sv_import_failed, "无法识别模型类型"))
+      }
+
+      // 更新通知处理器的模型类型
+      notificationHandler.updateModelType(modelType)
+
+      // 解压归档
+      val modelDir = extractArchive(cacheFile, key, variant, modelType, notificationHandler)
+
+      // 验证并安装模型
+      verifyAndInstallModel(modelDir, variant, modelType)
+
+      // 构造成功消息，包含模型类型和版本信息
+      val modelInfo = getModelInfo(modelType, variant)
+      val successMessage = getString(R.string.sv_import_success, modelInfo)
+      notificationHandler.notifySuccess(successMessage)
+    } catch (t: Throwable) {
+      Log.e(TAG, "Import task failed for key=$key, uri=$uri", t)
+      val errorMessage = t.message ?: "Unknown error"
+      val failMessage = getString(R.string.sv_import_failed, errorMessage)
+      notificationHandler.notifyFailed(failMessage)
+    } finally {
+      tasks.remove(key)
+      notificationHandlers.remove(key)
+
+      // 若无任务，结束前台与自身
+      if (tasks.isEmpty()) {
+        try {
+          stopForeground(STOP_FOREGROUND_REMOVE)
+        } catch (e: Throwable) {
+          Log.w(TAG, "Error stopping foreground in finally", e)
+        }
+        stopSelf()
+      }
+      try {
+        cacheFile.delete()
+      } catch (e: Throwable) {
+        Log.w(TAG, "Error deleting cache file: ${cacheFile.path}", e)
+      }
+    }
+  }
+
+  /**
+   * 从 Uri 复制文件到缓存目录
+   */
+  private suspend fun copyFileFromUri(
+    uri: android.net.Uri,
+    destFile: File,
+    notificationHandler: NotificationHandler
+  ) = withContext(Dispatchers.IO) {
+    Log.d(TAG, "Copying file from URI: $uri")
+
+    contentResolver.openInputStream(uri)?.use { input ->
+      val total = try {
+        contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } ?: 0L
+      } catch (e: Exception) {
+        0L
+      }
+
+      FileOutputStream(destFile).use { output ->
+        val buf = ByteArray(128 * 1024)
+        var readSum = 0L
+        var lastProgress = -1
+
+        while (true) {
+          val n = input.read(buf)
+          if (n <= 0) break
+
+          output.write(buf, 0, n)
+          readSum += n
+
+          if (total > 0) {
+            val progress = ((readSum * 100) / total).toInt()
+            if (progress != lastProgress) {
+              val cancelIntent = notificationHandler.createCancelIntent()
+              notificationHandler.notifyExtractProgress(progress, cancelIntent)
+              lastProgress = progress
+            }
+          }
+        }
+      }
+    } ?: throw IllegalStateException("无法打开文件")
+
+    Log.d(TAG, "File copied successfully: ${destFile.length()} bytes")
+  }
+
+  /**
+   * 检测模型类型
+   * 通过读取 tar.bz2 文件内容来判断是哪种模型
+   */
+  private suspend fun detectModelType(file: File): String? = withContext(Dispatchers.IO) {
+    try {
+      var hasTokensTxt = false
+      var hasSenseVoiceModel = false
+      var hasParaformerModel = false
+      var hasZipformerModel = false
+
+      BZip2CompressorInputStream(file.inputStream().buffered(64 * 1024)).use { bz ->
+        TarArchiveInputStream(bz).use { tar ->
+          var entry = tar.nextEntry
+          while (entry != null) {
+            val name = entry.name.lowercase()
+
+            when {
+              name.endsWith("tokens.txt") -> hasTokensTxt = true
+              name.contains("sense-voice") || name.endsWith("model.int8.onnx") -> hasSenseVoiceModel = true
+              name.contains("paraformer") -> hasParaformerModel = true
+              name.contains("zipformer") || name.contains("encoder-epoch") || name.contains("decoder-epoch") || name.contains("joiner-epoch") -> hasZipformerModel = true
+            }
+
+            entry = tar.nextEntry
+          }
+        }
+      }
+
+      // 根据检测到的特征返回模型类型
+      return@withContext when {
+        hasSenseVoiceModel && hasTokensTxt -> "sensevoice"
+        hasParaformerModel && hasTokensTxt -> "paraformer"
+        hasZipformerModel && hasTokensTxt -> "zipformer"
+        else -> null // 无法识别
+      }
+    } catch (e: Exception) {
+      Log.e(TAG, "Error detecting model type", e)
+      null
+    }
+  }
+
+  /**
+   * 获取模型信息字符串
+   */
+  private fun getModelInfo(modelType: String, variant: String): String {
+    return when (modelType) {
+      "sensevoice" -> {
+        val versionName = if (variant == "small-full") "Small (fp32)" else "Small (int8)"
+        "SenseVoice $versionName"
+      }
+      "paraformer" -> {
+        val versionName = when (variant) {
+          "bilingual" -> "双语版"
+          "trilingual" -> "三语版"
+          else -> variant
+        }
+        "Paraformer $versionName"
+      }
+      "zipformer" -> {
+        val versionName = when {
+          variant.contains("bilingual") -> "双语版"
+          variant.contains("zh") -> "中文版"
+          else -> variant
+        }
+        "Zipformer $versionName"
+      }
+      else -> "$modelType $variant"
     }
   }
 
@@ -607,9 +818,9 @@ data class DownloadKey(
 class NotificationHandler(
   private val context: Context,
   private val notificationManager: NotificationManager,
-  private val key: DownloadKey,
+  val key: DownloadKey,
   private val variant: String,
-  private val modelType: String
+  private var modelType: String
 ) {
   companion object {
     private const val THROTTLE_INTERVAL_MS = 500L
@@ -621,7 +832,15 @@ class NotificationHandler(
   private var lastNotifyTime: Long = 0L
 
   private val notifId: Int = key.notifIdForKey()
-  private val title: String = getTitleForVariant()
+  private var title: String = getTitleForVariant()
+
+  /**
+   * 更新模型类型（用于导入时自动检测）
+   */
+  fun updateModelType(newModelType: String) {
+    modelType = newModelType
+    title = getTitleForVariant()
+  }
 
   /**
    * 创建取消下载的 PendingIntent

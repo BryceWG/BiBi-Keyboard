@@ -16,12 +16,17 @@
     <string name="btn_sv_download_model">一键下载 SenseVoice 模型</string>
     <string name="btn_sv_download_model_int8">一键下载 SenseVoice 模型（small int8，约 160MB）</string>
     <string name="btn_sv_download_model_full">一键下载 SenseVoice 模型（small fp32，约 850MB）</string>
+    <string name="btn_sv_import_model">从本地导入模型</string>
     <string name="btn_sv_clear_model">清除已下载模型</string>
     <string name="sv_download_status_downloading">下载中… %1$d%%</string>
     <string name="sv_download_status_extracting_progress">解压中… %1$d%%</string>
     <string name="sv_download_status_done">模型已安装</string>
     <string name="sv_download_status_failed">下载或解压失败</string>
     <string name="sv_download_started_in_bg">已开始后台下载，请到通知栏查看进度</string>
+    <string name="sv_import_started_in_bg">已开始后台导入，请到通知栏查看进度</string>
+    <string name="sv_import_success">模型导入成功：%1$s</string>
+    <string name="sv_import_failed">模型导入失败：%1$s</string>
+    <string name="sv_import_status_extracting">导入中… %1$d%%</string>
     <string name="sv_clear_confirm_title">确认清除模型？</string>
     <string name="sv_clear_confirm_message">将删除已下载的模型文件，可稍后重新下载。是否继续？</string>
     <string name="sv_clear_done">已清除模型</string>

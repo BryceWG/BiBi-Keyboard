@@ -16,12 +16,17 @@
     <string name="btn_sv_download_model">One-click download SenseVoice model</string>
     <string name="btn_sv_download_model_int8">One-click download SenseVoice (small int8, ~160MB)</string>
     <string name="btn_sv_download_model_full">One-click download SenseVoice (small fp32, ~850MB)</string>
+    <string name="btn_sv_import_model">Import model from local file</string>
     <string name="btn_sv_clear_model">Clear downloaded model</string>
     <string name="sv_download_status_downloading">Downloading… %1$d%%</string>
     <string name="sv_download_status_extracting_progress">Extracting… %1$d%%</string>
     <string name="sv_download_status_done">Model installed</string>
     <string name="sv_download_status_failed">Download or extraction failed</string>
     <string name="sv_download_started_in_bg">Started background download. Check notification for progress.</string>
+    <string name="sv_import_started_in_bg">Started background import. Check notification for progress.</string>
+    <string name="sv_import_success">Model imported successfully: %1$s</string>
+    <string name="sv_import_failed">Model import failed: %1$s</string>
+    <string name="sv_import_status_extracting">Importing… %1$d%%</string>
     <string name="sv_clear_confirm_title">Confirm clear model?</string>
     <string name="sv_clear_confirm_message">This will delete downloaded model files. You can re-download later. Continue?</string>
     <string name="sv_clear_done">Model cleared</string>
