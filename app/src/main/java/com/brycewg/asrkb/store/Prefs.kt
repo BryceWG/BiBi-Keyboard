@@ -62,7 +62,7 @@ class Prefs(context: Context) {
     var accessKey: String by stringPref(KEY_ACCESS_KEY, "")
 
     var trimFinalTrailingPunct: Boolean
-        get() = sp.getBoolean(KEY_TRIM_FINAL_TRAILING_PUNCT, false)
+        get() = sp.getBoolean(KEY_TRIM_FINAL_TRAILING_PUNCT, true)
         set(value) = sp.edit { putBoolean(KEY_TRIM_FINAL_TRAILING_PUNCT, value) }
 
     // 移除：键盘内“切换输入法”按钮显示开关（按钮始终显示）
@@ -541,12 +541,12 @@ class Prefs(context: Context) {
 
     // 火山引擎：双向流式开关（bigmodel_async vs bigmodel_nostream），默认开启
     var volcBidiStreamingEnabled: Boolean
-        get() = sp.getBoolean(KEY_VOLC_BIDI_STREAMING_ENABLED, false)
+        get() = sp.getBoolean(KEY_VOLC_BIDI_STREAMING_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_VOLC_BIDI_STREAMING_ENABLED, value) }
 
     // 火山引擎：语义顺滑开关（enable_ddc）
     var volcDdcEnabled: Boolean
-        get() = sp.getBoolean(KEY_VOLC_DDC_ENABLED, false)
+        get() = sp.getBoolean(KEY_VOLC_DDC_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_VOLC_DDC_ENABLED, value) }
 
     // 火山引擎：VAD 分句开关（控制判停参数）
@@ -556,7 +556,7 @@ class Prefs(context: Context) {
 
     // 火山引擎：二遍识别开关（enable_nonstream）
     var volcNonstreamEnabled: Boolean
-        get() = sp.getBoolean(KEY_VOLC_NONSTREAM_ENABLED, false)
+        get() = sp.getBoolean(KEY_VOLC_NONSTREAM_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_VOLC_NONSTREAM_ENABLED, value) }
 
     // 火山引擎：识别语言（nostream 支持；空=自动中英/方言）
@@ -604,7 +604,7 @@ class Prefs(context: Context) {
 
     // SenseVoice：首次显示时预加载（默认关闭）
     var svPreloadEnabled: Boolean
-        get() = sp.getBoolean(KEY_SV_PRELOAD_ENABLED, false)
+        get() = sp.getBoolean(KEY_SV_PRELOAD_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_SV_PRELOAD_ENABLED, value) }
 
     // SenseVoice：模型保留时长（分钟）。-1=始终保持；0=识别后立即卸载。
@@ -626,12 +626,12 @@ class Prefs(context: Context) {
         set(value) = sp.edit { putInt(KEY_PF_KEEP_ALIVE_MINUTES, value) }
 
     var pfPreloadEnabled: Boolean
-        get() = sp.getBoolean(KEY_PF_PRELOAD_ENABLED, false)
+        get() = sp.getBoolean(KEY_PF_PRELOAD_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_PF_PRELOAD_ENABLED, value) }
 
     // Paraformer: ITN 开关（反向文本规范化）
     var pfUseItn: Boolean
-        get() = sp.getBoolean(KEY_PF_USE_ITN, false)
+        get() = sp.getBoolean(KEY_PF_USE_ITN, true)
         set(value) = sp.edit { putBoolean(KEY_PF_USE_ITN, value) }
 
     // Zipformer（本地 ASR，流式）
@@ -648,12 +648,12 @@ class Prefs(context: Context) {
         set(value) = sp.edit { putInt(KEY_ZF_KEEP_ALIVE_MINUTES, value) }
 
     var zfPreloadEnabled: Boolean
-        get() = sp.getBoolean(KEY_ZF_PRELOAD_ENABLED, false)
+        get() = sp.getBoolean(KEY_ZF_PRELOAD_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_ZF_PRELOAD_ENABLED, value) }
 
     // Zipformer: ITN（客户端轻量规范化开关，占位，可扩展）
     var zfUseItn: Boolean
-        get() = sp.getBoolean(KEY_ZF_USE_ITN, false)
+        get() = sp.getBoolean(KEY_ZF_USE_ITN, true)
         set(value) = sp.edit { putBoolean(KEY_ZF_USE_ITN, value) }
     // --- 供应商配置通用化 ---
     private data class VendorField(val key: String, val required: Boolean = false, val default: String = "")
