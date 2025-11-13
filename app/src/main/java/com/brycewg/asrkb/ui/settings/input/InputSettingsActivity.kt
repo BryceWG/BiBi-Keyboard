@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
+import android.view.MotionEvent
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -27,6 +28,18 @@ class InputSettingsActivity : AppCompatActivity() {
         private const val TAG = "InputSettingsActivity"
         private const val REQ_BT_CONNECT = 2001
     }
+
+    // 标志位：防止程序内部修改开关状态时触发监听器递归
+    private var isUpdatingSwitchTrimTrailingPunct = false
+    private var isUpdatingSwitchMicHaptic = false
+    private var isUpdatingSwitchMicTapToggle = false
+    private var isUpdatingSwitchMicSwipeUpAutoEnter = false
+    private var isUpdatingSwitchAutoStartRecordingOnShow = false
+    private var isUpdatingSwitchFcitx5ReturnOnSwitcher = false
+    private var isUpdatingSwitchReturnPrevImeOnHide = false
+    private var isUpdatingSwitchHideRecentTasks = false
+    private var isUpdatingSwitchDuckMediaOnRecord = false
+    private var isUpdatingSwitchHeadsetMicPriority = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,17 +70,47 @@ class InputSettingsActivity : AppCompatActivity() {
         val tvExtensionButtons = findViewById<TextView>(R.id.tvExtensionButtonsValue)
 
         fun applyPrefsToUi() {
+            isUpdatingSwitchTrimTrailingPunct = true
             switchTrimTrailingPunct.isChecked = prefs.trimFinalTrailingPunct
+            isUpdatingSwitchTrimTrailingPunct = false
+
+            isUpdatingSwitchMicHaptic = true
             switchMicHaptic.isChecked = prefs.micHapticEnabled
+            isUpdatingSwitchMicHaptic = false
+
+            isUpdatingSwitchMicTapToggle = true
             switchMicTapToggle.isChecked = prefs.micTapToggleEnabled
+            isUpdatingSwitchMicTapToggle = false
+
+            isUpdatingSwitchFcitx5ReturnOnSwitcher = true
             switchFcitx5ReturnOnSwitcher.isChecked = prefs.fcitx5ReturnOnImeSwitch
+            isUpdatingSwitchFcitx5ReturnOnSwitcher = false
+
+            isUpdatingSwitchReturnPrevImeOnHide = true
             switchReturnPrevImeOnHide.isChecked = prefs.returnPrevImeOnHide
+            isUpdatingSwitchReturnPrevImeOnHide = false
+
+            isUpdatingSwitchHideRecentTasks = true
             switchHideRecentTasks.isChecked = prefs.hideRecentTaskCard
+            isUpdatingSwitchHideRecentTasks = false
+
+            isUpdatingSwitchDuckMediaOnRecord = true
             switchDuckMediaOnRecord.isChecked = prefs.duckMediaOnRecordEnabled
+            isUpdatingSwitchDuckMediaOnRecord = false
+
+            isUpdatingSwitchHeadsetMicPriority = true
             switchHeadsetMicPriority.isChecked = prefs.headsetMicPriorityEnabled
+            isUpdatingSwitchHeadsetMicPriority = false
+
             switchExternalImeAidl.isChecked = prefs.externalAidlEnabled
+
+            isUpdatingSwitchMicSwipeUpAutoEnter = true
             switchMicSwipeUpAutoEnter.isChecked = prefs.micSwipeUpAutoEnterEnabled
+            isUpdatingSwitchMicSwipeUpAutoEnter = false
+
+            isUpdatingSwitchAutoStartRecordingOnShow = true
             switchAutoStartRecordingOnShow.isChecked = prefs.autoStartRecordingOnShow
+            isUpdatingSwitchAutoStartRecordingOnShow = false
         }
         applyPrefsToUi()
 
@@ -83,19 +126,30 @@ class InputSettingsActivity : AppCompatActivity() {
         // 扩展按钮配置（点击弹出多选对话框）
         setupExtensionButtonsSelection(prefs, tvExtensionButtons)
 
-        // 监听与保存
-        switchTrimTrailingPunct.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.trimFinalTrailingPunct = isChecked
-        }
-        switchMicHaptic.setOnCheckedChangeListener { btn, isChecked ->
-            prefs.micHapticEnabled = isChecked
-            try {
-                btn.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            } catch (e: Throwable) {
-                Log.w(TAG, "Failed to perform haptic feedback for mic haptic switch", e)
+        // 监听与保存（统一通过触摸拦截 + 弹窗确认）
+        installExplainedSwitch(
+            switch = switchTrimTrailingPunct,
+            titleRes = R.string.label_trim_trailing_punct,
+            offDescRes = R.string.feature_trim_trailing_punct_off_desc,
+            onDescRes = R.string.feature_trim_trailing_punct_on_desc,
+            preferenceKey = "trim_trailing_punct_explained",
+            readPref = { prefs.trimFinalTrailingPunct },
+            writePref = { v -> prefs.trimFinalTrailingPunct = v }
+        )
+        installExplainedSwitch(
+            switch = switchMicHaptic,
+            titleRes = R.string.label_mic_haptic,
+            offDescRes = R.string.feature_mic_haptic_off_desc,
+            onDescRes = R.string.feature_mic_haptic_on_desc,
+            preferenceKey = "mic_haptic_explained",
+            readPref = { prefs.micHapticEnabled },
+            writePref = { v -> prefs.micHapticEnabled = v },
+            onChanged = { enabled ->
+                if (enabled) {
+                    switchMicHaptic.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                }
             }
-        }
+        )
         switchExternalImeAidl.setOnCheckedChangeListener { btn, isChecked ->
             hapticTapIfEnabled(btn)
             prefs.externalAidlEnabled = isChecked
@@ -105,87 +159,113 @@ class InputSettingsActivity : AppCompatActivity() {
                 showExternalAidlGuide(prefs)
             }
         }
-        switchMicTapToggle.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.micTapToggleEnabled = isChecked
-            if (isChecked) {
-                // 互斥：启用点按控制后，关闭“上滑自动发送”
-                if (prefs.micSwipeUpAutoEnterEnabled) {
+        installExplainedSwitch(
+            switch = switchMicTapToggle,
+            titleRes = R.string.label_mic_tap_toggle,
+            offDescRes = R.string.feature_mic_tap_toggle_off_desc,
+            onDescRes = R.string.feature_mic_tap_toggle_on_desc,
+            preferenceKey = "mic_tap_toggle_explained",
+            readPref = { prefs.micTapToggleEnabled },
+            writePref = { v -> prefs.micTapToggleEnabled = v },
+            onChanged = { enabled ->
+                if (enabled && prefs.micSwipeUpAutoEnterEnabled) {
                     prefs.micSwipeUpAutoEnterEnabled = false
-                    try { switchMicSwipeUpAutoEnter.isChecked = false } catch (_: Throwable) { }
+                    switchMicSwipeUpAutoEnter.isChecked = false
                 }
             }
-        }
-        switchMicSwipeUpAutoEnter.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.micSwipeUpAutoEnterEnabled = isChecked
-            if (isChecked) {
-                // 互斥：启用"上滑自动发送"后，关闭点按控制
-                if (prefs.micTapToggleEnabled) {
+        )
+        installExplainedSwitch(
+            switch = switchMicSwipeUpAutoEnter,
+            titleRes = R.string.label_mic_swipe_up_auto_enter,
+            offDescRes = R.string.feature_mic_swipe_up_auto_enter_off_desc,
+            onDescRes = R.string.feature_mic_swipe_up_auto_enter_on_desc,
+            preferenceKey = "mic_swipe_up_auto_enter_explained",
+            readPref = { prefs.micSwipeUpAutoEnterEnabled },
+            writePref = { v -> prefs.micSwipeUpAutoEnterEnabled = v },
+            onChanged = { enabled ->
+                if (enabled && prefs.micTapToggleEnabled) {
                     prefs.micTapToggleEnabled = false
-                    try { switchMicTapToggle.isChecked = false } catch (_: Throwable) { }
+                    switchMicTapToggle.isChecked = false
                 }
             }
-        }
-        switchAutoStartRecordingOnShow.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.autoStartRecordingOnShow = isChecked
-        }
-        switchReturnPrevImeOnHide.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.returnPrevImeOnHide = isChecked
-        }
-        switchFcitx5ReturnOnSwitcher.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.fcitx5ReturnOnImeSwitch = isChecked
-        }
-        switchHideRecentTasks.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.hideRecentTaskCard = isChecked
-            applyExcludeFromRecents(isChecked)
-        }
-        switchDuckMediaOnRecord.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            prefs.duckMediaOnRecordEnabled = isChecked
-        }
-        switchHeadsetMicPriority.setOnCheckedChangeListener { btn, isChecked ->
-            hapticTapIfEnabled(btn)
-            if (isChecked) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        )
+        installExplainedSwitch(
+            switch = switchAutoStartRecordingOnShow,
+            titleRes = R.string.label_auto_start_recording_on_show,
+            offDescRes = R.string.feature_auto_start_recording_on_show_off_desc,
+            onDescRes = R.string.feature_auto_start_recording_on_show_on_desc,
+            preferenceKey = "auto_start_recording_on_show_explained",
+            readPref = { prefs.autoStartRecordingOnShow },
+            writePref = { v -> prefs.autoStartRecordingOnShow = v }
+        )
+        installExplainedSwitch(
+            switch = switchReturnPrevImeOnHide,
+            titleRes = R.string.label_return_prev_ime_on_hide,
+            offDescRes = R.string.feature_return_prev_ime_on_hide_off_desc,
+            onDescRes = R.string.feature_return_prev_ime_on_hide_on_desc,
+            preferenceKey = "return_prev_ime_on_hide_explained",
+            readPref = { prefs.returnPrevImeOnHide },
+            writePref = { v -> prefs.returnPrevImeOnHide = v }
+        )
+        installExplainedSwitch(
+            switch = switchFcitx5ReturnOnSwitcher,
+            titleRes = R.string.label_fcitx5_return_on_switcher,
+            offDescRes = R.string.feature_fcitx5_return_on_switcher_off_desc,
+            onDescRes = R.string.feature_fcitx5_return_on_switcher_on_desc,
+            preferenceKey = "fcitx5_return_on_switcher_explained",
+            readPref = { prefs.fcitx5ReturnOnImeSwitch },
+            writePref = { v -> prefs.fcitx5ReturnOnImeSwitch = v }
+        )
+        installExplainedSwitch(
+            switch = switchHideRecentTasks,
+            titleRes = R.string.label_hide_recent_task_card,
+            offDescRes = R.string.feature_hide_recent_tasks_off_desc,
+            onDescRes = R.string.feature_hide_recent_tasks_on_desc,
+            preferenceKey = "hide_recent_tasks_explained",
+            readPref = { prefs.hideRecentTaskCard },
+            writePref = { v -> prefs.hideRecentTaskCard = v },
+            onChanged = { enabled -> applyExcludeFromRecents(enabled) }
+        )
+        installExplainedSwitch(
+            switch = switchDuckMediaOnRecord,
+            titleRes = R.string.label_audio_ducking_on_record,
+            offDescRes = R.string.feature_duck_media_on_record_off_desc,
+            onDescRes = R.string.feature_duck_media_on_record_on_desc,
+            preferenceKey = "duck_media_on_record_explained",
+            readPref = { prefs.duckMediaOnRecordEnabled },
+            writePref = { v -> prefs.duckMediaOnRecordEnabled = v }
+        )
+        installExplainedSwitch(
+            switch = switchHeadsetMicPriority,
+            titleRes = R.string.label_headset_mic_priority,
+            offDescRes = R.string.feature_headset_mic_priority_off_desc,
+            onDescRes = R.string.feature_headset_mic_priority_on_desc,
+            preferenceKey = "headset_mic_priority_explained",
+            readPref = { prefs.headsetMicPriorityEnabled },
+            writePref = { v -> prefs.headsetMicPriorityEnabled = v },
+            preCheck = { target ->
+                if (target && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
                     if (!granted) {
-                        try {
-                            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), REQ_BT_CONNECT)
-                        } catch (t: Throwable) {
-                            Log.w(TAG, "requestPermissions BLUETOOTH_CONNECT failed", t)
-                            Toast.makeText(this, getString(R.string.toast_bt_connect_permission_required), Toast.LENGTH_SHORT).show()
-                        }
-                        // 临时回退 UI，待授权结果再更新偏好
-                        try { switchHeadsetMicPriority.isChecked = false } catch (_: Throwable) {}
-                        return@setOnCheckedChangeListener
-                    }
-                }
-            }
-            prefs.headsetMicPriorityEnabled = isChecked
-            if (!isChecked) {
-                // 若用户关闭耳机优先，立刻撤销可能存在的预热连接
-                try {
+                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), REQ_BT_CONNECT)
+                        false
+                    } else true
+                } else true
+            },
+            onChanged = { enabled ->
+                if (!enabled) {
                     com.brycewg.asrkb.asr.BluetoothRouteManager.onRecordingStopped(this)
                     com.brycewg.asrkb.asr.BluetoothRouteManager.setImeActive(this, false)
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to converge route after disabling headset priority", t)
                 }
             }
-        }
+        )
 
         // 初始应用一次"从最近任务中排除"设置
         applyExcludeFromRecents(prefs.hideRecentTaskCard)
 
         // Pro：注入输入设置额外 UI
-        try {
-            val root = findViewById<View>(android.R.id.content)
-            com.brycewg.asrkb.ProUiInjector.injectIntoInputSettings(this, root)
-        } catch (_: Throwable) { }
+        val root = findViewById<View>(android.R.id.content)
+        com.brycewg.asrkb.ProUiInjector.injectIntoInputSettings(this, root)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -196,11 +276,15 @@ class InputSettingsActivity : AppCompatActivity() {
             val granted = grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED
             if (granted) {
                 prefs.headsetMicPriorityEnabled = true
-                try { switchHeadsetMicPriority.isChecked = true } catch (_: Throwable) {}
+                isUpdatingSwitchHeadsetMicPriority = true
+                switchHeadsetMicPriority.isChecked = true
+                isUpdatingSwitchHeadsetMicPriority = false
             } else {
                 prefs.headsetMicPriorityEnabled = false
-                try { switchHeadsetMicPriority.isChecked = false } catch (_: Throwable) {}
-                try { Toast.makeText(this, getString(R.string.toast_bt_connect_permission_denied), Toast.LENGTH_SHORT).show() } catch (_: Throwable) {}
+                isUpdatingSwitchHeadsetMicPriority = true
+                switchHeadsetMicPriority.isChecked = false
+                isUpdatingSwitchHeadsetMicPriority = false
+                Toast.makeText(this, getString(R.string.toast_bt_connect_permission_denied), Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -346,23 +430,15 @@ class InputSettingsActivity : AppCompatActivity() {
      * 发送刷新 IME UI 的广播
      */
     private fun sendRefreshBroadcast() {
-        try {
-            sendBroadcast(Intent(AsrKeyboardService.ACTION_REFRESH_IME_UI))
-        } catch (e: Throwable) {
-            Log.e(TAG, "Failed to send refresh IME UI broadcast", e)
-        }
+        sendBroadcast(Intent(AsrKeyboardService.ACTION_REFRESH_IME_UI))
     }
 
     /**
      * 根据设置执行触觉反馈
      */
     private fun hapticTapIfEnabled(view: View?) {
-        try {
-            if (Prefs(this).micHapticEnabled) {
-                view?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            }
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to perform haptic feedback", e)
+        if (Prefs(this).micHapticEnabled) {
+            view?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
         }
     }
 
@@ -370,12 +446,8 @@ class InputSettingsActivity : AppCompatActivity() {
      * 应用"从最近任务中排除"设置
      */
     private fun applyExcludeFromRecents(enabled: Boolean) {
-        try {
-            val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
-            am.appTasks?.forEach { it.setExcludeFromRecents(enabled) }
-        } catch (e: Throwable) {
-            Log.e(TAG, "Failed to apply exclude from recents setting", e)
-        }
+        val am = getSystemService(ACTIVITY_SERVICE) as android.app.ActivityManager
+        am.appTasks?.forEach { it.setExcludeFromRecents(enabled) }
     }
 
     /**
@@ -502,6 +574,64 @@ class InputSettingsActivity : AppCompatActivity() {
     }
 
     /**
+     * 为开关安装“说明弹窗 + 拦截”逻辑：
+     * - 首次点击显示说明弹窗，由弹窗确认决定是否切换
+     * - 勾选“不再提醒”后，后续点击直接切换
+     * - 过程中不出现“先切换再撤回”的闪烁
+     */
+    private fun installExplainedSwitch(
+        switch: MaterialSwitch,
+        titleRes: Int,
+        offDescRes: Int,
+        onDescRes: Int,
+        preferenceKey: String,
+        readPref: () -> Boolean,
+        writePref: (Boolean) -> Unit,
+        onChanged: ((Boolean) -> Unit)? = null,
+        preCheck: ((Boolean) -> Boolean)? = null,
+    ) {
+        // 通过触摸事件拦截系统默认切换，改为由弹窗控制
+        switch.setOnTouchListener { v, event ->
+            if (event?.action == MotionEvent.ACTION_UP) {
+                v?.isPressed = false
+                v?.cancelPendingInputEvents()
+                hapticTapIfEnabled(v)
+
+                val current = readPref()
+                val target = !current
+
+                com.brycewg.asrkb.ui.FeatureExplainerDialog.Builder(this)
+                    .setTitle(titleRes)
+                    .setOffDescription(offDescRes)
+                    .setOnDescription(onDescRes)
+                    .setCurrentState(current)
+                    .setPreferenceKey(preferenceKey)
+                    .setOnConfirm {
+                        // 额外前置校验（如权限）
+                        if (preCheck != null && !preCheck(target)) {
+                            return@setOnConfirm
+                        }
+
+                        // 真正提交：写入偏好并更新 UI
+                        writePref(target)
+                        switch.isChecked = target
+                        switch.isPressed = false
+                        onChanged?.invoke(target)
+                    }
+                    .setOnCancel {
+                        // 取消时不修改当前状态
+                    }
+                    .showIfNeeded()
+
+                // 消耗事件，阻止系统默认切换造成的闪烁
+                return@setOnTouchListener true
+            }
+            // 其他事件不拦截，交给系统用于按压态等效果
+            false
+        }
+    }
+
+    /**
      * 显示外部输入法联动使用指引弹窗
      * 按钮布局：不再提醒(左) - 打开Release页(中) - 关闭(右)
      */
@@ -515,15 +645,10 @@ class InputSettingsActivity : AppCompatActivity() {
                 prefs.externalAidlGuideShown = true
             }
             .setNegativeButton(R.string.external_aidl_guide_btn_open_release) { _, _ ->
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW).apply {
-                        data = android.net.Uri.parse("https://github.com/BryceWG/fcitx5-android-lexi-keyboard/releases")
-                    }
-                    startActivity(intent)
-                } catch (e: Throwable) {
-                    Log.e(TAG, "Failed to open release page", e)
-                    Toast.makeText(this, R.string.external_aidl_guide_open_failed, Toast.LENGTH_SHORT).show()
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    data = android.net.Uri.parse("https://github.com/BryceWG/fcitx5-android-lexi-keyboard/releases")
                 }
+                startActivity(intent)
             }
             .setPositiveButton(R.string.external_aidl_guide_btn_close, null)
             .show()

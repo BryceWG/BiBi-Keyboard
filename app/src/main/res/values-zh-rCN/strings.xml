@@ -177,4 +177,57 @@
   <string name="toast_accessibility_enabled">无障碍服务已启用，现在可以自动插入文本了</string>
   <string name="toast_silence_autostop_on">已开启录音判停</string>
   <string name="toast_silence_autostop_off">已关闭录音判停</string>
+
+  <!-- ============================================== -->
+  <!-- 功能说明弹窗 -->
+  <!-- ============================================== -->
+  <string name="dialog_feature_explainer_title">功能说明</string>
+  <string name="dialog_feature_explainer_turn_on">您即将开启该功能：</string>
+  <string name="dialog_feature_explainer_turn_off">您即将关闭该功能：</string>
+  <string name="dialog_feature_explainer_from">当前状态：</string>
+  <string name="dialog_feature_explainer_to">变更后：</string>
+  <string name="dialog_feature_explainer_dont_show_again">不再提示</string>
+
+  <!-- ============================================== -->
+  <!-- 输入设置功能说明 -->
+  <!-- ============================================== -->
+  <!-- 去除句末标点 -->
+  <string name="feature_trim_trailing_punct_off_desc">识别结果保留所有内容。</string>
+  <string name="feature_trim_trailing_punct_on_desc">识别结果将自动去除句末标点和 emoji，输出更清爽。</string>
+
+  <!-- 按键振动 -->
+  <string name="feature_mic_haptic_off_desc">按下按键或操作悬浮球时没有振动反馈。</string>
+  <string name="feature_mic_haptic_on_desc">按下按键或操作悬浮球时提供振动反馈，触感更好。</string>
+
+  <!-- 点按控制 -->
+  <string name="feature_mic_tap_toggle_off_desc">长按麦克风按钮开始录音，松开停止录音。</string>
+  <string name="feature_mic_tap_toggle_on_desc">点击麦克风按钮开始录音，再次点击停止。方便单手操作。</string>
+
+  <!-- 上滑自动发送 -->
+  <string name="feature_mic_swipe_up_auto_enter_off_desc">松开麦克风按钮后，文本将提交但不会发送回车键。</string>
+  <string name="feature_mic_swipe_up_auto_enter_on_desc">松手上滑时自动提交文本并发送回车键，适合聊天应用。</string>
+
+  <!-- 自动开始录音 -->
+  <string name="feature_auto_start_recording_on_show_off_desc">键盘出现后需要手动按麦克风按钮开始录音。</string>
+  <string name="feature_auto_start_recording_on_show_on_desc">键盘出现时自动开始录音，省去一次点击操作。</string>
+
+  <!-- 输入法切换键功能 -->
+  <string name="feature_fcitx5_return_on_switcher_off_desc">输入法切换键打开系统的输入法选择器。</string>
+  <string name="feature_fcitx5_return_on_switcher_on_desc">输入法切换键直接返回上一个输入法，方便快速切换。</string>
+
+  <!-- 收起后切回上一个输入法 -->
+  <string name="feature_return_prev_ime_on_hide_off_desc">键盘收起后，当前输入法仍为言犀键盘。</string>
+  <string name="feature_return_prev_ime_on_hide_on_desc">键盘收起时自动切回上一个输入法，方便临时语音输入。</string>
+
+  <!-- 隐藏任务卡片 -->
+  <string name="feature_hide_recent_tasks_off_desc">应用卡片在最近任务列表中可见。</string>
+  <string name="feature_hide_recent_tasks_on_desc">应用卡片在最近任务列表中隐藏，多任务界面更清爽。可能会降低后台保活能力。</string>
+
+  <!-- 录音时音频避让 -->
+  <string name="feature_duck_media_on_record_off_desc">录音时媒体播放音量保持不变。</string>
+  <string name="feature_duck_media_on_record_on_desc">录音时自动暂停媒体播放，减少干扰提高识别准确率。</string>
+
+  <!-- 耳机麦克风优先 -->
+  <string name="feature_headset_mic_priority_off_desc">使用设备内置麦克风进行录音。</string>
+  <string name="feature_headset_mic_priority_on_desc">优先使用耳机麦克风（如果可用）。实验性功能，需要蓝牙权限和获取附近设备权限。</string>
 </resources>

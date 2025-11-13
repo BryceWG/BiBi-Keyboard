@@ -178,4 +178,57 @@
   <string name="toast_accessibility_enabled">アクセシビリティサービスが有効になりました。自動挿入が利用可能になりました。</string>
   <string name="toast_silence_autostop_on">無音時自動停止が有効になりました</string>
   <string name="toast_silence_autostop_off">無音時自動停止が無効になりました</string>
+
+  <!-- ============================================== -->
+  <!-- 機能説明ダイアログ -->
+  <!-- ============================================== -->
+  <string name="dialog_feature_explainer_title">機能説明</string>
+  <string name="dialog_feature_explainer_turn_on">この機能をONにします：</string>
+  <string name="dialog_feature_explainer_turn_off">この機能をOFFにします：</string>
+  <string name="dialog_feature_explainer_from">現在の状態：</string>
+  <string name="dialog_feature_explainer_to">変更後：</string>
+  <string name="dialog_feature_explainer_dont_show_again">次回から表示しない</string>
+
+  <!-- ============================================== -->
+  <!-- 入力設定の機能説明 -->
+  <!-- ============================================== -->
+  <!-- 末尾の句読点を削除 -->
+  <string name="feature_trim_trailing_punct_off_desc">認識結果はすべての内容を保持します。</string>
+  <string name="feature_trim_trailing_punct_on_desc">認識結果の末尾の句読点と絵文字を自動的に削除し、よりクリーンな出力を実現します。</string>
+
+  <!-- キーのバイブレーション -->
+  <string name="feature_mic_haptic_off_desc">キーを押したりフローティングボールを操作してもバイブレーションはありません。</string>
+  <string name="feature_mic_haptic_on_desc">キーを押したりフローティングボールを操作すると、よりよい触覚体験のためにバイブレーションを提供します。</string>
+
+  <!-- タップコントロール -->
+  <string name="feature_mic_tap_toggle_off_desc">マイクボタンを長押しして録音を開始し、離すと停止します。</string>
+  <string name="feature_mic_tap_toggle_on_desc">マイクボタンをタップして録音を開始し、もう一度タップして停止します。片手操作に便利です。</string>
+
+  <!-- 上スワイプ自動送信 -->
+  <string name="feature_mic_swipe_up_auto_enter_off_desc">マイクボタンを離した後、テキストは確定されますがEnterキーは送信されません。</string>
+  <string name="feature_mic_swipe_up_auto_enter_on_desc">マイクボタンを離すときに上スワイプすると、自動的にテキストを確定してEnterを送信します。メッセージアプリに便利です。</string>
+
+  <!-- 表示時自動録音開始 -->
+  <string name="feature_auto_start_recording_on_show_off_desc">キーボードが表示された後、手動でマイクボタンを押して録音を開始する必要があります。</string>
+  <string name="feature_auto_start_recording_on_show_on_desc">キーボードが表示されたときに自動的に録音を開始し、1タップを節約します。</string>
+
+  <!-- 入力法切替キーの機能 -->
+  <string name="feature_fcitx5_return_on_switcher_off_desc">入力法切替キーはシステムの入力法選択画面を開きます。</string>
+  <string name="feature_fcitx5_return_on_switcher_on_desc">入力法切替キーは前の入力法に直接戻ります。素早い切り替えに便利です。</string>
+
+  <!-- 非表示時に前のIMEに戻る -->
+  <string name="feature_return_prev_ime_on_hide_off_desc">非表示後も現在の入力法はLexiSharpキーボードのままです。</string>
+  <string name="feature_return_prev_ime_on_hide_on_desc">キーボードが非表示になったときに自動的に前の入力法に切り替わります。一時的な音声入力に便利です。</string>
+
+  <!-- 最近のタスクを非表示 -->
+  <string name="feature_hide_recent_tasks_off_desc">アプリカードは最近のタスク概要に表示されます。</string>
+  <string name="feature_hide_recent_tasks_on_desc">アプリカードは最近のタスク概要から非表示になり、よりクリーンなマルチタスク表示になります。バックグラウンド保持能力が低下する可能性があります。</string>
+
+  <!-- 録音中のメディアダッキング -->
+  <string name="feature_duck_media_on_record_off_desc">録音中もメディア再生の音量は変わりません。</string>
+  <string name="feature_duck_media_on_record_on_desc">録音中にメディア再生を自動的に一時停止し、干渉を減らして認識精度を向上させます。</string>
+
+  <!-- ヘッドセットマイク優先 -->
+  <string name="feature_headset_mic_priority_off_desc">デバイス内蔵マイクを録音に使用します。</string>
+  <string name="feature_headset_mic_priority_on_desc">利用可能な場合はヘッドセットマイクを優先します。実験的機能で、Bluetooth権限と近くのデバイス権限が必要です。</string>
 </resources>

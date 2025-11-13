@@ -177,4 +177,57 @@
   <string name="toast_accessibility_enabled">Accessibility service enabled. Auto-insert is now available.</string>
   <string name="toast_silence_autostop_on">Auto-stop on silence enabled</string>
   <string name="toast_silence_autostop_off">Auto-stop on silence disabled</string>
+
+  <!-- ============================================== -->
+  <!-- Feature Explainer Dialog -->
+  <!-- ============================================== -->
+  <string name="dialog_feature_explainer_title">Feature Description</string>
+  <string name="dialog_feature_explainer_turn_on">You are about to turn ON this feature:</string>
+  <string name="dialog_feature_explainer_turn_off">You are about to turn OFF this feature:</string>
+  <string name="dialog_feature_explainer_from">Current:</string>
+  <string name="dialog_feature_explainer_to">Will become:</string>
+  <string name="dialog_feature_explainer_dont_show_again">Don\'t show again</string>
+
+  <!-- ============================================== -->
+  <!-- Feature Descriptions for Input Settings -->
+  <!-- ============================================== -->
+  <!-- Trim trailing punctuation -->
+  <string name="feature_trim_trailing_punct_off_desc">Recognition results will keep all content as is.</string>
+  <string name="feature_trim_trailing_punct_on_desc">Recognition results will automatically remove trailing punctuation and emoji for cleaner output.</string>
+
+  <!-- Mic haptic -->
+  <string name="feature_mic_haptic_off_desc">No haptic feedback when pressing keys or interacting with the floating ball.</string>
+  <string name="feature_mic_haptic_on_desc">Provides haptic feedback when pressing keys or interacting with the floating ball for better tactile experience.</string>
+
+  <!-- Mic tap toggle -->
+  <string name="feature_mic_tap_toggle_off_desc">Long-press the mic button to record, release to stop recording.</string>
+  <string name="feature_mic_tap_toggle_on_desc">Tap the mic button to start recording, tap again to stop. Easier for one-handed operation.</string>
+
+  <!-- Mic swipe up auto enter -->
+  <string name="feature_mic_swipe_up_auto_enter_off_desc">After releasing the mic button, text is committed but no Enter key is sent.</string>
+  <string name="feature_mic_swipe_up_auto_enter_on_desc">Swipe up when releasing the mic button to automatically commit text and send Enter, useful for messaging apps.</string>
+
+  <!-- Auto start recording on show -->
+  <string name="feature_auto_start_recording_on_show_off_desc">You need to manually press the mic button to start recording after the keyboard appears.</string>
+  <string name="feature_auto_start_recording_on_show_on_desc">Recording starts automatically when the keyboard appears, saving you one tap.</string>
+
+  <!-- Fcitx5 return on switcher -->
+  <string name="feature_fcitx5_return_on_switcher_off_desc">The IME switcher key opens the system input method picker.</string>
+  <string name="feature_fcitx5_return_on_switcher_on_desc">The IME switcher key directly returns to the previous input method, convenient for quick switching.</string>
+
+  <!-- Return prev IME on hide -->
+  <string name="feature_return_prev_ime_on_hide_off_desc">The current input method remains as LexiSharp Keyboard after hiding.</string>
+  <string name="feature_return_prev_ime_on_hide_on_desc">Automatically switches back to the previous input method when the keyboard is hidden, convenient for temporary voice input.</string>
+
+  <!-- Hide recent tasks -->
+  <string name="feature_hide_recent_tasks_off_desc">The app card is visible in the recent tasks overview.</string>
+  <string name="feature_hide_recent_tasks_on_desc">The app card is hidden from the recent tasks overview for a cleaner multitasking view. May reduce background keep-alive capability.</string>
+
+  <!-- Duck media on record -->
+  <string name="feature_duck_media_on_record_off_desc">Media playback volume remains unchanged during recording.</string>
+  <string name="feature_duck_media_on_record_on_desc">Automatically pauses media playback during recording to reduce interference and improve recognition accuracy.</string>
+
+  <!-- Headset mic priority -->
+  <string name="feature_headset_mic_priority_off_desc">Uses the device\'s built-in microphone for recording.</string>
+  <string name="feature_headset_mic_priority_on_desc">Prioritizes the headset microphone when available. Experimental feature, requires Bluetooth permission and nearby devices permission.</string>
 </resources>

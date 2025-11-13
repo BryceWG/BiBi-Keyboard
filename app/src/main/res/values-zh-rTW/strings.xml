@@ -177,4 +177,57 @@
   <string name="toast_accessibility_enabled">無障礙服務已啟用，現在可以自動插入文字了</string>
   <string name="toast_silence_autostop_on">已開啟錄音判停</string>
   <string name="toast_silence_autostop_off">已關閉錄音判停</string>
+
+  <!-- ============================================== -->
+  <!-- 功能說明彈窗 -->
+  <!-- ============================================== -->
+  <string name="dialog_feature_explainer_title">功能說明</string>
+  <string name="dialog_feature_explainer_turn_on">您即將開啟該功能：</string>
+  <string name="dialog_feature_explainer_turn_off">您即將關閉該功能：</string>
+  <string name="dialog_feature_explainer_from">目前狀態：</string>
+  <string name="dialog_feature_explainer_to">變更後：</string>
+  <string name="dialog_feature_explainer_dont_show_again">不再提示</string>
+
+  <!-- ============================================== -->
+  <!-- 輸入設定功能說明 -->
+  <!-- ============================================== -->
+  <!-- 去除句末標點 -->
+  <string name="feature_trim_trailing_punct_off_desc">識別結果保留所有內容。</string>
+  <string name="feature_trim_trailing_punct_on_desc">識別結果將自動去除句末標點和 emoji，輸出更清爽。</string>
+
+  <!-- 按鍵震動 -->
+  <string name="feature_mic_haptic_off_desc">按下按鍵或操作懸浮球時沒有震動回饋。</string>
+  <string name="feature_mic_haptic_on_desc">按下按鍵或操作懸浮球時提供震動回饋，觸感更好。</string>
+
+  <!-- 點按控制 -->
+  <string name="feature_mic_tap_toggle_off_desc">長按麥克風按鈕開始錄音，放開停止錄音。</string>
+  <string name="feature_mic_tap_toggle_on_desc">點擊麥克風按鈕開始錄音，再次點擊停止。方便單手操作。</string>
+
+  <!-- 上滑自動發送 -->
+  <string name="feature_mic_swipe_up_auto_enter_off_desc">放開麥克風按鈕後，文字將提交但不會發送 Enter 鍵。</string>
+  <string name="feature_mic_swipe_up_auto_enter_on_desc">放手上滑時自動提交文字並發送 Enter 鍵，適合聊天應用程式。</string>
+
+  <!-- 自動開始錄音 -->
+  <string name="feature_auto_start_recording_on_show_off_desc">鍵盤出現後需要手動按麥克風按鈕開始錄音。</string>
+  <string name="feature_auto_start_recording_on_show_on_desc">鍵盤出現時自動開始錄音，省去一次點擊操作。</string>
+
+  <!-- 輸入法切換鍵功能 -->
+  <string name="feature_fcitx5_return_on_switcher_off_desc">輸入法切換鍵開啟系統的輸入法選擇器。</string>
+  <string name="feature_fcitx5_return_on_switcher_on_desc">輸入法切換鍵直接返回上一個輸入法，方便快速切換。</string>
+
+  <!-- 收起後切回上一個輸入法 -->
+  <string name="feature_return_prev_ime_on_hide_off_desc">鍵盤收起後，目前輸入法仍為言犀鍵盤。</string>
+  <string name="feature_return_prev_ime_on_hide_on_desc">鍵盤收起時自動切回上一個輸入法，方便臨時語音輸入。</string>
+
+  <!-- 隱藏任務卡片 -->
+  <string name="feature_hide_recent_tasks_off_desc">應用程式卡片在最近任務清單中可見。</string>
+  <string name="feature_hide_recent_tasks_on_desc">應用程式卡片在最近任務清單中隱藏，多工介面更清爽。可能會降低後臺保活能力。</string>
+
+  <!-- 錄音時音訊避讓 -->
+  <string name="feature_duck_media_on_record_off_desc">錄音時媒體播放音量保持不變。</string>
+  <string name="feature_duck_media_on_record_on_desc">錄音時自動暫停媒體播放，減少干擾提高識別準確率。</string>
+
+  <!-- 耳機麥克風優先 -->
+  <string name="feature_headset_mic_priority_off_desc">使用裝置內建麥克風進行錄音。</string>
+  <string name="feature_headset_mic_priority_on_desc">優先使用耳機麥克風（如果可用）。實驗性功能，需要藍牙權限和取得附近裝置權限。</string>
 </resources>
