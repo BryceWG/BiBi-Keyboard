@@ -12,12 +12,15 @@
     <string name="pf_variant_trilingual_int8">中英+広東語（int8）</string>
     <string name="pf_variant_trilingual_fp32">中英+広東語（fp32）</string>
     <string name="btn_pf_download_model">Paraformer モデルをダウンロード</string>
+    <string name="btn_pf_import_model">ローカルファイルからモデルをインポート</string>
     <string name="btn_pf_clear_model">ダウンロード済みモデルを削除</string>
     <string name="pf_download_status_downloading">ダウンロード中… %1$d%%</string>
     <string name="pf_download_status_extracting_progress">展開中… %1$d%%</string>
     <string name="pf_download_status_done">モデルをインストールしました</string>
     <string name="pf_download_status_failed">ダウンロードまたは展開に失敗しました</string>
     <string name="pf_download_started_in_bg">バックグラウンドで開始しました。通知で進行状況を確認してください</string>
+    <string name="pf_import_started_in_bg">バックグラウンドインポートを開始しました。進行状況は通知で確認してください</string>
+    <string name="pf_import_failed">モデルのインポートに失敗しました：%1$s</string>
     <string name="pf_clear_confirm_title">モデルを削除しますか？</string>
     <string name="pf_clear_confirm_message">ダウンロード済みのモデルを削除します。後で再ダウンロードできます。続行しますか？</string>
     <string name="pf_clear_done">モデルを削除しました</string>

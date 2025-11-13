@@ -12,12 +12,15 @@
     <string name="pf_variant_trilingual_int8">Zh+Yue+En (int8)</string>
     <string name="pf_variant_trilingual_fp32">Zh+Yue+En (fp32)</string>
     <string name="btn_pf_download_model">Download Paraformer model</string>
+    <string name="btn_pf_import_model">Import model from local file</string>
     <string name="btn_pf_clear_model">Clear downloaded model</string>
     <string name="pf_download_status_downloading">Downloading… %1$d%%</string>
     <string name="pf_download_status_extracting_progress">Extracting… %1$d%%</string>
     <string name="pf_download_status_done">Model installed</string>
     <string name="pf_download_status_failed">Download or extract failed</string>
     <string name="pf_download_started_in_bg">Started in background. See notification for progress</string>
+    <string name="pf_import_started_in_bg">Started background import. See notification for progress</string>
+    <string name="pf_import_failed">Model import failed: %1$s</string>
     <string name="pf_clear_confirm_title">Clear model?</string>
     <string name="pf_clear_confirm_message">This will delete downloaded model files. You can re-download later. Continue?</string>
     <string name="pf_clear_done">Model cleared</string>

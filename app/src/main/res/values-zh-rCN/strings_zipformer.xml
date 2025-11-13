@@ -10,6 +10,7 @@
     <string name="label_zf_preload">首次显示时加载模型</string>
     <string name="label_zf_use_itn">启用 ITN（反向文本规范化）</string>
     <string name="btn_zf_download_model">下载 Zipformer 模型</string>
+    <string name="btn_zf_import_model">从本地导入模型</string>
     <string name="btn_zf_clear_model">清除 Zipformer 模型</string>
     <string name="zf_model_info">Zipformer 提供 4 类模型共 8 个版本：\n
 1. 中文 XL 版：仅支持中文和部分方言，拥有 int8（570MB）和 fp16（1.25GB）两个版本，需要分别下载\n
@@ -21,6 +22,8 @@
     <string name="zf_download_status_extracting_progress">解压中… %1$d%%</string>
     <string name="zf_download_status_failed">下载或解压失败</string>
     <string name="zf_download_started_in_bg">已开始后台下载，请到通知栏查看进度</string>
+    <string name="zf_import_started_in_bg">已开始后台导入，请到通知栏查看进度</string>
+    <string name="zf_import_failed">模型导入失败：%1$s</string>
     <string name="zf_clear_confirm_title">确认清除模型？</string>
     <string name="zf_clear_confirm_message">将删除已下载的 Zipformer 模型文件，可稍后重新下载。是否继续？</string>
     <string name="zf_clear_done">已清除模型</string>

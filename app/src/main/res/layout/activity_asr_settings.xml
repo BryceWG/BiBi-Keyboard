@@ -902,14 +902,34 @@
           android:stepSize="1"
           android:layout_marginTop="2dp" />
 
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/btnSvDownloadModel"
-          style="@style/Widget.Material3.Button.TonalButton"
+        <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_marginTop="12dp"
-          app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
-          android:text="@string/btn_sv_download_model" />
+          android:orientation="horizontal"
+          android:gravity="center"
+          android:weightSum="2">
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSvDownloadModel"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            android:text="@string/btn_sv_download_model" />
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSvImportModel"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            android:text="@string/btn_sv_import_model" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
           android:id="@+id/btnSvClearModel"
@@ -1010,14 +1030,32 @@
           android:textColor="?attr/colorOnSurfaceVariant"
           android:text="@string/sv_keep_alive_always" />
 
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/btnPfDownloadModel"
-          style="@style/Widget.Material3.Button.TonalButton"
+        <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_marginTop="12dp"
-          app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
-          android:text="@string/btn_pf_download_model" />
+          android:orientation="horizontal">
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPfDownloadModel"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            android:text="@string/btn_pf_download_model" />
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPfImportModel"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            android:text="@string/btn_pf_import_model" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
           android:id="@+id/btnPfClearModel"
@@ -1126,14 +1164,32 @@
           android:textColor="?attr/colorOnSurfaceVariant"
           android:text="@string/sv_keep_alive_always" />
 
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/btnZfDownloadModel"
-          style="@style/Widget.Material3.Button.TonalButton"
+        <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:layout_marginTop="12dp"
-          app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
-          android:text="@string/btn_zf_download_model" />
+          android:orientation="horizontal">
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnZfDownloadModel"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginEnd="4dp"
+            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            android:text="@string/btn_zf_download_model" />
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnZfImportModel"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            android:text="@string/btn_zf_import_model" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
           android:id="@+id/btnZfClearModel"

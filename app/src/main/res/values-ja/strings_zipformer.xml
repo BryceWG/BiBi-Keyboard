@@ -10,6 +10,7 @@
     <string name="label_zf_preload">初回表示時にモデルを読み込み</string>
     <string name="label_zf_use_itn">ITN を有効化（逆正規化）</string>
     <string name="btn_zf_download_model">Zipformer モデルをダウンロード</string>
+    <string name="btn_zf_import_model">ローカルファイルからモデルをインポート</string>
     <string name="btn_zf_clear_model">Zipformer モデルを削除</string>
     <string name="zf_model_info">Zipformer は 4 種類のモデル（計 8 バージョン）を提供：\n
 1. 中国語 XL 版：中国語と一部の方言のみサポート。int8（570MB）と fp16（1.25GB）の 2 つのバージョンがあり、個別にダウンロードが必要\n
@@ -21,6 +22,8 @@
     <string name="zf_download_status_extracting_progress">展開中… %1$d%%</string>
     <string name="zf_download_status_failed">ダウンロードまたは解凍に失敗しました</string>
     <string name="zf_download_started_in_bg">バックグラウンドで開始しました。通知で進捗をご確認ください</string>
+    <string name="zf_import_started_in_bg">バックグラウンドインポートを開始しました。進行状況は通知で確認してください</string>
+    <string name="zf_import_failed">モデルのインポートに失敗しました：%1$s</string>
     <string name="zf_clear_confirm_title">モデルを削除しますか？</string>
     <string name="zf_clear_confirm_message">ダウンロード済みの Zipformer モデルを削除します。後で再ダウンロード可能です。続行しますか？</string>
     <string name="zf_clear_done">削除しました</string>

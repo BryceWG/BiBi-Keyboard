@@ -10,6 +10,7 @@
     <string name="label_zf_preload">Load model on first show</string>
     <string name="label_zf_use_itn">Enable ITN (inverse text normalization)</string>
     <string name="btn_zf_download_model">Download Zipformer model</string>
+    <string name="btn_zf_import_model">Import model from local file</string>
     <string name="btn_zf_clear_model">Clear Zipformer model</string>
     <string name="zf_model_info">Zipformer offers 4 model types with 8 versions:\n
 1. Chinese XL: Chinese and some dialects only. int8 (570MB) and fp16 (1.25GB) versions require separate downloads\n
@@ -21,6 +22,8 @@
     <string name="zf_download_status_extracting_progress">Extracting… %1$d%%</string>
     <string name="zf_download_status_failed">Download or extract failed</string>
     <string name="zf_download_started_in_bg">Started in background. See notification for progress</string>
+    <string name="zf_import_started_in_bg">Started background import. See notification for progress</string>
+    <string name="zf_import_failed">Model import failed: %1$s</string>
     <string name="zf_clear_confirm_title">Clear model?</string>
     <string name="zf_clear_confirm_message">This will delete downloaded Zipformer model files. You can re-download later. Continue?</string>
     <string name="zf_clear_done">Model cleared</string>

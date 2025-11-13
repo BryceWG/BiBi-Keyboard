@@ -11,6 +11,7 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -43,6 +44,17 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AsrSettingsViewModel
     private lateinit var prefs: Prefs
+
+    // File pickers for model import
+    private val modelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { handleModelImport(it) }
+    }
+    private val pfModelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { handlePfModelImport(it) }
+    }
+    private val zfModelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let { handleZfModelImport(it) }
+    }
 
     // View references grouped by function
     private lateinit var tvAsrVendor: TextView
@@ -870,8 +882,15 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private fun setupPfDownloadButtons() {
         val btnDl = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnPfDownloadModel)
+        val btnImport = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnPfImportModel)
         val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnPfClearModel)
         val tvStatus = findViewById<TextView>(R.id.tvPfDownloadStatus)
+
+        btnImport.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            pfModelFilePicker.launch("*/*")
+        }
+
         btnDl.setOnClickListener { v ->
             v.isEnabled = false
             tvStatus.text = ""
@@ -945,10 +964,16 @@ class AsrSettingsActivity : AppCompatActivity() {
     private fun updatePfDownloadUiVisibility() {
         val ready = viewModel.checkPfModelDownloaded(this)
         val btn = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnPfDownloadModel)
+        val btnImport = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnPfImportModel)
         val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnPfClearModel)
         val tv = findViewById<TextView>(R.id.tvPfDownloadStatus)
+
+        // 模型已安装时：隐藏下载和导入按钮，显示清理按钮
+        // 模型未安装时：显示下载和导入按钮，隐藏清理按钮
         btn.visibility = if (ready) View.GONE else View.VISIBLE
+        btnImport.visibility = if (ready) View.GONE else View.VISIBLE
         btnClear.visibility = if (ready) View.VISIBLE else View.GONE
+
         if (ready && tv.text.isNullOrBlank()) {
             tv.text = getString(R.string.pf_download_status_done)
         }
@@ -1071,8 +1096,15 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private fun setupZfDownloadButtons() {
         val btnDl = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfDownloadModel)
+        val btnImport = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfImportModel)
         val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfClearModel)
         val tvStatus = findViewById<TextView>(R.id.tvZfDownloadStatus)
+
+        btnImport.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            zfModelFilePicker.launch("*/*")
+        }
+
         btnDl.setOnClickListener { v ->
             v.isEnabled = false
             tvStatus.text = ""
@@ -1150,10 +1182,16 @@ class AsrSettingsActivity : AppCompatActivity() {
     private fun updateZfDownloadUiVisibility() {
         val ready = viewModel.checkZfModelDownloaded(this)
         val btn = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfDownloadModel)
+        val btnImport = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfImportModel)
         val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfClearModel)
         val tv = findViewById<TextView>(R.id.tvZfDownloadStatus)
+
+        // 模型已安装时：隐藏下载和导入按钮，显示清理按钮
+        // 模型未安装时：显示下载和导入按钮，隐藏清理按钮
         btn.visibility = if (ready) View.GONE else View.VISIBLE
+        btnImport.visibility = if (ready) View.GONE else View.VISIBLE
         btnClear.visibility = if (ready) View.VISIBLE else View.GONE
+
         if (ready && tv.text.isNullOrBlank()) {
             tv.text = getString(R.string.zf_download_status_done)
         }
@@ -1174,13 +1212,8 @@ class AsrSettingsActivity : AppCompatActivity() {
         }
 
         fun updateDownloadButtonText() {
-            val variant = prefs.svModelVariant
-            val text = if (variant == "small-full") {
-                getString(R.string.btn_sv_download_model_full)
-            } else {
-                getString(R.string.btn_sv_download_model_int8)
-            }
-            btnSvDownload.text = text
+            // 统一使用简洁的按钮文本，不再显示详细信息
+            btnSvDownload.text = getString(R.string.btn_sv_download_model)
         }
 
         updateVariantSummary()
@@ -1261,6 +1294,7 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private fun setupSvDownloadButtons() {
         val btnSvDownload = findViewById<MaterialButton>(R.id.btnSvDownloadModel)
+        val btnSvImport = findViewById<MaterialButton>(R.id.btnSvImportModel)
         val btnSvClear = findViewById<MaterialButton>(R.id.btnSvClearModel)
         val tvSvDownloadStatus = findViewById<TextView>(R.id.tvSvDownloadStatus)
 
@@ -1343,6 +1377,53 @@ class AsrSettingsActivity : AppCompatActivity() {
                 .setNegativeButton(R.string.btn_cancel, null)
                 .create()
                 .show()
+        }
+
+        btnSvImport.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            modelFilePicker.launch("*/*")
+        }
+    }
+
+    private fun handleModelImport(uri: Uri) {
+        val tvSvDownloadStatus = findViewById<TextView>(R.id.tvSvDownloadStatus)
+        tvSvDownloadStatus.text = ""
+
+        try {
+            val variant = prefs.svModelVariant
+            ModelDownloadService.startImport(this, uri, variant)
+            tvSvDownloadStatus.text = getString(R.string.sv_import_started_in_bg)
+        } catch (e: Throwable) {
+            android.util.Log.e(TAG, "Failed to start model import", e)
+            tvSvDownloadStatus.text = getString(R.string.sv_import_failed, e.message ?: "Unknown error")
+        }
+    }
+
+    private fun handlePfModelImport(uri: Uri) {
+        val tvStatus = findViewById<TextView>(R.id.tvPfDownloadStatus)
+        tvStatus.text = ""
+
+        try {
+            val variant = prefs.pfModelVariant
+            ModelDownloadService.startImport(this, uri, variant)
+            tvStatus.text = getString(R.string.pf_import_started_in_bg)
+        } catch (e: Throwable) {
+            android.util.Log.e(TAG, "Failed to start paraformer model import", e)
+            tvStatus.text = getString(R.string.pf_import_failed, e.message ?: "Unknown error")
+        }
+    }
+
+    private fun handleZfModelImport(uri: Uri) {
+        val tvStatus = findViewById<TextView>(R.id.tvZfDownloadStatus)
+        tvStatus.text = ""
+
+        try {
+            val variant = prefs.zfModelVariant
+            ModelDownloadService.startImport(this, uri, variant)
+            tvStatus.text = getString(R.string.zf_import_started_in_bg)
+        } catch (e: Throwable) {
+            android.util.Log.e(TAG, "Failed to start zipformer model import", e)
+            tvStatus.text = getString(R.string.zf_import_failed, e.message ?: "Unknown error")
         }
     }
 
@@ -1427,9 +1508,11 @@ class AsrSettingsActivity : AppCompatActivity() {
     private fun updateSvDownloadUiVisibility() {
         val ready = viewModel.checkSvModelDownloaded(this)
         val btn = findViewById<MaterialButton>(R.id.btnSvDownloadModel)
+        val btnImport = findViewById<MaterialButton>(R.id.btnSvImportModel)
         val btnClear = findViewById<MaterialButton>(R.id.btnSvClearModel)
         val tv = findViewById<TextView>(R.id.tvSvDownloadStatus)
         btn.visibility = if (ready) View.GONE else View.VISIBLE
+        btnImport.visibility = if (ready) View.GONE else View.VISIBLE
         btnClear.visibility = if (ready) View.VISIBLE else View.GONE
         if (ready && tv.text.isNullOrBlank()) {
             tv.text = getString(R.string.sv_download_status_done)

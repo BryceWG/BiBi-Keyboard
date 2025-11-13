@@ -12,12 +12,15 @@
     <string name="pf_variant_trilingual_int8">中英+粵語（int8）</string>
     <string name="pf_variant_trilingual_fp32">中英+粵語（fp32）</string>
     <string name="btn_pf_download_model">一鍵下載 Paraformer 模型</string>
+    <string name="btn_pf_import_model">從本機匯入模型</string>
     <string name="btn_pf_clear_model">清除已下載模型</string>
     <string name="pf_download_status_downloading">下載中… %1$d%%</string>
     <string name="pf_download_status_extracting_progress">解壓中… %1$d%%</string>
     <string name="pf_download_status_done">模型已安裝</string>
     <string name="pf_download_status_failed">下載或解壓失敗</string>
     <string name="pf_download_started_in_bg">已開始背景下載，請到通知欄查看進度</string>
+    <string name="pf_import_started_in_bg">已開始背景匯入，請到通知欄查看進度</string>
+    <string name="pf_import_failed">模型匯入失敗：%1$s</string>
     <string name="pf_clear_confirm_title">確認清除模型？</string>
     <string name="pf_clear_confirm_message">將刪除已下載的模型檔案，可稍後重新下載。是否繼續？</string>
     <string name="pf_clear_done">已清除模型</string>
