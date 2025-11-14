@@ -2,7 +2,6 @@
     <string name="vendor_eleven">ElevenLabs</string>
     <string name="eleven_section_title">ElevenLabs Credentials</string>
     <string name="label_eleven_api_key">xi-api-key</string>
-    <string name="label_eleven_model">Model ID (required)</string>
     <string name="label_eleven_language">Language (optional, empty = auto)</string>
     <string name="eleven_lang_auto">Auto (enable language ID)</string>
     <string name="eleven_lang_zh">Chinese (zh)</string>
@@ -15,4 +14,7 @@
     <string name="eleven_lang_pt">Portuguese (pt)</string>
     <string name="eleven_lang_ru">Russian (ru)</string>
     <string name="eleven_lang_it">Italian (it)</string>
+    <string name="label_eleven_streaming">Use ElevenLabs streaming (Realtime API)</string>
+    <string name="feature_eleven_streaming_off_desc">Uses non-streaming transcription. Audio uploads after recording ends.</string>
+    <string name="feature_eleven_streaming_on_desc">Uses realtime streaming so you can see transcripts while speaking.</string>
 </resources>

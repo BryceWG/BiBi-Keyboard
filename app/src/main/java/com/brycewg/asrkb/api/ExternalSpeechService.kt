@@ -232,8 +232,9 @@ class ExternalSpeechService : Service() {
                 // 本地 sherpa-onnx：Paraformer/Zipformer 仅流式；SenseVoice 仅非流式
                 AsrVendor.Paraformer, AsrVendor.Zipformer -> true
                 AsrVendor.SenseVoice -> false
-                // 其他云厂商（OpenAI/Gemini/Eleven/SiliconFlow）仅非流式
-                AsrVendor.OpenAI, AsrVendor.Gemini, AsrVendor.ElevenLabs, AsrVendor.SiliconFlow -> false
+                AsrVendor.ElevenLabs -> prefs.elevenStreamingEnabled
+                // 其他云厂商（OpenAI/Gemini/SiliconFlow）仅非流式
+                AsrVendor.OpenAI, AsrVendor.Gemini, AsrVendor.SiliconFlow -> false
             }
         }
 
@@ -259,12 +260,16 @@ class ExternalSpeechService : Service() {
                         try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
                     }
                 )
-                AsrVendor.ElevenLabs -> ElevenLabsFileAsrEngine(
-                    context, scope, prefs, this,
-                    onRequestDuration = { ms: Long ->
-                        try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
-                    }
-                )
+                AsrVendor.ElevenLabs -> if (streamingPreferred) {
+                    ElevenLabsStreamAsrEngine(context, scope, prefs, this)
+                } else {
+                    ElevenLabsFileAsrEngine(
+                        context, scope, prefs, this,
+                        onRequestDuration = { ms: Long ->
+                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                        }
+                    )
+                }
                 AsrVendor.OpenAI -> OpenAiFileAsrEngine(
                     context, scope, prefs, this,
                     onRequestDuration = { ms: Long ->
@@ -356,16 +361,20 @@ class ExternalSpeechService : Service() {
                         )
                     )
                 }
-                // 其他云厂商：仅非流式
-                AsrVendor.ElevenLabs -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
-                    context, scope, prefs, this,
-                    com.brycewg.asrkb.asr.ElevenLabsFileAsrEngine(
+                // 其他云厂商：仅非流式（若供应商另行支持流式则走对应分支）
+                AsrVendor.ElevenLabs -> if (streamingPreferred) {
+                    com.brycewg.asrkb.asr.ElevenLabsStreamAsrEngine(context, scope, prefs, this, externalPcmMode = true)
+                } else {
+                    com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                         context, scope, prefs, this,
-                        onRequestDuration = { ms: Long ->
-                            try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
-                        }
+                        com.brycewg.asrkb.asr.ElevenLabsFileAsrEngine(
+                            context, scope, prefs, this,
+                            onRequestDuration = { ms: Long ->
+                                try { lastRequestDurationMs = ms } catch (t: Throwable) { Log.w(TAG, "set proc ms failed", t) }
+                            }
+                        )
                     )
-                )
+                }
                 AsrVendor.OpenAI -> com.brycewg.asrkb.asr.GenericPushFileAsrAdapter(
                     context, scope, prefs, this,
                     com.brycewg.asrkb.asr.OpenAiFileAsrEngine(

@@ -11,7 +11,6 @@
     <string name="error_missing_siliconflow_key">未配置 SiliconFlow API Key</string>
     <string name="error_missing_eleven_key">未配置 ElevenLabs API Key</string>
     <string name="error_missing_soniox_key">未配置 Soniox API Key</string>
-    <string name="error_missing_eleven_model_id">未配置 ElevenLabs Model ID（服务端要求必填）</string>
     <string name="error_request_failed_http">识别请求失败: HTTP %1$d%2$s</string>
     <string name="error_asr_request_failed_http">ASR 请求失败: HTTP %1$d%2$s</string>
     <string name="error_dash_getpolicy_failed_http">getPolicy 失败: HTTP %1$d%2$s</string>

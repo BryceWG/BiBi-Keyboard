@@ -465,12 +465,21 @@ class AsrSettingsActivity : AppCompatActivity() {
             setText(prefs.elevenApiKey)
             bindString { prefs.elevenApiKey = it }
         }
-        findViewById<EditText>(R.id.etElevenModel).apply {
-            setText(prefs.elevenModelId)
-            bindString { prefs.elevenModelId = it }
-        }
-
         setupElevenLanguageSelection()
+
+        findViewById<MaterialSwitch>(R.id.switchElevenStreaming).apply {
+            isChecked = prefs.elevenStreamingEnabled
+            installExplainedSwitch(
+                context = this@AsrSettingsActivity,
+                titleRes = R.string.label_eleven_streaming,
+                offDescRes = R.string.feature_eleven_streaming_off_desc,
+                onDescRes = R.string.feature_eleven_streaming_on_desc,
+                preferenceKey = "eleven_streaming_explained",
+                readPref = { prefs.elevenStreamingEnabled },
+                writePref = { v -> viewModel.updateElevenStreaming(v) },
+                hapticFeedback = { hapticTapIfEnabled(it) }
+            )
+        }
 
         // Key guide link
         findViewById<com.google.android.material.button.MaterialButton>(R.id.btnElevenGetKey).setOnClickListener { v ->

@@ -132,7 +132,11 @@ class AsrSessionManager(
             } else null
 
             AsrVendor.ElevenLabs -> if (prefs.hasElevenKeys()) {
-                ElevenLabsFileAsrEngine(context, scope, prefs, this, ::onRequestDuration)
+                if (prefs.elevenStreamingEnabled) {
+                    ElevenLabsStreamAsrEngine(context, scope, prefs, this)
+                } else {
+                    ElevenLabsFileAsrEngine(context, scope, prefs, this, ::onRequestDuration)
+                }
             } else null
 
             AsrVendor.OpenAI -> if (prefs.hasOpenAiKeys()) {
@@ -204,7 +208,11 @@ class AsrSessionManager(
             }
 
             AsrVendor.SiliconFlow -> if (current is SiliconFlowFileAsrEngine) current else null
-            AsrVendor.ElevenLabs -> if (current is ElevenLabsFileAsrEngine) current else null
+            AsrVendor.ElevenLabs -> when (current) {
+                is ElevenLabsFileAsrEngine -> if (!prefs.elevenStreamingEnabled) current else null
+                is ElevenLabsStreamAsrEngine -> if (prefs.elevenStreamingEnabled) current else null
+                else -> null
+            }
             AsrVendor.OpenAI -> if (current is OpenAiFileAsrEngine) current else null
             AsrVendor.DashScope -> when (current) {
                 is DashscopeFileAsrEngine -> if (!prefs.dashStreamingEnabled) current else null

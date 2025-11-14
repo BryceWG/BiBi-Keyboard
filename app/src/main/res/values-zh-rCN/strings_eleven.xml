@@ -2,7 +2,6 @@
     <string name="vendor_eleven">ElevenLabs</string>
     <string name="eleven_section_title">ElevenLabs 鉴权参数</string>
     <string name="label_eleven_api_key">xi-api-key</string>
-    <string name="label_eleven_model">Model ID（必填）</string>
     <string name="label_eleven_language">识别语言（可选，留空自动）</string>
     <string name="eleven_lang_auto">自动（启用语种识别）</string>
     <string name="eleven_lang_zh">中文 (zh)</string>
@@ -15,4 +14,7 @@
     <string name="eleven_lang_pt">葡萄牙语 (pt)</string>
     <string name="eleven_lang_ru">俄语 (ru)</string>
     <string name="eleven_lang_it">意大利语 (it)</string>
+    <string name="label_eleven_streaming">使用 ElevenLabs 流式识别（Realtime API）</string>
+    <string name="feature_eleven_streaming_off_desc">使用非流式识别，录音结束后再上传处理。</string>
+    <string name="feature_eleven_streaming_on_desc">使用流式识别，边说话边实时返回结果。</string>
 </resources>

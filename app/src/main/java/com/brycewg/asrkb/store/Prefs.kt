@@ -452,7 +452,10 @@ class Prefs(context: Context) {
     // ElevenLabs凭证
     var elevenApiKey: String by stringPref(KEY_ELEVEN_API_KEY, "")
 
-    var elevenModelId: String by stringPref(KEY_ELEVEN_MODEL_ID, "")
+    // ElevenLabs：流式识别开关
+    var elevenStreamingEnabled: Boolean
+        get() = sp.getBoolean(KEY_ELEVEN_STREAMING_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_ELEVEN_STREAMING_ENABLED, value) }
 
     // OpenAI 语音转文字（ASR）配置
     var oaAsrEndpoint: String by stringPref(KEY_OA_ASR_ENDPOINT, DEFAULT_OA_ASR_ENDPOINT)
@@ -669,7 +672,6 @@ class Prefs(context: Context) {
         ),
         AsrVendor.ElevenLabs to listOf(
             VendorField(KEY_ELEVEN_API_KEY, required = true),
-            VendorField(KEY_ELEVEN_MODEL_ID),
             VendorField(KEY_ELEVEN_LANGUAGE_CODE)
         ),
         AsrVendor.OpenAI to listOf(
@@ -1080,7 +1082,7 @@ class Prefs(context: Context) {
         private const val KEY_SF_USE_OMNI = "sf_use_omni"
         private const val KEY_SF_OMNI_PROMPT = "sf_omni_prompt"
         private const val KEY_ELEVEN_API_KEY = "eleven_api_key"
-        private const val KEY_ELEVEN_MODEL_ID = "eleven_model_id"
+        private const val KEY_ELEVEN_STREAMING_ENABLED = "eleven_streaming_enabled"
         private const val KEY_ELEVEN_LANGUAGE_CODE = "eleven_language_code"
         private const val KEY_OA_ASR_ENDPOINT = "oa_asr_endpoint"
         private const val KEY_OA_ASR_API_KEY = "oa_asr_api_key"

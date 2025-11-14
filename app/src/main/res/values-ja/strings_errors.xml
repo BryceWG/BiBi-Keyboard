@@ -12,7 +12,6 @@
     <string name="error_missing_siliconflow_key">SiliconFlow APIキーが設定されていません</string>
     <string name="error_missing_eleven_key">ElevenLabs APIキーが設定されていません</string>
     <string name="error_missing_soniox_key">Soniox APIキーが設定されていません</string>
-    <string name="error_missing_eleven_model_id">ElevenLabsモデルIDが設定されていません（必須）</string>
     <string name="error_request_failed_http">認識リクエスト失敗：HTTP %1$d%2$s</string>
     <string name="error_asr_request_failed_http">ASRリクエスト失敗：HTTP %1$d%2$s</string>
     <string name="error_dash_getpolicy_failed_http">getPolicy失敗：HTTP %1$d%2$s</string>

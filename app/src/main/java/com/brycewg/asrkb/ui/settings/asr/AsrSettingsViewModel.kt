@@ -53,6 +53,8 @@ class AsrSettingsViewModel : ViewModel() {
             dashStreamingEnabled = prefs.dashStreamingEnabled,
             // SiliconFlow settings
             sfUseOmni = isQwenOmniModel(prefs.sfModel.ifBlank { com.brycewg.asrkb.store.Prefs.DEFAULT_SF_MODEL }),
+            // Eleven settings
+            elevenStreamingEnabled = prefs.elevenStreamingEnabled,
             // OpenAI settings
             oaAsrUsePrompt = prefs.oaAsrUsePrompt,
             // Soniox settings
@@ -205,6 +207,11 @@ class AsrSettingsViewModel : ViewModel() {
     fun updateOpenAiUsePrompt(enabled: Boolean) {
         prefs.oaAsrUsePrompt = enabled
         _uiState.value = _uiState.value.copy(oaAsrUsePrompt = enabled)
+    }
+
+    fun updateElevenStreaming(enabled: Boolean) {
+        prefs.elevenStreamingEnabled = enabled
+        _uiState.value = _uiState.value.copy(elevenStreamingEnabled = enabled)
     }
 
     fun updateSonioxStreaming(enabled: Boolean) {
@@ -498,6 +505,8 @@ data class AsrSettingsUiState(
     val dashStreamingEnabled: Boolean = false,
     // SiliconFlow settings
     val sfUseOmni: Boolean = false,
+    // ElevenLabs settings
+    val elevenStreamingEnabled: Boolean = false,
     // OpenAI settings
     val oaAsrUsePrompt: Boolean = false,
     // Soniox settings

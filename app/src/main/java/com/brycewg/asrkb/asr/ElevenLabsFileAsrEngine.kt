@@ -29,6 +29,7 @@ class ElevenLabsFileAsrEngine(
 
     companion object {
         private const val TAG = "ElevenLabsFileAsrEngine"
+        private const val MODEL_ID = "scribe_v1"
     }
 
     // ElevenLabs：未明确限制，本地限制为 20 分钟
@@ -42,10 +43,6 @@ class ElevenLabsFileAsrEngine(
         if (!super.ensureReady()) return false
         if (prefs.elevenApiKey.isBlank()) {
             listener.onError(context.getString(R.string.error_missing_eleven_key))
-            return false
-        }
-        if (prefs.elevenModelId.trim().isEmpty()) {
-            listener.onError(context.getString(R.string.error_missing_eleven_model_id))
             return false
         }
         return true
@@ -64,7 +61,9 @@ class ElevenLabsFileAsrEngine(
                     "audio.wav",
                     tmp.asRequestBody("audio/wav".toMediaType())
                 )
-                .addFormDataPart("model_id", prefs.elevenModelId.trim())
+                .addFormDataPart("model_id", MODEL_ID)
+                .addFormDataPart("tag_audio_events", "false")
+                .addFormDataPart("num_speakers", "1")
             val lang = prefs.elevenLanguageCode.trim()
             if (lang.isNotEmpty()) {
                 multipartBuilder.addFormDataPart("language_code", lang)

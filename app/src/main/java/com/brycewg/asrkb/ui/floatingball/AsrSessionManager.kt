@@ -405,7 +405,11 @@ class AsrSessionManager(
                 SiliconFlowFileAsrEngine(context, serviceScope, prefs, this, onRequestDuration = ::onRequestDuration)
             } else null
             AsrVendor.ElevenLabs -> if (prefs.hasElevenKeys()) {
-                ElevenLabsFileAsrEngine(context, serviceScope, prefs, this, onRequestDuration = ::onRequestDuration)
+                if (prefs.elevenStreamingEnabled) {
+                    ElevenLabsStreamAsrEngine(context, serviceScope, prefs, this)
+                } else {
+                    ElevenLabsFileAsrEngine(context, serviceScope, prefs, this, onRequestDuration = ::onRequestDuration)
+                }
             } else null
             AsrVendor.OpenAI -> if (prefs.hasOpenAiKeys()) {
                 OpenAiFileAsrEngine(context, serviceScope, prefs, this, onRequestDuration = ::onRequestDuration)

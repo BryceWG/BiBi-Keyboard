@@ -363,21 +363,6 @@
             android:textColorHint="?attr/colorOnSurfaceVariant" />
         </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          app:boxBackgroundMode="outline"
-          android:hint="@string/label_eleven_model">
-
-          <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etElevenModel"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?attr/colorOnSurfaceVariant" />
-        </com.google.android.material.textfield.TextInputLayout>
-
         <TextView
             android:layout_width="match_parent"
           android:layout_height="wrap_content"
@@ -399,6 +384,13 @@
             android:layout_width="match_parent"
           android:layout_height="wrap_content"
           android:visibility="gone" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+          android:id="@+id/switchElevenStreaming"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:text="@string/label_eleven_streaming" />
 
         <com.google.android.material.button.MaterialButton
           android:id="@+id/btnElevenGetKey"
