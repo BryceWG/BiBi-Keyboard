@@ -451,9 +451,9 @@ class AsrSettingsViewModel : ViewModel() {
         val files = modelDir.listFiles() ?: emptyArray()
         if (!File(modelDir, "tokens.txt").exists()) return false
         fun exists(regex: Regex): Boolean = files.any { it.isFile && regex.matches(it.name) }
-        val hasEncoder = exists(Regex("^encoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
-        val hasDecoder = exists(Regex("^decoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$")) || exists(Regex("^decoder\\.onnx$"))
-        val hasJoiner = exists(Regex("^joiner(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+        val hasEncoder = exists(Regex("^encoder(?:[.-].*)?\\.onnx$"))
+        val hasDecoder = exists(Regex("^decoder(?:[.-].*)?\\.onnx$"))
+        val hasJoiner = exists(Regex("^joiner(?:[.-].*)?\\.onnx$"))
         return hasEncoder && hasDecoder && hasJoiner
     }
 

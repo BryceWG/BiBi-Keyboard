@@ -396,9 +396,9 @@ fun findZfModelDir(root: java.io.File?): java.io.File? {
 private fun hasZfRequiredComponents(dir: java.io.File): Boolean {
     val files = dir.listFiles() ?: return false
     fun exists(regex: Regex): Boolean = files.any { f -> f.isFile && regex.matches(f.name) }
-    val hasEncoder = exists(Regex("^encoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
-    val hasDecoder = exists(Regex("^decoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$")) || exists(Regex("^decoder\\.onnx$"))
-    val hasJoiner = exists(Regex("^joiner(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+    val hasEncoder = exists(Regex("^encoder(?:[.-].*)?\\.onnx$"))
+    val hasDecoder = exists(Regex("^decoder(?:[.-].*)?\\.onnx$"))
+    val hasJoiner = exists(Regex("^joiner(?:[.-].*)?\\.onnx$"))
     return hasEncoder && hasDecoder && hasJoiner
 }
 
@@ -406,12 +406,17 @@ private fun pickZfComponentFile(dir: java.io.File, comp: String, preferInt8: Boo
     val files = dir.listFiles() ?: return null
     val patternsPreferred = if (preferInt8) listOf(
         Regex("^${comp}(?:-epoch-\\d+-avg-\\d+)?\\.int8\\.onnx$"),
-        Regex("^${comp}\\.int8\\.onnx$")
+        Regex("^${comp}\\.int8\\.onnx$"),
+        Regex("^${comp}(?:-epoch-\\d+-avg-\\d+)?\\.onnx$")
     ) else listOf(
+        Regex("^${comp}\\.fp16\\.onnx$"),
+        Regex("^${comp}(?:-epoch-\\d+-avg-\\d+)?\\.fp16\\.onnx$"),
         Regex("^${comp}\\.onnx$"),
         Regex("^${comp}(?:-epoch-\\d+-avg-\\d+)?\\.onnx$")
     )
     val patternsFallback = if (preferInt8) listOf(
+        Regex("^${comp}\\.fp16\\.onnx$"),
+        Regex("^${comp}(?:-epoch-\\d+-avg-\\d+)?\\.fp16\\.onnx$"),
         Regex("^${comp}\\.onnx$"),
         Regex("^${comp}(?:-epoch-\\d+-avg-\\d+)?\\.onnx$")
     ) else listOf(

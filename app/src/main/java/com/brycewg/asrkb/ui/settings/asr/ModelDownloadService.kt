@@ -14,11 +14,14 @@ import com.brycewg.asrkb.LocaleHelper
 import com.brycewg.asrkb.ui.SettingsActivity
 import com.brycewg.asrkb.store.Prefs
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.util.zip.ZipInputStream
@@ -56,20 +59,30 @@ class ModelDownloadService : Service() {
     private const val EXTRA_KEY = "key"
     private const val EXTRA_MODEL_TYPE = "modelType" // sensevoice | paraformer
 
+    private fun buildDownloadKey(variant: String, modelType: String): DownloadKey {
+      val sourceId = when (modelType) {
+        "paraformer" -> "download_paraformer"
+        "zipformer" -> "download_zipformer"
+        else -> "download_sensevoice"
+      }
+      return DownloadKey(variant, sourceId)
+    }
+
     fun startDownload(context: Context, url: String, variant: String) {
-      val key = DownloadKey(variant, url)
+      val modelType = "sensevoice"
+      val key = buildDownloadKey(variant, modelType)
       val i = Intent(context, ModelDownloadService::class.java).apply {
         action = ACTION_START
         putExtra(EXTRA_URL, url)
         putExtra(EXTRA_VARIANT, variant)
         putExtra(EXTRA_KEY, key.toSerializedKey())
-        putExtra(EXTRA_MODEL_TYPE, "sensevoice")
+        putExtra(EXTRA_MODEL_TYPE, modelType)
       }
       context.startService(i)
     }
 
     fun startDownload(context: Context, url: String, variant: String, modelType: String) {
-      val key = DownloadKey(variant, url)
+      val key = buildDownloadKey(variant, modelType)
       val i = Intent(context, ModelDownloadService::class.java).apply {
         action = ACTION_START
         putExtra(EXTRA_URL, url)
@@ -108,9 +121,10 @@ class ModelDownloadService : Service() {
       ACTION_START -> {
         val url = intent.getStringExtra(EXTRA_URL) ?: return START_NOT_STICKY
         val variant = intent.getStringExtra(EXTRA_VARIANT) ?: ""
-        val serializedKey = intent.getStringExtra(EXTRA_KEY) ?: DownloadKey(variant, url).toSerializedKey()
-        val key = DownloadKey.fromSerializedKey(serializedKey)
         val modelType = intent.getStringExtra(EXTRA_MODEL_TYPE) ?: "sensevoice"
+        val serializedKey = intent.getStringExtra(EXTRA_KEY)
+          ?: buildDownloadKey(variant, modelType).toSerializedKey()
+        val key = DownloadKey.fromSerializedKey(serializedKey)
 
         if (!tasks.containsKey(key)) {
           if (tasks.isEmpty()) startAsForegroundSummary()
@@ -468,33 +482,45 @@ class ModelDownloadService : Service() {
 
     val ok = OkHttpClient()
     val req = Request.Builder().url(url).build()
+    val call = ok.newCall(req)
 
-    ok.newCall(req).execute().use { resp ->
-      if (!resp.isSuccessful) {
-        throw IllegalStateException("HTTP ${resp.code}")
-      }
+    try {
+      call.execute().use { resp ->
+        if (!resp.isSuccessful) {
+          throw IllegalStateException("HTTP ${resp.code}")
+        }
 
-      val body = resp.body ?: throw IllegalStateException("empty body")
-      val total = body.contentLength()
+        val body = resp.body ?: throw IllegalStateException("empty body")
+        val total = body.contentLength()
 
-      cacheFile.outputStream().use { out ->
-        var readSum = 0L
-        val buf = ByteArray(128 * 1024)
+        cacheFile.outputStream().use { out ->
+          var readSum = 0L
+          val buf = ByteArray(128 * 1024)
 
-        body.byteStream().use { ins ->
-          while (true) {
-            val n = ins.read(buf)
-            if (n <= 0) break
+          body.byteStream().use { ins ->
+            while (true) {
+              if (!coroutineContext.isActive) {
+                call.cancel()
+                throw CancellationException("Download cancelled")
+              }
 
-            out.write(buf, 0, n)
-            readSum += n
+              val n = ins.read(buf)
+              if (n <= 0) break
 
-            if (total > 0L) {
-              val progress = ((readSum * 100) / total).toInt().coerceIn(0, 100)
-              notificationHandler.notifyDownloadProgress(progress, cancelIntent)
+              out.write(buf, 0, n)
+              readSum += n
+
+              if (total > 0L) {
+                val progress = ((readSum * 100) / total).toInt().coerceIn(0, 100)
+                notificationHandler.notifyDownloadProgress(progress, cancelIntent)
+              }
             }
           }
         }
+      }
+    } finally {
+      if (!coroutineContext.isActive) {
+        call.cancel()
       }
     }
 
@@ -571,9 +597,9 @@ class ModelDownloadService : Service() {
       val files = modelDir.listFiles() ?: emptyArray()
       fun exists(regex: Regex): Boolean = files.any { it.isFile && regex.matches(it.name) }
       val hasTokens = File(modelDir, "tokens.txt").exists()
-      val hasEncoder = exists(Regex("^encoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
-      val hasDecoder = exists(Regex("^decoder(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$")) || exists(Regex("^decoder\\.onnx$"))
-      val hasJoiner = exists(Regex("^joiner(?:-epoch-\\d+-avg-\\d+)?(?:\\.int8)?\\.onnx$"))
+      val hasEncoder = exists(Regex("^encoder(?:[.-].*)?\\.onnx$"))
+      val hasDecoder = exists(Regex("^decoder(?:[.-].*)?\\.onnx$"))
+      val hasJoiner = exists(Regex("^joiner(?:[.-].*)?\\.onnx$"))
       if (!(hasTokens && hasEncoder && hasDecoder && hasJoiner)) {
         throw IllegalStateException("zipformer files missing after extract (pattern)")
       }
@@ -686,12 +712,16 @@ class ModelDownloadService : Service() {
     compressedTotal: Long,
     onProgress: (Int) -> Unit
   ) = withContext(Dispatchers.IO) {
+    val ctx = coroutineContext
     val counting = CountingInputStream(file.inputStream().buffered(64 * 1024))
     ZipInputStream(counting).use { zis ->
       val buf = ByteArray(64 * 1024)
       var entry: ZipEntry? = zis.nextEntry
       var lastPercent = -1
       while (entry != null) {
+        if (!ctx.isActive) {
+          throw CancellationException("Extraction cancelled")
+        }
         val outFile = File(outDir, entry.name)
         if (entry.isDirectory) {
           outFile.mkdirs()
@@ -700,6 +730,9 @@ class ModelDownloadService : Service() {
           java.io.BufferedOutputStream(FileOutputStream(outFile), 64 * 1024).use { bos ->
             var written = 0L
             while (true) {
+              if (!ctx.isActive) {
+                throw CancellationException("Extraction cancelled")
+              }
               val n = zis.read(buf)
               if (n <= 0) break
               bos.write(buf, 0, n)
@@ -720,7 +753,9 @@ class ModelDownloadService : Service() {
         entry = zis.nextEntry
       }
       // 结束时确保进度到 100%
-      onProgress(100)
+      if (ctx.isActive) {
+        onProgress(100)
+      }
     }
   }
 
