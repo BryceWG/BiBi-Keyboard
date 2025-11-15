@@ -35,7 +35,7 @@ object UiColorTokens {
     val kbdKeyFg = com.google.android.material.R.attr.colorOnSurfaceVariant
 
     /** 键盘容器背景 */
-    val kbdContainerBg = com.google.android.material.R.attr.colorSurface
+    val kbdContainerBg = com.google.android.material.R.attr.colorSurfaceVariant
 
 
     // ==================== 强调与状态色 ====================

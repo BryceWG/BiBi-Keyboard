@@ -5,10 +5,10 @@
     android:insetRight="2dp"
     android:insetBottom="2dp">
     <ripple android:color="?attr/colorControlHighlight">
-        <!-- 内容形状：圆角矩形底色 -->
+        <!-- 内容形状：圆角矩形底色（浅色模式下使用 colorSurface） -->
         <item>
             <shape android:shape="rectangle">
-                <solid android:color="?attr/colorSurfaceVariant" />
+                <solid android:color="?attr/colorSurface" />
                 <corners android:radius="10dp" />
             </shape>
         </item>

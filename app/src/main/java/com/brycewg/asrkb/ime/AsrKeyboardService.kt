@@ -277,16 +277,19 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         return view
     }
 
-    private fun createKeyboardView(): View {
-        val themedContext = ContextThemeWrapper(this, R.style.Theme_ASRKeyboard_Ime)
-        val dynamicContext = com.google.android.material.color.DynamicColors.wrapContextIfAvailable(themedContext)
-        val coloredContext = ProUiInjector.wrapContextWithProColors(dynamicContext)
-        val view = LayoutInflater.from(coloredContext).inflate(R.layout.keyboard_view, null, false)
-        return setupKeyboardView(view)
-    }
+  private fun createKeyboardView(): View {
+    val themedContext = ContextThemeWrapper(this, R.style.Theme_ASRKeyboard_Ime)
+    val dynamicContext = com.google.android.material.color.DynamicColors.wrapContextIfAvailable(themedContext)
+    val coloredContext = ProUiInjector.wrapContextWithProColors(dynamicContext)
+    val view = LayoutInflater.from(coloredContext).inflate(R.layout.keyboard_view, null, false)
+    return setupKeyboardView(view)
+  }
 
-    private fun setupKeyboardView(view: View): View {
-        rootView = view
+  private fun setupKeyboardView(view: View): View {
+    rootView = view
+
+    // 根据主题动态调整键盘背景色，使其略浅于当前容器色但仍明显深于普通按键与麦克风按钮
+    applyKeyboardBackgroundColor(view)
 
         // 应用 Window Insets 以适配 Android 15 边缘到边缘显示
         applyKeyboardInsets(view)
@@ -2520,11 +2523,29 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
     private fun resolveKeyboardSurfaceColor(from: View? = null): Int {
         val ctx = from?.context ?: this
         return try {
-            UiColors.get(ctx, UiColorTokens.kbdContainerBg)
+            resolveKeyboardBackgroundColor(ctx)
         } catch (_: Throwable) {
             // 使用 Material3 标准浅色 Surface 作为最终回退
             0xFFFFFBFE.toInt()
         }
+    }
+
+    private fun applyKeyboardBackgroundColor(root: View) {
+        val ctx = root.context
+        val bg = try {
+            resolveKeyboardBackgroundColor(ctx)
+        } catch (_: Throwable) {
+            UiColors.panelBg(ctx)
+        }
+        root.setBackgroundColor(bg)
+    }
+
+    private fun resolveKeyboardBackgroundColor(ctx: Context): Int {
+        val baseSurface = UiColors.panelBg(ctx)
+        val micContainer = UiColors.get(ctx, UiColorTokens.secondaryContainer)
+        // 先在按钮和麦克风之间插值，再统一向黑色略微偏一点
+        val mixed = ColorUtils.blendARGB(baseSurface, micContainer, 0.08f)
+        return ColorUtils.blendARGB(mixed, 0xFF000000.toInt(), 0.04f)
     }
 
     // ========== 剪贴板预览监听 ==========
