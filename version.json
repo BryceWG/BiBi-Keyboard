@@ -1,10 +1,10 @@
 {
-  "version": "3.7.2",
-  "version_code": 115,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.7.2",
-  "release_notes": "本次更新包含 4 个提交:\n- build: 更新项目文档和版本信息至 v3.7.2并重构构建配置\n- feat(ui): 添加模型选择引导功能\n- refactor(build): 移除多变体构建，统一为开源版本\n- pro(asr): 添加畅说模式支持",
+  "version": "3.7.3",
+  "version_code": 116,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.7.3",
+  "release_notes": "本次更新包含 3 个提交:\n- feat(asr): 更改 DashScope 流式识别为 Qwen3-ASR-Flash-Realtime 模型\n- feat(waveform): 添加波形灵敏度调节功能\n- feat(ime): 添加录音手势控制",
   "important_notice": "本次更新支持了从小企鹅输入法调用言犀的语音识别能力。使用方式：\n1. 下载修改版的Fcitx(0.1.2beta3)：https://github.com/BryceWG/fcitx5-android-lexi-keyboard/releases，需要卸载之前的Fcitx，注意数据备份\n 2. 打开Fcitx设置-虚拟键盘-空格键长按行为-语音输入（AIDL）\n 3. 在Lexi Keyboard设置(3.6.2以上)-输入设置-允许外部输入法联动（AIDL），新版无需启用悬浮球和无障碍功能\n 4. 在小企鹅输入法面板，长按空格键即可语音输入",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-23T06:11:19Z"
+  "update_time": "2025-11-25T07:57:45Z"
 }
