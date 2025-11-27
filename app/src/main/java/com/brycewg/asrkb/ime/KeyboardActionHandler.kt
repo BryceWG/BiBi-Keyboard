@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.inputmethod.InputConnection
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmPostProcessor
+import com.brycewg.asrkb.asr.AsrTimeoutCalculator
 import com.brycewg.asrkb.util.TextSanitizer
 import com.brycewg.asrkb.store.Prefs
 import kotlinx.coroutines.CoroutineScope
@@ -73,17 +74,19 @@ class KeyboardActionHandler(
     // 自动启动录音标志：标识当前录音是否由键盘面板自动启动
     private var isAutoStartedRecording: Boolean = false
 
-    private fun scheduleProcessingTimeout() {
+    private fun scheduleProcessingTimeout(audioMsOverride: Long? = null) {
         try { processingTimeoutJob?.cancel() } catch (t: Throwable) { Log.w(TAG, "Cancel previous processingTimeoutJob failed", t) }
+        val audioMs = audioMsOverride ?: try { asrManager.peekLastAudioMsForStats() } catch (_: Throwable) { 0L }
+        val timeoutMs = AsrTimeoutCalculator.calculateTimeoutMs(audioMs)
         processingTimeoutJob = scope.launch {
-            delay(8000)
+            delay(timeoutMs)
             // 若仍处于 Processing，则回到 Idle
             if (currentState is KeyboardState.Processing) {
-                try { DebugLogManager.log("ime", "processing_timeout_fired", mapOf("opSeq" to opSeq)) } catch (_: Throwable) { }
+                try { DebugLogManager.log("ime", "processing_timeout_fired", mapOf("opSeq" to opSeq, "audioMs" to audioMs, "timeoutMs" to timeoutMs)) } catch (_: Throwable) { }
                 transitionToIdle()
             }
         }
-        try { DebugLogManager.log("ime", "processing_timeout_scheduled", mapOf("opSeq" to opSeq)) } catch (_: Throwable) { }
+        try { DebugLogManager.log("ime", "processing_timeout_scheduled", mapOf("opSeq" to opSeq, "audioMs" to audioMs, "timeoutMs" to timeoutMs)) } catch (_: Throwable) { }
     }
 
     fun setUiListener(listener: UiListener) {
@@ -1004,7 +1007,7 @@ class KeyboardActionHandler(
             }
             // 正常流程：进入 Processing，等待最终结果或兜底
             transitionToState(KeyboardState.Processing)
-            scheduleProcessingTimeout()
+            scheduleProcessingTimeout(audioMsVal)
             uiListener?.onStatusMessage(context.getString(R.string.status_recognizing))
             try { DebugLogManager.log("ime", "asr_stopped", mapOf("audioMs" to audioMs, "action" to "enter_processing", "opSeq" to opSeq)) } catch (_: Throwable) { }
         }

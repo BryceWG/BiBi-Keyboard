@@ -94,6 +94,18 @@ class AsrSessionManager(
     private var sessionStartUptimeMs: Long = 0L
     private var lastAudioMsForStats: Long = 0L
 
+    private fun snapshotAudioDurationIfPossible() {
+        if (sessionStartUptimeMs == 0L || lastAudioMsForStats != 0L) return
+        try {
+            val now = SystemClock.uptimeMillis()
+            if (now >= sessionStartUptimeMs) {
+                lastAudioMsForStats = now - sessionStartUptimeMs
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to snapshot audio duration on stopRecording", t)
+        }
+    }
+
     fun setListener(l: Listener) {
         listener = l
     }
@@ -269,6 +281,7 @@ class AsrSessionManager(
             Log.w(TAG, "Failed to get uptime for session start", t)
             sessionStartUptimeMs = 0L
         }
+        lastAudioMsForStats = 0L
         // 新会话开始时重置上次请求耗时，避免串台（流式模式不会更新此值）
         lastRequestDurationMs = null
         try {
@@ -351,6 +364,7 @@ class AsrSessionManager(
      * 停止 ASR 录音
      */
     fun stopRecording() {
+        snapshotAudioDurationIfPossible()
         asrEngine?.stop()
         try {
             DebugLogManager.log(
@@ -509,8 +523,10 @@ class AsrSessionManager(
         // 计算本次会话录音时长
         if (sessionStartUptimeMs > 0L) {
             try {
-                val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
-                lastAudioMsForStats = dur
+                if (lastAudioMsForStats == 0L) {
+                    val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
+                    lastAudioMsForStats = dur
+                }
             } catch (t: Throwable) {
                 Log.w(TAG, "Failed to compute audio duration on onStopped", t)
             } finally {

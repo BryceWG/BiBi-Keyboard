@@ -10,6 +10,7 @@ import android.media.AudioFocusRequest
 import android.media.AudioAttributes
 import com.brycewg.asrkb.asr.*
 import com.brycewg.asrkb.asr.BluetoothRouteManager
+import com.brycewg.asrkb.asr.AsrTimeoutCalculator
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.AsrAccessibilityService.FocusContext
 import com.brycewg.asrkb.util.TextSanitizer
@@ -31,7 +32,6 @@ class AsrSessionManager(
 
     companion object {
         private const val TAG = "AsrSessionManager"
-        private const val PROCESSING_TIMEOUT_MS = 8000L
     }
 
     interface AsrSessionListener {
@@ -63,6 +63,18 @@ class AsrSessionManager(
     // 音频焦点请求句柄
     private var audioFocusRequest: AudioFocusRequest? = null
 
+    private fun snapshotAudioDurationIfPossible() {
+        if (sessionStartUptimeMs == 0L || lastAudioMsForStats != 0L) return
+        try {
+            val now = SystemClock.uptimeMillis()
+            if (now >= sessionStartUptimeMs) {
+                lastAudioMsForStats = now - sessionStartUptimeMs
+            }
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to snapshot audio duration on stopRecording", t)
+        }
+    }
+
     /** 开始录音 */
     fun startRecording() {
         Log.d(TAG, "startRecording called")
@@ -70,6 +82,7 @@ class AsrSessionManager(
             Log.w(TAG, "Failed to read uptime for session start", t)
             sessionStartUptimeMs = 0L
         }
+        lastAudioMsForStats = 0L
         // 新会话开始：重置请求耗时，避免上一轮的值串台
         lastRequestDurationMs = null
         // 开始录音前根据设置决定是否请求短时独占音频焦点（音频避让）
@@ -121,6 +134,7 @@ class AsrSessionManager(
     /** 停止录音 */
     fun stopRecording() {
         Log.d(TAG, "stopRecording called")
+        snapshotAudioDurationIfPossible()
         asrEngine?.stop()
         // 归还音频焦点
         try {
@@ -134,7 +148,7 @@ class AsrSessionManager(
         listener.onSessionStateChanged(FloatingBallState.Processing)
 
         // 启动超时兜底
-        startProcessingTimeout()
+        startProcessingTimeout(lastAudioMsForStats)
     }
 
     /**
@@ -253,8 +267,10 @@ class AsrSessionManager(
             // 计算本次会话录音时长
             if (sessionStartUptimeMs > 0L) {
                 try {
-                    val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
-                    lastAudioMsForStats = dur
+                    if (lastAudioMsForStats == 0L) {
+                        val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
+                        lastAudioMsForStats = dur
+                    }
                 } catch (t: Throwable) {
                     Log.w(TAG, "Failed to compute audio duration in onStopped", t)
                 } finally {
@@ -267,7 +283,7 @@ class AsrSessionManager(
             } catch (t: Throwable) {
                 Log.w(TAG, "abandonAudioFocusIfNeeded failed in onStopped", t)
             }
-            startProcessingTimeout()
+            startProcessingTimeout(lastAudioMsForStats)
         }
     }
 
@@ -479,18 +495,22 @@ class AsrSessionManager(
         Log.d(TAG, "Request duration: ${ms}ms")
     }
 
-    private fun startProcessingTimeout() {
+    private fun startProcessingTimeout(audioMsOverride: Long? = null) {
         try {
             processingTimeoutJob?.cancel()
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to cancel previous timeout job", e)
         }
+        val audioMs = audioMsOverride ?: lastAudioMsForStats
+        val timeoutMs = AsrTimeoutCalculator.calculateTimeoutMs(audioMs)
         processingTimeoutJob = serviceScope.launch {
-            delay(PROCESSING_TIMEOUT_MS)
+            delay(timeoutMs)
             if (!hasCommittedResult) {
+                Log.d(TAG, "Processing timeout fired: audioMs=$audioMs, timeoutMs=$timeoutMs")
                 handleProcessingTimeout()
             }
         }
+        Log.d(TAG, "Processing timeout scheduled: audioMs=$audioMs, timeoutMs=$timeoutMs")
     }
 
     private suspend fun handleProcessingTimeout() {
