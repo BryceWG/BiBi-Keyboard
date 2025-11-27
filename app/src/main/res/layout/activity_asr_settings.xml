@@ -215,29 +215,16 @@
             android:text="@string/sf_free_register_hint" />
 
           <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+            style="@style/SettingsButtonRow">
 
             <com.google.android.material.button.MaterialButton
               android:id="@+id/btnSfFreeRegister"
-              style="@style/Widget.Material3.Button.TonalButton"
-              android:layout_width="0dp"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              android:layout_marginEnd="4dp"
-              app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+              style="@style/SettingsRowButtonLeft"
               android:text="@string/btn_sf_free_register" />
 
             <com.google.android.material.button.MaterialButton
               android:id="@+id/btnSfFreeGuide"
-              style="@style/Widget.Material3.Button.OutlinedButton"
-              android:layout_width="0dp"
-              android:layout_height="wrap_content"
-              android:layout_weight="1"
-              android:layout_marginStart="4dp"
-              app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+              style="@style/SettingsRowButtonRight"
               android:text="@string/btn_sf_free_guide" />
           </LinearLayout>
           
@@ -637,31 +624,16 @@
           android:stepSize="1" />
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="12dp"
-          android:orientation="horizontal"
-          android:gravity="center"
-          android:weightSum="2">
+          style="@style/SettingsButtonRow.MarginTop12">
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSvDownloadModel"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonLeft"
             android:text="@string/btn_sv_download_model" />
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSvImportModel"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonRight"
             android:text="@string/btn_sv_import_model" />
         </LinearLayout>
 
@@ -739,31 +711,16 @@
           android:text="@string/label_ts_pseudo_stream" />
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="horizontal"
-          android:layout_marginTop="12dp"
-          android:gravity="center"
-          android:weightSum="2">
+          style="@style/SettingsButtonRow.MarginTop12">
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTsDownloadModel"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonLeft"
             android:text="@string/btn_ts_download_model" />
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnTsImportModel"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonRight"
             android:text="@string/btn_ts_import_model" />
         </LinearLayout>
 
@@ -833,29 +790,16 @@
           android:text="@string/sv_keep_alive_always" />
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="12dp"
-          android:orientation="horizontal">
+          style="@style/SettingsButtonRow.MarginTop12">
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPfDownloadModel"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonLeft"
             android:text="@string/btn_pf_download_model" />
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPfImportModel"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonRight"
             android:text="@string/btn_pf_import_model" />
         </LinearLayout>
 
@@ -930,29 +874,16 @@
           android:text="@string/sv_keep_alive_always" />
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="12dp"
-          android:orientation="horizontal">
+          style="@style/SettingsButtonRow.MarginTop12">
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnZfDownloadModel"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonLeft"
             android:text="@string/btn_zf_download_model" />
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnZfImportModel"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonRight"
             android:text="@string/btn_zf_import_model" />
         </LinearLayout>
 

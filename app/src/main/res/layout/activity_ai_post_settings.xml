@@ -97,29 +97,17 @@
           android:text="@string/sf_free_register_hint" />
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_marginTop="8dp"
-          android:orientation="horizontal">
+          style="@style/SettingsButtonRow"
+          android:layout_marginTop="8dp">
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSfFreeLlmRegister"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonLeft"
             android:text="@string/btn_sf_free_register" />
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSfFreeLlmGuide"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
+            style="@style/SettingsRowButtonRight"
             android:text="@string/btn_sf_free_guide" />
         </LinearLayout>
       </LinearLayout>
@@ -154,26 +142,17 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="horizontal"
+          style="@style/SettingsButtonRow"
           android:layout_marginTop="4dp">
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLlmAddProfile"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            style="@style/Widget.Material3.Button.TonalButton"
+            style="@style/SettingsRowButtonLeft"
             android:text="@string/btn_llm_add_profile" />
 
           <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLlmDeleteProfile"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+            style="@style/SettingsRowButtonRight"
             android:text="@string/btn_llm_delete_profile" />
         </LinearLayout>
 
@@ -259,26 +238,17 @@
       </com.google.android.material.textfield.TextInputLayout>
 
       <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        style="@style/SettingsButtonRow"
         android:layout_marginTop="8dp">
 
         <com.google.android.material.button.MaterialButton
           android:id="@+id/btnAddPromptPreset"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          style="@style/Widget.Material3.Button.TonalButton"
+          style="@style/SettingsRowButtonLeft"
           android:text="@string/btn_add_preset" />
 
         <com.google.android.material.button.MaterialButton
           android:id="@+id/btnDeletePromptPreset"
-          android:layout_width="0dp"
-          android:layout_height="wrap_content"
-          android:layout_weight="1"
-          android:layout_marginStart="8dp"
-          style="@style/Widget.Material3.Button.OutlinedButton"
+          style="@style/SettingsRowButtonRight"
           android:text="@string/btn_delete_preset" />
       </LinearLayout>
     </LinearLayout>

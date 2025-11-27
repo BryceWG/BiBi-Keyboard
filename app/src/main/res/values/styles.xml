@@ -108,6 +108,37 @@
         <item name="iconPadding">8dp</item>
     </style>
 
+    <!-- 水平双按钮容器 -->
+    <style name="SettingsButtonRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!-- 水平双按钮容器（带顶部边距 12dp，用于模型下载等） -->
+    <style name="SettingsButtonRow.MarginTop12" parent="SettingsButtonRow">
+        <item name="android:layout_marginTop">12dp</item>
+    </style>
+
+    <!-- 水平双按钮 - 左侧 TonalButton -->
+    <style name="SettingsRowButtonLeft" parent="Widget.Material3.Button.TonalButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="shapeAppearanceOverlay">@style/AsrkbShapeOverlayCapsule</item>
+    </style>
+
+    <!-- 水平双按钮 - 右侧 OutlinedButton -->
+    <style name="SettingsRowButtonRight" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginStart">4dp</item>
+        <item name="shapeAppearanceOverlay">@style/AsrkbShapeOverlayCapsule</item>
+    </style>
+
     <!-- Slider 滑块 -->
     <style name="SettingsSlider">
         <item name="android:layout_width">match_parent</item>
