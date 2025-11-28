@@ -1,10 +1,10 @@
 {
-  "version": "3.7.3",
-  "version_code": 116,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.7.3",
-  "release_notes": "本次更新包含 3 个提交:\n- feat(asr): 更改 DashScope 流式识别为 Qwen3-ASR-Flash-Realtime 模型\n- feat(waveform): 添加波形灵敏度调节功能\n- feat(ime): 添加录音手势控制",
+  "version": "3.8.0",
+  "version_code": 117,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.8.0",
+  "release_notes": "本次更新包含 11 个提交:\n- feat(ui): 重构设置页面布局为分组卡片设计\n- feat(floating): 改进悬浮球长按移动的触摸交互\n- style(ui): 继续统一各设置页面的文字样式定义和布局结构\n- style(ui): 统一水平按钮容器的样式定义\n- feat(settings): 为 SiliconFlow 免费服务添加注册账号和配置教程按钮\n- feat(ui): 为浮动菜单添加设置按钮并优化剪贴板同步按钮显示逻辑\n- style(ui): 通过集中主题资源统一布局样式\n- feat(asr): 实现基于录音时长的动态超时计算\n- feat(asr): 添加 SiliconFlow 免费服务支持\n- feat(ui): 优化点按模式录音手势按钮文案\n- feat: 更新 v3.7.3 更新日志",
   "important_notice": "本次更新支持了硅基流动渠道的语音识别和LLM免费模型免配置支持，降低配置难度",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-25T07:57:45Z"
+  "update_time": "2025-11-28T05:50:23Z"
 }
