@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Keep artwork within ~72dp safe zone of the 108dp viewport to avoid mask clipping -->
+    <!-- 108dp viewport, 54dp artwork = 50% ratio, ensures content isn't clipped by aggressive masks -->
     <item
-        android:width="66dp"
-        android:height="66dp"
+        android:width="54dp"
+        android:height="54dp"
         android:gravity="center"
         android:drawable="@drawable/logo" />
-    <!-- If the logo still feels tight, reduce to 66dp -->
 </layer-list>
 
