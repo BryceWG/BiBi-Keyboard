@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.8.1 (2025-11-29)
+
+### UI Improvements
+
+- **App Icon Optimization**: Optimized app icon foreground layer size for better visual effect
+- **Predictive Return Animation**: Added predictive return animation to settings page for improved interaction experience, requires Android 13 or above
+
+### Improvements
+
+- **WebDAV Backup Refactoring**: Refactored WebDAV backup implementation to improve code quality and maintainability
+
+---
+
 ## v3.8.0 (2025-11-28)
 
 ### New Features

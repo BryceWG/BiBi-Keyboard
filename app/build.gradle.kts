@@ -12,8 +12,8 @@ android {
         applicationId = "com.brycewg.asrkb"
         minSdk = 29
         targetSdk = 35
-        versionCode = 117
-        versionName = "3.8.0"
+        versionCode = 118
+        versionName = "3.8.1"
 
         // 仅构建 arm64-v8a 以减小包体体积
         ndk {
@@ -125,7 +125,10 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
     implementation("com.alibaba:dashscope-sdk-java:2.21.15")
-    implementation("com.github.thegrizzlylabs:sardine-android:0.9")
+    implementation("com.github.thegrizzlylabs:sardine-android:0.9") {
+        // 避免 xpp3 中的 org.xmlpull.v1.XmlPullParser 与 Android SDK 冲突
+        exclude(module = "xpp3")
+    }
 
     // AAR 占位：sherpa-onnx Kotlin API AAR 放在 app/libs/ 会自动识别
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
