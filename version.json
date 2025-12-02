@@ -1,10 +1,10 @@
 {
-  "version": "3.8.1",
-  "version_code": 118,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.8.1",
-  "release_notes": "本次更新包含 2 个提交:\n- style(android): 优化应用图标前景图层尺寸\n- refactor(backup): 重构 WebDAV 备份实现",
+  "version": "3.8.2",
+  "version_code": 126,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.8.2",
+  "release_notes": "本次更新包含 4 个提交:\n- fix(ui): 优化状态栏图标颜色动态切换逻辑\n- feat(ui): 为本地模型设置页添加配置指南按钮\n- feat(ui): 为模型选择对话框添加跳过按钮功能\n- fix(ui): 状态栏图标颜色动态切换",
   "important_notice": "本次更新支持了硅基流动渠道的语音识别和LLM免费模型免配置支持，降低配置难度",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-11-29T04:21:11Z"
+  "update_time": "2025-12-02T05:41:14Z"
 }
