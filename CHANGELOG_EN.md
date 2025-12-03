@@ -1,5 +1,18 @@
 # Changelog
 
+## v3.8.3 (2025-12-03)
+
+### New Features
+
+- **Multi-vendor Deep Thinking Mode**: Added multi-vendor LLM deep thinking mode support, improving AI post-processing quality
+- **Built-in Service Providers**: Refactored LLM vendor architecture with support for built-in service providers, expanding post-processing capabilities
+
+### Improvements
+
+- **AI Prompt Management System**: Refactored AI post-processing prompt management system, optimizing prompt organization and usage
+
+---
+
 ## v3.8.2 (2025-12-02)
 
 ### UI Improvements
