@@ -73,8 +73,7 @@
 
         <TextView
           android:id="@+id/tvAsrVendorValue"
-          style="@style/SettingsClickableValue"
-          android:layout_marginTop="0dp"
+          style="@style/SettingsClickableValue.Dropdown"
           android:text="@string/vendor_volc" />
         <Spinner
           style="@style/SettingsHiddenSpinner" />
@@ -87,14 +86,8 @@
           android:orientation="vertical"
           android:visibility="gone">
 
-          <TextView
-            android:id="@+id/titleVolc"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/volc_section_title" />
-
           <com.google.android.material.textfield.TextInputLayout
             style="@style/SettingsTextInputLayout"
-            android:layout_marginTop="0dp"
             android:hint="@string/label_app_key">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -149,7 +142,7 @@
             android:text="@string/label_volc_language" />
           <TextView
             android:id="@+id/tvVolcLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/volc_lang_auto" />
           <Spinner
             style="@style/SettingsHiddenSpinner" />
@@ -172,11 +165,6 @@
           android:layout_height="wrap_content"
           android:orientation="vertical"
           android:visibility="gone">
-
-          <TextView
-            android:id="@+id/titleSf"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/sf_section_title" />
 
           <!-- 免费服务开关 -->
           <com.google.android.material.materialswitch.MaterialSwitch
@@ -203,7 +191,7 @@
               android:text="@string/label_sf_model_select" />
             <TextView
               android:id="@+id/tvSfFreeModelValue"
-              style="@style/SettingsClickableValue"
+              style="@style/SettingsClickableValue.Dropdown"
               android:text="@string/sf_model_default_display" />
 
             <!-- Powered by SiliconFlow Logo -->
@@ -263,7 +251,7 @@
               android:text="@string/label_sf_model_select" />
             <TextView
               android:id="@+id/tvSfModelValue"
-              style="@style/SettingsClickableValue"
+              style="@style/SettingsClickableValue.Dropdown"
               android:text="@string/sf_model_default_display" />
             <Spinner
               style="@style/SettingsHiddenSpinner" />
@@ -293,14 +281,8 @@
           android:orientation="vertical"
           android:visibility="gone">
 
-          <TextView
-            android:id="@+id/titleEleven"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/eleven_section_title" />
-
           <com.google.android.material.textfield.TextInputLayout
             style="@style/SettingsTextInputLayout"
-            android:layout_marginTop="0dp"
             android:hint="@string/label_eleven_api_key">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -314,7 +296,7 @@
             android:text="@string/label_eleven_language" />
           <TextView
             android:id="@+id/tvElevenLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/eleven_lang_auto" />
           <Spinner
             style="@style/SettingsHiddenSpinner" />
@@ -338,14 +320,8 @@
           android:orientation="vertical"
           android:visibility="gone">
 
-          <TextView
-            android:id="@+id/titleOpenAI"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/openai_section_title" />
-
           <com.google.android.material.textfield.TextInputLayout
             style="@style/SettingsTextInputLayout"
-            android:layout_marginTop="0dp"
             android:hint="@string/label_openai_asr_endpoint">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -394,7 +370,7 @@
             android:text="@string/label_openai_language" />
           <TextView
             android:id="@+id/tvOpenAiLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/dash_lang_auto" />
           <Spinner
             style="@style/SettingsHiddenSpinner" />
@@ -413,14 +389,8 @@
           android:orientation="vertical"
           android:visibility="gone">
 
-          <TextView
-            android:id="@+id/titleDash"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/dash_section_title" />
-
           <com.google.android.material.textfield.TextInputLayout
             style="@style/SettingsTextInputLayout"
-            android:layout_marginTop="0dp"
             android:hint="@string/label_dash_api_key">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -446,7 +416,7 @@
 
           <TextView
             android:id="@+id/tvDashLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/dash_lang_auto" />
           <Spinner
             style="@style/SettingsHiddenSpinner" />
@@ -458,7 +428,7 @@
 
           <TextView
             android:id="@+id/tvDashRegionValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/dash_region_cn" />
 
           <com.google.android.material.materialswitch.MaterialSwitch
@@ -485,14 +455,8 @@
           android:orientation="vertical"
           android:visibility="gone">
 
-          <TextView
-            android:id="@+id/titleGemini"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/gemini_section_title" />
-
           <com.google.android.material.textfield.TextInputLayout
             style="@style/SettingsTextInputLayout"
-            android:layout_marginTop="0dp"
             android:hint="@string/label_gemini_api_key">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -539,14 +503,8 @@
           android:orientation="vertical"
           android:visibility="gone">
 
-          <TextView
-            android:id="@+id/titleSoniox"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/soniox_section_title" />
-
           <com.google.android.material.textfield.TextInputLayout
             style="@style/SettingsTextInputLayout"
-            android:layout_marginTop="0dp"
             android:hint="@string/label_soniox_api_key">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -566,7 +524,7 @@
 
           <TextView
             android:id="@+id/tvSonioxLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/soniox_lang_auto" />
 
           <com.google.android.material.button.MaterialButton
@@ -584,14 +542,8 @@
           android:visibility="gone">
 
           <TextView
-            android:id="@+id/titleSenseVoice"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/sensevoice_section_title" />
-
-          <TextView
             android:id="@+id/tvSvModelVariantValue"
-            style="@style/SettingsClickableValue"
-            android:layout_marginTop="0dp"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/sv_model_small_int8" />
           <Spinner
             style="@style/SettingsHiddenSpinner" />
@@ -602,7 +554,7 @@
 
           <TextView
             android:id="@+id/tvSvLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/sv_lang_auto" />
 
           <com.google.android.material.materialswitch.MaterialSwitch
@@ -626,7 +578,7 @@
 
           <TextView
             android:id="@+id/tvSvKeepAliveValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/sv_keep_alive_always" />
           <Spinner
             style="@style/SettingsHiddenSpinner" />
@@ -686,14 +638,8 @@
           android:visibility="gone">
 
           <TextView
-            android:id="@+id/titleTelespeech"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/telespeech_section_title" />
-
-          <TextView
             android:id="@+id/tvTsModelVariantValue"
-            style="@style/SettingsClickableValue"
-            android:layout_marginTop="0dp"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/ts_model_int8" />
 
           <Spinner
@@ -705,7 +651,7 @@
 
           <TextView
             android:id="@+id/tvTsKeepAliveValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/sv_keep_alive_always" />
 
           <Spinner
@@ -781,14 +727,8 @@
           android:visibility="gone">
 
           <TextView
-            android:id="@+id/titleParaformer"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/paraformer_section_title" />
-
-          <TextView
             android:id="@+id/tvPfModelVariantValue"
-            style="@style/SettingsClickableValue"
-            android:layout_marginTop="0dp"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/pf_variant_bilingual_int8" />
 
           <com.google.android.material.materialswitch.MaterialSwitch
@@ -818,7 +758,7 @@
 
           <TextView
             android:id="@+id/tvPfKeepAliveValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/sv_keep_alive_always" />
 
           <LinearLayout
@@ -871,14 +811,8 @@
           android:visibility="gone">
 
           <TextView
-            android:id="@+id/titleZipformer"
-            style="@style/SettingsSectionTitle"
-            android:text="@string/zipformer_section_title" />
-
-          <TextView
             android:id="@+id/tvZfModelVariantValue"
-            style="@style/SettingsClickableValue"
-            android:layout_marginTop="0dp"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/zf_variant_zh_xl_int8_20250630" />
 
           <com.google.android.material.materialswitch.MaterialSwitch
@@ -907,7 +841,7 @@
 
           <TextView
             android:id="@+id/tvZfKeepAliveValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/sv_keep_alive_always" />
 
           <LinearLayout

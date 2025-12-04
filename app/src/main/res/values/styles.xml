@@ -45,6 +45,20 @@
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
+    <!-- 可点击选择项（带下拉箭头和边框，用于弹出选择器） -->
+    <style name="SettingsClickableValue.Dropdown" parent="SettingsClickableValue">
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:background">@drawable/bg_clickable_selector</item>
+        <item name="android:foreground">@null</item>
+        <item name="android:paddingStart">20dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:drawableEnd">@drawable/caret_circle_down</item>
+        <item name="android:drawablePadding">8dp</item>
+        <item name="android:drawableTint">?attr/colorOnSurfaceVariant</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
     <!-- MaterialSwitch 开关 -->
     <style name="SettingsSwitch">
         <item name="android:layout_width">match_parent</item>
@@ -76,7 +90,12 @@
     <style name="SettingsTextInputLayout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
         <item name="boxBackgroundMode">outline</item>
+        <item name="boxCornerRadiusTopStart">20dp</item>
+        <item name="boxCornerRadiusTopEnd">20dp</item>
+        <item name="boxCornerRadiusBottomStart">20dp</item>
+        <item name="boxCornerRadiusBottomEnd">20dp</item>
     </style>
 
     <!-- TextInputLayout（带上边距） -->
@@ -196,6 +215,22 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:visibility">gone</item>
+    </style>
+
+    <!-- 分段按钮组（用于少量固定选项，如大/中/小） -->
+    <style name="SettingsSegmentedButtonGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="singleSelection">true</item>
+        <item name="selectionRequired">true</item>
+    </style>
+
+    <!-- 分段按钮项 -->
+    <style name="SettingsSegmentedButton" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
     </style>
 
     <!-- 状态/下载状态文字 -->

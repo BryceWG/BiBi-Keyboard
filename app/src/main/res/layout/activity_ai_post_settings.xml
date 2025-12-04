@@ -73,7 +73,7 @@
 
         <TextView
           android:id="@+id/tvLlmVendor"
-          style="@style/SettingsClickableValue" />
+          style="@style/SettingsClickableValue.Dropdown" />
 
         <!-- ========== SiliconFlow 配置区域 ========== -->
         <LinearLayout
@@ -109,14 +109,9 @@
               android:inputType="textPassword" />
           </com.google.android.material.textfield.TextInputLayout>
 
-          <!-- 模型选择 -->
-          <TextView
-            style="@style/SettingsSectionTitle"
-            android:text="@string/label_sf_free_llm_model" />
-
           <TextView
             android:id="@+id/tvSfFreeLlmModel"
-            style="@style/SettingsClickableValue" />
+            style="@style/SettingsClickableValue.Dropdown" />
 
           <!-- 自定义模型ID输入 (选中自定义模型时可见) -->
           <com.google.android.material.textfield.TextInputLayout
@@ -216,14 +211,9 @@
               android:inputType="textPassword" />
           </com.google.android.material.textfield.TextInputLayout>
 
-          <!-- 模型选择 -->
-          <TextView
-            style="@style/SettingsSectionTitle"
-            android:text="@string/label_llm_model_select" />
-
           <TextView
             android:id="@+id/tvBuiltinModel"
-            style="@style/SettingsClickableValue" />
+            style="@style/SettingsClickableValue.Dropdown" />
 
           <!-- 自定义模型ID输入 (选中自定义时可见) -->
           <com.google.android.material.textfield.TextInputLayout
@@ -305,7 +295,7 @@
 
           <TextView
             android:id="@+id/tvLlmProfilesValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/untitled_profile" />
 
           <Spinner style="@style/SettingsHiddenSpinner" />
@@ -393,8 +383,7 @@
 
         <TextView
           android:id="@+id/tvPromptPresetsValue"
-          style="@style/SettingsClickableValue"
-          android:layout_marginTop="0dp"
+          style="@style/SettingsClickableValue.Dropdown"
           android:text="@string/untitled_preset" />
 
         <Spinner style="@style/SettingsHiddenSpinner" />

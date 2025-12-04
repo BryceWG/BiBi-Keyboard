@@ -107,8 +107,7 @@
 
         <TextView
           android:id="@+id/tvSpeechPresetsValue"
-          style="@style/SettingsClickableValue"
-          android:layout_marginTop="4dp"
+          style="@style/SettingsClickableValue.Dropdown"
           android:text="@string/speech_preset_empty_placeholder" />
 
         <Spinner

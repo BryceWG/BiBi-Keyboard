@@ -19,6 +19,7 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.installExplainedSwitch
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 
@@ -61,7 +62,7 @@ class InputSettingsActivity : AppCompatActivity() {
         val switchDuckMediaOnRecord = findViewById<MaterialSwitch>(R.id.switchDuckMediaOnRecord)
         val switchHeadsetMicPriority = findViewById<MaterialSwitch>(R.id.switchHeadsetMicPriority)
         val switchExternalImeAidl = findViewById<MaterialSwitch>(R.id.switchExternalImeAidl)
-        val tvKeyboardHeight = findViewById<TextView>(R.id.tvKeyboardHeightValue)
+        val toggleKeyboardHeight = findViewById<MaterialButtonToggleGroup>(R.id.toggleKeyboardHeight)
         val tvLanguage = findViewById<TextView>(R.id.tvLanguageValue)
         val sliderBottomPadding = findViewById<com.google.android.material.slider.Slider>(R.id.sliderBottomPadding)
         val tvBottomPaddingValue = findViewById<TextView>(R.id.tvBottomPaddingValue)
@@ -110,8 +111,8 @@ class InputSettingsActivity : AppCompatActivity() {
         }
         applyPrefsToUi()
 
-        // 键盘高度：三档（点击弹出单选对话框）
-        setupKeyboardHeightSelection(prefs, tvKeyboardHeight)
+        // 键盘高度：三档（分段按钮）
+        setupKeyboardHeightToggle(prefs, toggleKeyboardHeight)
 
         // 底部间距调节
         setupBottomPaddingSlider(prefs, sliderBottomPadding, tvBottomPaddingValue)
@@ -275,37 +276,31 @@ class InputSettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * 设置键盘高度选择对话框
+     * 设置键盘高度分段按钮
      */
-    private fun setupKeyboardHeightSelection(prefs: Prefs, tvKeyboardHeight: TextView) {
-        val options = listOf(
-            getString(R.string.keyboard_height_small),
-            getString(R.string.keyboard_height_medium),
-            getString(R.string.keyboard_height_large)
-        )
+    private fun setupKeyboardHeightToggle(prefs: Prefs, toggleGroup: MaterialButtonToggleGroup) {
+        // 按钮 ID 与 tier 值的映射：small=1, medium=2, large=3
+        val buttonIds = listOf(R.id.btnHeightSmall, R.id.btnHeightMedium, R.id.btnHeightLarge)
 
-        fun updateSummary() {
-            val idx = (prefs.keyboardHeightTier - 1).coerceIn(0, 2)
-            tvKeyboardHeight.text = options[idx]
-        }
-        updateSummary()
+        // 初始化选中状态
+        val currentTier = prefs.keyboardHeightTier.coerceIn(1, 3)
+        toggleGroup.check(buttonIds[currentTier - 1])
 
-        tvKeyboardHeight.setOnClickListener { v ->
-            hapticTapIfEnabled(v)
-            val currentIndex = (prefs.keyboardHeightTier - 1).coerceIn(0, 2)
-            showSingleChoiceDialog(
-                titleRes = R.string.label_keyboard_height,
-                items = options,
-                currentIndex = currentIndex,
-                onSelected = { selectedIndex ->
-                    val tier = (selectedIndex + 1).coerceIn(1, 3)
-                    if (prefs.keyboardHeightTier != tier) {
-                        prefs.keyboardHeightTier = tier
-                        updateSummary()
-                        sendRefreshBroadcast()
-                    }
+        // 监听选择变化
+        toggleGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            if (isChecked) {
+                hapticTapIfEnabled(group)
+                val newTier = when (checkedId) {
+                    R.id.btnHeightSmall -> 1
+                    R.id.btnHeightMedium -> 2
+                    R.id.btnHeightLarge -> 3
+                    else -> 2
                 }
-            )
+                if (prefs.keyboardHeightTier != newTier) {
+                    prefs.keyboardHeightTier = newTier
+                    sendRefreshBroadcast()
+                }
+            }
         }
     }
 

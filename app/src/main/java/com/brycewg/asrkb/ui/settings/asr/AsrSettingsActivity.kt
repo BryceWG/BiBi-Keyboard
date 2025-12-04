@@ -85,19 +85,6 @@ class AsrSettingsActivity : AppCompatActivity() {
     private lateinit var groupParaformer: View
     private lateinit var groupZipformer: View
 
-    // Vendor title views
-    private lateinit var titleVolc: View
-    private lateinit var titleSf: View
-    private lateinit var titleEleven: View
-    private lateinit var titleOpenAi: View
-    private lateinit var titleDash: View
-    private lateinit var titleGemini: View
-    private lateinit var titleSoniox: View
-    private lateinit var titleSenseVoice: View
-    private lateinit var titleTelespeech: View
-    private lateinit var titleParaformer: View
-    private lateinit var titleZipformer: View
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_asr_settings)
@@ -157,19 +144,6 @@ class AsrSettingsActivity : AppCompatActivity() {
         groupTelespeech = findViewById(R.id.groupTelespeech)
         groupParaformer = findViewById(R.id.groupParaformer)
         groupZipformer = findViewById(R.id.groupZipformer)
-
-        // Vendor titles
-        titleVolc = findViewById(R.id.titleVolc)
-        titleSf = findViewById(R.id.titleSf)
-        titleEleven = findViewById(R.id.titleEleven)
-        titleOpenAi = findViewById(R.id.titleOpenAI)
-        titleDash = findViewById(R.id.titleDash)
-        titleGemini = findViewById(R.id.titleGemini)
-        titleSoniox = findViewById(R.id.titleSoniox)
-        titleSenseVoice = findViewById(R.id.titleSenseVoice)
-        titleTelespeech = findViewById(R.id.titleTelespeech)
-        titleParaformer = findViewById(R.id.titleParaformer)
-        titleZipformer = findViewById(R.id.titleZipformer)
     }
 
     private fun setupVendorSelection() {
@@ -1898,23 +1872,21 @@ class AsrSettingsActivity : AppCompatActivity() {
 
     private fun updateVendorVisibility(state: AsrSettingsUiState) {
         val visMap = mapOf(
-            AsrVendor.Volc to listOf(titleVolc, groupVolc),
-            AsrVendor.SiliconFlow to listOf(titleSf, groupSf),
-            AsrVendor.ElevenLabs to listOf(titleEleven, groupEleven),
-            AsrVendor.OpenAI to listOf(titleOpenAi, groupOpenAi),
-            AsrVendor.DashScope to listOf(titleDash, groupDash),
-            AsrVendor.Gemini to listOf(titleGemini, groupGemini),
-            AsrVendor.Soniox to listOf(titleSoniox, groupSoniox),
-            AsrVendor.SenseVoice to listOf(titleSenseVoice, groupSenseVoice),
-            AsrVendor.Telespeech to listOf(titleTelespeech, groupTelespeech),
-            AsrVendor.Paraformer to listOf(titleParaformer, groupParaformer),
-            AsrVendor.Zipformer to listOf(titleZipformer, groupZipformer)
+            AsrVendor.Volc to groupVolc,
+            AsrVendor.SiliconFlow to groupSf,
+            AsrVendor.ElevenLabs to groupEleven,
+            AsrVendor.OpenAI to groupOpenAi,
+            AsrVendor.DashScope to groupDash,
+            AsrVendor.Gemini to groupGemini,
+            AsrVendor.Soniox to groupSoniox,
+            AsrVendor.SenseVoice to groupSenseVoice,
+            AsrVendor.Telespeech to groupTelespeech,
+            AsrVendor.Paraformer to groupParaformer,
+            AsrVendor.Zipformer to groupZipformer
         )
-        visMap.forEach { (vendor, views) ->
+        visMap.forEach { (vendor, view) ->
             val vis = if (vendor == state.selectedVendor) View.VISIBLE else View.GONE
-            views.forEach { v ->
-                if (v.visibility != vis) v.visibility = vis
-            }
+            if (view.visibility != vis) view.visibility = vis
         }
     }
 

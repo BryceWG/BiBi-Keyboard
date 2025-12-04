@@ -120,13 +120,26 @@
             android:layout_marginTop="0dp"
             android:text="@string/label_keyboard_height" />
 
-          <TextView
-            android:id="@+id/tvKeyboardHeightValue"
-            style="@style/SettingsClickableValue"
-            android:text="@string/keyboard_height_medium" />
+          <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleKeyboardHeight"
+            style="@style/SettingsSegmentedButtonGroup">
 
-          <Spinner
-            style="@style/SettingsHiddenSpinner" />
+            <Button
+              android:id="@+id/btnHeightSmall"
+              style="@style/SettingsSegmentedButton"
+              android:text="@string/keyboard_height_small" />
+
+            <Button
+              android:id="@+id/btnHeightMedium"
+              style="@style/SettingsSegmentedButton"
+              android:text="@string/keyboard_height_medium" />
+
+            <Button
+              android:id="@+id/btnHeightLarge"
+              style="@style/SettingsSegmentedButton"
+              android:text="@string/keyboard_height_large" />
+
+          </com.google.android.material.button.MaterialButtonToggleGroup>
 
           <!-- 底部间距调节 -->
           <TextView
@@ -193,11 +206,8 @@
 
           <TextView
             android:id="@+id/tvLanguageValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/lang_follow_system" />
-
-          <Spinner
-            style="@style/SettingsHiddenSpinner" />
 
           <!-- 扩展按钮配置 -->
           <TextView
@@ -206,7 +216,7 @@
 
           <TextView
             android:id="@+id/tvExtensionButtonsValue"
-            style="@style/SettingsClickableValue"
+            style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/ext_btn_default_summary" />
 
         </LinearLayout>
