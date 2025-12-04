@@ -9,8 +9,10 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSource
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -67,7 +69,12 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
 
   companion object {
     private const val TAG = "LlmPostProcessor"
-    private const val DEFAULT_TIMEOUT_SECONDS = 30L
+
+    /** 连接超时（秒） */
+    private const val CONNECT_TIMEOUT_SECONDS = 30L
+
+    /** 首 token 超时（秒）- streaming 模式下等待首个数据块的最大时间 */
+    private const val FIRST_TOKEN_TIMEOUT_SECONDS = 60L
 
     /**
      * 用于包装用户输入文本的前缀。
@@ -239,11 +246,13 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
    *
    * @param config LLM 配置
    * @param messages 消息列表（JSONArray）
+   * @param streaming 是否启用流式传输
    * @return 构建好的 Request 对象
    */
   private fun buildRequest(
     config: LlmRequestConfig,
-    messages: JSONArray
+    messages: JSONArray,
+    streaming: Boolean = true
   ): Request {
     val url = resolveUrl(config.endpoint)
 
@@ -251,6 +260,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
       put("model", config.model)
       put("temperature", kotlin.math.round(config.temperature * 100) / 100)
       put("messages", messages)
+      put("stream", streaming)
 
       // Add reasoning control parameters based on vendor
       addReasoningParams(this, config)
@@ -271,10 +281,19 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
 
   /**
    * 获取或创建 OkHttpClient
+   *
+   * 超时策略说明：
+   * - connectTimeout: 建立连接的超时时间
+   * - readTimeout: 等待首个数据块的超时时间（首 token 超时）
+   * - writeTimeout: 写入请求体的超时时间
+   * - 不设置 callTimeout: streaming 模式下总时长不受限制
    */
   private fun getHttpClient(): OkHttpClient {
     return client ?: OkHttpClient.Builder()
-      .callTimeout(DEFAULT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      .readTimeout(0, TimeUnit.SECONDS)
+      .writeTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+      // 不设置 callTimeout，让 streaming 可以持续接收数据
       .build()
   }
 
@@ -323,12 +342,127 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
   }
 
   /**
+   * 从 SSE 流中解析并拼接所有文本内容
+   *
+   * @param source 响应的 BufferedSource
+   * @return 拼接后的完整文本
+   */
+  private fun parseStreamingResponse(source: BufferedSource): String {
+    val contentBuilder = StringBuilder()
+    val timeout = source.timeout()
+    // 仅首个数据块启用超时，之后允许长间隔
+    timeout.timeout(FIRST_TOKEN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+    var waitingFirstEvent = true
+    var shouldStop = false
+    val eventBuilder = StringBuilder()
+
+    fun flushEvent() {
+      if (eventBuilder.isEmpty()) return
+      val rawData = eventBuilder.toString().trim()
+      eventBuilder.clear()
+
+      if (waitingFirstEvent) {
+        timeout.timeout(0, TimeUnit.MILLISECONDS)
+        timeout.clearDeadline()
+        waitingFirstEvent = false
+      }
+
+      if (rawData.isEmpty()) return
+      if (rawData == "[DONE]") {
+        shouldStop = true
+        return
+      }
+
+      try {
+        val json = JSONObject(rawData)
+        val choices = json.optJSONArray("choices") ?: return
+        if (choices.length() == 0) return
+
+        val choice = choices.getJSONObject(0)
+        val delta = choice.optJSONObject("delta")
+        if (delta != null) {
+          when (val content = delta.opt("content")) {
+            is String -> if (content.isNotEmpty()) contentBuilder.append(content)
+            is JSONArray -> {
+              for (i in 0 until content.length()) {
+                when (val item = content.get(i)) {
+                  is String -> if (item.isNotEmpty()) contentBuilder.append(item)
+                  is JSONObject -> {
+                    val textPart = item.optString("text")
+                    if (textPart.isNotEmpty()) contentBuilder.append(textPart)
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        val finishReason = choice.optString("finish_reason", "")
+        if (finishReason == "stop") {
+          shouldStop = true
+        }
+      } catch (e: Exception) {
+        Log.w(TAG, "Parse SSE chunk failed: $rawData", e)
+      }
+    }
+
+    while (!source.exhausted() && !shouldStop) {
+      val line = try {
+        source.readUtf8Line() ?: break
+      } catch (e: IOException) {
+        Log.w(TAG, "Read line failed", e)
+        break
+      }
+
+      if (line.isEmpty()) {
+        flushEvent()
+        continue
+      }
+
+      // SSE 格式: 以 data: 开头的事件行，可能跨多行
+      if (line.startsWith("data:")) {
+        eventBuilder.append(line.removePrefix("data:").trim()).append('\n')
+      }
+    }
+
+    // 处理未以空行结尾的事件
+    if (!shouldStop) {
+      flushEvent()
+    }
+
+    return contentBuilder.toString()
+  }
+
+  /**
    * 复用的底层 Chat 调用：构建请求、执行并解析文本。
+   * 使用 streaming 模式，支持长时间等待和持续接收。
    * 需确保在非主线程调用。
    */
   private fun performChat(config: LlmRequestConfig, messages: JSONArray): RawCallResult {
+    val streamingResult = performChatInternal(config, messages, streaming = true)
+    if (streamingResult.ok) return streamingResult
+
+    // 若服务端拒绝或不支持流式，尝试回退到非流模式
+    val shouldRetryWithoutStream = streamingResult.httpCode in listOf(400, 404, 405, 415, 422) ||
+      (streamingResult.error?.contains("stream", ignoreCase = true) == true) ||
+      (streamingResult.error?.contains("sse", ignoreCase = true) == true)
+
+    if (!shouldRetryWithoutStream) return streamingResult
+
+    Log.w(TAG, "Streaming call failed (code=${streamingResult.httpCode}): ${streamingResult.error ?: ""}. Retrying without stream.")
+    val fallback = performChatInternal(config, messages, streaming = false)
+    if (fallback.ok) return fallback
+
+    return fallback.copy(error = fallback.error ?: streamingResult.error)
+  }
+
+  private fun performChatInternal(
+    config: LlmRequestConfig,
+    messages: JSONArray,
+    streaming: Boolean
+  ): RawCallResult {
     val req = try {
-      buildRequest(config, messages)
+      buildRequest(config, messages, streaming = streaming)
     } catch (t: Throwable) {
       Log.e(TAG, "Failed to build request", t)
       return RawCallResult(false, error = "Build request failed: ${t.message}")
@@ -349,18 +483,28 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     }
 
     val text = try {
-      val body = resp.body?.string()
-      if (body == null) {
+      val body = resp.body ?: run {
         Log.w(TAG, "Response body is null")
         return RawCallResult(false, error = "Empty body")
       }
-      val extracted = extractTextFromResponse(body, "")
-      if (extracted.isBlank()) {
+
+      val contentType = resp.header("Content-Type") ?: body.contentType()?.toString().orEmpty()
+      val isEventStream = streaming && contentType.contains("text/event-stream", ignoreCase = true)
+
+      val parsed = if (isEventStream) {
+        parseStreamingResponse(body.source())
+      } else {
+        val respText = body.string()
+        extractTextFromResponse(respText, fallback = "")
+      }
+
+      val filtered = filterThinkTags(parsed)
+      if (filtered.isBlank()) {
         return RawCallResult(false, error = "Empty result")
       }
-      extracted
+      filtered
     } catch (t: Throwable) {
-      Log.e(TAG, "Failed to parse response", t)
+      Log.e(TAG, "Failed to parse ${if (streaming) "streaming" else "non-streaming"} response", t)
       return RawCallResult(false, error = t.message ?: "Parse error")
     } finally {
       try {
