@@ -1,11 +1,11 @@
 {
-  "version": "3.8.5",
-  "version_code": 129,
-  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.8.5",
-  "release_notes": "### 新增功能\n\n- **火山引擎标准版文件识别**: 新增火山引擎标准版文件识别支持，包含超时机制和详细错误处理\n- **豆包语音识别模型 2.0**: 为火山引擎添加豆包语音识别模型 2.0 支持(暂不支持文件识别极速版)，提升识别准确性\n\n### 改进优化\n\n- **发布流程改进**: 改进发布流程以支持中英文更新日志，提升多语言发布效率",
-  "release_notes_en": "### New Features\n\n- **Volcengine Standard File Recognition**: Added Volcengine standard file recognition support with timeout mechanism and detailed error handling\n- **Doubao Speech Recognition Model 2.0**: Added Doubao speech recognition model 2.0 support for Volcengine(), improving recognition accuracy\n\n### Improvements\n\n- **Release Process Enhancement**: Improved release process to support both Chinese and English changelogs, enhancing multilingual release efficiency",
+  "version": "3.8.6",
+  "version_code": 130,
+  "download_url": "https://github.com/BryceWG/LexiSharp-Keyboard/releases/tag/v3.8.6",
+  "release_notes": "### 新增功能\n\n- **智谱 GLM ASR 支持**: 新增智谱 GLM 语音识别引擎支持，为下一个版本的 GLM-ASR 做准备\n- **火山引擎模型版本选择**: 为火山引擎豆包 ASR 添加模型版本选择功能，支持在不同模型版本间切换\n- **Pro 版本宣传弹窗**: 添加 Pro 版本功能介绍弹窗，帮助用户了解专业版特性",
+  "release_notes_en": "### New Features\n\n- **Zhipu GLM ASR Support**: Added Zhipu GLM speech recognition engine support, ready for next version of GLM-ASR\n- **Volcengine Model Version Selection**: Added model version selection for Volcengine Doubao ASR, allowing switching between different model versions\n- **Pro Version Promotion Dialog**: Added Pro version feature introduction dialog to help users learn about professional edition features",
   "important_notice": "Pro版本已上架，欢迎在3.8.6后版本-关于页面中了解详情。\n注意:3.8.5更新升级了火山引擎(豆包语音识别模型)到了2.0版本,请到控制台开通对应模型(https://console.volcengine.com/speech/service),或者可以在3.8.6版本中通过开关选择回退到1.0版本。",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-12-06T06:45:21Z"
+  "update_time": "2025-12-09T02:54:05Z"
 }
