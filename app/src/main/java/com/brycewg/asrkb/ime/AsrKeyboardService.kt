@@ -217,6 +217,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         asrManager.setListener(actionHandler)
         actionHandler.setUiListener(this)
         actionHandler.setInputConnectionProvider { currentInputConnection }
+        actionHandler.setEditorInfoProvider { currentInputEditorInfo }
 
         // 构建初始 ASR 引擎
         asrManager.rebuildEngine()
@@ -736,7 +737,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
         // 数字小键盘：回车
         btnNumpadEnter?.setOnClickListener { v ->
             performKeyHaptic(v)
-            inputHelper.sendEnter(currentInputConnection)
+            inputHelper.sendEnter(currentInputConnection, currentInputEditorInfo)
         }
 
         // 数字小键盘：退格（位于回车上方）
@@ -1048,7 +1049,7 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
 
         btnEnter?.setOnClickListener { v ->
             performKeyHaptic(v)
-            inputHelper.sendEnter(currentInputConnection)
+            inputHelper.sendEnter(currentInputConnection, currentInputEditorInfo)
         }
 
         btnHide?.setOnClickListener { v ->

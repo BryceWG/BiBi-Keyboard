@@ -2,6 +2,7 @@ package com.brycewg.asrkb.ime
 
 import android.util.Log
 import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 
 /**
@@ -229,16 +230,50 @@ class InputConnectionHelper(
     }
 
     /**
-     * 发送回车键
+     * 发送回车键或执行编辑器动作
+     *
+     * 根据 EditorInfo 的 imeOptions 判断行为：
+     * - 对于 IME_ACTION_SEND/GO/SEARCH/DONE/NEXT/PREVIOUS，执行 performEditorAction
+     * - 对于多行输入框或 IME_ACTION_NONE/UNSPECIFIED，发送普通回车键
+     *
+     * @param ic InputConnection 实例
+     * @param editorInfo 当前编辑器信息，用于判断应执行的动作
      */
-    fun sendEnter(ic: InputConnection?): Boolean {
+    fun sendEnter(ic: InputConnection?, editorInfo: EditorInfo? = null): Boolean {
         if (ic == null) {
             Log.w(tag, "sendEnter: InputConnection is null")
             return false
         }
         return try {
-            ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
-            ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+            val imeOptions = editorInfo?.imeOptions ?: 0
+            val action = imeOptions and EditorInfo.IME_MASK_ACTION
+            val isMultiLine = (editorInfo?.inputType ?: 0) and
+                    android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE != 0
+            val flagNoEnterAction = (imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION) != 0
+
+            // 根据 action 类型和输入框特性决定行为
+            val shouldPerformAction = when {
+                // 多行且设置了 NO_ENTER_ACTION 标志，发送普通回车
+                isMultiLine && flagNoEnterAction -> false
+                // 特定的 action 类型需要执行 performEditorAction
+                action == EditorInfo.IME_ACTION_SEND ||
+                action == EditorInfo.IME_ACTION_GO ||
+                action == EditorInfo.IME_ACTION_SEARCH ||
+                action == EditorInfo.IME_ACTION_DONE ||
+                action == EditorInfo.IME_ACTION_NEXT ||
+                action == EditorInfo.IME_ACTION_PREVIOUS -> true
+                // 其他情况发送普通回车
+                else -> false
+            }
+
+            if (shouldPerformAction) {
+                Log.d(tag, "sendEnter: performEditorAction($action)")
+                ic.performEditorAction(action)
+            } else {
+                Log.d(tag, "sendEnter: sendKeyEvent(KEYCODE_ENTER)")
+                ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
+                ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+            }
             true
         } catch (e: Throwable) {
             Log.e(tag, "sendEnter failed", e)

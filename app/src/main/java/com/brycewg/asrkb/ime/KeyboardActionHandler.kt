@@ -2,6 +2,7 @@ package com.brycewg.asrkb.ime
 
 import android.content.Context
 import android.util.Log
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmPostProcessor
@@ -1198,7 +1199,7 @@ class KeyboardActionHandler(
 
         // 若需要，最终结果后自动发送回车（仅一次）
         if (finalOut.isNotEmpty() && autoEnterOnce) {
-            try { inputHelper.sendEnter(ic) } catch (t: Throwable) {
+            try { inputHelper.sendEnter(ic, getCurrentEditorInfo()) } catch (t: Throwable) {
                 Log.w(TAG, "sendEnter after postprocess failed", t)
             }
             autoEnterOnce = false
@@ -1326,7 +1327,7 @@ class KeyboardActionHandler(
 
         // 若需要，最终结果后自动发送回车（仅一次）
         if (finalToCommit.isNotEmpty() && autoEnterOnce) {
-            try { inputHelper.sendEnter(ic) } catch (t: Throwable) {
+            try { inputHelper.sendEnter(ic, getCurrentEditorInfo()) } catch (t: Throwable) {
                 Log.w(TAG, "sendEnter after final failed", t)
             }
             autoEnterOnce = false
@@ -1497,6 +1498,19 @@ class KeyboardActionHandler(
 
     private fun getCurrentInputConnection(): InputConnection? {
         return currentInputConnectionProvider?.invoke()
+    }
+
+    /**
+     * 获取当前编辑器信息（需要从外部注入）
+     */
+    private var currentEditorInfoProvider: (() -> EditorInfo?)? = null
+
+    fun setEditorInfoProvider(provider: () -> EditorInfo?) {
+        currentEditorInfoProvider = provider
+    }
+
+    private fun getCurrentEditorInfo(): EditorInfo? {
+        return currentEditorInfoProvider?.invoke()
     }
 
     // 会话一次性标记：最终结果提交后是否自动发送回车
