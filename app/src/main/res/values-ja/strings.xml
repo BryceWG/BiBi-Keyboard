@@ -271,4 +271,31 @@
   <!-- 使用統計を無効化 -->
   <string name="feature_disable_usage_stats_off_desc">使用統計（総文字数と集計データ）が参考用に収集されます。</string>
   <string name="feature_disable_usage_stats_on_desc">使用統計は収集されません。有効にすると既存の統計データがすべて削除されます。プライバシー保護に使用します。</string>
+
+  <!-- ============================================== -->
+  <!-- Pro版プロモーション -->
+  <!-- ============================================== -->
+  <string name="pro_promo_title">言犀キーボード Pro 版が Play ストアで公開中！</string>
+  <string name="pro_promo_price">4.49ドルの買い切り。ライセンスはアカウントに紐づき、デバイス数制限なし。</string>
+  <string name="pro_promo_features_title">Pro 限定機能：</string>
+  <string name="pro_promo_features">1. 複数ベンダー統一ホットワード管理（オフラインモデルと ElevenLabs を除く）\n2. WebDAV 自動バックアップ\n3. カスタム UI カラー\n4. 全方向カーソルスライド\n5. オフライン繁体字変換\n6. 正規表現ポストプロセス</string>
+  <string name="pro_promo_future">今後も継続的にアップデート予定…</string>
+  <string name="pro_promo_once_hint">このダイアログは一度だけ表示されます。後で「アプリについて」から再確認できます。</string>
+  <string name="pro_promo_btn_play_store">Play ストアで入手</string>
+  <string name="pro_promo_btn_telegram">Telegram グループに参加</string>
+  <string name="pro_promo_btn_payment_qr">QRコードで購入</string>
+  <string name="pro_promo_btn_close">閉じる</string>
+  <string name="about_btn_learn_pro">Pro について</string>
+
+  <!-- 支払いQRコードダイアログ -->
+  <string name="payment_qr_title">QRコードで Pro を購入</string>
+  <string name="payment_qr_instruction">WeChatまたはAlipayで作者に直接お支払い（32元）いただき、支払いスクリーンショットと注文番号を含む備考を作者のメールアドレスに送信してください。作者は最長1〜2日以内にアクティベーションコードを返信します。</string>
+  <string name="payment_qr_wechat">WeChat</string>
+  <string name="payment_qr_alipay">Alipay</string>
+  <string name="payment_qr_save">保存</string>
+  <string name="payment_qr_email_label">作者メールをコピー</string>
+  <string name="payment_qr_email_tap_copy">タップしてコピー</string>
+  <string name="payment_qr_email_copied">メールアドレスをコピーしました</string>
+  <string name="payment_qr_save_success">ギャラリーに保存しました</string>
+  <string name="payment_qr_save_failed">保存に失敗しました</string>
 </resources>

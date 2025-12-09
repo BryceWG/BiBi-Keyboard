@@ -53,6 +53,14 @@
         style="@style/Widget.Material3.Button.TonalButton"
         android:text="@string/about_open_github" />
 
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnLearnPro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        style="@style/Widget.Material3.Button"
+        android:text="@string/about_btn_learn_pro" />
+
       <TextView
         style="@style/AboutBodyText"
         android:layout_marginTop="16dp"

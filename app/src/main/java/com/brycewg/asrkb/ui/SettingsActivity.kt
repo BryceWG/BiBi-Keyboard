@@ -139,6 +139,9 @@ class SettingsActivity : AppCompatActivity() {
         // 首次进入时自动展示快速上手指南（首次需等待 5s 才能关闭）
         // 使用指南关闭后会自动显示模型选择引导
         maybeAutoShowQuickGuideOnFirstOpen()
+
+        // 版本升级后显示 Pro 版宣传弹窗（仅显示一次，且不与其他引导弹窗冲突）
+        maybeShowProPromoOnUpgrade()
     }
 
     /**
@@ -982,6 +985,33 @@ class SettingsActivity : AppCompatActivity() {
             }
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to maybe auto show model guide", t)
+        }
+    }
+
+    /**
+     * 版本升级后显示 Pro 版宣传弹窗（仅显示一次）
+     *
+     * 使用延迟以避免与首次使用引导弹窗冲突：
+     * - 如果是首次使用（未显示过引导），跳过本次
+     * - 否则延迟 500ms 后检查并显示
+     */
+    private fun maybeShowProPromoOnUpgrade() {
+        try {
+            val prefs = Prefs(this)
+            // 如果首次使用引导或模型选择引导还未展示过，跳过（避免弹窗堆叠）
+            if (!prefs.hasShownQuickGuideOnce || !prefs.hasShownModelGuideOnce) {
+                return
+            }
+            // 延迟显示以避免与其他操作冲突
+            handler.postDelayed({
+                try {
+                    ProPromoDialog.showIfNeeded(this)
+                } catch (t: Throwable) {
+                    Log.w(TAG, "Failed to show Pro promo dialog", t)
+                }
+            }, 500L)
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to check Pro promo", t)
         }
     }
 

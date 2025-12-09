@@ -270,4 +270,31 @@
   <!-- 关闭数据统计 -->
   <string name="feature_disable_usage_stats_off_desc">使用统计（总字符数和汇总数据）将被收集以供你参考。</string>
   <string name="feature_disable_usage_stats_on_desc">使用统计将不会被收集。启用此选项将清除所有现有统计数据。用于保护你的隐私。</string>
+
+  <!-- ============================================== -->
+  <!-- Pro 版宣传 -->
+  <!-- ============================================== -->
+  <string name="pro_promo_title">言犀键盘 Pro 版已上线 Play 商店！</string>
+  <string name="pro_promo_price">4.49 美元买断制。也可以加入 TG 群联系作者，以 32 元购入激活码。权限跟随账户，不限制使用设备数量。</string>
+  <string name="pro_promo_features_title">Pro 专属功能：</string>
+  <string name="pro_promo_features">1. 多供应商统一热词管理（暂不支持离线模型和 ElevenLabs）\n2. WebDAV 自动备份\n3. 个性化 UI 取色\n4. 全向光标滑动\n5. 离线繁体结果转换\n6. 正则后处理</string>
+  <string name="pro_promo_future">后续将持续更新…</string>
+  <string name="pro_promo_once_hint">此弹窗仅显示一次，后续可在「关于」页面再次查看。</string>
+  <string name="pro_promo_btn_play_store">前往 Play 商店</string>
+  <string name="pro_promo_btn_telegram">加入 Telegram 群</string>
+  <string name="pro_promo_btn_payment_qr">通过付款码购买</string>
+  <string name="pro_promo_btn_close">关闭</string>
+  <string name="about_btn_learn_pro">了解 Pro</string>
+
+  <!-- 付款码弹窗 -->
+  <string name="payment_qr_title">通过付款码购买 Pro</string>
+  <string name="payment_qr_instruction">您可以通过微信或支付宝向作者直接付款（32 元），然后将付款截图和备注信息（包含订单号）发送到作者邮箱。作者最晚将在 1-2 天内回复激活码。</string>
+  <string name="payment_qr_wechat">微信</string>
+  <string name="payment_qr_alipay">支付宝</string>
+  <string name="payment_qr_save">保存</string>
+  <string name="payment_qr_email_label">复制作者邮箱</string>
+  <string name="payment_qr_email_tap_copy">点击复制</string>
+  <string name="payment_qr_email_copied">邮箱已复制到剪贴板</string>
+  <string name="payment_qr_save_success">已保存到相册</string>
+  <string name="payment_qr_save_failed">保存失败</string>
 </resources>

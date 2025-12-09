@@ -1080,6 +1080,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_SHOWN_MODEL_GUIDE_ONCE, false)
         set(value) = sp.edit { putBoolean(KEY_SHOWN_MODEL_GUIDE_ONCE, value) }
 
+    // Pro 版宣传弹窗是否已显示过
+    var proPromoShown: Boolean
+        get() = sp.getBoolean(KEY_PRO_PROMO_SHOWN, false)
+        set(value) = sp.edit { putBoolean(KEY_PRO_PROMO_SHOWN, value) }
+
     // 隐私：关闭识别历史记录
     var disableAsrHistory: Boolean
         get() = sp.getBoolean(KEY_DISABLE_ASR_HISTORY, false)
@@ -1454,6 +1459,7 @@ class Prefs(context: Context) {
         private const val KEY_FIRST_USE_DATE = "first_use_date"
         private const val KEY_SHOWN_QUICK_GUIDE_ONCE = "shown_quick_guide_once"
         private const val KEY_SHOWN_MODEL_GUIDE_ONCE = "shown_model_guide_once"
+        private const val KEY_PRO_PROMO_SHOWN = "pro_promo_shown"
 
         // 隐私：关闭识别历史与使用统计记录
         private const val KEY_DISABLE_ASR_HISTORY = "disable_asr_history"

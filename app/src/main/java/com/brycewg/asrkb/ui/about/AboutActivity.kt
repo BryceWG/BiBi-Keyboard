@@ -22,6 +22,7 @@ import com.brycewg.asrkb.ui.AsrAccessibilityService
 import android.provider.Settings
 import android.os.PowerManager
 import android.Manifest
+import com.brycewg.asrkb.ui.ProPromoDialog
 import java.text.NumberFormat
 import java.util.Locale
 import java.time.LocalDate
@@ -68,6 +69,15 @@ class AboutActivity : AppCompatActivity() {
       } catch (e: Throwable) {
         Log.e(TAG, "Failed to open GitHub URL", e)
         Toast.makeText(this, R.string.error_open_browser, Toast.LENGTH_SHORT).show()
+      }
+    }
+
+    // 了解 Pro 按钮
+    findViewById<Button>(R.id.btnLearnPro)?.setOnClickListener {
+      try {
+        ProPromoDialog.showForce(this)
+      } catch (e: Throwable) {
+        Log.e(TAG, "Failed to show Pro promo dialog", e)
       }
     }
 

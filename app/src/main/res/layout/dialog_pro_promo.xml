@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- 标题 -->
+    <TextView
+        android:id="@+id/tvPromoTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pro_promo_title"
+        android:textAppearance="?attr/textAppearanceHeadlineSmall"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 价格说明 -->
+    <TextView
+        android:id="@+id/tvPromoPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pro_promo_price"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorPrimary"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 功能列表标题 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pro_promo_features_title"
+        android:textAppearance="?attr/textAppearanceTitleSmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 功能列表 -->
+    <TextView
+        android:id="@+id/tvPromoFeatures"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pro_promo_features"
+        android:textAppearance="?attr/textAppearanceBodyMedium"
+        android:textColor="?attr/colorOnSurface"
+        android:lineSpacingMultiplier="1.3"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 后续更新说明 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pro_promo_future"
+        android:textAppearance="?attr/textAppearanceBodySmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 弹窗显示提示 -->
+    <TextView
+        android:id="@+id/tvPromoOnceHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pro_promo_once_hint"
+        android:textAppearance="?attr/textAppearanceLabelSmall"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 按钮区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Play 商店按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPlayStore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Widget.Material3.Button"
+            android:text="@string/pro_promo_btn_play_store" />
+
+        <!-- TG 群按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTelegram"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:text="@string/pro_promo_btn_telegram" />
+
+        <!-- 付款码购买按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPaymentQr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:text="@string/pro_promo_btn_payment_qr" />
+
+        <!-- 关闭按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:text="@string/pro_promo_btn_close" />
+
+    </LinearLayout>
+
+</LinearLayout>

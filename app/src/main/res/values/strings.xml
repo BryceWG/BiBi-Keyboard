@@ -270,4 +270,31 @@
   <!-- Disable usage statistics -->
   <string name="feature_disable_usage_stats_off_desc">Usage statistics (total characters and aggregated data) will be collected for your reference.</string>
   <string name="feature_disable_usage_stats_on_desc">Usage statistics will not be collected. Enabling this will clear all existing statistics. Use this to protect your privacy.</string>
+
+  <!-- ============================================== -->
+  <!-- Pro Version Promo -->
+  <!-- ============================================== -->
+  <string name="pro_promo_title">LexiSharp Keyboard Pro is Now on Play Store!</string>
+  <string name="pro_promo_price">$4.49 one-time purchase. License follows your account with unlimited devices.</string>
+  <string name="pro_promo_features_title">Pro Exclusive Features:</string>
+  <string name="pro_promo_features">1. Unified hotword management across vendors (except offline models and ElevenLabs)\n2. WebDAV auto backup\n3. Custom UI color picking\n4. Omni-directional cursor sliding\n5. Offline Traditional Chinese conversion\n6. Regex post-processing</string>
+  <string name="pro_promo_future">More features coming soon…</string>
+  <string name="pro_promo_once_hint">This dialog only appears once. You can view it again in the About page.</string>
+  <string name="pro_promo_btn_play_store">Get on Play Store</string>
+  <string name="pro_promo_btn_telegram">Join Telegram Group</string>
+  <string name="pro_promo_btn_payment_qr">Pay via QR Code</string>
+  <string name="pro_promo_btn_close">Close</string>
+  <string name="about_btn_learn_pro">Learn about Pro</string>
+
+  <!-- Payment QR Dialog -->
+  <string name="payment_qr_title">Purchase Pro via QR Code</string>
+  <string name="payment_qr_instruction">Pay the author directly via WeChat or Alipay (¥32 CNY), then send the payment screenshot with your order number to the author\'s email. The author will reply with an activation code within 1-2 days at most.</string>
+  <string name="payment_qr_wechat">WeChat</string>
+  <string name="payment_qr_alipay">Alipay</string>
+  <string name="payment_qr_save">Save</string>
+  <string name="payment_qr_email_label">Copy author email</string>
+  <string name="payment_qr_email_tap_copy">Tap to copy</string>
+  <string name="payment_qr_email_copied">Email copied to clipboard</string>
+  <string name="payment_qr_save_success">Saved to gallery</string>
+  <string name="payment_qr_save_failed">Failed to save</string>
 </resources>
