@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.9.2 (2025-12-12)
+
+### New Features
+
+- **Anonymous Usage Analytics**: Added anonymous usage statistics collection to help improve product experience
+- **Complete User Documentation**: Added complete user documentation button for easy access at the bottom of the user guide popup
+
+### Improvements
+
+- **Floating Window Layout Optimization**: Refactored implementation of multiple floating windows to improve layout effects and interaction experience
+- **One-Click Setup Process Enhancement**: Improved IME selector state management, optimized polling logic to avoid inopportune prompts
+- **Floating Ball Toggle Control**: Fixed floating ball toggle control logic for improved feature stability
+
+---
+
 ## v3.9.1 (2025-12-11)
 
 ### New Features
