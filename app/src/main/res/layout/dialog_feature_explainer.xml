@@ -1,100 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
+    android:fillViewport="true">
 
-    <!-- 标题 -->
-    <TextView
-        android:id="@+id/tvDialogTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_feature_explainer_title"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall"
-        android:textColor="?attr/colorOnSurface"
-        android:layout_marginBottom="16dp" />
-
-    <!-- 操作提示（即将开启/关闭） -->
-    <TextView
-        android:id="@+id/tvCurrentState"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_feature_explainer_turn_on"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:textColor="?attr/colorPrimary"
-        android:layout_marginBottom="12dp" />
-
-    <!-- 从当前状态 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
+        android:orientation="vertical"
+        android:padding="24dp">
 
+        <!-- 标题 -->
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tvDialogTitle"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dialog_feature_explainer_from"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginEnd="8dp" />
+            android:text="@string/dialog_feature_explainer_title"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:layout_marginBottom="16dp" />
 
+        <!-- 操作提示（即将开启/关闭） -->
         <TextView
-            android:id="@+id/tvFromDescription"
-            android:layout_width="0dp"
+            android:id="@+id/tvCurrentState"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurface" />
-    </LinearLayout>
+            android:text="@string/dialog_feature_explainer_turn_on"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorPrimary"
+            android:layout_marginBottom="12dp" />
 
-    <!-- 箭头指示 -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="↓"
-        android:textAppearance="?attr/textAppearanceTitleLarge"
-        android:textColor="?attr/colorPrimary"
-        android:gravity="center"
-        android:layout_marginVertical="4dp" />
+        <!-- 从当前状态 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
 
-    <!-- 到目标状态 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="20dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_feature_explainer_from"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginEnd="8dp" />
 
+            <TextView
+                android:id="@+id/tvFromDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface" />
+        </LinearLayout>
+
+        <!-- 箭头指示 -->
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/dialog_feature_explainer_to"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginEnd="8dp" />
+            android:text="↓"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="?attr/colorPrimary"
+            android:gravity="center"
+            android:layout_marginVertical="4dp" />
 
-        <TextView
-            android:id="@+id/tvToDescription"
-            android:layout_width="0dp"
+        <!-- 到目标状态 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text=""
+            android:orientation="horizontal"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/dialog_feature_explainer_to"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/tvToDescription"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurface"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- 不再提示选项 -->
+        <CheckBox
+            android:id="@+id/cbDontShowAgain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_feature_explainer_dont_show_again"
             android:textAppearance="?attr/textAppearanceBodyMedium"
             android:textColor="?attr/colorOnSurface"
-            android:textStyle="bold" />
+            android:buttonTint="?attr/colorPrimary" />
+
     </LinearLayout>
 
-    <!-- 不再提示选项 -->
-    <CheckBox
-        android:id="@+id/cbDontShowAgain"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/dialog_feature_explainer_dont_show_again"
-        android:textAppearance="?attr/textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnSurface"
-        android:buttonTint="?attr/colorPrimary" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

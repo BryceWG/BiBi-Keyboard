@@ -183,6 +183,7 @@
   <string name="model_guide_option_online_desc">高精度、複数のプロバイダーをサポート（Volcengine、OpenAI、Gemini など）、API キーの設定が必要</string>
   <string name="model_guide_option_online_action">設定ガイドを開き、API キーの設定をサポート</string>
   <string name="model_guide_online_dialog_message">オンライン音声認識は複数のプロバイダーをサポート（Volcengine、SiliconFlow、OpenAI、Gemini、DashScope、Soniox、ElevenLabs など）。詳細な手順は設定ガイドをご参照ください。</string>
+  <string name="model_guide_select_prompt">モデルのタイプを選択してください</string>
   <string name="model_guide_downloading">モデルをダウンロード中、お待ちください…</string>
   <string name="model_guide_download_complete">モデルのダウンロード完了</string>
   <string name="model_guide_config_doc_url">https://brycewg.notion.site/bibi-keyboard-providers-guide</string>

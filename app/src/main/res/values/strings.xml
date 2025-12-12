@@ -184,6 +184,7 @@
   <string name="model_guide_option_online_desc">Better recognition accuracy, supports multiple providers (Volcengine, OpenAI, Gemini, etc.), requires API key configuration</string>
   <string name="model_guide_option_online_action">Will open the configuration guide to help you set up API keys</string>
   <string name="model_guide_online_dialog_message">Online speech recognition supports multiple providers (Volcengine, SiliconFlow, OpenAI, Gemini, DashScope, Soniox, ElevenLabs, etc.). Please refer to the configuration guide for detailed instructions.</string>
+  <string name="model_guide_select_prompt">Please select a model type</string>
   <string name="model_guide_downloading">Downloading model, please wait…</string>
   <string name="model_guide_download_complete">Model download complete</string>
   <string name="model_guide_config_doc_url">https://brycewg.notion.site/bibi-keyboard-providers-guide</string>

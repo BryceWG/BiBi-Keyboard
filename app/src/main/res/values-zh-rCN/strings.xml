@@ -182,6 +182,7 @@
   <string name="model_guide_option_online_desc">识别更精准，支持多种供应商（火山引擎、OpenAI、Gemini 等），需要配置密钥</string>
   <string name="model_guide_option_online_action">将打开配置指南，帮助您完成密钥配置</string>
   <string name="model_guide_online_dialog_message">在线语音识别支持多种供应商（火山引擎、硅基流动、OpenAI、Gemini、阿里云百炼、Soniox、ElevenLabs 等），请参阅配置指南了解详细步骤。</string>
+  <string name="model_guide_select_prompt">请选择一种模型类型</string>
   <string name="model_guide_downloading">正在下载模型，请稍候…</string>
   <string name="model_guide_download_complete">模型下载完成</string>
   <string name="model_guide_config_doc_url">https://brycewg.notion.site/bibi-keyboard-providers-guide</string>
