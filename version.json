@@ -1,11 +1,11 @@
 {
-  "version": "3.9.1",
-  "version_code": 132,
-  "download_url": "https://github.com/BryceWG/BiBi-Keyboard/releases/tag/v3.9.1",
-  "release_notes": "### 新增功能\n\n- **Android 标准语音识别服务**: 集成 Android 标准 RecognitionService\n- **GLM-ASR 上下文提示**: 为智谱 GLM-ASR 添加上下文提示参数支持，升级模型至 glm-asr-2512，提升长文本音频识别连续性\n- **更新检测添加查看历史按钮**: 在更新检测对话框中添加查看更新历史按钮，方便用户了解版本变更内容\n- **[Pro] 支持 GLM-ASR 热词注入**：为智谱 GLM-ASR 添加热词注入功能，提升特定词汇的识别准确率\n- **[Pro] 支持将热词插入后处理 Prompt**：为 LLM 后处理添加热词插入功能，针对不支持热词注入的 ASR 供应商",
-  "release_notes_en": "### New Features\n\n- **Android Standard Speech Recognition Service**: Integrated Android standard RecognitionService\n- **GLM-ASR Context Prompt**: Added context prompt parameter support for Zhipu GLM-ASR, upgraded model to glm-asr-2512 to improve long audio text recognition continuity\n- **Update Check with View History Button**: Added a button to view update history in the update check dialog, making it easier for users to understand version changes\n- **[Pro] Support for GLM-ASR Hotword Injection**: Added hotword injection functionality for Zhipu GLM-ASR to enhance recognition accuracy of specific vocabulary\n- **[Pro] Support for Inserting Hotwords into Post-Processing Prompt**: Added hotword insertion functionality for LLM post-processing, targeting ASR vendors that do not support hotword injection",
+  "version": "3.9.2",
+  "version_code": 133,
+  "download_url": "https://github.com/BryceWG/BiBi-Keyboard/releases/tag/v3.9.2",
+  "release_notes": "### 新增功能\n\n- **匿名使用数据采集**: 添加匿名使用统计功能，帮助改善产品体验\n- **完整使用文档**: 在使用指南弹窗最下方添加完整使用文档按钮，方便用户查看详细说明\n\n### 改进优化\n\n- **悬浮框布局优化**: 重构多个悬浮框的实现方式，改进布局效果和交互体验\n- **一键设置流程优化**: 改进 IME 选择器状态管理，优化轮询逻辑避免不合时宜的提示\n- **悬浮球开关控制**: 修复悬浮球开关状态控制逻辑，提升功能稳定性",
+  "release_notes_en": "### New Features\n\n- **Anonymous Usage Analytics**: Added anonymous usage statistics collection to help improve product experience\n- **Complete User Documentation**: Added complete user documentation button for easy access at the bottom of the user guide popup\n\n### Improvements\n\n- **Floating Window Layout Optimization**: Refactored implementation of multiple floating windows to improve layout effects and interaction experience\n- **One-Click Setup Process Enhancement**: Improved IME selector state management, optimized polling logic to avoid inopportune prompts\n- **Floating Ball Toggle Control**: Fixed floating ball toggle control logic for improved feature stability",
   "important_notice": "1. 为规避风险，3.9.0已将应用名称更改“说点啥”（BiBi Keyboard）\n2. BiBi Keyboard Pro版本已上架，欢迎在3.8.6后版本-关于页面中了解详情。\n3. 官方网站和使用文档均已上线,网址分别为: bibi.brycewg.com bibidocs.brycewg.com\n4. 注意:3.8.5更新升级了火山引擎(豆包语音识别模型)到了2.0版本,请到控制台开通对应模型(https://console.volcengine.com/speech/service),或者可以在3.8.6版本中通过开关选择回退到1.0版本。",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2025-12-11T15:53:31Z"
+  "update_time": "2025-12-12T14:49:19Z"
 }
