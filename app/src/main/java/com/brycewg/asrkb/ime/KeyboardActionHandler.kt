@@ -528,9 +528,6 @@ class KeyboardActionHandler(
                 // 收起键盘由 IME 层处理
                 ExtensionButtonActionResult.NEED_HIDE_KEYBOARD
             }
-            else -> {
-                ExtensionButtonActionResult.FAILED
-            }
         }
     }
 

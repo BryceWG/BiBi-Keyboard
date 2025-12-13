@@ -375,7 +375,12 @@ object AnalyticsManager {
     if (BuildConfig.DEBUG) return "debug"
     return try {
       val pm = context.packageManager
-      val installer = pm.getInstallerPackageName(context.packageName)
+      val installer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        pm.getInstallSourceInfo(context.packageName).installingPackageName
+      } else {
+        @Suppress("DEPRECATION")
+        pm.getInstallerPackageName(context.packageName)
+      }
       installer?.takeIf { it.isNotBlank() } ?: "unknown"
     } catch (t: Throwable) {
       Log.w(TAG, "Failed to resolve install channel", t)
