@@ -269,6 +269,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           SF_FREE_API_KEY: ${{ secrets.SF_FREE_API_KEY }}
+          POCKETBASE_BASE_URL: ${{ secrets.POCKETBASE_BASE_URL || vars.POCKETBASE_BASE_URL }}
         run: |
           echo "使用签名密钥构建 Release APK..."
           ./gradlew --no-daemon clean :app:assembleRelease
@@ -278,6 +279,7 @@ jobs:
         if: steps.version.outputs.changed == 'true' && steps.check_keystore.outputs.has_keystore != 'true'
         env:
           SF_FREE_API_KEY: ${{ secrets.SF_FREE_API_KEY }}
+          POCKETBASE_BASE_URL: ${{ secrets.POCKETBASE_BASE_URL || vars.POCKETBASE_BASE_URL }}
         run: |
           echo "未配置签名密钥,构建 Debug APK..."
           ./gradlew --no-daemon clean :app:assembleDebug

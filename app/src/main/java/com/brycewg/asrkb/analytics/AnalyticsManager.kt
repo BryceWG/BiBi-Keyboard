@@ -203,7 +203,7 @@ object AnalyticsManager {
         ""
       }
       if (baseUrl.isBlank()) {
-        Log.d(TAG, "PocketBase base url empty, skip upload")
+        Log.w(TAG, "PocketBase base url empty, skip upload")
         return
       }
 
@@ -270,7 +270,10 @@ object AnalyticsManager {
       Log.w(TAG, "Failed to read PocketBase base url for consent", t)
       ""
     }
-    if (baseUrl.isBlank()) return
+    if (baseUrl.isBlank()) {
+      Log.w(TAG, "PocketBase base url empty, skip consent upload")
+      return
+    }
 
     val userId = ensureUserId(prefs)
     val language = resolveLanguage(prefs)
