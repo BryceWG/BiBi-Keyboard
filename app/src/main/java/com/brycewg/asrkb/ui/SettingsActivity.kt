@@ -1124,6 +1124,13 @@ class SettingsActivity : BaseActivity() {
     private fun maybeShowDataCollectionConsentOnUpgrade() {
         try {
             val prefs = Prefs(this)
+
+            // 一次性迁移：重置同意弹窗状态以重新采集设备信息（修复打包问题后）
+            if (!prefs.analyticsConsentResetV1Done) {
+                prefs.analyticsConsentResetV1Done = true
+                prefs.dataCollectionConsentShown = false
+            }
+
             if (prefs.dataCollectionConsentShown) return
             if (!prefs.hasShownQuickGuideOnce || !prefs.hasShownModelGuideOnce) return
 
