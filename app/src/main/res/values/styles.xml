@@ -48,11 +48,14 @@
     <!-- 可点击选择项（带下拉箭头和边框，用于弹出选择器） -->
     <style name="SettingsClickableValue.Dropdown" parent="SettingsClickableValue">
         <item name="android:layout_marginTop">10dp</item>
-        <item name="android:layout_height">40dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">40dp</item>
         <item name="android:background">@drawable/bg_clickable_selector</item>
         <item name="android:foreground">@null</item>
         <item name="android:paddingStart">20dp</item>
         <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
         <item name="android:drawableEnd">@drawable/caret_circle_down</item>
         <item name="android:drawablePadding">8dp</item>
         <item name="android:drawableTint">?attr/colorOnSurfaceVariant</item>
