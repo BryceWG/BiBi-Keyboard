@@ -1,5 +1,25 @@
 # Changelog
 
+## v3.9.3 (2025-12-13)
+
+### New Features
+
+- **Fireworks AI Support**: Added Fireworks AI model provider support to expand AI post-processing capabilities
+- **Enhanced Lexi Integration**: Support for SenseVoice and TeleSpeech pseudo-streaming recognition in Fcitx5 Android Lexi Keyboard
+- **Add AI Post-Processing Toggle**: Add an AI post-processing toggle on the post-processing settings page.
+
+### Improvements
+
+- **AI Post-Processing UI Enhancement**: Changed temperature, threshold and other numeric parameters to slider controls for improved user experience
+- **Settings UI Style Unification**: Adjusted settings clickable selection items to wrap_content style
+
+### Bug Fixes
+
+- **Punctuation Button Reset**: Fixed issue where punctuation buttons didn't reset after being pressed
+- **SpeechRecognizer Interface Status Fix**: Added interface processing timeout mechanism
+
+---
+
 ## v3.9.2 (2025-12-12)
 
 ### New Features
