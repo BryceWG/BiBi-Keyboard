@@ -1,6 +1,7 @@
 package com.brycewg.asrkb.ui.setup
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +13,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.brycewg.asrkb.R
+import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.permission.PermissionActivity
 
@@ -376,9 +378,9 @@ class SetupStateMachine(private val context: Context) {
                 context.contentResolver,
                 Settings.Secure.ENABLED_INPUT_METHODS
             )
-            val id = "${context.packageName}/.ime.AsrKeyboardService"
-            enabled?.contains(id) == true ||
-            (enabled?.split(':')?.any { it.startsWith(context.packageName) } == true)
+            val ids = getOurImeIdCandidates()
+            ids.any { enabled?.contains(it) == true } ||
+                (enabled?.split(':')?.any { it.startsWith(context.packageName) } == true)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to check IME enabled via Settings", e)
             false
@@ -391,12 +393,20 @@ class SetupStateMachine(private val context: Context) {
                 context.contentResolver,
                 Settings.Secure.DEFAULT_INPUT_METHOD
             )
-            val expectedId = "${context.packageName}/.ime.AsrKeyboardService"
-            current == expectedId
+            val ids = getOurImeIdCandidates()
+            current != null && ids.contains(current)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to check current IME", e)
             false
         }
+    }
+
+    private fun getOurImeIdCandidates(): Set<String> {
+        val component = ComponentName(context, AsrKeyboardService::class.java)
+        return setOf(
+            component.flattenToShortString(),
+            component.flattenToString()
+        )
     }
 
     /**

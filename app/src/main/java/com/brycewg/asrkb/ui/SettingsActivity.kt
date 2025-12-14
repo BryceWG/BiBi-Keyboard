@@ -1364,14 +1364,17 @@ class SettingsActivity : BaseActivity() {
         dialog.setContentView(view)
 
         val edit = view.findViewById<TextInputEditText>(R.id.etBottomTestInput)
-        // 自动聚焦并弹出输入法
-        edit?.post {
-            try {
-                edit.requestFocus()
-                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(edit, InputMethodManager.SHOW_IMPLICIT)
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to show soft input", e)
+        dialog.setOnShowListener {
+            edit?.post {
+                edit.requestFocusFromTouch()
+                val imm = getSystemService(InputMethodManager::class.java)
+                val shown = imm?.showSoftInput(edit, InputMethodManager.SHOW_IMPLICIT) == true
+                if (!shown) {
+                    edit.postDelayed(
+                        { imm?.showSoftInput(edit, InputMethodManager.SHOW_IMPLICIT) },
+                        120
+                    )
+                }
             }
         }
 
