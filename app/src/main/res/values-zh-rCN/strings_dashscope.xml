@@ -5,10 +5,15 @@
 
     <!-- DashScope configuration -->
     <string name="label_dash_api_key">DashScope API Key（Bearer）</string>
+    <string name="label_dash_model">ASR 模型</string>
+    <string name="dash_model_qwen_file">Qwen3-ASR-Flash（非流式）</string>
+    <string name="dash_model_qwen_realtime">Qwen3-ASR-Flash-Realtime（流式）</string>
+    <string name="dash_model_fun_realtime">Fun-ASR-Realtime（流式）</string>
     <string name="label_dash_prompt">自定义提示词/识别上下文（可选）</string>
     <string name="label_dash_language">识别语言（可选，已知语种可提升准确率）</string>
     <string name="label_dash_streaming">使用 DashScope 流式识别（WebSocket）</string>
-    <string name="dash_streaming_note">流式和非流式均使用 Qwen3‑ASR‑Flash 模型\n流式模式支持语言和语料文本设置</string>
+    <string name="dash_streaming_note">模型选择决定是否流式。Qwen3 模型支持自定义提示词/上下文；Fun-ASR-Realtime 不支持。</string>
+    <string name="label_dash_fun_asr">使用 Fun-ASR 模型进行识别（fun-asr-realtime）</string>
     <string name="dash_lang_auto">自动（启用语种识别）</string>
     <string name="label_dash_region">DashScope 地域</string>
     <string name="dash_region_cn">中国大陆（aliyuncs.com）</string>
@@ -34,5 +39,9 @@
 
     <!-- 流式识别 - Streaming recognition -->
     <string name="feature_dash_streaming_off_desc">使用非流式识别。录音结束后开始处理，可能有延迟。使用Qwen3-ASR-Flash模型。</string>
-    <string name="feature_dash_streaming_on_desc">使用流式识别。边说话边实时显示转写结果。使用Qwen3-ASR-Flash-Realtime模型。</string>
+    <string name="feature_dash_streaming_on_desc">使用流式识别。边说话边实时显示转写结果。默认使用Qwen3-ASR-Flash-Realtime；也可在下方切换Fun-ASR-Realtime。</string>
+
+    <!-- Fun-ASR 模型（仅流式） -->
+    <string name="feature_dash_fun_asr_off_desc">流式识别使用 Qwen3-ASR-Flash-Realtime（默认）。</string>
+    <string name="feature_dash_fun_asr_on_desc">流式识别使用 Fun-ASR-Realtime。</string>
 </resources>

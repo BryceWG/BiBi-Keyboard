@@ -665,10 +665,58 @@ class Prefs(context: Context) {
             "https://dashscope-intl.aliyuncs.com/api/v1" else "https://dashscope.aliyuncs.com/api/v1"
     }
 
-    // DashScope: streaming toggle
+    // DashScope：ASR 模型选择（用于替代“流式开关 + Fun-ASR 开关”的组合）
+    // - qwen3-asr-flash：非流式
+    // - qwen3-asr-flash-realtime：流式（Qwen3）
+    // - fun-asr-realtime：流式（Fun-ASR）
+    var dashAsrModel: String
+        get() {
+            val v = (sp.getString(KEY_DASH_ASR_MODEL, "") ?: "").trim()
+            if (v.isNotBlank()) return v
+
+            val derived = deriveDashAsrModelFromLegacyFlags()
+            // 迁移：写回新 key，后续直接读取
+            try {
+                sp.edit { putString(KEY_DASH_ASR_MODEL, derived) }
+            } catch (t: Throwable) {
+                Log.w(TAG, "Failed to migrate DashScope model to dash_asr_model", t)
+            }
+            return derived
+        }
+        set(value) {
+            val model = value.trim().ifBlank { DEFAULT_DASH_MODEL }
+            sp.edit {
+                putString(KEY_DASH_ASR_MODEL, model)
+                // 同步旧开关，便于兼容旧版本导入/导出
+                putBoolean(KEY_DASH_STREAMING_ENABLED, model.endsWith("-realtime", ignoreCase = true))
+                putBoolean(KEY_DASH_FUNASR_ENABLED, model.startsWith("fun-asr", ignoreCase = true))
+            }
+        }
+
+    fun isDashStreamingModelSelected(): Boolean {
+        return dashAsrModel.endsWith("-realtime", ignoreCase = true)
+    }
+
+    fun isDashPromptSupportedByModel(): Boolean {
+        return !dashAsrModel.startsWith("fun-asr", ignoreCase = true)
+    }
+
+    private fun deriveDashAsrModelFromLegacyFlags(): String {
+        val streaming = sp.getBoolean(KEY_DASH_STREAMING_ENABLED, false)
+        if (!streaming) return DEFAULT_DASH_MODEL
+        val funAsr = sp.getBoolean(KEY_DASH_FUNASR_ENABLED, false)
+        return if (funAsr) DASH_MODEL_FUN_ASR_REALTIME else DASH_MODEL_QWEN3_REALTIME
+    }
+
+    // DashScope: streaming toggle（legacy，已由 dashAsrModel 替代）
     var dashStreamingEnabled: Boolean
         get() = sp.getBoolean(KEY_DASH_STREAMING_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_DASH_STREAMING_ENABLED, value) }
+
+    // DashScope: streaming 使用 Fun-ASR 模型（legacy，已由 dashAsrModel 替代）
+    var dashFunAsrEnabled: Boolean
+        get() = sp.getBoolean(KEY_DASH_FUNASR_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_DASH_FUNASR_ENABLED, value) }
 
     // ElevenLabs凭证
     var elevenApiKey: String by stringPref(KEY_ELEVEN_API_KEY, "")
@@ -1431,6 +1479,8 @@ class Prefs(context: Context) {
         private const val KEY_VOLC_STREAMING_ENABLED = "volc_streaming_enabled"
         private const val KEY_VOLC_BIDI_STREAMING_ENABLED = "volc_bidi_streaming_enabled"
         private const val KEY_DASH_STREAMING_ENABLED = "dash_streaming_enabled"
+        private const val KEY_DASH_FUNASR_ENABLED = "dash_funasr_enabled"
+        private const val KEY_DASH_ASR_MODEL = "dash_asr_model"
         private const val KEY_VOLC_DDC_ENABLED = "volc_ddc_enabled"
         private const val KEY_VOLC_VAD_ENABLED = "volc_vad_enabled"
         private const val KEY_VOLC_NONSTREAM_ENABLED = "volc_nonstream_enabled"
@@ -1554,6 +1604,8 @@ class Prefs(context: Context) {
 
         // DashScope 默认
         const val DEFAULT_DASH_MODEL = "qwen3-asr-flash"
+        const val DASH_MODEL_QWEN3_REALTIME = "qwen3-asr-flash-realtime"
+        const val DASH_MODEL_FUN_ASR_REALTIME = "fun-asr-realtime"
         // Gemini 默认
         const val DEFAULT_GEM_MODEL = "gemini-2.5-flash"
         const val DEFAULT_GEM_PROMPT = "请将以下音频逐字转写为文本，不要输出解释或前后缀。"
@@ -1804,6 +1856,8 @@ class Prefs(context: Context) {
         // DashScope streaming toggle
         o.put(KEY_DASH_STREAMING_ENABLED, dashStreamingEnabled)
         o.put(KEY_DASH_REGION, dashRegion)
+        o.put(KEY_DASH_FUNASR_ENABLED, dashFunAsrEnabled)
+        o.put(KEY_DASH_ASR_MODEL, dashAsrModel)
         // Volcano extras
         o.put(KEY_VOLC_DDC_ENABLED, volcDdcEnabled)
         o.put(KEY_VOLC_VAD_ENABLED, volcVadEnabled)
@@ -1993,7 +2047,19 @@ class Prefs(context: Context) {
             optBool(KEY_OA_ASR_USE_PROMPT)?.let { oaAsrUsePrompt = it }
             optBool(KEY_VOLC_STREAMING_ENABLED)?.let { volcStreamingEnabled = it }
             optBool(KEY_VOLC_BIDI_STREAMING_ENABLED)?.let { volcBidiStreamingEnabled = it }
-            optBool(KEY_DASH_STREAMING_ENABLED)?.let { dashStreamingEnabled = it }
+            // DashScope：优先读取新模型字段；否则回退旧开关并迁移
+            val importedDashModel = optString(KEY_DASH_ASR_MODEL)
+            if (importedDashModel != null) {
+                dashAsrModel = importedDashModel
+            } else {
+                val importedDashStreaming = optBool(KEY_DASH_STREAMING_ENABLED)
+                val importedDashFunAsr = optBool(KEY_DASH_FUNASR_ENABLED)
+                importedDashStreaming?.let { dashStreamingEnabled = it }
+                importedDashFunAsr?.let { dashFunAsrEnabled = it }
+                if (importedDashStreaming != null || importedDashFunAsr != null) {
+                    dashAsrModel = deriveDashAsrModelFromLegacyFlags()
+                }
+            }
             optString(KEY_DASH_REGION)?.let { dashRegion = it }
             optBool(KEY_VOLC_DDC_ENABLED)?.let { volcDdcEnabled = it }
             optBool(KEY_VOLC_VAD_ENABLED)?.let { volcVadEnabled = it }

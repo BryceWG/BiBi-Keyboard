@@ -455,7 +455,7 @@ class AsrSessionManager(
                 OpenAiFileAsrEngine(context, serviceScope, prefs, this, onRequestDuration = ::onRequestDuration)
             } else null
             AsrVendor.DashScope -> if (prefs.hasDashKeys()) {
-                if (prefs.dashStreamingEnabled) {
+                if (prefs.isDashStreamingModelSelected()) {
                     DashscopeStreamAsrEngine(context, serviceScope, prefs, this)
                 } else {
                     DashscopeFileAsrEngine(context, serviceScope, prefs, this, onRequestDuration = ::onRequestDuration)

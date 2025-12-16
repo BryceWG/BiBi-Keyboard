@@ -159,7 +159,7 @@ class AsrSessionManager(
             } else null
 
             AsrVendor.DashScope -> if (prefs.hasDashKeys()) {
-                if (prefs.dashStreamingEnabled) {
+                if (prefs.isDashStreamingModelSelected()) {
                     DashscopeStreamAsrEngine(context, scope, prefs, this)
                 } else {
                     DashscopeFileAsrEngine(context, scope, prefs, this, ::onRequestDuration)
@@ -232,8 +232,8 @@ class AsrSessionManager(
             }
             AsrVendor.OpenAI -> if (current is OpenAiFileAsrEngine) current else null
             AsrVendor.DashScope -> when (current) {
-                is DashscopeFileAsrEngine -> if (!prefs.dashStreamingEnabled) current else null
-                is DashscopeStreamAsrEngine -> if (prefs.dashStreamingEnabled) current else null
+                is DashscopeFileAsrEngine -> if (!prefs.isDashStreamingModelSelected()) current else null
+                is DashscopeStreamAsrEngine -> if (prefs.isDashStreamingModelSelected()) current else null
                 else -> null
             }
             AsrVendor.Gemini -> if (current is GeminiFileAsrEngine) current else null

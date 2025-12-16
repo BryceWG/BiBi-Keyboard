@@ -192,7 +192,7 @@ class AsrRecognitionService : RecognitionService() {
     private fun resolveStreamingBySettings(vendor: AsrVendor): Boolean {
         return when (vendor) {
             AsrVendor.Volc -> prefs.volcStreamingEnabled
-            AsrVendor.DashScope -> prefs.dashStreamingEnabled
+            AsrVendor.DashScope -> prefs.isDashStreamingModelSelected()
             AsrVendor.Soniox -> prefs.sonioxStreamingEnabled
             AsrVendor.ElevenLabs -> prefs.elevenStreamingEnabled
             AsrVendor.Paraformer, AsrVendor.Zipformer -> true

@@ -409,9 +409,21 @@
               android:inputType="textPassword" />
           </com.google.android.material.textfield.TextInputLayout>
 
-          <!-- 移除模型ID输入：固定使用 qwen3-asr-flash / qwen3-asr-flash-realtime -->
+          <!-- DashScope 模型选择（决定是否流式以及具体模型） -->
+
+          <TextView
+            style="@style/SettingsLabel"
+            android:text="@string/label_dash_model" />
+
+          <TextView
+            android:id="@+id/tvDashModelValue"
+            style="@style/SettingsClickableValue.Dropdown"
+            android:text="@string/dash_model_qwen_file" />
+          <Spinner
+            style="@style/SettingsHiddenSpinner" />
 
           <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilDashPrompt"
             style="@style/SettingsTextInputLayout.MarginTop"
             android:hint="@string/label_dash_prompt">
 
@@ -440,11 +452,6 @@
             android:id="@+id/tvDashRegionValue"
             style="@style/SettingsClickableValue.Dropdown"
             android:text="@string/dash_region_cn" />
-
-          <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/switchDashStreaming"
-            style="@style/SettingsSwitch"
-            android:text="@string/label_dash_streaming" />
 
           <TextView
             android:id="@+id/tvDashStreamingNote"

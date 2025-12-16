@@ -51,8 +51,6 @@ class AsrSettingsViewModel : ViewModel() {
             volcFileStandardEnabled = prefs.volcFileStandardEnabled,
             volcModelV2Enabled = prefs.volcModelV2Enabled,
             volcLanguage = prefs.volcLanguage,
-            // DashScope settings
-            dashStreamingEnabled = prefs.dashStreamingEnabled,
             // SiliconFlow settings
             sfUseOmni = isQwenOmniModel(prefs.sfModel.ifBlank { com.brycewg.asrkb.store.Prefs.DEFAULT_SF_MODEL }),
             // Eleven settings
@@ -207,11 +205,6 @@ class AsrSettingsViewModel : ViewModel() {
     fun updateVolcNonstream(enabled: Boolean) {
         prefs.volcNonstreamEnabled = enabled
         _uiState.value = _uiState.value.copy(volcNonstreamEnabled = enabled)
-    }
-
-    fun updateDashStreaming(enabled: Boolean) {
-        prefs.dashStreamingEnabled = enabled
-        _uiState.value = _uiState.value.copy(dashStreamingEnabled = enabled)
     }
 
     fun updateVolcFirstCharAccel(enabled: Boolean) {
@@ -625,8 +618,6 @@ data class AsrSettingsUiState(
     val volcFileStandardEnabled: Boolean = true,
     val volcModelV2Enabled: Boolean = true,
     val volcLanguage: String = "",
-    // DashScope settings
-    val dashStreamingEnabled: Boolean = false,
     // SiliconFlow settings
     val sfUseOmni: Boolean = false,
     // ElevenLabs settings

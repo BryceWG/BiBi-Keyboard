@@ -128,7 +128,7 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.2.1")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
-    implementation("com.alibaba:dashscope-sdk-java:2.21.15")
+    implementation("com.alibaba:dashscope-sdk-java:2.22.3")
     implementation("com.github.thegrizzlylabs:sardine-android:0.9") {
         // 避免 xpp3 中的 org.xmlpull.v1.XmlPullParser 与 Android SDK 冲突
         exclude(module = "xpp3")

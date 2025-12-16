@@ -662,28 +662,59 @@ class AsrSettingsActivity : BaseActivity() {
             bindString { prefs.dashPrompt = it }
         }
 
+        setupDashModelSelection()
         setupDashLanguageSelection()
         setupDashRegionSelection()
-
-        findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchDashStreaming).apply {
-            isChecked = prefs.dashStreamingEnabled
-            installExplainedSwitch(
-                context = this@AsrSettingsActivity,
-                titleRes = R.string.label_dash_streaming,
-                offDescRes = R.string.feature_dash_streaming_off_desc,
-                onDescRes = R.string.feature_dash_streaming_on_desc,
-                preferenceKey = "dash_streaming_explained",
-                readPref = { prefs.dashStreamingEnabled },
-                writePref = { v -> viewModel.updateDashStreaming(v) },
-                hapticFeedback = { hapticTapIfEnabled(it) }
-            )
-        }
 
         // Key guide link
         findViewById<com.google.android.material.button.MaterialButton>(R.id.btnDashGetKey).setOnClickListener { v ->
             hapticTapIfEnabled(v)
             openUrlSafely("https://brycewg.notion.site/bibi-keyboard-providers-guide")
         }
+    }
+
+    private fun setupDashModelSelection() {
+        val modelLabels = listOf(
+            getString(R.string.dash_model_qwen_file),
+            getString(R.string.dash_model_qwen_realtime),
+            getString(R.string.dash_model_fun_realtime)
+        )
+        val modelValues = listOf(
+            Prefs.DEFAULT_DASH_MODEL,
+            Prefs.DASH_MODEL_QWEN3_REALTIME,
+            Prefs.DASH_MODEL_FUN_ASR_REALTIME
+        )
+        val tvDashModel = findViewById<TextView>(R.id.tvDashModelValue)
+
+        fun normalizeModel(model: String): String {
+            return model.trim().ifBlank { Prefs.DEFAULT_DASH_MODEL }
+        }
+
+        fun updateModelSummary() {
+            val cur = normalizeModel(prefs.dashAsrModel)
+            val idx = modelValues.indexOf(cur).coerceAtLeast(0)
+            tvDashModel.text = modelLabels[idx]
+            updateDashPromptVisibility(cur)
+        }
+
+        updateModelSummary()
+        tvDashModel.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            val cur = normalizeModel(prefs.dashAsrModel)
+            val curIdx = modelValues.indexOf(cur).coerceAtLeast(0)
+            showSingleChoiceDialog(R.string.label_dash_model, modelLabels.toTypedArray(), curIdx) { which ->
+                val value = modelValues.getOrNull(which) ?: Prefs.DEFAULT_DASH_MODEL
+                if (value != prefs.dashAsrModel) prefs.dashAsrModel = value
+                updateModelSummary()
+            }
+        }
+    }
+
+    private fun updateDashPromptVisibility(model: String = prefs.dashAsrModel) {
+        val til = findViewById<View>(R.id.tilDashPrompt)
+        val supported = !model.startsWith("fun-asr", ignoreCase = true)
+        val vis = if (supported) View.VISIBLE else View.GONE
+        if (til.visibility != vis) til.visibility = vis
     }
 
     private fun setupDashLanguageSelection() {

@@ -236,7 +236,7 @@ class ExternalSpeechService : Service() {
         private fun resolveStreamingBySettings(vendor: AsrVendor): Boolean {
             return when (vendor) {
                 AsrVendor.Volc -> prefs.volcStreamingEnabled
-                AsrVendor.DashScope -> prefs.dashStreamingEnabled
+                AsrVendor.DashScope -> prefs.isDashStreamingModelSelected()
                 AsrVendor.Soniox -> prefs.sonioxStreamingEnabled
                 // 本地 sherpa-onnx：Paraformer/Zipformer 仅流式；SenseVoice/TeleSpeech 仅非流式
                 AsrVendor.Paraformer, AsrVendor.Zipformer -> true
