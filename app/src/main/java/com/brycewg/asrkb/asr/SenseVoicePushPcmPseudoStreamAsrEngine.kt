@@ -194,14 +194,8 @@ class SenseVoicePushPcmPseudoStreamAsrEngine(
     }
     val dir = auto.absolutePath
 
-    val tokensPath = java.io.File(dir, "tokens.txt").absolutePath
-    val int8File = java.io.File(dir, "model.int8.onnx")
-    val f32File = java.io.File(dir, "model.onnx")
-    val modelFile = when {
-      int8File.exists() -> int8File
-      f32File.exists() -> f32File
-      else -> null
-    }
+    val tokensPath = java.io.File(auto, "tokens.txt").absolutePath
+    val modelFile = selectSvModelFile(auto, variant)
     val modelPath = modelFile?.absolutePath
     val minBytes = 8L * 1024L * 1024L
     if (modelPath == null || !java.io.File(tokensPath).exists() || (modelFile?.length() ?: 0L) < minBytes) {

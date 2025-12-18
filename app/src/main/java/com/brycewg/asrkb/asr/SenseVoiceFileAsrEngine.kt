@@ -111,15 +111,9 @@ class SenseVoiceFileAsrEngine(
             }
             val dir = auto.absolutePath
 
-            // 准备模型文件（优先 int8 回退 float32）
-            val tokensPath = java.io.File(dir, "tokens.txt").absolutePath
-            val int8File = java.io.File(dir, "model.int8.onnx")
-            val f32File = java.io.File(dir, "model.onnx")
-            val modelFile = when {
-                int8File.exists() -> int8File
-                f32File.exists() -> f32File
-                else -> null
-            }
+            // 准备模型文件：根据变体优先选择 fp32 或 int8
+            val tokensPath = java.io.File(auto, "tokens.txt").absolutePath
+            val modelFile = selectSvModelFile(auto, variant)
             val modelPath = modelFile?.absolutePath
             val minBytes = 8L * 1024L * 1024L // 粗略下限，避免明显的截断文件
             if (modelPath == null || !java.io.File(tokensPath).exists() || (modelFile?.length() ?: 0L) < minBytes) {
@@ -253,14 +247,8 @@ fun preloadSenseVoiceIfConfigured(
         }
         val auto = findSvModelDir(variantDir) ?: findSvModelDir(probeRoot) ?: return
         val dir = auto.absolutePath
-        val tokensPath = java.io.File(dir, "tokens.txt").absolutePath
-        val int8File = java.io.File(dir, "model.int8.onnx")
-        val f32File = java.io.File(dir, "model.onnx")
-        val modelFile = when {
-            int8File.exists() -> int8File
-            f32File.exists() -> f32File
-            else -> return
-        }
+        val tokensPath = java.io.File(auto, "tokens.txt").absolutePath
+        val modelFile = selectSvModelFile(auto, variant) ?: return
         val modelPath = modelFile.absolutePath
         val minBytes = 8L * 1024L * 1024L
         if (!java.io.File(tokensPath).exists() || modelFile.length() < minBytes) return
@@ -354,6 +342,28 @@ fun findSvModelDir(root: java.io.File?): java.io.File? {
         }
     }
     return null
+}
+
+/**
+ * 根据变体与文件存在情况选择 SenseVoice 模型文件。
+ * - small-full 渠道优先使用 fp32（model.onnx），兼容旧包中同时存在 int8 的情况；
+ * - 其他变体保持原有“优先 int8 回退 fp32”的策略。
+ */
+fun selectSvModelFile(dir: java.io.File, variant: String?): java.io.File? {
+    val int8File = java.io.File(dir, "model.int8.onnx")
+    val f32File = java.io.File(dir, "model.onnx")
+    val hasInt8 = int8File.exists()
+    val hasF32 = f32File.exists()
+    if (!hasInt8 && !hasF32) return null
+
+    val isFullVariant = variant == "small-full"
+    return when {
+        isFullVariant && hasF32 -> f32File
+        !isFullVariant && hasInt8 -> int8File
+        hasF32 -> f32File
+        hasInt8 -> int8File
+        else -> null
+    }
 }
 
 /**
