@@ -183,6 +183,15 @@
         style="@style/AboutAckDesc"
         android:text="@string/about_wavelineview_desc" />
 
+      <!-- Ten VAD -->
+      <TextView
+        style="@style/AboutAckTitle"
+        android:text="@string/about_tenvad_title" />
+
+      <TextView
+        style="@style/AboutAckDesc"
+        android:text="@string/about_tenvad_desc" />
+
       <!-- 调试日志 -->
       <TextView
         style="@style/AboutSectionTitle"

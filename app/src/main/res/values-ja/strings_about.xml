@@ -51,6 +51,10 @@
     <string name="about_phosphor_desc">アプリケーション全体で使用されるほぼすべてのアイコンを提供します</string>
 
     <string name="about_wavelineview_desc">録音波形アニメーションの実装方案を提供し、オーディオ可視化効果をよりスムーズで美しくします。</string>
+
+    <string name="about_tenvad_title">TEN-framework/ten-vad</string>
+    <string name="about_tenvad_desc">音声活動検出（VAD）モデルを提供し、スマートな録音自動停止機能を実現します</string>
+
     <string name="unit_chars">文字</string>
     <string name="unit_0_min">0分</string>
     <string name="fmt_h_m">%1$d時間%2$d分</string>

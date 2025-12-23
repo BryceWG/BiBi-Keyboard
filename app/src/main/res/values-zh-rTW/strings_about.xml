@@ -50,6 +50,10 @@
     <string name="about_phosphor_desc">提供了軟體內幾乎所有的圖示資源</string>
 
     <string name="about_wavelineview_desc">提供了錄音波形動畫的實現方案，使音頻可視化效果更加流暢美觀</string>
+
+    <string name="about_tenvad_title">TEN-framework/ten-vad</string>
+    <string name="about_tenvad_desc">提供了語音活動檢測（VAD）模型，用於智能判停錄音功能</string>
+
     <string name="unit_chars">字</string>
     <string name="unit_0_min">0 分鐘</string>
     <string name="fmt_h_m">%1$d 小時 %2$d 分鐘</string>

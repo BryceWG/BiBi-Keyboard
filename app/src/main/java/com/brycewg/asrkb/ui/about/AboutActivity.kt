@@ -391,6 +391,12 @@ class AboutActivity : BaseActivity() {
 
         // 读取 WaveLineView 许可证
         append(readAssetFile("licenses/WaveLineView-LICENSE"))
+        append("\n\n")
+        append("=".repeat(80))
+        append("\n\n")
+
+        // 读取 Ten VAD 许可证
+        append(readAssetFile("licenses/TenVAD-LICENSE"))
       }
 
       // 创建滚动视图

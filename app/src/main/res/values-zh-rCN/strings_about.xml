@@ -52,6 +52,9 @@
     <string name="about_wavelineview_title">Jay-Goo/WaveLineView</string>
     <string name="about_wavelineview_desc">提供了录音波形动画的实现方案，使音频可视化效果更加流畅美观</string>
 
+    <string name="about_tenvad_title">TEN-framework/ten-vad</string>
+    <string name="about_tenvad_desc">提供了语音活动检测（VAD）模型，用于智能判停录音功能</string>
+
     <string name="unit_chars">字</string>
     <string name="unit_0_min">0 分钟</string>
     <string name="fmt_h_m">%1$d 小时 %2$d 分钟</string>

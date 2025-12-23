@@ -4,12 +4,12 @@ import android.content.Context
 import android.util.Log
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.floating.FloatingAsrService
-import com.k2fsa.sherpa.onnx.SileroVadModelConfig
+import com.k2fsa.sherpa.onnx.TenVadModelConfig
 import com.k2fsa.sherpa.onnx.Vad
 import com.k2fsa.sherpa.onnx.VadModelConfig
 
 /**
- * 基于 Silero VAD（sherpa-onnx）的语音活动检测与判停器。
+ * 基于 Ten VAD（sherpa-onnx）的语音活动检测与判停器。
  *
  * 相比基于音量阈值的 SilenceDetector，VAD 使用 AI 模型进行语音/静音判断，
  * 能够更准确地区分语音、呼吸声、环境噪音，减少误判。
@@ -78,15 +78,15 @@ class VadDetector(
                 }
                 val minSilenceDuration = MIN_SILENCE_DURATION_MAP[lvl - 1]
 
-                val sileroConfig = SileroVadModelConfig(
-                    model = "vad/silero_vad.onnx",
+                val tenConfig = TenVadModelConfig(
+                    model = "vad/ten-vad.onnx",
                     threshold = threshold,
                     minSilenceDuration = minSilenceDuration,
                     minSpeechDuration = 0.25f,
-                    windowSize = 512
+                    windowSize = 256
                 )
                 val vadConfig = VadModelConfig(
-                    sileroVadModelConfig = sileroConfig,
+                    tenVadModelConfig = tenConfig,
                     sampleRate = sampleRate,
                     numThreads = 1,
                     provider = "cpu",
@@ -177,18 +177,18 @@ class VadDetector(
             Log.d(TAG, "Reusing global VAD instance")
             return
         }
-        // 1. 构建 SileroVadModelConfig
-        val sileroConfig = SileroVadModelConfig(
-            model = "vad/silero_vad.onnx",  // 模型路径（相对于 assets）
-            threshold = threshold,           // 按灵敏度映射的语音检测阈值
+        // 1. 构建 TenVadModelConfig
+        val tenConfig = TenVadModelConfig(
+            model = "vad/ten-vad.onnx",   // 模型路径（相对于 assets）
+            threshold = threshold,         // 按灵敏度映射的语音检测阈值
             minSilenceDuration = minSilenceDuration, // 根据灵敏度映射
-            minSpeechDuration = 0.25f,       // 最小语音持续时长
-            windowSize = 512                 // VAD 窗口大小
+            minSpeechDuration = 0.25f,     // 最小语音持续时长
+            windowSize = 256               // Ten VAD 窗口大小
         )
 
         // 2. 构建 VadModelConfig
         val vadConfig = VadModelConfig(
-            sileroVadModelConfig = sileroConfig,
+            tenVadModelConfig = tenConfig,
             sampleRate = sampleRate,
             numThreads = 1,
             provider = "cpu",
