@@ -2159,6 +2159,7 @@ class AsrSettingsActivity : BaseActivity() {
                 updateSfOmniVisibility(state.sfUseOmni)
                 updateOpenAiPromptVisibility(state.oaAsrUsePrompt)
                 updateVolcFileModeVisibility(state.volcStreamingEnabled)
+                updateVolcModelV2Visibility(state.volcStreamingEnabled, state.volcFileStandardEnabled)
                 findViewById<MaterialSwitch>(R.id.switchVolcFileStandard).let { sw ->
                     if (sw.isChecked != state.volcFileStandardEnabled) {
                         sw.isChecked = state.volcFileStandardEnabled
@@ -2226,6 +2227,12 @@ class AsrSettingsActivity : BaseActivity() {
     private fun updateVolcFileModeVisibility(streamingEnabled: Boolean) {
         val switch = findViewById<MaterialSwitch>(R.id.switchVolcFileStandard)
         val vis = if (streamingEnabled) View.GONE else View.VISIBLE
+        if (switch.visibility != vis) switch.visibility = vis
+    }
+
+    private fun updateVolcModelV2Visibility(streamingEnabled: Boolean, fileStandardEnabled: Boolean) {
+        val switch = findViewById<MaterialSwitch>(R.id.switchVolcModelV2)
+        val vis = if (streamingEnabled || fileStandardEnabled) View.VISIBLE else View.GONE
         if (switch.visibility != vis) switch.visibility = vis
     }
 

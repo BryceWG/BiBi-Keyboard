@@ -30,7 +30,8 @@ class VolcStandardFileAsrEngine(
 
     companion object {
         private const val TAG = "VolcStandardFileAsr"
-        private const val RESOURCE_ID_STANDARD = "volc.seedasr.auc"
+        private const val RESOURCE_ID_STANDARD_V1 = "volc.bigasr.auc"
+        private const val RESOURCE_ID_STANDARD_V2 = "volc.seedasr.auc"
         private const val SUBMIT_URL = "https://openspeech.bytedance.com/api/v3/auc/bigmodel/submit"
         private const val QUERY_URL = "https://openspeech.bytedance.com/api/v3/auc/bigmodel/query"
         private const val MAX_POLL_ATTEMPTS = 120
@@ -43,6 +44,9 @@ class VolcStandardFileAsrEngine(
     private val http: OkHttpClient = httpClient ?: OkHttpClient.Builder()
         .callTimeout(60, TimeUnit.SECONDS)
         .build()
+
+    private val resourceId: String
+        get() = if (prefs.volcModelV2Enabled) RESOURCE_ID_STANDARD_V2 else RESOURCE_ID_STANDARD_V1
 
     private sealed interface QueryResult {
         data class Success(val text: String) : QueryResult
@@ -62,7 +66,7 @@ class VolcStandardFileAsrEngine(
                 .url(SUBMIT_URL)
                 .addHeader("X-Api-App-Key", prefs.appKey)
                 .addHeader("X-Api-Access-Key", prefs.accessKey)
-                .addHeader("X-Api-Resource-Id", RESOURCE_ID_STANDARD)
+                .addHeader("X-Api-Resource-Id", resourceId)
                 .addHeader("X-Api-Request-Id", requestId)
                 .addHeader("X-Api-Sequence", "-1")
                 .post(submitJson.toRequestBody("application/json; charset=utf-8".toMediaType()))
@@ -149,7 +153,7 @@ class VolcStandardFileAsrEngine(
                 .url(QUERY_URL)
                 .addHeader("X-Api-App-Key", prefs.appKey)
                 .addHeader("X-Api-Access-Key", prefs.accessKey)
-                .addHeader("X-Api-Resource-Id", RESOURCE_ID_STANDARD)
+                .addHeader("X-Api-Resource-Id", resourceId)
                 .addHeader("X-Api-Request-Id", requestId)
                 .addHeader("X-Api-Sequence", "-1")
                 .post("{}".toRequestBody("application/json; charset=utf-8".toMediaType()))

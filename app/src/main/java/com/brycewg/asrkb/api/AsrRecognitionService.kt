@@ -146,7 +146,11 @@ class AsrRecognitionService : RecognitionService() {
             AsrVendor.Volc -> if (streamingPref) {
                 VolcStreamAsrEngine(this, scope, prefs, listener)
             } else {
-                VolcFileAsrEngine(this, scope, prefs, listener)
+                if (prefs.volcFileStandardEnabled) {
+                    VolcStandardFileAsrEngine(this, scope, prefs, listener)
+                } else {
+                    VolcFileAsrEngine(this, scope, prefs, listener)
+                }
             }
             AsrVendor.SiliconFlow -> SiliconFlowFileAsrEngine(this, scope, prefs, listener)
             AsrVendor.ElevenLabs -> if (streamingPref) {

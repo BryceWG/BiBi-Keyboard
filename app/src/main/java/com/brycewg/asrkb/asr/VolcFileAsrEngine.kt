@@ -31,11 +31,19 @@ class VolcFileAsrEngine(
         // 文件识别模型 1.0 / 2.0
         private const val FILE_RESOURCE_V1 = "volc.bigasr.auc"
         private const val FILE_RESOURCE_V2 = "volc.seedasr.auc"
+        // 文件识别极速版（仅 1.0）
+        private const val FILE_RESOURCE_TURBO = "volc.bigasr.auc_turbo"
         private const val TAG = "VolcFileAsrEngine"
     }
 
     private val fileResource: String
-        get() = if (prefs.volcModelV2Enabled) FILE_RESOURCE_V2 else FILE_RESOURCE_V1
+        get() = if (!prefs.volcFileStandardEnabled) {
+            FILE_RESOURCE_TURBO
+        } else if (prefs.volcModelV2Enabled) {
+            FILE_RESOURCE_V2
+        } else {
+            FILE_RESOURCE_V1
+        }
 
     // 火山引擎非流式：服务端上限 2h，本地稳妥限制为 1h
     override val maxRecordDurationMillis: Int = 60 * 60 * 1000

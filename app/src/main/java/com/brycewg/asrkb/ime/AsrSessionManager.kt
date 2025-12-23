@@ -219,8 +219,9 @@ class AsrSessionManager(
         val matched = when (prefs.asrVendor) {
             AsrVendor.Volc -> {
                 when (current) {
-                    is VolcFileAsrEngine -> if (!prefs.volcStreamingEnabled) current else null
                     is VolcStreamAsrEngine -> if (prefs.volcStreamingEnabled) current else null
+                    is VolcStandardFileAsrEngine -> if (!prefs.volcStreamingEnabled && prefs.volcFileStandardEnabled) current else null
+                    is VolcFileAsrEngine -> if (!prefs.volcStreamingEnabled && !prefs.volcFileStandardEnabled) current else null
                     else -> null
                 }
             }
