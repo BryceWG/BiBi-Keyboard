@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.10.1 (2025-12-23)
+
+### New Features
+
+- **VAD Engine Upgrade**: Replaced Silero VAD with Ten VAD for improved voice activity detection accuracy
+- **Gemini Custom Endpoint**: Added support for custom Gemini API endpoint, facilitating proxy or private deployment usage
+- **Non-Streaming Noise Reduction**: Added noise reduction toggle for non-streaming recognition engines to improve accuracy in noisy environments
+
+### Improvements
+
+- **Pseudo-Streaming Architecture**: Refactored SenseVoice and TeleSpeech pseudo-streaming common logic into an independent Delegate for improved maintainability
+- **Pseudo-Streaming Preview Strategy**: Adopted "timed segmentation + VAD filtering" strategy for pseudo-streaming preview to optimize preview effects
+
+### Bug Fixes
+
+- Fixed silence-based auto-stop not working in local model pseudo-streaming mode
+- Fixed Volcengine recognition model version selection issue
+- Disabled silence auto-stop in long-press recording mode to prevent accidental stops
+
+---
+
 ## v3.10.0 (2025-12-18)
 
 ### New Features

@@ -1,19 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./gradlew build:*)",
-      "Bash(.\\gradlew build:*)",
-      "Bash(tree:*)",
-      "Bash(dir:*)",
-      "Bash(openspec list:*)",
+      "Bash(cat)",
       "mcp__auggie-mcp__codebase-retrieval",
-      "Bash(git add:*)",
-      "Bash(git cherry-pick:*)",
-      "WebSearch",
-      "mcp__web-reader__webReader",
-      "Bash(git show:*)",
-      "Bash(node -c:*)",
-      "Bash(node -e:*)"
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
