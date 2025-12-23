@@ -186,9 +186,9 @@ abstract class LocalModelPseudoStreamAsrEngine(
                         }
                     }
 
-                    // 停录 VAD：仅在当前片段已清空且启用静音自动停止时生效
+                    // 停录 VAD：启用静音自动停止时持续喂入，避免分段缓冲导致判停失效
                     val stopVad = stopVadDetector
-                    if (autoStopEnabled && stopVad != null && audioChunk.isNotEmpty() && segmentBuffer.size() == 0) {
+                    if (autoStopEnabled && stopVad != null && audioChunk.isNotEmpty()) {
                         val shouldStop = try {
                             stopVad.shouldStop(audioChunk, audioChunk.size)
                         } catch (t: Throwable) {
