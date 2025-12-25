@@ -4,7 +4,7 @@
     <!-- LLM settings -->
     <string name="label_llm_endpoint">OpenAI 端點（例如：https://api.openai.com/v1 或包含 /chat/completions）</string>
     <string name="label_llm_api_key">API Key</string>
-    <string name="label_llm_model">模型名稱（例如：gpt-4o-mini）</string>
+    <string name="label_llm_model">模型名稱（可選）</string>
     <string name="label_llm_temperature">溫度（0.0 – 2.0）</string>
     <string name="label_llm_prompt">後處理提示詞內容（僅輸出處理後的文字）</string>
     <string name="label_llm_prompt_title">提示詞預設標題</string>
@@ -27,7 +27,7 @@
     <string name="llm_test_failed_title">測試失敗</string>
     <string name="llm_test_failed_reason">原因：%1$s</string>
     <string name="llm_test_failed_generic">呼叫失敗</string>
-    <string name="llm_test_missing_params">請填寫 API 位址與模型名稱</string>
+    <string name="llm_test_missing_params">請填寫 API 位址</string>
     <!-- Skip AI under char count -->
     <string name="label_ai_skip_under_chars">少於特定字數時跳過 AI 後處理</string>
     <string name="helper_ai_skip_under_chars">當有效字數（中文按字，英文按詞）小於此數值時不執行 AI 後處理；設為 0 表示停用。</string>

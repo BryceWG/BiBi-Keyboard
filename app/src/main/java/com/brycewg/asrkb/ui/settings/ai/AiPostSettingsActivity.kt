@@ -719,7 +719,8 @@ class AiPostSettingsActivity : BaseActivity() {
                         .show()
                 } else {
                     val msg = when {
-                        result.message?.contains("Missing endpoint or model", ignoreCase = true) == true ->
+                        result.message?.contains("Missing endpoint", ignoreCase = true) == true ||
+                            result.message?.contains("Missing model", ignoreCase = true) == true ->
                             getString(R.string.llm_test_missing_params)
                         result.httpCode != null ->
                             "HTTP ${result.httpCode}: ${result.message ?: ""}"

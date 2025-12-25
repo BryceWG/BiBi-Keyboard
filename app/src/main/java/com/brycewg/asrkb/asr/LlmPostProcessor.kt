@@ -281,7 +281,9 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     val url = resolveUrl(config.endpoint)
 
     val reqJson = JSONObject().apply {
-      put("model", config.model)
+      if (config.model.isNotBlank()) {
+        put("model", config.model)
+      }
       put("temperature", kotlin.math.round(config.temperature * 100) / 100)
       put("messages", messages)
       put("stream", streaming)
@@ -572,10 +574,12 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
   suspend fun testConnectivity(prefs: Prefs): LlmTestResult = withContext(Dispatchers.IO) {
     // 基础必填校验（endpoint / model）
     val active = getActiveConfig(prefs)
-    if (active.endpoint.isBlank() || active.model.isBlank()) {
+    val requiresModel = active.vendor != LlmVendor.CUSTOM
+    if (active.endpoint.isBlank() || (requiresModel && active.model.isBlank())) {
+      val message = if (active.endpoint.isBlank()) "Missing endpoint" else "Missing model"
       return@withContext LlmTestResult(
         ok = false,
-        message = "Missing endpoint or model"
+        message = message
       )
     }
 

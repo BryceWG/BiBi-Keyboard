@@ -609,7 +609,7 @@ class Prefs(context: Context) {
             LlmVendor.CUSTOM -> {
                 // 自定义供应商：使用用户配置的 LlmProvider
                 val provider = getActiveLlmProvider()
-                if (provider != null && provider.endpoint.isNotBlank() && provider.model.isNotBlank()) {
+                if (provider != null && provider.endpoint.isNotBlank()) {
                     EffectiveLlmConfig(
                         endpoint = provider.endpoint,
                         apiKey = provider.apiKey,

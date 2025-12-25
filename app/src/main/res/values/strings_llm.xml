@@ -4,7 +4,7 @@
     <!-- LLM settings -->
     <string name="label_llm_endpoint">OpenAI Endpoint (e.g., https://api.openai.com/v1 or includes /chat/completions)</string>
     <string name="label_llm_api_key">API Key</string>
-    <string name="label_llm_model">Model Name (e.g., gpt-4o-mini)</string>
+    <string name="label_llm_model">Model Name (optional)</string>
     <string name="label_llm_temperature">Temperature (0.0 – 2.0)</string>
     <string name="label_llm_prompt">Post-processing prompt (output only the processed text)</string>
     <string name="label_llm_prompt_title">Prompt Preset Title</string>
@@ -27,7 +27,7 @@
     <string name="llm_test_failed_title">Test Failed</string>
     <string name="llm_test_failed_reason">Reason: %1$s</string>
     <string name="llm_test_failed_generic">Call failed</string>
-    <string name="llm_test_missing_params">Please fill API endpoint and model name</string>
+    <string name="llm_test_missing_params">Please fill API endpoint</string>
     <!-- Skip AI under char count -->
     <string name="label_ai_skip_under_chars">Skip AI post-processing if shorter than</string>
     <string name="helper_ai_skip_under_chars">When effective length (CJK: characters, English: words) is below this number, skip AI post-processing. Set to 0 to disable.</string>
