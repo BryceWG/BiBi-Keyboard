@@ -186,20 +186,20 @@ abstract class LocalModelPseudoStreamAsrEngine(
                         segmentElapsedMs += frameMs
                     }
                     if (segmentElapsedMs >= segmentWindowMs && segmentBuffer.size() > 0) {
-                        if (segmentHasSpeech) {
-                            val segBytes = try {
-                                segmentBuffer.toByteArray()
+                        val segBytes = try {
+                            segmentBuffer.toByteArray()
+                        } catch (t: Throwable) {
+                            Log.e(TAG, "Failed to toByteArray for segment", t)
+                            null
+                        }
+                        if (segBytes != null) {
+                            try {
+                                sessionBuffer.write(segBytes)
+                                hasRecordedAudio = true
                             } catch (t: Throwable) {
-                                Log.e(TAG, "Failed to toByteArray for segment", t)
-                                null
+                                Log.e(TAG, "Failed to append segment to session buffer", t)
                             }
-                            if (segBytes != null) {
-                                try {
-                                    sessionBuffer.write(segBytes)
-                                    hasRecordedAudio = true
-                                } catch (t: Throwable) {
-                                    Log.e(TAG, "Failed to append segment to session buffer", t)
-                                }
+                            if (segmentHasSpeech) {
                                 try {
                                     onSegmentBoundary(segBytes)
                                 } catch (t: Throwable) {
@@ -268,20 +268,18 @@ abstract class LocalModelPseudoStreamAsrEngine(
                 }
 
                 if (segmentBuffer.size() > 0) {
-                    if (segmentHasSpeech) {
-                        val segBytes = try {
-                            segmentBuffer.toByteArray()
+                    val segBytes = try {
+                        segmentBuffer.toByteArray()
+                    } catch (t: Throwable) {
+                        Log.e(TAG, "Failed to toByteArray for tail segment", t)
+                        null
+                    }
+                    if (segBytes != null) {
+                        try {
+                            sessionBuffer.write(segBytes)
+                            hasRecordedAudio = true
                         } catch (t: Throwable) {
-                            Log.e(TAG, "Failed to toByteArray for tail segment", t)
-                            null
-                        }
-                        if (segBytes != null) {
-                            try {
-                                sessionBuffer.write(segBytes)
-                                hasRecordedAudio = true
-                            } catch (t: Throwable) {
-                                Log.e(TAG, "Failed to append tail segment to session buffer", t)
-                            }
+                            Log.e(TAG, "Failed to append tail segment to session buffer", t)
                         }
                     }
                     segmentBuffer.reset()
