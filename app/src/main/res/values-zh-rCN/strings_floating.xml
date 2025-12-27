@@ -5,6 +5,7 @@
     <string name="section_floating_basic">基本设置</string>
     <string name="section_floating_compat">兼容性</string>
     <string name="label_floating_only_when_ime_visible">仅在键盘显示时显示悬浮球</string>
+    <string name="label_floating_direct_drag">直接拖动移动悬浮球</string>
     <string name="label_floating_alpha">悬浮球透明度</string>
     <string name="label_floating_size">悬浮球大小</string>
     <string name="toast_need_overlay_perm">请在系统设置中授予"在其他应用上层显示"权限以启用悬浮球</string>
@@ -52,6 +53,10 @@
     <!-- 仅在键盘显示时显示悬浮球 -->
     <string name="feature_floating_only_when_ime_visible_off_desc">即使键盘隐藏，悬浮球仍保持可见。</string>
     <string name="feature_floating_only_when_ime_visible_on_desc">键盘隐藏时悬浮球自动隐藏，键盘出现时自动显示。需要无障碍权限以检测键盘状态。</string>
+
+    <!-- 直接拖动移动悬浮球 -->
+    <string name="feature_floating_direct_drag_off_desc">移动悬浮球需要长按进入移动模式或通过菜单开启移动模式。</string>
+    <string name="feature_floating_direct_drag_on_desc">可直接拖动悬浮球调整位置。</string>
 
     <!-- 悬浮球写入文字兼容性模式 -->
     <string name="feature_floating_write_compat_off_desc">使用标准无障碍 API 插入文本。适用于大多数应用。</string>

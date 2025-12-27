@@ -41,6 +41,7 @@ class FloatingSettingsActivity : BaseActivity() {
 
     // UI 组件
     private lateinit var switchFloatingOnlyWhenImeVisible: MaterialSwitch
+    private lateinit var switchFloatingDirectDrag: MaterialSwitch
     private lateinit var sliderFloatingAlpha: Slider
     private lateinit var sliderFloatingSize: Slider
     private lateinit var switchFloatingAsr: MaterialSwitch
@@ -93,6 +94,7 @@ class FloatingSettingsActivity : BaseActivity() {
      */
     private fun initializeViews() {
         switchFloatingOnlyWhenImeVisible = findViewById(R.id.switchFloatingOnlyWhenImeVisible)
+        switchFloatingDirectDrag = findViewById(R.id.switchFloatingDirectDrag)
         sliderFloatingAlpha = findViewById(R.id.sliderFloatingAlpha)
         sliderFloatingSize = findViewById(R.id.sliderFloatingSize)
         switchFloatingAsr = findViewById(R.id.switchFloatingAsr)
@@ -121,6 +123,15 @@ class FloatingSettingsActivity : BaseActivity() {
             viewModel.onlyWhenImeVisible.collect { enabled ->
                 if (switchFloatingOnlyWhenImeVisible.isChecked != enabled) {
                     switchFloatingOnlyWhenImeVisible.isChecked = enabled
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            // 直接拖动移动悬浮球
+            viewModel.directDragEnabled.collect { enabled ->
+                if (switchFloatingDirectDrag.isChecked != enabled) {
+                    switchFloatingDirectDrag.isChecked = enabled
                 }
             }
         }
@@ -193,6 +204,18 @@ class FloatingSettingsActivity : BaseActivity() {
             onChanged = { enabled ->
                 // 权限检查通过后的额外处理已在 preCheck 中的 handleOnlyWhenImeVisibleToggle 完成
             },
+            hapticFeedback = { hapticTapIfEnabled(it) }
+        )
+
+        // 直接拖动移动悬浮球
+        switchFloatingDirectDrag.installExplainedSwitch(
+            context = this,
+            titleRes = R.string.label_floating_direct_drag,
+            offDescRes = R.string.feature_floating_direct_drag_off_desc,
+            onDescRes = R.string.feature_floating_direct_drag_on_desc,
+            preferenceKey = "floating_direct_drag_explained",
+            readPref = { viewModel.directDragEnabled.value },
+            writePref = { v -> viewModel.handleDirectDragToggle(this, v) },
             hapticFeedback = { hapticTapIfEnabled(it) }
         )
 

@@ -6,6 +6,7 @@
     <string name="section_floating_basic">基本設定</string>
     <string name="section_floating_compat">互換性</string>
     <string name="label_floating_only_when_ime_visible">キーボード表示時のみフローティングボールを表示する</string>
+    <string name="label_floating_direct_drag">直接ドラッグでフローティングボールを移動</string>
     <string name="label_floating_alpha">フローティングボールの透明度</string>
     <string name="label_floating_size">フローティングボールのサイズ</string>
     <string name="toast_need_overlay_perm">フローティングボールを有効にするには、システム設定で「他のアプリの上に表示」を許可してください</string>
@@ -53,6 +54,10 @@
     <!-- キーボード表示時のみフローティングボールを表示 -->
     <string name="feature_floating_only_when_ime_visible_off_desc">キーボードが非表示でもフローティングボールは表示されたままになります。</string>
     <string name="feature_floating_only_when_ime_visible_on_desc">キーボードが非表示のときにフローティングボールが自動的に非表示になり、キーボードが表示されると表示されます。キーボードの状態を検出するにはアクセシビリティ権限が必要です。</string>
+
+    <!-- 直接ドラッグ移動 -->
+    <string name="feature_floating_direct_drag_off_desc">移動するには長押しで移動モードに入るか、メニューから移動を選ぶ必要があります。</string>
+    <string name="feature_floating_direct_drag_on_desc">フローティングボールを直接ドラッグして移動できます。</string>
 
     <!-- フローティング書き込み互換モード -->
     <string name="feature_floating_write_compat_off_desc">標準のアクセシビリティAPIを使用してテキストを挿入します。ほとんどのアプリで動作します。</string>

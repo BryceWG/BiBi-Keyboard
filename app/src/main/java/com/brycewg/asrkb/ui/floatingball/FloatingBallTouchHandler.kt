@@ -42,6 +42,7 @@ class FloatingBallTouchHandler(
 
     private val handler = Handler(Looper.getMainLooper())
     private val touchSlop = dp(4)
+    private val directMoveSlop = maxOf(dp(8), ViewConfiguration.get(context).scaledTouchSlop)
     private val longPressTimeout = ViewConfiguration.getLongPressTimeout().toLong()
 
     // 触摸状态
@@ -56,6 +57,8 @@ class FloatingBallTouchHandler(
     private var dragSelecting = false
     private var longHoldMovePosted = false
     private var moveStarted = false
+    private var directMoveEnabled = false
+    private var activeMoveSlop = touchSlop
 
     private val longPressRunnable = Runnable {
         longPressPosted = false
@@ -133,6 +136,8 @@ class FloatingBallTouchHandler(
         longActionFired = false
         dragSelecting = false
         moveStarted = false
+        directMoveEnabled = prefs.floatingBallDirectDragEnabled
+        activeMoveSlop = if (directMoveEnabled) directMoveSlop else touchSlop
         downX = e.rawX
         downY = e.rawY
         startX = lp.x
@@ -143,8 +148,10 @@ class FloatingBallTouchHandler(
             try {
                 handler.postDelayed(longPressRunnable, longPressTimeout)
                 longPressPosted = true
-                handler.postDelayed(longHoldMoveRunnable, DIRECT_MOVE_HOLD_TIMEOUT_MS)
-                longHoldMovePosted = true
+                if (!directMoveEnabled) {
+                    handler.postDelayed(longHoldMoveRunnable, DIRECT_MOVE_HOLD_TIMEOUT_MS)
+                    longHoldMovePosted = true
+                }
             } catch (e: Throwable) {
                 Log.e(TAG, "Failed to post long press callback", e)
             }
@@ -158,9 +165,16 @@ class FloatingBallTouchHandler(
     ): Boolean {
         val dx = (e.rawX - downX).toInt()
         val dy = (e.rawY - downY).toInt()
+        val moveSlop = activeMoveSlop
 
-        if (!moved && (kotlin.math.abs(dx) > touchSlop || kotlin.math.abs(dy) > touchSlop)) {
+        if (!moved && (kotlin.math.abs(dx) > moveSlop || kotlin.math.abs(dy) > moveSlop)) {
             moved = true
+        }
+
+        if (!isDragging && directMoveEnabled && moved && !longActionFired && !dragSelecting) {
+            isDragging = true
+            cancelLongPress()
+            cancelLongHoldMove()
         }
 
         if (!isDragging) {

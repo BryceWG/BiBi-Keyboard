@@ -212,6 +212,11 @@ class Prefs(context: Context) {
         get() = sp.getInt(KEY_FLOATING_POS_Y, -1)
         set(value) = sp.edit { putInt(KEY_FLOATING_POS_Y, value) }
 
+    // 悬浮球：直接拖动移动（无需长按进入移动模式）
+    var floatingBallDirectDragEnabled: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_DIRECT_DRAG_ENABLED, true)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_DIRECT_DRAG_ENABLED, value) }
+
     // 悬浮球语音识别模式开关
     var floatingAsrEnabled: Boolean
         get() = sp.getBoolean(KEY_FLOATING_ASR_ENABLED, true)
@@ -1456,6 +1461,7 @@ class Prefs(context: Context) {
         private const val KEY_FLOATING_BALL_SIZE_DP = "floating_ball_size_dp"
         private const val KEY_FLOATING_POS_X = "floating_ball_pos_x"
         private const val KEY_FLOATING_POS_Y = "floating_ball_pos_y"
+        private const val KEY_FLOATING_DIRECT_DRAG_ENABLED = "floating_ball_direct_drag_enabled"
         private const val KEY_SWAP_AI_EDIT_IME_SWITCHER = "swap_ai_edit_ime_switcher"
         private const val KEY_FCITX5_RETURN_ON_SWITCHER = "fcitx5_return_on_switcher"
         private const val KEY_RETURN_PREV_IME_ON_HIDE = "return_prev_ime_on_hide"
@@ -1873,6 +1879,7 @@ class Prefs(context: Context) {
         o.put(KEY_FLOATING_BALL_SIZE_DP, floatingBallSizeDp)
         o.put(KEY_FLOATING_POS_X, floatingBallPosX)
         o.put(KEY_FLOATING_POS_Y, floatingBallPosY)
+        o.put(KEY_FLOATING_DIRECT_DRAG_ENABLED, floatingBallDirectDragEnabled)
         o.put(KEY_FLOATING_ASR_ENABLED, floatingAsrEnabled)
         o.put(KEY_FLOATING_ONLY_WHEN_IME_VISIBLE, floatingSwitcherOnlyWhenImeVisible)
         
@@ -2075,6 +2082,7 @@ class Prefs(context: Context) {
             optInt(KEY_FLOATING_BALL_SIZE_DP)?.let { floatingBallSizeDp = it.coerceIn(28, 96) }
             optInt(KEY_FLOATING_POS_X)?.let { floatingBallPosX = it }
             optInt(KEY_FLOATING_POS_Y)?.let { floatingBallPosY = it }
+            optBool(KEY_FLOATING_DIRECT_DRAG_ENABLED)?.let { floatingBallDirectDragEnabled = it }
             optBool(KEY_FLOATING_ASR_ENABLED)?.let { floatingAsrEnabled = it }
             optBool(KEY_FLOATING_ONLY_WHEN_IME_VISIBLE)?.let { floatingSwitcherOnlyWhenImeVisible = it }
             

@@ -5,6 +5,7 @@
     <string name="section_floating_basic">基本設定</string>
     <string name="section_floating_compat">相容性</string>
     <string name="label_floating_only_when_ime_visible">僅在鍵盤顯示時顯示懸浮球</string>
+    <string name="label_floating_direct_drag">直接拖動移動懸浮球</string>
     <string name="label_floating_alpha">懸浮球透明度</string>
     <string name="label_floating_size">懸浮球大小</string>
     <string name="toast_need_overlay_perm">請在系統設定中授予「在其他應用程式上層顯示」權限以啟用懸浮球</string>
@@ -52,6 +53,10 @@
     <!-- 僅在鍵盤顯示時顯示懸浮球 -->
     <string name="feature_floating_only_when_ime_visible_off_desc">即使鍵盤隱藏，懸浮球仍保持可見。</string>
     <string name="feature_floating_only_when_ime_visible_on_desc">鍵盤隱藏時懸浮球自動隱藏，鍵盤出現時自動顯示。需要無障礙權限以偵測鍵盤狀態。</string>
+
+    <!-- 直接拖動移動懸浮球 -->
+    <string name="feature_floating_direct_drag_off_desc">移動懸浮球需要長按進入移動模式或透過選單開啟移動模式。</string>
+    <string name="feature_floating_direct_drag_on_desc">可直接拖動懸浮球調整位置。</string>
 
     <!-- 懸浮球寫入文字相容性模式 -->
     <string name="feature_floating_write_compat_off_desc">使用標準無障礙 API 插入文字。適用於大多數應用程式。</string>

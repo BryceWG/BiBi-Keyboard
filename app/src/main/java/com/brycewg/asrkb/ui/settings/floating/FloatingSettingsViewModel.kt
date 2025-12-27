@@ -27,6 +27,9 @@ class FloatingSettingsViewModel : ViewModel() {
     private val _onlyWhenImeVisible = MutableStateFlow(true)
     val onlyWhenImeVisible: StateFlow<Boolean> = _onlyWhenImeVisible.asStateFlow()
 
+    private val _directDragEnabled = MutableStateFlow(false)
+    val directDragEnabled: StateFlow<Boolean> = _directDragEnabled.asStateFlow()
+
     private val _alpha = MutableStateFlow(1.0f)
     val alpha: StateFlow<Float> = _alpha.asStateFlow()
 
@@ -47,6 +50,7 @@ class FloatingSettingsViewModel : ViewModel() {
             val prefs = Prefs(context)
             _asrEnabled.value = prefs.floatingAsrEnabled
             _onlyWhenImeVisible.value = prefs.floatingSwitcherOnlyWhenImeVisible
+            _directDragEnabled.value = prefs.floatingBallDirectDragEnabled
             _alpha.value = (prefs.floatingSwitcherAlpha * 100f).coerceIn(30f, 100f)
             _sizeDp.value = prefs.floatingBallSizeDp
             _writeCompatEnabled.value = prefs.floatingWriteTextCompatEnabled
@@ -128,6 +132,20 @@ class FloatingSettingsViewModel : ViewModel() {
         } catch (e: Throwable) {
             Log.e(TAG, "Failed to handle OnlyWhenImeVisible toggle", e)
             return null
+        }
+    }
+
+    /**
+     * 处理“直接拖动移动悬浮球”开关变化
+     */
+    fun handleDirectDragToggle(context: Context, enabled: Boolean) {
+        try {
+            val prefs = Prefs(context)
+            _directDragEnabled.value = enabled
+            prefs.floatingBallDirectDragEnabled = enabled
+            Log.d(TAG, "DirectDrag toggled: $enabled")
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to handle DirectDrag toggle", e)
         }
     }
 

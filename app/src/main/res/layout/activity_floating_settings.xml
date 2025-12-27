@@ -44,6 +44,11 @@
           style="@style/SettingsSwitch"
           android:text="@string/label_floating_only_when_ime_visible" />
 
+        <com.google.android.material.materialswitch.MaterialSwitch
+          android:id="@+id/switchFloatingDirectDrag"
+          style="@style/SettingsSwitch"
+          android:text="@string/label_floating_direct_drag" />
+
         <TextView
           style="@style/SettingsLabel"
           android:text="@string/label_floating_alpha" />
