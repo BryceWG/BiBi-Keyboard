@@ -1,5 +1,26 @@
 # Changelog
 
+## v3.11.0 (2025-12-28)
+
+### New Features
+
+- **App Icon Update**: Updated app icon design with Monet dynamic color system adaptation
+- **Floating Ball Drag Enhancement**: Added direct drag-to-move support for floating ball, no need to long-press to enter drag mode
+- **IME Switching Enhancement**: Added manual target IME selection when switching back, improving multi-IME switching experience
+- **Custom LLM Enhancement**: Custom vendors now support configuration without model names, simplifying connection validation
+- **LLM Model List**: Added "Fetch Model List" feature for custom post-processing channels
+
+### Improvements
+
+- **Icon Resource Refactoring**: Refactored app icon resource structure and streamlined color definitions
+- **Wording Optimization**: Clarified Play Store redemption process wording
+
+### Bug Fixes
+
+- Fixed pseudo-streaming buffer processing flow issue
+
+---
+
 ## v3.10.1 (2025-12-23)
 
 ### New Features
