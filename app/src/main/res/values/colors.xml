@@ -4,6 +4,7 @@
     <color name="ic_launcher_background_color">#FCFCFC</color>
     <color name="ic_launcher_foreground_color">#777777</color>
 
-    <!-- 启动画面背景 -->
-    <color name="splash_background">@color/ic_launcher_background_color</color>
+    <!-- 启动画面颜色（浅色模式：白色背景、黑色前景） -->
+    <color name="splash_background">#FFFFFF</color>
+    <color name="splash_foreground">#000000</color>
 </resources>

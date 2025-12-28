@@ -4,7 +4,8 @@
     <color name="ic_launcher_background_color">#1F1F1F</color> <!-- Softer Dark Background -->
     <color name="ic_launcher_foreground_color">#BBBBBB</color> <!-- Dimmer Light Foreground -->
 
-    <!-- Linked Colors -->
-    <color name="splash_background">@color/ic_launcher_background_color</color>
+    <!-- 启动画面颜色（深色模式：黑色背景、白色前景） -->
+    <color name="splash_background">#000000</color>
+    <color name="splash_foreground">#FFFFFF</color>
 </resources>
 
