@@ -548,6 +548,7 @@ class AiPostSettingsActivity : BaseActivity() {
         etLlmEndpoint.setTextIfDifferent(provider?.endpoint ?: prefs.llmEndpoint)
         etLlmApiKey.setTextIfDifferent(provider?.apiKey ?: prefs.llmApiKey)
         val customModels = provider?.models.orEmpty().map { it.trim() }.filter { it.isNotBlank() }
+        val hasPresetModels = customModels.isNotEmpty()
         val model = (provider?.model ?: prefs.llmModel).trim()
         val isPresetModel = model.isNotBlank() && customModels.contains(model)
         if (isPresetModel) {
@@ -557,7 +558,7 @@ class AiPostSettingsActivity : BaseActivity() {
         }
         tvCustomLlmModel.text = if (model.isNotBlank()) model else getString(R.string.option_custom_model)
         tilCustomModelId.visibility = if (isCustomModelInputVisible) View.VISIBLE else View.GONE
-        btnCustomLlmFetchModels.visibility = if (isCustomModelInputVisible) View.GONE else View.VISIBLE
+        btnCustomLlmFetchModels.visibility = if (isCustomModelInputVisible && hasPresetModels) View.GONE else View.VISIBLE
         if (isCustomModelInputVisible) {
             etCustomModelId.setTextIfDifferent(model)
         } else {
@@ -696,6 +697,7 @@ class AiPostSettingsActivity : BaseActivity() {
         val provider = viewModel.activeLlmProvider.value
         val customOption = getString(R.string.option_custom_model)
         val presetModels = provider?.models.orEmpty().map { it.trim() }.filter { it.isNotBlank() }
+        val hasPresetModels = presetModels.isNotEmpty()
         val models = (presetModels + customOption).toTypedArray()
         val currentModel = provider?.model.orEmpty()
         val isCustom = currentModel.isBlank() || !presetModels.contains(currentModel)
@@ -710,7 +712,7 @@ class AiPostSettingsActivity : BaseActivity() {
             .setSingleChoiceItems(models, selectedIndex) { dialog, which ->
                 if (which == models.size - 1) {
                     tilCustomModelId.visibility = View.VISIBLE
-                    btnCustomLlmFetchModels.visibility = View.GONE
+                    btnCustomLlmFetchModels.visibility = if (hasPresetModels) View.GONE else View.VISIBLE
                     isCustomModelInputVisible = true
                     etCustomModelId.requestFocus()
                     val nextModel = currentModel.takeIf { it.isNotBlank() && !presetModels.contains(it) }.orEmpty()
