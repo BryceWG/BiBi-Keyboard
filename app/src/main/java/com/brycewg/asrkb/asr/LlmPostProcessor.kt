@@ -373,6 +373,15 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     return text.replace(Regex("""(?s)<think>.*?</think>"""), "").trim()
   }
 
+  private fun filterThinkTagsForStreaming(text: String): String {
+    val filtered = filterThinkTags(text)
+    val start = filtered.indexOf("<think>")
+    if (start < 0) return filtered
+    val end = filtered.indexOf("</think>", start + 7)
+    if (end >= 0) return filtered
+    return filtered.substring(0, start).trimEnd()
+  }
+
   /**
    * 从响应 JSON 中提取文本内容
    *
@@ -427,14 +436,30 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
    * @param source 响应的 BufferedSource
    * @return 拼接后的完整文本
    */
-  private fun parseStreamingResponse(source: BufferedSource): String {
+  private fun parseStreamingResponse(
+    source: BufferedSource,
+    onStreamingUpdate: ((String) -> Unit)? = null
+  ): String {
     val contentBuilder = StringBuilder()
+    var lastEmittedText: String? = null
     val timeout = source.timeout()
     // 仅首个数据块启用超时，之后允许长间隔
     timeout.timeout(FIRST_TOKEN_TIMEOUT_SECONDS, TimeUnit.SECONDS)
     var waitingFirstEvent = true
     var shouldStop = false
     val eventBuilder = StringBuilder()
+
+    fun emitStreamingUpdateIfNeeded() {
+      val handler = onStreamingUpdate ?: return
+      val current = filterThinkTagsForStreaming(contentBuilder.toString())
+      if (current.isEmpty() || current == lastEmittedText) return
+      lastEmittedText = current
+      try {
+        handler(current)
+      } catch (t: Throwable) {
+        Log.w(TAG, "Streaming update callback failed", t)
+      }
+    }
 
     fun flushEvent() {
       if (eventBuilder.isEmpty()) return
@@ -460,21 +485,34 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
 
         val choice = choices.getJSONObject(0)
         val delta = choice.optJSONObject("delta")
+        var appended = false
         if (delta != null) {
           when (val content = delta.opt("content")) {
-            is String -> if (content.isNotEmpty()) contentBuilder.append(content)
+            is String -> if (content.isNotEmpty()) {
+              contentBuilder.append(content)
+              appended = true
+            }
             is JSONArray -> {
               for (i in 0 until content.length()) {
                 when (val item = content.get(i)) {
-                  is String -> if (item.isNotEmpty()) contentBuilder.append(item)
+                  is String -> if (item.isNotEmpty()) {
+                    contentBuilder.append(item)
+                    appended = true
+                  }
                   is JSONObject -> {
                     val textPart = item.optString("text")
-                    if (textPart.isNotEmpty()) contentBuilder.append(textPart)
+                    if (textPart.isNotEmpty()) {
+                      contentBuilder.append(textPart)
+                      appended = true
+                    }
                   }
                 }
               }
             }
           }
+        }
+        if (appended) {
+          emitStreamingUpdateIfNeeded()
         }
 
         val finishReason = choice.optString("finish_reason", "")
@@ -518,8 +556,17 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
    * 使用 streaming 模式，支持长时间等待和持续接收。
    * 需确保在非主线程调用。
    */
-  private fun performChat(config: LlmRequestConfig, messages: JSONArray): RawCallResult {
-    val streamingResult = performChatInternal(config, messages, streaming = true)
+  private fun performChat(
+    config: LlmRequestConfig,
+    messages: JSONArray,
+    onStreamingUpdate: ((String) -> Unit)? = null
+  ): RawCallResult {
+    val streamingResult = performChatInternal(
+      config,
+      messages,
+      streaming = true,
+      onStreamingUpdate = onStreamingUpdate
+    )
     if (streamingResult.ok) return streamingResult
 
     // 若服务端拒绝或不支持流式，尝试回退到非流模式
@@ -539,7 +586,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
   private fun performChatInternal(
     config: LlmRequestConfig,
     messages: JSONArray,
-    streaming: Boolean
+    streaming: Boolean,
+    onStreamingUpdate: ((String) -> Unit)? = null
   ): RawCallResult {
     val req = try {
       buildRequest(config, messages, streaming = streaming)
@@ -572,7 +620,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
       val isEventStream = streaming && contentType.contains("text/event-stream", ignoreCase = true)
 
       val parsed = if (isEventStream) {
-        parseStreamingResponse(body.source())
+        parseStreamingResponse(body.source(), onStreamingUpdate = onStreamingUpdate)
       } else {
         val respText = body.string()
         extractTextFromResponse(respText, fallback = "")
@@ -603,13 +651,14 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
   private suspend fun performChatWithRetry(
     config: LlmRequestConfig,
     messages: JSONArray,
-    maxRetry: Int = 1
+    maxRetry: Int = 1,
+    onStreamingUpdate: ((String) -> Unit)? = null
   ): RawCallResult {
     var attempt = 0
     var last: RawCallResult
     while (true) {
       attempt++
-      last = performChat(config, messages)
+      last = performChat(config, messages, onStreamingUpdate = onStreamingUpdate)
       if (last.ok) return last
       if (attempt > maxRetry) return last
       Log.w(TAG, "performChat failed (attempt=$attempt), will retry once: ${last.httpCode ?: ""} ${last.error ?: ""}")
@@ -720,7 +769,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
   suspend fun processWithStatus(
     input: String,
     prefs: Prefs,
-    promptOverride: String? = null
+    promptOverride: String? = null,
+    onStreamingUpdate: ((String) -> Unit)? = null
   ): LlmProcessResult = withContext(Dispatchers.IO) {
     if (input.isBlank()) {
       Log.d(TAG, "Input is blank, skipping processing")
@@ -742,7 +792,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
       })
     }
 
-    val result = performChatWithRetry(config, messages)
+    val result = performChatWithRetry(config, messages, onStreamingUpdate = onStreamingUpdate)
     if (!result.ok) {
       if (result.httpCode != null) {
         Log.w(TAG, "LLM process() failed: HTTP ${result.httpCode}, ${result.error}")

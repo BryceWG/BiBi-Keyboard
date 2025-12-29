@@ -59,7 +59,8 @@ object AsrFinalFilters {
     input: String,
     postProcessor: LlmPostProcessor = LlmPostProcessor(),
     promptOverride: String? = null,
-    forceAi: Boolean = false
+    forceAi: Boolean = false,
+    onStreamingUpdate: ((String) -> Unit)? = null
   ): LlmPostProcessor.LlmProcessResult {
     // 预修剪
     val base = try {
@@ -164,7 +165,12 @@ object AsrFinalFilters {
     )
     if (shouldAttemptAi) {
       try {
-        val res = postProcessor.processWithStatus(base, prefs, promptOverride)
+        val res = postProcessor.processWithStatus(
+          base,
+          prefs,
+          promptOverride,
+          onStreamingUpdate = onStreamingUpdate
+        )
         ok = res.ok
         processed = res.text
         http = res.httpCode

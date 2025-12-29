@@ -179,6 +179,9 @@ class ExternalSpeechService : Service() {
         private var sessionStartUptimeMs: Long = 0L
         private var lastAudioMsForStats: Long = 0L
         private var lastRequestDurationMs: Long? = null
+        private var lastPostprocPreview: String? = null
+        @Volatile private var canceled: Boolean = false
+        @Volatile private var hasAsrPartial: Boolean = false
 
         fun prepare(): Boolean {
             // 完全跟随应用内当前设置：供应商与是否流式均以 Prefs 为准
@@ -202,6 +205,9 @@ class ExternalSpeechService : Service() {
                 // 新会话开始时重置上次请求耗时，避免串台（流式模式不会更新此值）
                 lastRequestDurationMs = null
                 lastAudioMsForStats = 0L
+                lastPostprocPreview = null
+                canceled = false
+                hasAsrPartial = false
             } catch (t: Throwable) {
                 Log.w(TAG, "Failed to mark session start", t)
             }
@@ -214,6 +220,7 @@ class ExternalSpeechService : Service() {
         }
 
         fun cancel() {
+            canceled = true
             try {
                 engine?.stop()
             } catch (t: Throwable) {
@@ -489,6 +496,7 @@ class ExternalSpeechService : Service() {
         }
 
         override fun onFinal(text: String) {
+            if (canceled) return
             // 若尚未收到 onStopped，则以当前时间近似计算一次时长
             if (lastAudioMsForStats == 0L && sessionStartUptimeMs > 0L) {
                 try {
@@ -501,10 +509,26 @@ class ExternalSpeechService : Service() {
             }
             val doAi = try { prefs.postProcessEnabled && prefs.hasLlmKeys() } catch (_: Throwable) { false }
             if (doAi) {
+                if (!hasAsrPartial && text.isNotEmpty()) {
+                    hasAsrPartial = true
+                    safe { cb.onPartial(id, text) }
+                }
                 // 执行带 AI 的完整后处理链（IO 在线程内切换）
                 CoroutineScope(Dispatchers.Main).launch {
+                    if (canceled) return@launch
                     val (out, usedAi) = try {
-                        val res = com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(context, prefs, text)
+                        val onStreamingUpdate: (String) -> Unit = onStreamingUpdate@{ streamed ->
+                            if (canceled) return@onStreamingUpdate
+                            if (streamed.isEmpty() || streamed == lastPostprocPreview) return@onStreamingUpdate
+                            lastPostprocPreview = streamed
+                            safe { cb.onPartial(id, streamed) }
+                        }
+                        val res = com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
+                            context,
+                            prefs,
+                            text,
+                            onStreamingUpdate = onStreamingUpdate
+                        )
                         val processed = res.text
                         val finalOut = processed.ifBlank {
                             // AI 返回空：回退到简单后处理（包含正则/繁体）
@@ -524,6 +548,7 @@ class ExternalSpeechService : Service() {
                         val fallback = try { com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text) } catch (_: Throwable) { text }
                         fallback to false
                     }
+                    if (canceled) return@launch
                     // 记录使用统计与识别历史（来源标记为 ime；尊重开关）
                     try {
                         val audioMs = lastAudioMsForStats
@@ -559,11 +584,13 @@ class ExternalSpeechService : Service() {
                     } catch (e: Exception) {
                         Log.e(TAG, "Failed to add ASR history (external, ai)", e)
                     }
+                    if (canceled) return@launch
                     safe { cb.onFinal(id, out) }
                     safe { cb.onState(id, STATE_IDLE, "final") }
                     try { (context as? ExternalSpeechService)?.onSessionDone(id) } catch (t: Throwable) { Log.w(TAG, "remove session on final failed", t) }
                 }
             } else {
+                if (canceled) return
                 // 应用简单末处理：去尾标点和预置替换
                 val out = try {
                     com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text)
@@ -613,6 +640,7 @@ class ExternalSpeechService : Service() {
         }
 
         override fun onError(message: String) {
+            if (canceled) return
             safe {
                 cb.onError(id, 500, message)
                 cb.onState(id, STATE_ERROR, message)
@@ -620,9 +648,16 @@ class ExternalSpeechService : Service() {
             try { (context as? ExternalSpeechService)?.onSessionDone(id) } catch (t: Throwable) { Log.w(TAG, "remove session on error failed", t) }
         }
 
-        override fun onPartial(text: String) { if (text.isNotEmpty()) safe { cb.onPartial(id, text) } }
+        override fun onPartial(text: String) {
+            if (canceled) return
+            if (text.isNotEmpty()) {
+                hasAsrPartial = true
+                safe { cb.onPartial(id, text) }
+            }
+        }
 
         override fun onStopped() {
+            if (canceled) return
             // 计算一次会话录音时长
             if (sessionStartUptimeMs > 0L) {
                 try {
@@ -637,7 +672,10 @@ class ExternalSpeechService : Service() {
             safe { cb.onState(id, STATE_PROCESSING, "processing") }
         }
 
-        override fun onAmplitude(amplitude: Float) { safe { cb.onAmplitude(id, amplitude) } }
+        override fun onAmplitude(amplitude: Float) {
+            if (canceled) return
+            safe { cb.onAmplitude(id, amplitude) }
+        }
     }
 
     private class CallbackProxy(private val remote: IBinder?) {

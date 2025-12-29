@@ -1188,7 +1188,25 @@ class KeyboardActionHandler(
 
         // 统一使用 AsrFinalFilters（含预修剪/LLM/后修剪/繁体转换）
         val preTrimRaw = try { if (prefs.trimFinalTrailingPunct) TextSanitizer.trimTrailingPunctAndEmoji(text) else text } catch (_: Throwable) { text }
-        val res = try { com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(context, prefs, text, llmPostProcessor) } catch (t: Throwable) {
+        var lastStreamingText: String? = null
+        val onStreamingUpdate: (String) -> Unit = onStreamingUpdate@{ streamed ->
+            if (seq != opSeq) return@onStreamingUpdate
+            if (streamed.isEmpty() || streamed == lastStreamingText) return@onStreamingUpdate
+            lastStreamingText = streamed
+            scope.launch {
+                if (seq != opSeq) return@launch
+                inputHelper.setComposingText(ic, streamed)
+            }
+        }
+        val res = try {
+            com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
+                context,
+                prefs,
+                text,
+                llmPostProcessor,
+                onStreamingUpdate = onStreamingUpdate
+            )
+        } catch (t: Throwable) {
             Log.e(TAG, "applyWithAi failed", t)
             // 统一回退到 applySimple，确保语音预设仍然生效
             val fallback = try { com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text) } catch (_: Throwable) { preTrimRaw }

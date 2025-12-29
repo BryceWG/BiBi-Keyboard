@@ -224,7 +224,21 @@ class AsrSessionManager(
                 if (!stillRecording) {
                     listener.onSessionStateChanged(FloatingBallState.Processing)
                 }
-                val res = try { com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(context, prefs, text, postproc) } catch (t: Throwable) {
+                if (lastPartialForPreview.isNullOrEmpty()) {
+                    updatePreviewText(text)
+                }
+                val onStreamingUpdate: (String) -> Unit = { streamed ->
+                    updatePreviewText(streamed)
+                }
+                val res = try {
+                    com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
+                        context,
+                        prefs,
+                        text,
+                        postproc,
+                        onStreamingUpdate = onStreamingUpdate
+                    )
+                } catch (t: Throwable) {
                     Log.e(TAG, "applyWithAi failed", t)
                     com.brycewg.asrkb.asr.LlmPostProcessor.LlmProcessResult(false, text)
                 }
@@ -335,18 +349,7 @@ class AsrSessionManager(
     }
 
     override fun onPartial(text: String) {
-        if (text.isEmpty() || lastPartialForPreview == text) return
-        val ctx = focusContext ?: return
-        val toWrite = ctx.prefix + text + ctx.suffix
-        Log.d(TAG, "onPartial preview: $text")
-
-        serviceScope.launch {
-            com.brycewg.asrkb.ui.AsrAccessibilityService.insertTextSilent(toWrite)
-            val prefixLenForCursor = stripMarkersIfAny(ctx.prefix).length
-            val desiredCursor = (prefixLenForCursor + text.length).coerceAtLeast(0)
-            com.brycewg.asrkb.ui.AsrAccessibilityService.setSelectionSilent(desiredCursor)
-        }
-        lastPartialForPreview = text
+        updatePreviewText(text)
     }
 
     override fun onError(message: String) {
@@ -652,6 +655,21 @@ class AsrSessionManager(
         out = out.replace("\u2060", "")
         out = out.replace("\u200B", "")
         return out
+    }
+
+    private fun updatePreviewText(text: String) {
+        if (text.isEmpty() || lastPartialForPreview == text) return
+        val ctx = focusContext ?: return
+        val toWrite = ctx.prefix + text + ctx.suffix
+        Log.d(TAG, "preview update: $text")
+
+        serviceScope.launch {
+            com.brycewg.asrkb.ui.AsrAccessibilityService.insertTextSilent(toWrite)
+            val prefixLenForCursor = stripMarkersIfAny(ctx.prefix).length
+            val desiredCursor = (prefixLenForCursor + text.length).coerceAtLeast(0)
+            com.brycewg.asrkb.ui.AsrAccessibilityService.setSelectionSilent(desiredCursor)
+        }
+        lastPartialForPreview = text
     }
 
 

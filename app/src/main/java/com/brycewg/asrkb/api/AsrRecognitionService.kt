@@ -262,12 +262,16 @@ class AsrRecognitionService : RecognitionService() {
         @Volatile
         private var finished: Boolean = false
 
+        @Volatile
+        private var finalReceived: Boolean = false
+
         private var speechDetected = false
         private var endOfSpeechDelivered = false
 
         private var sessionStartUptimeMs: Long = 0L
         private var lastAudioMsForTimeout: Long = 0L
         private var processingTimeoutJob: Job? = null
+        private var lastPostprocPreview: String? = null
 
         fun setEngine(engine: StreamingAsrEngine) {
             this.engine = engine
@@ -277,10 +281,12 @@ class AsrRecognitionService : RecognitionService() {
             isActive = true
             canceled = false
             finished = false
+            finalReceived = false
             speechDetected = false
             endOfSpeechDelivered = false
             sessionStartUptimeMs = SystemClock.uptimeMillis()
             lastAudioMsForTimeout = 0L
+            lastPostprocPreview = null
             cancelProcessingTimeout()
             engine?.start()
         }
@@ -307,51 +313,97 @@ class AsrRecognitionService : RecognitionService() {
         }
 
         override fun onFinal(text: String) {
-            if (canceled || finished) return
+            if (canceled || finished || finalReceived) return
             Log.d(TAG, "onFinal: $text")
             isActive = false
-            finished = true
+            finalReceived = true
             cancelProcessingTimeout()
 
-            // 应用后处理
-            val processedText = try {
-                com.brycewg.asrkb.util.AsrFinalFilters.applySimple(
-                    this@AsrRecognitionService,
-                    prefs,
-                    text
-                )
-            } catch (t: Throwable) {
-                Log.w(TAG, "Post-processing failed", t)
-                text
-            }
+            val doAi = try { prefs.postProcessEnabled && prefs.hasLlmKeys() } catch (_: Throwable) { false }
 
-            // 构建结果 Bundle
-            val results = Bundle().apply {
-                putStringArrayList(
-                    SpeechRecognizer.RESULTS_RECOGNITION,
-                    arrayListOf(processedText)
-                )
-                // 可选：添加置信度分数
-                putFloatArray(
-                    SpeechRecognizer.CONFIDENCE_SCORES,
-                    floatArrayOf(1.0f) // 单结果，置信度设为 1.0
-                )
-            }
+            serviceScope.launch {
+                if (canceled || finished) return@launch
+                val processedText = if (doAi) {
+                    try {
+                        val onStreamingUpdate: (String) -> Unit = onStreamingUpdate@{ streamed ->
+                            if (canceled || finished) return@onStreamingUpdate
+                            if (streamed.isEmpty() || streamed == lastPostprocPreview) return@onStreamingUpdate
+                            lastPostprocPreview = streamed
+                            deliverPartialResults(streamed)
+                        }
+                        val res = com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
+                            this@AsrRecognitionService,
+                            prefs,
+                            text,
+                            onStreamingUpdate = onStreamingUpdate
+                        )
+                        res.text.ifBlank {
+                            try {
+                                com.brycewg.asrkb.util.AsrFinalFilters.applySimple(
+                                    this@AsrRecognitionService,
+                                    prefs,
+                                    text
+                                )
+                            } catch (_: Throwable) {
+                                text
+                            }
+                        }
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "applyWithAi failed, fallback to simple", t)
+                        try {
+                            com.brycewg.asrkb.util.AsrFinalFilters.applySimple(
+                                this@AsrRecognitionService,
+                                prefs,
+                                text
+                            )
+                        } catch (_: Throwable) {
+                            text
+                        }
+                    }
+                } else {
+                    try {
+                        com.brycewg.asrkb.util.AsrFinalFilters.applySimple(
+                            this@AsrRecognitionService,
+                            prefs,
+                            text
+                        )
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "Post-processing failed", t)
+                        text
+                    }
+                }
 
-            try {
-                callback.results(results)
-            } catch (t: Throwable) {
-                Log.w(TAG, "results callback failed", t)
-            }
+                if (canceled || finished) return@launch
 
-            // 清理会话
-            if (currentSession === this) {
-                currentSession = null
+                // 构建结果 Bundle
+                val results = Bundle().apply {
+                    putStringArrayList(
+                        SpeechRecognizer.RESULTS_RECOGNITION,
+                        arrayListOf(processedText)
+                    )
+                    // 可选：添加置信度分数
+                    putFloatArray(
+                        SpeechRecognizer.CONFIDENCE_SCORES,
+                        floatArrayOf(1.0f) // 单结果，置信度设为 1.0
+                    )
+                }
+
+                try {
+                    callback.results(results)
+                } catch (t: Throwable) {
+                    Log.w(TAG, "results callback failed", t)
+                }
+
+                finished = true
+                // 清理会话
+                if (currentSession === this@RecognitionSession) {
+                    currentSession = null
+                }
             }
         }
 
         override fun onPartial(text: String) {
-            if (canceled || finished) return
+            if (canceled || finished || finalReceived) return
             if (text.isEmpty()) return
             Log.d(TAG, "onPartial: $text")
 
@@ -366,23 +418,11 @@ class AsrRecognitionService : RecognitionService() {
             }
 
             // 仅当请求了部分结果时才回调
-            if (config.partialResults) {
-                val partialBundle = Bundle().apply {
-                    putStringArrayList(
-                        SpeechRecognizer.RESULTS_RECOGNITION,
-                        arrayListOf(text)
-                    )
-                }
-                try {
-                    callback.partialResults(partialBundle)
-                } catch (t: Throwable) {
-                    Log.w(TAG, "partialResults callback failed", t)
-                }
-            }
+            deliverPartialResults(text)
         }
 
         override fun onError(message: String) {
-            if (canceled || finished) return
+            if (canceled || finished || finalReceived) return
             Log.e(TAG, "onError: $message")
             isActive = false
             finished = true
@@ -402,7 +442,7 @@ class AsrRecognitionService : RecognitionService() {
         }
 
         override fun onStopped() {
-            if (canceled || finished) return
+            if (canceled || finished || finalReceived) return
             Log.d(TAG, "onStopped")
             // 保底将会话标记为非活动，避免仅收到 onStopped 时长期占用 BUSY 状态
             isActive = false
@@ -477,6 +517,21 @@ class AsrRecognitionService : RecognitionService() {
                         currentSession = null
                     }
                 }
+            }
+        }
+
+        private fun deliverPartialResults(text: String) {
+            if (!config.partialResults) return
+            val partialBundle = Bundle().apply {
+                putStringArrayList(
+                    SpeechRecognizer.RESULTS_RECOGNITION,
+                    arrayListOf(text)
+                )
+            }
+            try {
+                callback.partialResults(partialBundle)
+            } catch (t: Throwable) {
+                Log.w(TAG, "partialResults callback failed", t)
             }
         }
     }
