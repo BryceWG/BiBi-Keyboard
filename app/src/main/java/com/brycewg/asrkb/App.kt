@@ -14,6 +14,11 @@ import androidx.core.os.LocaleListCompat
 import com.brycewg.asrkb.ui.floating.FloatingAsrService
 import com.brycewg.asrkb.asr.VadDetector
 import com.brycewg.asrkb.analytics.AnalyticsManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import java.io.File
 
 class App : Application() {
     override fun onCreate() {
@@ -69,6 +74,30 @@ class App : Application() {
             Log.w("App", "Failed to preload VAD", t)
         }
 
+        // 清理已移除的 Zipformer 模型文件（仅执行一次）
+        try {
+            val prefs = Prefs(this)
+            if (!prefs.zipformerCleanupDone) {
+                CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+                    val externalBase = getExternalFilesDir(null)
+                    val bases = mutableListOf<File>()
+                    if (externalBase != null) bases.add(externalBase)
+                    if (externalBase == null || externalBase != filesDir) bases.add(filesDir)
+                    bases.forEach { base ->
+                        val zipformerDir = File(base, "zipformer")
+                        if (zipformerDir.exists()) {
+                            val deleted = zipformerDir.deleteRecursively()
+                            if (!deleted) {
+                                Log.w("App", "Failed to delete zipformer dir: ${zipformerDir.path}")
+                            }
+                        }
+                    }
+                    prefs.zipformerCleanupDone = true
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w("App", "Zipformer cleanup init failed", t)
+        }
 
         // 根据设置将任务从最近任务中排除/恢复
         try {

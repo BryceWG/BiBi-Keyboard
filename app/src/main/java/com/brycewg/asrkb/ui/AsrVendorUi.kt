@@ -20,8 +20,7 @@ object AsrVendorUi {
     AsrVendor.Zhipu,
     AsrVendor.SenseVoice,
     AsrVendor.Telespeech,
-    AsrVendor.Paraformer,
-    AsrVendor.Zipformer
+    AsrVendor.Paraformer
   )
 
   /** 指定 vendor 的多语言显示名 */
@@ -37,7 +36,6 @@ object AsrVendorUi {
     AsrVendor.SenseVoice -> context.getString(R.string.vendor_sensevoice)
     AsrVendor.Telespeech -> context.getString(R.string.vendor_telespeech)
     AsrVendor.Paraformer -> context.getString(R.string.vendor_paraformer)
-    AsrVendor.Zipformer -> context.getString(R.string.vendor_zipformer)
   }
 
   /** 顺序化的 (Vendor, 显示名) 列表 */

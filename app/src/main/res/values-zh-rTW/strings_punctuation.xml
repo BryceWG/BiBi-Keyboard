@@ -1,6 +1,6 @@
 <resources>
     <!-- 通用 sherpa-onnx 標點模型（ct-transformer zh+en） -->
-    <string name="label_punct_model_shared">通用標點模型（FunASR Nano / TeleSpeech / Paraformer / Zipformer 共用）</string>
+    <string name="label_punct_model_shared">通用標點模型（FunASR Nano / TeleSpeech / Paraformer 共用）</string>
     <string name="btn_punct_download_model">下載標點模型（60MB 通用）</string>
     <string name="btn_punct_import_model">匯入標點模型</string>
     <string name="btn_punct_clear_model">清除標點模型</string>
@@ -22,6 +22,6 @@
 
     <string name="notif_punct_title">標點模型（60MB,通用）</string>
 
-    <!-- TeleSpeech/Paraformer/Zipformer 選取或呼叫時缺少標點模型的提示 -->
+    <!-- TeleSpeech/Paraformer 選取或呼叫時缺少標點模型的提示 -->
     <string name="toast_punct_model_missing">未偵測到本機標點模型，辨識結果可能缺少句讀符號。你可以在 ASR 設定中下載通用標點模型。</string>
 </resources>

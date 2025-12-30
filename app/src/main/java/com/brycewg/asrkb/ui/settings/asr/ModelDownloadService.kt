@@ -57,12 +57,11 @@ class ModelDownloadService : Service() {
     private const val EXTRA_URI = "uri"
     private const val EXTRA_VARIANT = "variant"
     private const val EXTRA_KEY = "key"
-    private const val EXTRA_MODEL_TYPE = "modelType" // sensevoice | paraformer | zipformer | telespeech | punctuation
+    private const val EXTRA_MODEL_TYPE = "modelType" // sensevoice | paraformer | telespeech | punctuation
 
     private fun buildDownloadKey(variant: String, modelType: String): DownloadKey {
       val sourceId = when (modelType) {
         "paraformer" -> "download_paraformer"
-        "zipformer" -> "download_zipformer"
         "telespeech" -> "download_telespeech"
         "punctuation" -> "download_punctuation"
         else -> "download_sensevoice"
@@ -243,7 +242,6 @@ class ModelDownloadService : Service() {
 
       val doneText = when (modelType) {
         "paraformer" -> getString(R.string.pf_download_status_done)
-        "zipformer" -> getString(R.string.zf_download_status_done)
         "telespeech" -> getString(R.string.ts_download_status_done)
         "punctuation" -> getString(R.string.punct_download_status_done)
         else -> getString(R.string.sv_download_status_done)
@@ -255,7 +253,6 @@ class ModelDownloadService : Service() {
       val failText = when {
         t.message == onlyZipMsg -> onlyZipMsg
         modelType == "paraformer" -> getString(R.string.pf_download_status_failed)
-        modelType == "zipformer" -> getString(R.string.zf_download_status_failed)
         modelType == "telespeech" -> getString(R.string.ts_download_status_failed)
         modelType == "punctuation" -> getString(R.string.punct_download_status_failed)
         else -> getString(R.string.sv_download_status_failed)
@@ -322,11 +319,10 @@ class ModelDownloadService : Service() {
         detectedVariant = typeAndVariant.second
 
         // 更新通知处理器（类型与变体），以便文案准确：
-        // Paraformer/Zipformer(bi*) 包含双量化，保持用户当前变体文案；SenseVoice 与 Zip zh* 精确展示
+        // Paraformer 包含双量化，保持用户当前变体文案；SenseVoice 精确展示
         notificationHandler.updateModelType(modelType)
         val shouldUpdateVariant = when (modelType) {
           "sensevoice" -> true
-          "zipformer" -> detectedVariant.startsWith("zh")
           else -> false // paraformer 保持用户选择
         }
         if (shouldUpdateVariant) notificationHandler.updateVariant(detectedVariant)
@@ -341,8 +337,6 @@ class ModelDownloadService : Service() {
             "telespeech" -> prefs.tsModelVariant = detectedVariant
             // Paraformer：单包含 int8+fp32，两者均可用，不覆盖用户当前偏好
             "paraformer" -> { /* no-op */ }
-            // Zipformer：zh/zh-xl 为单量化包，同步；bilingual 系列包含双量化，不覆盖
-            "zipformer" -> if (detectedVariant.startsWith("zh")) prefs.zfModelVariant = detectedVariant
           }
         } catch (e: Throwable) {
           Log.w(TAG, "Failed to persist detected variant: $detectedVariant for $modelType", e)
@@ -350,7 +344,7 @@ class ModelDownloadService : Service() {
       }
 
       // 解压归档（仅支持 ZIP）
-      val installVariant = if (modelType == "zipformer" && !detectedVariant.startsWith("zh")) variant else detectedVariant
+      val installVariant = detectedVariant
       val modelDir = extractArchive(cacheFile, key, installVariant, modelType, notificationHandler)
 
       // 验证并安装模型（使用检测到的变体决定最终安装路径）
@@ -443,7 +437,6 @@ class ModelDownloadService : Service() {
     val n = name.lowercase()
     return when {
       n.contains("paraformer") -> "paraformer"
-      n.contains("zipformer") -> "zipformer"
       n.contains("telespeech") -> "telespeech"
       n.contains("sense-voice") || n.contains("sensevoice") -> "sensevoice"
       n.contains("punct-ct-transformer") || n.contains("punctuation") -> "punctuation"
@@ -473,14 +466,6 @@ class ModelDownloadService : Service() {
       // TeleSpeech（离线 CTC）
       "sherpa-onnx-telespeech-ctc-int8-zh-2024-06-04" -> "telespeech" to "int8"
       "sherpa-onnx-telespeech-ctc-zh-2024-06-04" -> "telespeech" to "full"
-
-      // Zipformer（精确到量化/日期）
-      "sherpa-onnx-streaming-zipformer-zh-xlarge-int8-2025-06-30" -> "zipformer" to "zh-xl-int8-20250630"
-      "sherpa-onnx-streaming-zipformer-zh-xlarge-fp16-2025-06-30" -> "zipformer" to "zh-xl-fp16-20250630"
-      "sherpa-onnx-streaming-zipformer-zh-int8-2025-06-30" -> "zipformer" to "zh-int8-20250630"
-      "sherpa-onnx-streaming-zipformer-zh-fp16-2025-06-30" -> "zipformer" to "zh-fp16-20250630"
-      "sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20" -> "zipformer" to "bi-20230220-int8"
-      "sherpa-onnx-streaming-zipformer-small-bilingual-zh-en-2023-02-16" -> "zipformer" to "bi-small-20230216-int8"
 
       // Punctuation（ct-transformer zh+en）
       "sherpa-onnx-punct-ct-transformer-zh-en-vocab272727-2024-04-12-int8" -> "punctuation" to "ct-zh-en-int8"
@@ -515,14 +500,6 @@ class ModelDownloadService : Service() {
           else -> variant
         }
         "Paraformer $versionName"
-      }
-      "zipformer" -> {
-        val versionName = when {
-          variant.contains("bilingual") -> "双语版"
-          variant.contains("zh") -> "中文版"
-          else -> variant
-        }
-        "Zipformer $versionName"
       }
       "punctuation" -> {
         // 目前仅一套中英通用标点模型
@@ -610,7 +587,6 @@ class ModelDownloadService : Service() {
     val base = getExternalFilesDir(null) ?: filesDir
     val outRoot = when (modelType) {
       "paraformer" -> File(base, "paraformer")
-      "zipformer" -> File(base, "zipformer")
       "telespeech" -> File(base, "telespeech")
       "punctuation" -> File(base, "punctuation_tmp")
       else -> File(base, "sensevoice")
@@ -666,16 +642,6 @@ class ModelDownloadService : Service() {
       if (!((encInt8.exists() && decInt8.exists()) || (encF32.exists() && decF32.exists()))) {
         throw IllegalStateException("paraformer files missing after extract")
       }
-    } else if (modelType == "zipformer") {
-      val files = modelDir.listFiles() ?: emptyArray()
-      fun exists(regex: Regex): Boolean = files.any { it.isFile && regex.matches(it.name) }
-      val hasTokens = File(modelDir, "tokens.txt").exists()
-      val hasEncoder = exists(Regex("^encoder(?:[.-].*)?\\.onnx$"))
-      val hasDecoder = exists(Regex("^decoder(?:[.-].*)?\\.onnx$"))
-      val hasJoiner = exists(Regex("^joiner(?:[.-].*)?\\.onnx$"))
-      if (!(hasTokens && hasEncoder && hasDecoder && hasJoiner)) {
-        throw IllegalStateException("zipformer files missing after extract (pattern)")
-      }
     } else if (modelType == "telespeech") {
       if (!(File(modelDir, "model.int8.onnx").exists() || File(modelDir, "model.onnx").exists())) {
         throw IllegalStateException("telespeech files missing after extract")
@@ -695,16 +661,6 @@ class ModelDownloadService : Service() {
         val outRoot = File(base, "paraformer")
         val group = if (variant.startsWith("trilingual")) "trilingual" else "bilingual"
         File(outRoot, group)
-      }
-      "zipformer" -> {
-        val outRoot = File(base, "zipformer")
-        val groupDir = when {
-          variant.startsWith("zh-xl-") -> "zh-xlarge-2025-06-30"
-          variant.startsWith("zh-") -> "zh-2025-06-30"
-          variant.startsWith("bi-small-") -> "small-bilingual-zh-en-2023-02-16"
-          else -> "bilingual-zh-en-2023-02-20"
-        }
-        File(outRoot, groupDir)
       }
       "telespeech" -> {
         val outRoot = File(base, "telespeech")
@@ -1072,7 +1028,6 @@ class NotificationHandler(
   fun notifyDownloadProgress(progress: Int, cancelIntent: PendingIntent) {
     val text = when (modelType) {
       "paraformer" -> context.getString(R.string.pf_download_status_downloading, progress)
-      "zipformer" -> context.getString(R.string.zf_download_status_downloading, progress)
       "telespeech" -> context.getString(R.string.ts_download_status_downloading, progress)
       "punctuation" -> context.getString(R.string.punct_download_status_downloading, progress)
       else -> context.getString(R.string.sv_download_status_downloading, progress)
@@ -1095,7 +1050,6 @@ class NotificationHandler(
   fun notifyExtractProgress(progress: Int, cancelIntent: PendingIntent) {
     val text = when (modelType) {
       "paraformer" -> context.getString(R.string.pf_download_status_extracting_progress, progress)
-      "zipformer" -> context.getString(R.string.zf_download_status_extracting_progress, progress)
       "telespeech" -> context.getString(R.string.ts_download_status_extracting_progress, progress)
       "punctuation" -> context.getString(R.string.punct_download_status_extracting_progress, progress)
       else -> context.getString(R.string.sv_download_status_extracting_progress, progress)
@@ -1117,7 +1071,6 @@ class NotificationHandler(
   fun notifyExtractProgressImmediate(progress: Int, cancelIntent: PendingIntent) {
     val text = when (modelType) {
       "paraformer" -> context.getString(R.string.pf_download_status_extracting_progress, progress)
-      "zipformer" -> context.getString(R.string.zf_download_status_extracting_progress, progress)
       "telespeech" -> context.getString(R.string.ts_download_status_extracting_progress, progress)
       "punctuation" -> context.getString(R.string.punct_download_status_extracting_progress, progress)
       else -> context.getString(R.string.sv_download_status_extracting_progress, progress)
@@ -1167,7 +1120,6 @@ class NotificationHandler(
   fun getFailedText(): String {
     return when (modelType) {
       "paraformer" -> context.getString(R.string.pf_download_status_failed)
-      "zipformer" -> context.getString(R.string.zf_download_status_failed)
       "telespeech" -> context.getString(R.string.ts_download_status_failed)
       "punctuation" -> context.getString(R.string.punct_download_status_failed)
       else -> context.getString(R.string.sv_download_status_failed)
@@ -1250,14 +1202,6 @@ class NotificationHandler(
           context.getString(R.string.notif_pf_title_trilingual)
         else
           context.getString(R.string.notif_pf_title_bilingual)
-      }
-      "zipformer" -> {
-        when {
-          variant.startsWith("zh-xl-") -> context.getString(R.string.notif_zf_title_zh_xl)
-          variant.startsWith("zh-") -> context.getString(R.string.notif_zf_title_zh)
-          variant.startsWith("bi-small-") -> context.getString(R.string.notif_zf_title_small_bi)
-          else -> context.getString(R.string.notif_zf_title_bi)
-        }
       }
       "telespeech" -> {
         if (variant == "full") context.getString(R.string.notif_ts_title_full)

@@ -61,9 +61,6 @@ class AsrSettingsActivity : BaseActivity() {
     private val pfModelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { handlePfModelImport(it) }
     }
-    private val zfModelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let { handleZfModelImport(it) }
-    }
     private val punctModelFilePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let { handlePunctModelImport(it) }
     }
@@ -90,7 +87,6 @@ class AsrSettingsActivity : BaseActivity() {
     private lateinit var groupSenseVoice: View
     private lateinit var groupTelespeech: View
     private lateinit var groupParaformer: View
-    private lateinit var groupZipformer: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -119,7 +115,6 @@ class AsrSettingsActivity : BaseActivity() {
         updateSvDownloadUiVisibility()
         updateTsDownloadUiVisibility()
         updatePfDownloadUiVisibility()
-        updateZfDownloadUiVisibility()
         updatePunctDownloadUiVisibility()
     }
 
@@ -152,7 +147,6 @@ class AsrSettingsActivity : BaseActivity() {
         groupSenseVoice = findViewById(R.id.groupSenseVoice)
         groupTelespeech = findViewById(R.id.groupTelespeech)
         groupParaformer = findViewById(R.id.groupParaformer)
-        groupZipformer = findViewById(R.id.groupZipformer)
     }
 
     private fun setupVendorSelection() {
@@ -232,7 +226,6 @@ class AsrSettingsActivity : BaseActivity() {
         setupSenseVoiceSettings()
         setupTelespeechSettings()
         setupParaformerSettings()
-        setupZipformerSettings()
     }
 
     private fun setupVolcengineSettings() {
@@ -1176,7 +1169,7 @@ class AsrSettingsActivity : BaseActivity() {
         // 下载/清理
         setupPfDownloadButtons()
 
-        // 通用标点模型（TeleSpeech / Paraformer / Zipformer 共用）
+        // 通用标点模型（TeleSpeech / Paraformer 共用）
         setupPunctDownloadButtons(
             btnDownloadId = R.id.btnPfDownloadPunct,
             btnImportId = R.id.btnPfImportPunct,
@@ -1281,244 +1274,6 @@ class AsrSettingsActivity : BaseActivity() {
 
         if (ready && tv.text.isNullOrBlank()) {
             tv.text = getString(R.string.pf_download_status_done)
-        }
-    }
-
-    // ===== Zipformer (Local streaming) =====
-    private fun setupZipformerSettings() {
-        // 变体选择（八种）
-        val tvZfVariant = findViewById<TextView>(R.id.tvZfModelVariantValue)
-        val variantLabels = listOf(
-            getString(R.string.zf_variant_zh_xl_int8_20250630),
-            getString(R.string.zf_variant_zh_xl_fp16_20250630),
-            getString(R.string.zf_variant_zh_int8_20250630),
-            getString(R.string.zf_variant_zh_fp16_20250630),
-            getString(R.string.zf_variant_bi_int8_20230220),
-            getString(R.string.zf_variant_bi_fp32_20230220),
-            getString(R.string.zf_variant_small_bi_int8_20230216),
-            getString(R.string.zf_variant_small_bi_fp32_20230216)
-        )
-        val variantCodes = listOf(
-            "zh-xl-int8-20250630",
-            "zh-xl-fp16-20250630",
-            "zh-int8-20250630",
-            "zh-fp16-20250630",
-            "bi-20230220-int8",
-            "bi-20230220-fp32",
-            "bi-small-20230216-int8",
-            "bi-small-20230216-fp32"
-        )
-        fun updateVariantSummary() {
-            val idx = variantCodes.indexOf(prefs.zfModelVariant).coerceAtLeast(0)
-            tvZfVariant.text = variantLabels[idx]
-        }
-        updateVariantSummary()
-        tvZfVariant.setOnClickListener { v ->
-            hapticTapIfEnabled(v)
-            val cur = variantCodes.indexOf(prefs.zfModelVariant).coerceAtLeast(0)
-            showSingleChoiceDialog(R.string.label_zf_model_variant, variantLabels.toTypedArray(), cur) { which ->
-                val code = variantCodes.getOrNull(which) ?: "zh-xl-int8-20250630"
-                if (code != prefs.zfModelVariant) {
-                    viewModel.updateZfModelVariant(code)
-                }
-                updateVariantSummary()
-                updateZfDownloadUiVisibility()
-            }
-        }
-
-        // 保留时长
-        val tvKeep = findViewById<TextView>(R.id.tvZfKeepAliveValue)
-        fun updateKeepAliveSummary() {
-            val values = listOf(0, 5, 15, 30, -1)
-            val labels = listOf(
-                getString(R.string.sv_keep_alive_immediate),
-                getString(R.string.sv_keep_alive_5m),
-                getString(R.string.sv_keep_alive_15m),
-                getString(R.string.sv_keep_alive_30m),
-                getString(R.string.sv_keep_alive_always)
-            )
-            val idx = values.indexOf(prefs.zfKeepAliveMinutes).let { if (it >= 0) it else values.size - 1 }
-            tvKeep.text = labels[idx]
-        }
-        updateKeepAliveSummary()
-        tvKeep.setOnClickListener { v ->
-            hapticTapIfEnabled(v)
-            val labels = arrayOf(
-                getString(R.string.sv_keep_alive_immediate),
-                getString(R.string.sv_keep_alive_5m),
-                getString(R.string.sv_keep_alive_15m),
-                getString(R.string.sv_keep_alive_30m),
-                getString(R.string.sv_keep_alive_always)
-            )
-            val values = listOf(0, 5, 15, 30, -1)
-            val cur = values.indexOf(prefs.zfKeepAliveMinutes).let { if (it >= 0) it else values.size - 1 }
-            showSingleChoiceDialog(R.string.label_zf_keep_alive, labels, cur) { which ->
-                val vv = values.getOrNull(which) ?: -1
-                if (vv != prefs.zfKeepAliveMinutes) {
-                    prefs.zfKeepAliveMinutes = vv
-                }
-                updateKeepAliveSummary()
-            }
-        }
-
-        // 线程数滑块（1-8）
-        findViewById<com.google.android.material.slider.Slider>(R.id.sliderZfThreads).apply {
-            value = prefs.zfNumThreads.coerceIn(1, 8).toFloat()
-            addOnChangeListener { _, value, fromUser ->
-                if (fromUser) {
-                    val v = value.toInt().coerceIn(1, 8)
-                    if (v != prefs.zfNumThreads) {
-                        viewModel.updateZfNumThreads(v)
-                    }
-                }
-            }
-            addOnSliderTouchListener(object : com.google.android.material.slider.Slider.OnSliderTouchListener {
-                override fun onStartTrackingTouch(slider: com.google.android.material.slider.Slider) = hapticTapIfEnabled(slider)
-                override fun onStopTrackingTouch(slider: com.google.android.material.slider.Slider) = hapticTapIfEnabled(slider)
-            })
-        }
-
-        // 首次显示时加载模型
-        findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchZfPreload).apply {
-            isChecked = prefs.zfPreloadEnabled
-            installExplainedSwitch(
-                context = this@AsrSettingsActivity,
-                titleRes = R.string.label_zf_preload,
-                offDescRes = R.string.feature_zf_preload_off_desc,
-                onDescRes = R.string.feature_zf_preload_on_desc,
-                preferenceKey = "zf_preload_explained",
-                readPref = { prefs.zfPreloadEnabled },
-                writePref = { v -> viewModel.updateZfPreload(v) },
-                hapticFeedback = { hapticTapIfEnabled(it) }
-            )
-        }
-
-        // ITN 开关
-        findViewById<com.google.android.material.materialswitch.MaterialSwitch>(R.id.switchZfItn).apply {
-            isChecked = prefs.zfUseItn
-            installExplainedSwitch(
-                context = this@AsrSettingsActivity,
-                titleRes = R.string.label_zf_use_itn,
-                offDescRes = R.string.feature_zf_use_itn_off_desc,
-                onDescRes = R.string.feature_zf_use_itn_on_desc,
-                preferenceKey = "zf_use_itn_explained",
-                readPref = { prefs.zfUseItn },
-                writePref = { v -> viewModel.updateZfUseItn(v) },
-                hapticFeedback = { hapticTapIfEnabled(it) }
-            )
-        }
-
-        setupZfDownloadButtons()
-
-        // 通用标点模型（TeleSpeech / Paraformer / Zipformer 共用）
-        setupPunctDownloadButtons(
-            btnDownloadId = R.id.btnZfDownloadPunct,
-            btnImportId = R.id.btnZfImportPunct,
-            btnClearId = R.id.btnZfClearPunct,
-            statusTextId = R.id.tvZfPunctStatus
-        )
-    }
-
-    private fun setupZfDownloadButtons() {
-        val btnDl = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfDownloadModel)
-        val btnImport = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfImportModel)
-        val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfClearModel)
-        val tvStatus = findViewById<TextView>(R.id.tvZfDownloadStatus)
-
-        btnImport.setOnClickListener { v ->
-            hapticTapIfEnabled(v)
-            zfModelFilePicker.launch("application/zip")
-        }
-
-        btnDl.setOnClickListener { v ->
-            v.isEnabled = false
-            tvStatus.text = ""
-            val sources = arrayOf(
-                getString(R.string.download_source_github_official),
-                getString(R.string.download_source_mirror_ghproxy),
-                getString(R.string.download_source_mirror_gitmirror),
-                getString(R.string.download_source_mirror_gh_proxynet)
-            )
-            val variant = prefs.zfModelVariant
-            val urlOfficial = when (variant) {
-                "zh-xl-int8-20250630" -> "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-streaming-zipformer-zh-xlarge-int8-2025-06-30.zip"
-                "zh-xl-fp16-20250630" -> "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-streaming-zipformer-zh-xlarge-fp16-2025-06-30.zip"
-                "zh-int8-20250630" -> "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-streaming-zipformer-zh-int8-2025-06-30.zip"
-                "zh-fp16-20250630" -> "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-streaming-zipformer-zh-fp16-2025-06-30.zip"
-                "bi-20230220-int8", "bi-20230220-fp32" -> "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-streaming-zipformer-bilingual-zh-en-2023-02-20.zip"
-                else -> "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-streaming-zipformer-small-bilingual-zh-en-2023-02-16.zip"
-            }
-            androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle(R.string.download_source_title)
-                .setItems(sources) { dlg, which ->
-                    dlg.dismiss()
-                    val url = when (which) {
-                        1 -> "https://ghproxy.net/$urlOfficial"
-                        2 -> "https://hub.gitmirror.com/$urlOfficial"
-                        3 -> "https://gh-proxy.net/$urlOfficial"
-                        else -> urlOfficial
-                    }
-                    try {
-                        ModelDownloadService.startDownload(this, url, variant, "zipformer")
-                        tvStatus.text = getString(R.string.zf_download_started_in_bg)
-                    } catch (e: Throwable) {
-                        android.util.Log.e(TAG, "Failed to start zipformer download", e)
-                        tvStatus.text = getString(R.string.zf_download_status_failed)
-                    } finally { v.isEnabled = true }
-                }
-                .setOnDismissListener { v.isEnabled = true }
-                .show()
-        }
-
-        btnClear.setOnClickListener { v ->
-            androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle(R.string.zf_clear_confirm_title)
-                .setMessage(R.string.zf_clear_confirm_message)
-                .setPositiveButton(android.R.string.ok) { d, _ ->
-                    d.dismiss()
-                    v.isEnabled = false
-                    lifecycleScope.launch {
-                        try {
-                            val base = getExternalFilesDir(null) ?: filesDir
-                            val root = java.io.File(base, "zipformer")
-                            val outDir = when {
-                                prefs.zfModelVariant.startsWith("zh-xl-") -> java.io.File(root, "zh-xlarge-2025-06-30")
-                                prefs.zfModelVariant.startsWith("zh-") -> java.io.File(root, "zh-2025-06-30")
-                                prefs.zfModelVariant.startsWith("bi-small-") -> java.io.File(root, "small-bilingual-zh-en-2023-02-16")
-                                else -> java.io.File(root, "bilingual-zh-en-2023-02-20")
-                            }
-                            if (outDir.exists()) withContext(Dispatchers.IO) { outDir.deleteRecursively() }
-                            tvStatus.text = getString(R.string.zf_clear_done)
-                        } catch (e: Throwable) {
-                            android.util.Log.e(TAG, "Failed to clear zipformer model", e)
-                            tvStatus.text = getString(R.string.zf_clear_failed)
-                        } finally {
-                            v.isEnabled = true
-                            updateZfDownloadUiVisibility()
-                        }
-                    }
-                }
-                .setNegativeButton(R.string.btn_cancel, null)
-                .create()
-                .show()
-        }
-    }
-
-    private fun updateZfDownloadUiVisibility() {
-        val ready = viewModel.checkZfModelDownloaded(this)
-        val btn = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfDownloadModel)
-        val btnImport = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfImportModel)
-        val btnClear = findViewById<com.google.android.material.button.MaterialButton>(R.id.btnZfClearModel)
-        val tv = findViewById<TextView>(R.id.tvZfDownloadStatus)
-
-        // 模型已安装时：隐藏下载和导入按钮，显示清理按钮
-        // 模型未安装时：显示下载和导入按钮，隐藏清理按钮
-        btn.visibility = if (ready) View.GONE else View.VISIBLE
-        btnImport.visibility = if (ready) View.GONE else View.VISIBLE
-        btnClear.visibility = if (ready) View.VISIBLE else View.GONE
-
-        if (ready && tv.text.isNullOrBlank()) {
-            tv.text = getString(R.string.zf_download_status_done)
         }
     }
 
@@ -1819,7 +1574,7 @@ class AsrSettingsActivity : BaseActivity() {
     }
 
     /**
-     * 通用标点模型下载/导入/清理（本地 sherpa-onnx 引擎共用：FunASR Nano / TeleSpeech / Paraformer / Zipformer）
+     * 通用标点模型下载/导入/清理（本地 sherpa-onnx 引擎共用：FunASR Nano / TeleSpeech / Paraformer）
      */
     private fun setupPunctDownloadButtons(
         btnDownloadId: Int,
@@ -2028,7 +1783,7 @@ class AsrSettingsActivity : BaseActivity() {
 
         setupTsDownloadButtons()
 
-        // 通用标点模型（TeleSpeech / Paraformer / Zipformer 共用）
+        // 通用标点模型（TeleSpeech / Paraformer 共用）
         setupPunctDownloadButtons(
             btnDownloadId = R.id.btnTsDownloadPunct,
             btnImportId = R.id.btnTsImportPunct,
@@ -2091,30 +1846,11 @@ class AsrSettingsActivity : BaseActivity() {
         }
     }
 
-    private fun handleZfModelImport(uri: Uri) {
-        val tvStatus = findViewById<TextView>(R.id.tvZfDownloadStatus)
-        tvStatus.text = ""
-
-        try {
-            if (!isZipUri(uri)) {
-                tvStatus.text = getString(R.string.zf_import_failed, getString(R.string.error_only_zip_supported))
-                return
-            }
-            val variant = prefs.zfModelVariant
-            ModelDownloadService.startImport(this, uri, variant)
-            tvStatus.text = getString(R.string.zf_import_started_in_bg)
-        } catch (e: Throwable) {
-            android.util.Log.e(TAG, "Failed to start zipformer model import", e)
-            tvStatus.text = getString(R.string.zf_import_failed, e.message ?: "Unknown error")
-        }
-    }
-
     private fun handlePunctModelImport(uri: Uri) {
         // 更新三个状态文本区域
         val statusTextViews = listOf(
             findViewById<TextView?>(R.id.tvTsPunctStatus),
-            findViewById<TextView?>(R.id.tvPfPunctStatus),
-            findViewById<TextView?>(R.id.tvZfPunctStatus)
+            findViewById<TextView?>(R.id.tvPfPunctStatus)
         ).filterNotNull()
 
         statusTextViews.forEach { it.text = "" }
@@ -2196,8 +1932,7 @@ class AsrSettingsActivity : BaseActivity() {
             AsrVendor.Zhipu to groupZhipu,
             AsrVendor.SenseVoice to groupSenseVoice,
             AsrVendor.Telespeech to groupTelespeech,
-            AsrVendor.Paraformer to groupParaformer,
-            AsrVendor.Zipformer to groupZipformer
+            AsrVendor.Paraformer to groupParaformer
         )
         visMap.forEach { (vendor, view) ->
             val vis = if (vendor == state.selectedVendor) View.VISIBLE else View.GONE
@@ -2312,7 +2047,6 @@ class AsrSettingsActivity : BaseActivity() {
         apply(R.id.btnSvDownloadPunct, R.id.btnSvImportPunct, R.id.btnSvClearPunct, R.id.tvSvPunctStatus)
         apply(R.id.btnTsDownloadPunct, R.id.btnTsImportPunct, R.id.btnTsClearPunct, R.id.tvTsPunctStatus)
         apply(R.id.btnPfDownloadPunct, R.id.btnPfImportPunct, R.id.btnPfClearPunct, R.id.tvPfPunctStatus)
-        apply(R.id.btnZfDownloadPunct, R.id.btnZfImportPunct, R.id.btnZfClearPunct, R.id.tvZfPunctStatus)
     }
 
     // ====== Helper Functions ======

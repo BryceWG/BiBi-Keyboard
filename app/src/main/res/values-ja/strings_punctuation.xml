@@ -1,6 +1,6 @@
 <resources>
     <!-- 共通 sherpa-onnx 句読点モデル（ct-transformer zh+en） -->
-    <string name="label_punct_model_shared">共通句読点モデル（FunASR Nano / TeleSpeech / Paraformer / Zipformer 用）</string>
+    <string name="label_punct_model_shared">共通句読点モデル（FunASR Nano / TeleSpeech / Paraformer 用）</string>
     <string name="btn_punct_download_model">句読点モデルをダウンロード（60MB 共通）</string>
     <string name="btn_punct_import_model">句読点モデルをインポート</string>
     <string name="btn_punct_clear_model">句読点モデルを削除</string>
@@ -22,6 +22,6 @@
 
     <string name="notif_punct_title">句読点モデル（60MB,共通）</string>
 
-    <!-- TeleSpeech/Paraformer/Zipformer 選択・呼び出し時に句読点モデルがない場合の通知 -->
+    <!-- TeleSpeech/Paraformer 選択・呼び出し時に句読点モデルがない場合の通知 -->
     <string name="toast_punct_model_missing">ローカルの句読点モデルが見つかりません。認識結果に句読点が付かない場合があります。ASR 設定から共通の句読点モデルをダウンロードできます。</string>
 </resources>

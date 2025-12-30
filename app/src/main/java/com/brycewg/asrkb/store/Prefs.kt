@@ -987,27 +987,10 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_PF_USE_ITN, true)
         set(value) = sp.edit { putBoolean(KEY_PF_USE_ITN, value) }
 
-    // Zipformer（本地 ASR，流式）
-    var zfModelVariant: String
-        get() = sp.getString(KEY_ZF_MODEL_VARIANT, "zh-xl-int8-20250630") ?: "zh-xl-int8-20250630"
-        set(value) = sp.edit { putString(KEY_ZF_MODEL_VARIANT, value.trim().ifBlank { "zh-xl-int8-20250630" }) }
-
-    var zfNumThreads: Int
-        get() = sp.getInt(KEY_ZF_NUM_THREADS, 2).coerceIn(1, 8)
-        set(value) = sp.edit { putInt(KEY_ZF_NUM_THREADS, value.coerceIn(1, 8)) }
-
-    var zfKeepAliveMinutes: Int
-        get() = sp.getInt(KEY_ZF_KEEP_ALIVE_MINUTES, -1)
-        set(value) = sp.edit { putInt(KEY_ZF_KEEP_ALIVE_MINUTES, value) }
-
-    var zfPreloadEnabled: Boolean
-        get() = sp.getBoolean(KEY_ZF_PRELOAD_ENABLED, true)
-        set(value) = sp.edit { putBoolean(KEY_ZF_PRELOAD_ENABLED, value) }
-
-    // Zipformer: ITN（客户端轻量规范化开关，占位，可扩展）
-    var zfUseItn: Boolean
-        get() = sp.getBoolean(KEY_ZF_USE_ITN, true)
-        set(value) = sp.edit { putBoolean(KEY_ZF_USE_ITN, value) }
+    // Zipformer 模型清理标记（移除 Zipformer 支持后仅执行一次）
+    var zipformerCleanupDone: Boolean
+        get() = sp.getBoolean(KEY_ZIPFORMER_CLEANUP_DONE, false)
+        set(value) = sp.edit { putBoolean(KEY_ZIPFORMER_CLEANUP_DONE, value) }
     // --- 供应商配置通用化 ---
     private data class VendorField(val key: String, val required: Boolean = false, val default: String = "")
 
@@ -1056,9 +1039,7 @@ class Prefs(context: Context) {
         // 本地 TeleSpeech（sherpa-onnx）无需鉴权
         AsrVendor.Telespeech to emptyList(),
         // 本地 Paraformer（sherpa-onnx）无需鉴权
-        AsrVendor.Paraformer to emptyList(),
-        // 本地 Zipformer（sherpa-onnx，流式）无需鉴权
-        AsrVendor.Zipformer to emptyList()
+        AsrVendor.Paraformer to emptyList()
     )
 
     fun hasVendorKeys(v: AsrVendor): Boolean {
@@ -1572,12 +1553,7 @@ class Prefs(context: Context) {
         private const val KEY_PF_KEEP_ALIVE_MINUTES = "pf_keep_alive_minutes"
         private const val KEY_PF_PRELOAD_ENABLED = "pf_preload_enabled"
         private const val KEY_PF_USE_ITN = "pf_use_itn"
-        // Zipformer（本地 ASR，流式）
-        private const val KEY_ZF_MODEL_VARIANT = "zf_model_variant"
-        private const val KEY_ZF_NUM_THREADS = "zf_num_threads"
-        private const val KEY_ZF_KEEP_ALIVE_MINUTES = "zf_keep_alive_minutes"
-        private const val KEY_ZF_PRELOAD_ENABLED = "zf_preload_enabled"
-        private const val KEY_ZF_USE_ITN = "zf_use_itn"
+        private const val KEY_ZIPFORMER_CLEANUP_DONE = "zipformer_cleanup_done"
         private const val KEY_AI_EDIT_DEFAULT_TO_LAST_ASR = "ai_edit_default_to_last_asr"
         private const val KEY_POSTPROC_SKIP_UNDER_CHARS = "postproc_skip_under_chars"
         private const val KEY_HEADSET_MIC_PRIORITY_ENABLED = "headset_mic_priority_enabled"
@@ -1988,12 +1964,6 @@ class Prefs(context: Context) {
         o.put(KEY_PF_KEEP_ALIVE_MINUTES, pfKeepAliveMinutes)
         o.put(KEY_PF_PRELOAD_ENABLED, pfPreloadEnabled)
         o.put(KEY_PF_USE_ITN, pfUseItn)
-        // Zipformer（本地 ASR，流式）
-        o.put(KEY_ZF_MODEL_VARIANT, zfModelVariant)
-        o.put(KEY_ZF_NUM_THREADS, zfNumThreads)
-        o.put(KEY_ZF_KEEP_ALIVE_MINUTES, zfKeepAliveMinutes)
-        o.put(KEY_ZF_PRELOAD_ENABLED, zfPreloadEnabled)
-        o.put(KEY_ZF_USE_ITN, zfUseItn)
         // SyncClipboard 配置
         o.put(KEY_SC_ENABLED, syncClipboardEnabled)
         o.put(KEY_SC_SERVER_BASE, syncClipboardServerBase)
@@ -2202,12 +2172,6 @@ class Prefs(context: Context) {
             optInt(KEY_PF_KEEP_ALIVE_MINUTES)?.let { pfKeepAliveMinutes = it }
             optBool(KEY_PF_PRELOAD_ENABLED)?.let { pfPreloadEnabled = it }
             optBool(KEY_PF_USE_ITN)?.let { pfUseItn = it }
-            // Zipformer（本地 ASR，流式）
-            optString(KEY_ZF_MODEL_VARIANT)?.let { zfModelVariant = it }
-            optInt(KEY_ZF_NUM_THREADS)?.let { zfNumThreads = it.coerceIn(1, 8) }
-            optInt(KEY_ZF_KEEP_ALIVE_MINUTES)?.let { zfKeepAliveMinutes = it }
-            optBool(KEY_ZF_PRELOAD_ENABLED)?.let { zfPreloadEnabled = it }
-            optBool(KEY_ZF_USE_ITN)?.let { zfUseItn = it }
             // SyncClipboard 配置
             optBool(KEY_SC_ENABLED)?.let { syncClipboardEnabled = it }
             optString(KEY_SC_SERVER_BASE)?.let { syncClipboardServerBase = it }

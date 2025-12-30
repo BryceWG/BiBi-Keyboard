@@ -967,13 +967,6 @@ class FloatingAsrService : Service(),
                                 Log.e(TAG, "Failed to unload Paraformer", e)
                             }
                         }
-                        if (old == AsrVendor.Zipformer && v != AsrVendor.Zipformer) {
-                            try {
-                                com.brycewg.asrkb.asr.unloadZipformerRecognizer()
-                            } catch (e: Throwable) {
-                                Log.e(TAG, "Failed to unload Zipformer", e)
-                            }
-                        }
 
                         // 切换到本地引擎且启用预加载时，触发预加载以降低首次等待
                         if (v == AsrVendor.SenseVoice && prefs.svPreloadEnabled) {
@@ -995,13 +988,6 @@ class FloatingAsrService : Service(),
                                 com.brycewg.asrkb.asr.preloadParaformerIfConfigured(this, prefs)
                             } catch (e: Throwable) {
                                 Log.e(TAG, "Failed to preload Paraformer", e)
-                            }
-                        }
-                        if (v == AsrVendor.Zipformer && prefs.zfPreloadEnabled) {
-                            try {
-                                com.brycewg.asrkb.asr.preloadZipformerIfConfigured(this, prefs)
-                            } catch (e: Throwable) {
-                                Log.e(TAG, "Failed to preload Zipformer", e)
                             }
                         }
                     }
@@ -1302,7 +1288,6 @@ class FloatingAsrService : Service(),
             AsrVendor.SenseVoice -> prefs.svPreloadEnabled
             AsrVendor.Telespeech -> prefs.tsPreloadEnabled
             AsrVendor.Paraformer -> prefs.pfPreloadEnabled
-            AsrVendor.Zipformer -> prefs.zfPreloadEnabled
             else -> false
         }
         if (!enabled) return

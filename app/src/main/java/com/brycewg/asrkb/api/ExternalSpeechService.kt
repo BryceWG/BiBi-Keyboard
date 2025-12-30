@@ -245,8 +245,8 @@ class ExternalSpeechService : Service() {
                 AsrVendor.Volc -> prefs.volcStreamingEnabled
                 AsrVendor.DashScope -> prefs.isDashStreamingModelSelected()
                 AsrVendor.Soniox -> prefs.sonioxStreamingEnabled
-                // 本地 sherpa-onnx：Paraformer/Zipformer 仅流式；SenseVoice/TeleSpeech 仅非流式
-                AsrVendor.Paraformer, AsrVendor.Zipformer -> true
+                // 本地 sherpa-onnx：Paraformer 仅流式；SenseVoice/TeleSpeech 仅非流式
+                AsrVendor.Paraformer -> true
                 AsrVendor.SenseVoice, AsrVendor.Telespeech -> false
                 AsrVendor.ElevenLabs -> prefs.elevenStreamingEnabled
                 // 其他云厂商（OpenAI/Gemini/SiliconFlow/Zhipu）仅非流式
@@ -337,7 +337,6 @@ class ExternalSpeechService : Service() {
                     }
                 )
                 AsrVendor.Paraformer -> ParaformerStreamAsrEngine(context, scope, prefs, this)
-                AsrVendor.Zipformer -> ZipformerStreamAsrEngine(context, scope, prefs, this)
             }
         }
 
@@ -447,9 +446,8 @@ class ExternalSpeechService : Service() {
                         }
                     )
                 )
-                // 本地：Paraformer/Zipformer 固定流式
+                // 本地：Paraformer 固定流式
                 AsrVendor.Paraformer -> com.brycewg.asrkb.asr.ParaformerStreamAsrEngine(context, scope, prefs, this, externalPcmMode = true)
-                AsrVendor.Zipformer -> com.brycewg.asrkb.asr.ZipformerStreamAsrEngine(context, scope, prefs, this, externalPcmMode = true)
                 // SenseVoice：支持伪流式（VAD 分片预览 + 整段离线识别）
                 AsrVendor.SenseVoice -> {
                     if (prefs.svPseudoStreamEnabled) {

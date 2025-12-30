@@ -186,7 +186,6 @@ class AsrRecognitionService : RecognitionService() {
                 }
             }
             AsrVendor.Paraformer -> ParaformerStreamAsrEngine(this, scope, prefs, listener)
-            AsrVendor.Zipformer -> ZipformerStreamAsrEngine(this, scope, prefs, listener)
         }
     }
 
@@ -199,7 +198,7 @@ class AsrRecognitionService : RecognitionService() {
             AsrVendor.DashScope -> prefs.isDashStreamingModelSelected()
             AsrVendor.Soniox -> prefs.sonioxStreamingEnabled
             AsrVendor.ElevenLabs -> prefs.elevenStreamingEnabled
-            AsrVendor.Paraformer, AsrVendor.Zipformer -> true
+            AsrVendor.Paraformer -> true
             AsrVendor.SenseVoice, AsrVendor.Telespeech -> false
             AsrVendor.OpenAI, AsrVendor.Gemini, AsrVendor.SiliconFlow, AsrVendor.Zhipu -> false
         }

@@ -2245,9 +2245,6 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
                     if (old == com.brycewg.asrkb.asr.AsrVendor.Paraformer && vendor != com.brycewg.asrkb.asr.AsrVendor.Paraformer) {
                         com.brycewg.asrkb.asr.unloadParaformerRecognizer()
                     }
-                    if (old == com.brycewg.asrkb.asr.AsrVendor.Zipformer && vendor != com.brycewg.asrkb.asr.AsrVendor.Zipformer) {
-                        com.brycewg.asrkb.asr.unloadZipformerRecognizer()
-                    }
                 } catch (t: Throwable) {
                     android.util.Log.e("AsrKeyboardService", "Failed to unload local recognizer", t)
                 }
@@ -2263,7 +2260,6 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
                         com.brycewg.asrkb.asr.AsrVendor.SenseVoice -> if (prefs.svPreloadEnabled) com.brycewg.asrkb.asr.preloadSenseVoiceIfConfigured(this, prefs)
                         com.brycewg.asrkb.asr.AsrVendor.Telespeech -> if (prefs.tsPreloadEnabled) com.brycewg.asrkb.asr.preloadTelespeechIfConfigured(this, prefs)
                         com.brycewg.asrkb.asr.AsrVendor.Paraformer -> if (prefs.pfPreloadEnabled) com.brycewg.asrkb.asr.preloadParaformerIfConfigured(this, prefs)
-                        com.brycewg.asrkb.asr.AsrVendor.Zipformer -> if (prefs.zfPreloadEnabled) com.brycewg.asrkb.asr.preloadZipformerIfConfigured(this, prefs)
                         else -> {}
                     }
                 } catch (t: Throwable) {
@@ -2287,7 +2283,6 @@ class AsrKeyboardService : InputMethodService(), KeyboardActionHandler.UiListene
             AsrVendor.SenseVoice -> p.svPreloadEnabled
             AsrVendor.Telespeech -> p.tsPreloadEnabled
             AsrVendor.Paraformer -> p.pfPreloadEnabled
-            AsrVendor.Zipformer -> p.zfPreloadEnabled
             else -> false
         }
         if (!enabled) return

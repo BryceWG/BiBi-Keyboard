@@ -1,6 +1,6 @@
 <resources>
     <!-- Shared sherpa-onnx punctuation model (ct-transformer zh+en) -->
-    <string name="label_punct_model_shared">Shared punctuation model (FunASR Nano / TeleSpeech / Paraformer / Zipformer)</string>
+    <string name="label_punct_model_shared">Shared punctuation model (FunASR Nano / TeleSpeech / Paraformer)</string>
     <string name="btn_punct_download_model">Download punctuation model (60MB, shared)</string>
     <string name="btn_punct_import_model">Import punctuation model</string>
     <string name="btn_punct_clear_model">Clear punctuation model</string>
@@ -22,6 +22,6 @@
 
     <string name="notif_punct_title">Punctuation model (60MB, shared)</string>
 
-    <!-- Toast when punctuation model is missing for TeleSpeech/Paraformer/Zipformer -->
+    <!-- Toast when punctuation model is missing for TeleSpeech/Paraformer -->
     <string name="toast_punct_model_missing">No local punctuation model detected. Recognition results may lack punctuation. You can download the shared punctuation model in ASR settings.</string>
 </resources>

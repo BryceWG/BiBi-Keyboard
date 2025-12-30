@@ -13,7 +13,7 @@ import kotlinx.coroutines.sync.withLock
  * sherpa-onnx 文本标点管理器（Offline/Online Punctuation）。
  *
  * - 通过反射调用 sherpa-onnx Kotlin API（OfflinePunctuation/OnlinePunctuation）；
- * - 统一管理标点模型的文件路径，供 TeleSpeech/Paraformer/Zipformer 共用；
+ * - 统一管理标点模型的文件路径，供 TeleSpeech/Paraformer 共用；
  * - 线程数固定为 1，不暴露配置项；
  * - 当前仅提供能力封装，不在任意 ASR 引擎中自动接入。
  */

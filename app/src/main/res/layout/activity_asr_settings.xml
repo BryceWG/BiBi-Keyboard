@@ -714,7 +714,7 @@
             app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
             android:text="@string/btn_sv_clear_model" />
 
-          <!-- 通用标点模型（FunASR Nano / TeleSpeech / Paraformer / Zipformer 共用） -->
+          <!-- 通用标点模型（FunASR Nano / TeleSpeech / Paraformer 共用） -->
           <TextView
             style="@style/SettingsLabel"
             android:layout_marginTop="12dp"
@@ -839,7 +839,7 @@
             android:text="@string/btn_ts_clear_model" />
 
 
-          <!-- 通用标点模型（TeleSpeech / Paraformer / Zipformer 共用） -->
+          <!-- 通用标点模型（TeleSpeech / Paraformer 共用） -->
           <TextView
             style="@style/SettingsLabel"
             android:layout_marginTop="12dp"
@@ -968,7 +968,7 @@
             android:layout_marginTop="12dp"
             android:text="@string/pf_model_info" />
 
-          <!-- 通用标点模型（TeleSpeech / Paraformer / Zipformer 共用） -->
+          <!-- 通用标点模型（TeleSpeech / Paraformer 共用） -->
           <TextView
             style="@style/SettingsLabel"
             android:layout_marginTop="12dp"
@@ -1004,123 +1004,6 @@
             android:text="" />
         </LinearLayout>
 
-        <!-- Zipformer (Local streaming) -->
-        <LinearLayout
-          android:id="@+id/groupZipformer"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="vertical"
-          android:visibility="gone">
-
-          <TextView
-            android:id="@+id/tvZfModelVariantValue"
-            style="@style/SettingsClickableValue.Dropdown"
-            android:text="@string/zf_variant_zh_xl_int8_20250630" />
-
-          <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/switchZfPreload"
-            style="@style/SettingsSwitch"
-            android:text="@string/label_zf_preload" />
-
-          <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/switchZfItn"
-            style="@style/SettingsSwitch"
-            android:text="@string/label_zf_use_itn" />
-          <TextView
-            style="@style/SettingsLabel"
-            android:text="@string/label_zf_threads" />
-
-          <com.google.android.material.slider.Slider
-            android:id="@+id/sliderZfThreads"
-            style="@style/SettingsSlider"
-            android:valueFrom="1"
-            android:valueTo="8"
-            android:stepSize="1" />
-
-          <TextView
-            style="@style/SettingsLabel"
-            android:text="@string/label_zf_keep_alive" />
-
-          <TextView
-            android:id="@+id/tvZfKeepAliveValue"
-            style="@style/SettingsClickableValue.Dropdown"
-            android:text="@string/sv_keep_alive_always" />
-
-          <LinearLayout
-            style="@style/SettingsButtonRow.MarginTop12"
-            android:baselineAligned="false">
-
-            <com.google.android.material.button.MaterialButton
-              android:id="@+id/btnZfDownloadModel"
-              style="@style/SettingsRowButtonLeft"
-              android:text="@string/btn_zf_download_model" />
-
-            <com.google.android.material.button.MaterialButton
-              android:id="@+id/btnZfImportModel"
-              style="@style/SettingsRowButtonRight"
-              android:text="@string/btn_zf_import_model" />
-          </LinearLayout>
-
-          <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnZfClearModel"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
-            android:text="@string/btn_zf_clear_model" />
-
-          <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnZfGuide"
-            style="@style/SettingsTonalButton"
-            android:text="@string/btn_local_model_guide" />
-
-          <TextView
-            android:id="@+id/tvZfDownloadStatus"
-            style="@style/SettingsStatusText"
-            android:text="" />
-
-          <TextView
-            style="@style/SettingsHint"
-            android:layout_marginTop="8dp"
-            android:lineSpacingMultiplier="1.2"
-            android:text="@string/zf_model_info" />
-
-          <!-- 通用标点模型（TeleSpeech / Paraformer / Zipformer 共用） -->
-          <TextView
-            style="@style/SettingsLabel"
-            android:layout_marginTop="12dp"
-            android:text="@string/label_punct_model_shared" />
-
-          <LinearLayout
-            style="@style/SettingsButtonRow.MarginTop12"
-            android:baselineAligned="false">
-
-            <com.google.android.material.button.MaterialButton
-              android:id="@+id/btnZfDownloadPunct"
-              style="@style/SettingsRowButtonLeft"
-              android:text="@string/btn_punct_download_model" />
-
-            <com.google.android.material.button.MaterialButton
-              android:id="@+id/btnZfImportPunct"
-              style="@style/SettingsRowButtonRight"
-              android:text="@string/btn_punct_import_model" />
-          </LinearLayout>
-
-          <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnZfClearPunct"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:shapeAppearanceOverlay="@style/AsrkbShapeOverlayCapsule"
-            android:text="@string/btn_punct_clear_model" />
-
-          <TextView
-            android:id="@+id/tvZfPunctStatus"
-            style="@style/SettingsStatusText"
-            android:text="" />
-        </LinearLayout>
       </LinearLayout>
 
     </LinearLayout>
