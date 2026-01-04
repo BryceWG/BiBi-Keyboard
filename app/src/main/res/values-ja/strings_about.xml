@@ -8,6 +8,10 @@
     <string name="about_app_name">アプリ名：%1$s</string>
     <string name="about_version">バージョン：%1$s</string>
     <string name="about_package">パッケージ：%1$s</string>
+    <string name="about_disable_auto_update_check">自動更新チェックをオフ</string>
+    <string name="about_enable_auto_update_check">自動更新チェックをオン</string>
+    <string name="toast_auto_update_check_disabled">自動更新チェックをオフにしました</string>
+    <string name="toast_auto_update_check_enabled">自動更新チェックをオンにしました</string>
     <string name="about_open_github">プロジェクトページを開く</string>
     <string name="about_project_url">https://github.com/BryceWG/BiBi-Keyboard</string>
     <string name="about_open_website">公式サイトを開く</string>

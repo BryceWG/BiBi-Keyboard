@@ -183,6 +183,11 @@ class Prefs(context: Context) {
     // 最近一次检查更新的日期（格式：yyyyMMdd，本地时区）；用于“每天首次进入设置页自动检查”
     var lastUpdateCheckDate: String by stringPref(KEY_LAST_UPDATE_CHECK_DATE, "")
 
+    // 自动检查更新开关（默认开启；仅影响“进入设置页时的每日静默检查”）
+    var autoUpdateCheckEnabled: Boolean
+        get() = sp.getBoolean(KEY_AUTO_UPDATE_CHECK_ENABLED, true)
+        set(value) = sp.edit { putBoolean(KEY_AUTO_UPDATE_CHECK_ENABLED, value) }
+
     // 输入法切换悬浮球开关
     var floatingSwitcherEnabled: Boolean
         get() = sp.getBoolean(KEY_FLOATING_SWITCHER_ENABLED, false)
@@ -1462,6 +1467,7 @@ class Prefs(context: Context) {
         private const val KEY_POSTPROC_ENABLED = "postproc_enabled"
         private const val KEY_APP_LANGUAGE_TAG = "app_language_tag"
         private const val KEY_LAST_UPDATE_CHECK_DATE = "last_update_check_date"
+        private const val KEY_AUTO_UPDATE_CHECK_ENABLED = "auto_update_check_enabled"
         private const val KEY_LLM_ENDPOINT = "llm_endpoint"
         private const val KEY_LLM_API_KEY = "llm_api_key"
         private const val KEY_LLM_MODEL = "llm_model"
@@ -1854,6 +1860,7 @@ class Prefs(context: Context) {
         o.put(KEY_IME_SWITCH_TARGET_ID, imeSwitchTargetId)
         o.put(KEY_HIDE_RECENT_TASK_CARD, hideRecentTaskCard)
         o.put(KEY_APP_LANGUAGE_TAG, appLanguageTag)
+        o.put(KEY_AUTO_UPDATE_CHECK_ENABLED, autoUpdateCheckEnabled)
         o.put(KEY_FLOATING_SWITCHER_ENABLED, floatingSwitcherEnabled)
         o.put(KEY_FLOATING_SWITCHER_ALPHA, floatingSwitcherAlpha)
         o.put(KEY_FLOATING_BALL_SIZE_DP, floatingBallSizeDp)
@@ -2038,6 +2045,7 @@ class Prefs(context: Context) {
             optBool(KEY_FCITX5_RETURN_ON_SWITCHER)?.let { fcitx5ReturnOnImeSwitch = it }
             optBool(KEY_HIDE_RECENT_TASK_CARD)?.let { hideRecentTaskCard = it }
             optString(KEY_APP_LANGUAGE_TAG)?.let { appLanguageTag = it }
+            optBool(KEY_AUTO_UPDATE_CHECK_ENABLED)?.let { autoUpdateCheckEnabled = it }
             optBool(KEY_POSTPROC_ENABLED)?.let { postProcessEnabled = it }
             optBool(KEY_HEADSET_MIC_PRIORITY_ENABLED)?.let { headsetMicPriorityEnabled = it }
             // SiliconFlow 免费/付费 LLM 配置

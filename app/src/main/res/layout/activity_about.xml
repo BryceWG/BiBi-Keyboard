@@ -46,10 +46,18 @@
         android:text="@string/about_package" />
 
       <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnOpenGithub"
+        android:id="@+id/btnToggleAutoUpdateCheck"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:text="@string/about_disable_auto_update_check" />
+
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnOpenGithub"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         style="@style/Widget.Material3.Button.TonalButton"
         android:text="@string/about_open_github" />
 

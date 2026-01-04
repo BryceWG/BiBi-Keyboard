@@ -537,6 +537,10 @@ class SettingsActivity : BaseActivity() {
     private fun maybeAutoCheckUpdatesDaily() {
         try {
             val prefs = Prefs(this)
+            if (!prefs.autoUpdateCheckEnabled) {
+                Log.d(TAG, "Auto update check disabled by user, skipping")
+                return
+            }
             val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(Date())
 
             if (prefs.lastUpdateCheckDate == today) {

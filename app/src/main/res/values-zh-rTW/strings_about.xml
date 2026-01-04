@@ -7,6 +7,10 @@
     <string name="about_app_name">應用程式名稱：%1$s</string>
     <string name="about_version">版本：%1$s</string>
     <string name="about_package">套件名稱：%1$s</string>
+    <string name="about_disable_auto_update_check">關閉自動更新檢查</string>
+    <string name="about_enable_auto_update_check">開啟自動更新檢查</string>
+    <string name="toast_auto_update_check_disabled">已關閉自動更新檢查</string>
+    <string name="toast_auto_update_check_enabled">已開啟自動更新檢查</string>
     <string name="about_open_github">查看專案首頁</string>
     <string name="about_project_url">https://github.com/BryceWG/BiBi-Keyboard</string>
     <string name="about_open_website">查看專案官網</string>
