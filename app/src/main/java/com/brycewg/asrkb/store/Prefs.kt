@@ -1335,6 +1335,10 @@ class Prefs(context: Context) {
         }
 
         setUsageStats(stats)
+        val syncedTotalChars = stats.totalChars.coerceAtLeast(0)
+        if (syncedTotalChars > totalAsrChars) {
+            totalAsrChars = syncedTotalChars
+        }
     }
 
     /**
