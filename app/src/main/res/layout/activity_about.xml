@@ -45,6 +45,11 @@
         android:layout_marginTop="4dp"
         android:text="@string/about_package" />
 
+      <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/switchAutoUpdateCheck"
+        style="@style/AboutSwitch"
+        android:text="@string/about_auto_update_check" />
+
       <com.google.android.material.button.MaterialButton
         android:id="@+id/btnOpenGithub"
         android:layout_width="match_parent"

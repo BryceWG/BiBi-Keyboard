@@ -7,6 +7,7 @@
     <string name="about_app_name">App name: %1$s</string>
     <string name="about_version">Version: %1$s</string>
     <string name="about_package">Package: %1$s</string>
+    <string name="about_auto_update_check">Auto-check for updates</string>
     <string name="about_open_github">Open Project Page</string>
     <string name="about_project_url">https://github.com/BryceWG/BiBi-Keyboard</string>
     <string name="about_open_website">Open Project Website</string>

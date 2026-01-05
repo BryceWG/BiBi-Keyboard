@@ -311,6 +311,9 @@
         <item name="android:textSize">14sp</item>
     </style>
 
+    <!-- 关于页面开关 -->
+    <style name="AboutSwitch" parent="SettingsSwitch" />
+
     <!-- ==================== 键盘样式 ==================== -->
 
     <!-- 键盘 ImageButton -->

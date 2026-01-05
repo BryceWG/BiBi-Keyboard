@@ -17,6 +17,7 @@ import com.brycewg.asrkb.UiColors
 import com.brycewg.asrkb.UiColorTokens
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.store.Prefs
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.ui.AsrAccessibilityService
@@ -42,6 +43,7 @@ class AboutActivity : BaseActivity() {
     val tvAppName = findViewById<TextView>(R.id.tvAppName)
     val tvVersion = findViewById<TextView>(R.id.tvVersion)
     val tvPackage = findViewById<TextView>(R.id.tvPackage)
+    val switchAutoUpdateCheck = findViewById<MaterialSwitch>(R.id.switchAutoUpdateCheck)
     val btnGithub = findViewById<Button>(R.id.btnOpenGithub)
 
     tvAppName.text = getString(R.string.about_app_name, getString(R.string.app_name))
@@ -59,6 +61,12 @@ class AboutActivity : BaseActivity() {
     val versionCodeLong = pInfo?.longVersionCode ?: 0L
     tvVersion.text = getString(R.string.about_version, "$versionName ($versionCodeLong)")
     tvPackage.text = getString(R.string.about_package, packageName)
+
+    val prefs = Prefs(this)
+    switchAutoUpdateCheck.isChecked = prefs.autoUpdateCheckEnabled
+    switchAutoUpdateCheck.setOnCheckedChangeListener { _, isChecked ->
+      prefs.autoUpdateCheckEnabled = isChecked
+    }
 
     btnGithub.setOnClickListener {
       try {
