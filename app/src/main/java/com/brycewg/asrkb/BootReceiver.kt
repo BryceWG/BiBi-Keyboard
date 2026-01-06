@@ -12,6 +12,7 @@ import android.util.Log
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.AsrAccessibilityService
 import com.brycewg.asrkb.ui.floating.FloatingAsrService
+import com.brycewg.asrkb.ui.floating.FloatingKeepAliveService
 
 /**
  * 开机自启广播接收器：
@@ -34,16 +35,20 @@ class BootReceiver : BroadcastReceiver() {
     private fun tryStartOverlayServices(context: Context) {
         try {
             val prefs = Prefs(context)
-            val canOverlay = Settings.canDrawOverlays(context)
-            if (!canOverlay) return
+            if (prefs.floatingKeepAliveEnabled) {
+                FloatingKeepAliveService.start(context)
+            }
 
-            if (prefs.floatingAsrEnabled) {
+            val canOverlay = Settings.canDrawOverlays(context)
+            if (canOverlay && prefs.floatingAsrEnabled) {
                 val i2 = Intent(context, FloatingAsrService::class.java).apply {
                     action = FloatingAsrService.ACTION_SHOW
                 }
                 context.startService(i2)
             }
-        } catch (_: Throwable) { }
+        } catch (t: Throwable) {
+            Log.w("BootReceiver", "Failed to start overlay services on boot", t)
+        }
     }
 
     private fun tryEnableAccessibilityIfPermitted(context: Context) {

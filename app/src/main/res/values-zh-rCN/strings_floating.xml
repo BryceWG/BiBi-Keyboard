@@ -4,12 +4,15 @@
     <string name="title_floating_settings">悬浮球设置</string>
     <string name="section_floating_basic">基本设置</string>
     <string name="section_floating_compat">兼容性</string>
+    <string name="section_floating_keep_alive">后台保活</string>
     <string name="label_floating_only_when_ime_visible">仅在键盘显示时显示悬浮球</string>
     <string name="label_floating_direct_drag">直接拖动移动悬浮球</string>
     <string name="label_floating_alpha">悬浮球透明度</string>
     <string name="label_floating_size">悬浮球大小</string>
     <string name="toast_need_overlay_perm">请在系统设置中授予"在其他应用上层显示"权限以启用悬浮球</string>
     <string name="label_floating_asr">使用悬浮球进行语音识别</string>
+    <string name="label_floating_keep_alive_foreground">前台服务保活</string>
+    <string name="label_request_battery_whitelist">申请电池优化白名单</string>
     <string name="label_floating_write_compat">悬浮球写入文字兼容性模式</string>
     <string name="desc_floating_write_compat">在部分应用中文本框会出现背景文字被误识别，导致通过无障碍服务插入文字时会附带背景文字的情况。开启此模式后，在目标软件中使用悬浮球时会尝试"全选+粘贴"写入一个不可见字符，以屏蔽背景文字。</string>
     <string name="label_floating_write_compat_pkgs">兼容目标包名（每行一个）</string>
@@ -20,6 +23,8 @@
     <string name="hint_floating_write_paste_pkgs">请填写完整包名进行精确匹配（例如 com.tencent.mm）。如需全局生效，单独添加一行 all。</string>
     <string name="toast_need_accessibility_perm">请在系统设置中授予"无障碍服务"权限以支持此功能</string>
     <string name="cd_floating_asr">悬浮球语音识别</string>
+    <string name="toast_battery_whitelist_already">已在电池优化白名单中</string>
+    <string name="toast_battery_whitelist_failed">申请电池优化白名单失败</string>
 
     <!-- Floating ASR status messages -->
     <string name="floating_asr_error">识别失败: %1$s</string>
@@ -41,6 +46,11 @@
     <string name="toast_move_mode_on">已进入移动模式，再次点击悬浮球退出</string>
     <string name="label_reset_floating_position">重置悬浮球位置</string>
     <string name="toast_floating_position_reset">已重置悬浮球位置</string>
+
+    <string name="notif_channel_floating_keep_alive">后台保活</string>
+    <string name="notif_channel_floating_keep_alive_desc">通过常驻通知保持后台运行。</string>
+    <string name="notif_floating_keep_alive_title">后台保活已启用</string>
+    <string name="notif_floating_keep_alive_desc">前台服务常驻以强化后台保活能力。</string>
 
     <!-- ============================================== -->
     <!-- 悬浮球设置 - 功能说明 -->
@@ -65,4 +75,8 @@
     <!-- 悬浮球识别结果仅写入粘贴板 -->
     <string name="feature_floating_write_paste_off_desc">识别结果通过无障碍 API 直接插入到输入字段中。</string>
     <string name="feature_floating_write_paste_on_desc">针对目标包名，识别结果仅复制到剪贴板，不自动插入。适用于直接插入无法正常工作的应用。</string>
+
+    <!-- 前台保活 -->
+    <string name="feature_floating_keep_alive_off_desc">不开启前台服务，系统可能更容易回收后台进程。</string>
+    <string name="feature_floating_keep_alive_on_desc">启动前台服务并显示常驻通知，强化后台保活能力。</string>
 </resources>

@@ -227,6 +227,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_FLOATING_ASR_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_FLOATING_ASR_ENABLED, value) }
 
+    // 悬浮球：前台保活开关
+    var floatingKeepAliveEnabled: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_KEEP_ALIVE_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_KEEP_ALIVE_ENABLED, value) }
+
     // 悬浮球：写入文字兼容性模式（统一控制使用“全选+粘贴”等策略），默认开启
     var floatingWriteTextCompatEnabled: Boolean
         get() = sp.getBoolean(KEY_FLOATING_WRITE_COMPAT_ENABLED, true)
@@ -1461,6 +1466,7 @@ class Prefs(context: Context) {
         private const val KEY_FLOATING_WRITE_PASTE_ENABLED = "floating_write_paste_enabled"
         private const val KEY_FLOATING_ASR_ENABLED = "floating_asr_enabled"
         private const val KEY_FLOATING_ONLY_WHEN_IME_VISIBLE = "floating_only_when_ime_visible"
+        private const val KEY_FLOATING_KEEP_ALIVE_ENABLED = "floating_keep_alive_enabled"
         
         private const val KEY_FLOATING_WRITE_COMPAT_PACKAGES = "floating_write_compat_packages"
         private const val KEY_FLOATING_WRITE_PASTE_PACKAGES = "floating_write_paste_packages"
@@ -1869,6 +1875,7 @@ class Prefs(context: Context) {
         o.put(KEY_FLOATING_DIRECT_DRAG_ENABLED, floatingBallDirectDragEnabled)
         o.put(KEY_FLOATING_ASR_ENABLED, floatingAsrEnabled)
         o.put(KEY_FLOATING_ONLY_WHEN_IME_VISIBLE, floatingSwitcherOnlyWhenImeVisible)
+        o.put(KEY_FLOATING_KEEP_ALIVE_ENABLED, floatingKeepAliveEnabled)
         
         o.put(KEY_POSTPROC_ENABLED, postProcessEnabled)
         o.put(KEY_AI_EDIT_DEFAULT_TO_LAST_ASR, aiEditDefaultToLastAsr)
@@ -2067,6 +2074,7 @@ class Prefs(context: Context) {
             optBool(KEY_FLOATING_DIRECT_DRAG_ENABLED)?.let { floatingBallDirectDragEnabled = it }
             optBool(KEY_FLOATING_ASR_ENABLED)?.let { floatingAsrEnabled = it }
             optBool(KEY_FLOATING_ONLY_WHEN_IME_VISIBLE)?.let { floatingSwitcherOnlyWhenImeVisible = it }
+            optBool(KEY_FLOATING_KEEP_ALIVE_ENABLED)?.let { floatingKeepAliveEnabled = it }
             
             optBool(KEY_FLOATING_WRITE_COMPAT_ENABLED)?.let { floatingWriteTextCompatEnabled = it }
             optString(KEY_FLOATING_WRITE_COMPAT_PACKAGES)?.let { floatingWriteCompatPackages = it }

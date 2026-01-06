@@ -1,6 +1,9 @@
 package com.brycewg.asrkb.ui.settings.other
 
+import android.content.Intent
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -10,13 +13,14 @@ import android.widget.TextView
 import com.google.android.material.button.MaterialButton
 import android.widget.Toast
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.brycewg.asrkb.ui.BaseActivity
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.analytics.AnalyticsManager
 import com.brycewg.asrkb.ui.SettingsOptionSheet
+import com.brycewg.asrkb.ui.floating.FloatingServiceManager
 import com.brycewg.asrkb.ui.installExplainedSwitch
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -33,6 +37,7 @@ class OtherSettingsActivity : BaseActivity() {
 
     private lateinit var viewModel: OtherSettingsViewModel
     private lateinit var prefs: Prefs
+    private lateinit var floatingServiceManager: FloatingServiceManager
 
     // Flag to prevent circular updates when programmatically setting text
     private var updatingFieldsFromViewModel = false
@@ -48,19 +53,53 @@ class OtherSettingsActivity : BaseActivity() {
 
         prefs = Prefs(this)
         viewModel = OtherSettingsViewModel(prefs)
+        floatingServiceManager = FloatingServiceManager(this)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         toolbar.setTitle(R.string.title_other_settings)
         toolbar.setNavigationOnClickListener { finish() }
 
+        setupKeepAlive()
         setupPunctuationButtons()
         setupSpeechPresets()
         setupSyncClipboard()
         setupPrivacyToggles()
 
 
-        // Observe ViewModel state
-        observeViewModel()
+    // Observe ViewModel state
+    observeViewModel()
+    }
+
+    // ========== General ==========
+
+    private fun setupKeepAlive() {
+        val switchKeepAlive = findViewById<MaterialSwitch>(R.id.switchFloatingKeepAlive)
+        val btnBatteryWhitelist = findViewById<MaterialButton>(R.id.btnRequestBatteryWhitelist)
+
+        switchKeepAlive.isChecked = prefs.floatingKeepAliveEnabled
+
+        switchKeepAlive.installExplainedSwitch(
+            context = this,
+            titleRes = R.string.label_floating_keep_alive_foreground,
+            offDescRes = R.string.feature_floating_keep_alive_off_desc,
+            onDescRes = R.string.feature_floating_keep_alive_on_desc,
+            preferenceKey = "floating_keep_alive_explained",
+            readPref = { prefs.floatingKeepAliveEnabled },
+            writePref = { enabled ->
+                prefs.floatingKeepAliveEnabled = enabled
+                if (enabled) {
+                    floatingServiceManager.startKeepAliveService()
+                } else {
+                    floatingServiceManager.stopKeepAliveService()
+                }
+            },
+            hapticFeedback = { hapticTapIfEnabled(it) }
+        )
+
+        btnBatteryWhitelist.setOnClickListener { v ->
+            hapticTapIfEnabled(v)
+            requestBatteryOptimizationWhitelist()
+        }
     }
 
     // ========== Privacy Toggles ==========
@@ -472,6 +511,28 @@ class OtherSettingsActivity : BaseActivity() {
                 getString(R.string.sc_open_browser_failed),
                 Toast.LENGTH_SHORT
             ).show()
+        }
+    }
+
+    private fun requestBatteryOptimizationWhitelist() {
+        val powerManager = getSystemService(PowerManager::class.java)
+        val alreadyIgnoring = try {
+            powerManager?.isIgnoringBatteryOptimizations(packageName) == true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to query battery optimization state", e)
+            false
+        }
+        if (alreadyIgnoring) {
+            Toast.makeText(this, getString(R.string.toast_battery_whitelist_already), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        try {
+            val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, "package:$packageName".toUri())
+            startActivity(intent)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to request battery optimization whitelist", e)
+            Toast.makeText(this, getString(R.string.toast_battery_whitelist_failed), Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -12,6 +12,7 @@ import com.brycewg.asrkb.store.Prefs
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.brycewg.asrkb.ui.floating.FloatingAsrService
+import com.brycewg.asrkb.ui.floating.FloatingKeepAliveService
 import com.brycewg.asrkb.asr.VadDetector
 import com.brycewg.asrkb.analytics.AnalyticsManager
 import kotlinx.coroutines.CoroutineScope
@@ -59,6 +60,10 @@ class App : Application() {
                     action = FloatingAsrService.ACTION_SHOW
                 }
                 startService(intent)
+            }
+
+            if (prefs.floatingKeepAliveEnabled) {
+                FloatingKeepAliveService.start(this)
             }
         } catch (t: Throwable) {
             Log.w("App", "Failed to start overlay services", t)

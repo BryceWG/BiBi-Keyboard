@@ -54,6 +54,7 @@
   <!-- Settings page section titles -->
   <string name="section_settings_items">主要设置项</string>
   <string name="section_more">更多</string>
+  <string name="section_general">后台保活</string>
 
   <string name="label_app_key">X-Api-App-Key</string>
   <string name="label_access_key">X-Api-Access-Key</string>

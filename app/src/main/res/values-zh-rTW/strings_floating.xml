@@ -4,12 +4,15 @@
     <string name="title_floating_settings">懸浮球設定</string>
     <string name="section_floating_basic">基本設定</string>
     <string name="section_floating_compat">相容性</string>
+    <string name="section_floating_keep_alive">背景保活</string>
     <string name="label_floating_only_when_ime_visible">僅在鍵盤顯示時顯示懸浮球</string>
     <string name="label_floating_direct_drag">直接拖動移動懸浮球</string>
     <string name="label_floating_alpha">懸浮球透明度</string>
     <string name="label_floating_size">懸浮球大小</string>
     <string name="toast_need_overlay_perm">請在系統設定中授予「在其他應用程式上層顯示」權限以啟用懸浮球</string>
     <string name="label_floating_asr">使用懸浮球進行語音識別</string>
+    <string name="label_floating_keep_alive_foreground">前台服務保活</string>
+    <string name="label_request_battery_whitelist">申請電池最佳化白名單</string>
     <string name="label_floating_write_compat">懸浮球寫入文字相容性模式</string>
     <string name="desc_floating_write_compat">部分應用程式會向無障礙服務暴露背景預留位置文字，這會污染最終插入。啟用後，在目標應用程式中，懸浮球會切換為全選 + 貼上並使用不可見標記來避免預留位置問題。剪貼簿可能會暫時被使用（盡力恢復）。適用於 Telegram、抖音等。</string>
     <string name="label_floating_write_compat_pkgs">相容目標套件名稱（每行一個）</string>
@@ -20,6 +23,8 @@
     <string name="hint_floating_write_paste_pkgs">請填寫完整套件名稱進行精確匹配（例如 com.tencent.mm）。如需全域生效，單獨新增一行 all。</string>
     <string name="toast_need_accessibility_perm">請在系統設定中授予「無障礙服務」權限以支援此功能</string>
     <string name="cd_floating_asr">懸浮球語音識別</string>
+    <string name="toast_battery_whitelist_already">已在電池最佳化白名單中</string>
+    <string name="toast_battery_whitelist_failed">申請電池最佳化白名單失敗</string>
 
     <!-- Floating ASR status messages -->
     <string name="floating_asr_error">識別失敗：%1$s</string>
@@ -41,6 +46,11 @@
     <string name="toast_move_mode_on">已進入移動模式，再次點擊懸浮球退出</string>
     <string name="label_reset_floating_position">重置懸浮球位置</string>
     <string name="toast_floating_position_reset">已重置懸浮球位置</string>
+
+    <string name="notif_channel_floating_keep_alive">背景保活</string>
+    <string name="notif_channel_floating_keep_alive_desc">透過常駐通知保持背景執行。</string>
+    <string name="notif_floating_keep_alive_title">背景保活已啟用</string>
+    <string name="notif_floating_keep_alive_desc">前台服務常駐以強化背景保活能力。</string>
 
     <!-- ============================================== -->
     <!-- 懸浮球設定 - 功能說明 -->
@@ -65,4 +75,8 @@
     <!-- 懸浮球識別結果僅寫入剪貼簿 -->
     <string name="feature_floating_write_paste_off_desc">識別結果透過無障礙 API 直接插入到輸入欄位中。</string>
     <string name="feature_floating_write_paste_on_desc">針對目標套件名稱，識別結果僅複製到剪貼簿，不自動插入。適用於直接插入無法正常運作的應用程式。</string>
+
+    <!-- 前台保活 -->
+    <string name="feature_floating_keep_alive_off_desc">不啟用前台服務，系統可能更容易回收背景程序。</string>
+    <string name="feature_floating_keep_alive_on_desc">啟動前台服務並顯示常駐通知，強化背景保活能力。</string>
 </resources>

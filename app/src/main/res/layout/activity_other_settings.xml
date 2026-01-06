@@ -24,8 +24,30 @@
       android:padding="16dp"
       android:orientation="vertical">
 
-      <!-- 隐私与数据 -->
+      <!-- 通用 -->
       <LinearLayout style="@style/SettingsSectionCard.First">
+
+        <TextView
+          style="@style/SettingsSectionCardTitle"
+          android:text="@string/section_general" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+          android:id="@+id/switchFloatingKeepAlive"
+          style="@style/SettingsSwitch.First"
+          android:layout_marginTop="0dp"
+          android:text="@string/label_floating_keep_alive_foreground" />
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnRequestBatteryWhitelist"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginTop="8dp"
+          android:text="@string/label_request_battery_whitelist" />
+
+      </LinearLayout>
+
+      <!-- 隐私与数据 -->
+      <LinearLayout style="@style/SettingsSectionCard">
 
         <TextView
           style="@style/SettingsSectionCardTitle"

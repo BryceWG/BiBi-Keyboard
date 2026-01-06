@@ -5,12 +5,15 @@
     <string name="title_floating_settings">フローティング設定</string>
     <string name="section_floating_basic">基本設定</string>
     <string name="section_floating_compat">互換性</string>
+    <string name="section_floating_keep_alive">バックグラウンド保活</string>
     <string name="label_floating_only_when_ime_visible">キーボード表示時のみフローティングボールを表示する</string>
     <string name="label_floating_direct_drag">直接ドラッグでフローティングボールを移動</string>
     <string name="label_floating_alpha">フローティングボールの透明度</string>
     <string name="label_floating_size">フローティングボールのサイズ</string>
     <string name="toast_need_overlay_perm">フローティングボールを有効にするには、システム設定で「他のアプリの上に表示」を許可してください</string>
     <string name="label_floating_asr">フローティングボールで音声認識を使用する</string>
+    <string name="label_floating_keep_alive_foreground">フォアグラウンドサービスで保活する</string>
+    <string name="label_request_battery_whitelist">電池最適化の除外を申請</string>
     <string name="label_floating_write_compat">フローティングボールのテキスト挿入互換モード</string>
     <string name="desc_floating_write_compat">一部のアプリでは背景テキストが誤認識され、無障害サービス経由でテキストを挿入する際に背景テキストも含まれてしまう場合があります。このモードを有効にすると、対象アプリでフローティングボールを使用する際、「全選択+貼り付け」で不可視文字を挿入し、背景テキストの問題を回避します。</string>
     <string name="label_floating_write_compat_pkgs">ターゲットパッケージ名（1行に1つ）</string>
@@ -21,6 +24,8 @@
     <string name="hint_floating_write_paste_pkgs">正確なパッケージ名を入力（例：com.tencent.mm）。グローバルに適用するには、allを含む行を1つ追加してください。</string>
     <string name="toast_need_accessibility_perm">この機能をサポートするには、システム設定でアクセシビリティサービスを有効にしてください</string>
     <string name="cd_floating_asr">フローティングボール音声認識</string>
+    <string name="toast_battery_whitelist_already">すでに電池最適化の除外済みです</string>
+    <string name="toast_battery_whitelist_failed">電池最適化の除外申請に失敗しました</string>
 
     <!-- Floating ASR status messages -->
     <string name="floating_asr_error">認識失敗：%1$s</string>
@@ -42,6 +47,11 @@
     <string name="toast_move_mode_on">移動モードが有効になりました。ボールをタップして終了します。</string>
     <string name="label_reset_floating_position">フローティングボール位置をリセット</string>
     <string name="toast_floating_position_reset">フローティングボールの位置をリセットしました</string>
+
+    <string name="notif_channel_floating_keep_alive">バックグラウンド保活</string>
+    <string name="notif_channel_floating_keep_alive_desc">常駐通知でバックグラウンド動作を維持します。</string>
+    <string name="notif_floating_keep_alive_title">バックグラウンド保活が有効</string>
+    <string name="notif_floating_keep_alive_desc">フォアグラウンドサービスを常駐してバックグラウンド保活を強化します。</string>
 
     <!-- ============================================== -->
     <!-- フローティング設定 - 機能説明 -->
@@ -66,4 +76,8 @@
     <!-- フローティング書き込み貼り付け -->
     <string name="feature_floating_write_paste_off_desc">認識結果はアクセシビリティAPI経由で入力フィールドに直接挿入されます。</string>
     <string name="feature_floating_write_paste_on_desc">対象パッケージでは、認識結果はクリップボードにのみコピーされ、自動挿入されません。直接挿入が正しく機能しないアプリに役立ちます。</string>
+
+    <!-- フローティング保活 -->
+    <string name="feature_floating_keep_alive_off_desc">フォアグラウンドサービスを保持しません。バックグラウンドで停止されやすくなります。</string>
+    <string name="feature_floating_keep_alive_on_desc">常駐通知付きでフォアグラウンドサービスを起動し、バックグラウンド保活を強化します。</string>
 </resources>

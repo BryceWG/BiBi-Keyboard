@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- Android 14+ 针对数据同步/下载类型前台服务权限（兼容不存在时忽略） -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" tools:ignore="NewApi" />
+    <!-- 申请电池优化白名单 -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <!-- 悬浮球需要的系统悬浮窗权限（运行时在设置中授予） -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <!-- 通知权限,用于显示悬浮球语音识别状态 -->
@@ -123,6 +125,12 @@
         <service
             android:name=".ui.floating.FloatingAsrService"
             android:exported="false" />
+
+        <!-- 悬浮球前台保活服务 -->
+        <service
+            android:name=".ui.floating.FloatingKeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <!-- 模型下载/解压前台服务（支持并发任务） -->
         <service

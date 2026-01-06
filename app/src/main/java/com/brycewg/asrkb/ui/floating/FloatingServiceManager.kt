@@ -68,4 +68,24 @@ class FloatingServiceManager(private val context: Context) {
             Log.e(TAG, "Failed to request position reset", e)
         }
     }
+
+    /** 启动前台保活服务 */
+    fun startKeepAliveService() {
+        try {
+            FloatingKeepAliveService.start(context)
+            Log.d(TAG, "Started FloatingKeepAliveService")
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to start FloatingKeepAliveService", e)
+        }
+    }
+
+    /** 停止前台保活服务 */
+    fun stopKeepAliveService() {
+        try {
+            FloatingKeepAliveService.stop(context)
+            Log.d(TAG, "Stopped FloatingKeepAliveService")
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to stop FloatingKeepAliveService", e)
+        }
+    }
 }

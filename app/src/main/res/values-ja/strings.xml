@@ -55,6 +55,7 @@
   <!-- Settings page section titles -->
   <string name="section_settings_items">主要設定項目</string>
   <string name="section_more">その他</string>
+  <string name="section_general">バックグラウンド維持</string>
 
   <string name="label_app_key">X-Api-App-Key</string>
   <string name="label_access_key">X-Api-Access-Key</string>

@@ -4,12 +4,15 @@
     <string name="title_floating_settings">Floating Settings</string>
     <string name="section_floating_basic">Basic Settings</string>
     <string name="section_floating_compat">Compatibility</string>
+    <string name="section_floating_keep_alive">Background Keep-Alive</string>
     <string name="label_floating_only_when_ime_visible">Only show floating ball when keyboard is visible</string>
     <string name="label_floating_direct_drag">Drag to move the floating ball</string>
     <string name="label_floating_alpha">Floating ball transparency</string>
     <string name="label_floating_size">Floating ball size</string>
     <string name="toast_need_overlay_perm">Please grant "Display over other apps" in system settings to enable the floating ball</string>
     <string name="label_floating_asr">Use floating ball for voice recognition</string>
+    <string name="label_floating_keep_alive_foreground">Keep alive with a foreground service</string>
+    <string name="label_request_battery_whitelist">Request battery optimization whitelist</string>
     <string name="label_floating_write_compat">Floating write-text compatibility mode</string>
     <string name="desc_floating_write_compat">Some apps expose background placeholder text to Accessibility, which contaminates final insertion. When enabled, in target apps the floating ball switches to Select-All + Paste with an invisible marker to avoid placeholder issues. The clipboard may be used temporarily (best-effort restore). Works for Telegram, Douyin, etc.</string>
     <string name="label_floating_write_compat_pkgs">Target package names (one per line)</string>
@@ -20,6 +23,8 @@
     <string name="hint_floating_write_paste_pkgs">Enter exact package names (e.g., com.tencent.mm). To apply globally, add a single line with all.</string>
     <string name="toast_need_accessibility_perm">Please enable Accessibility Service in system settings to support this feature</string>
     <string name="cd_floating_asr">Floating ball voice recognition</string>
+    <string name="toast_battery_whitelist_already">Already ignoring battery optimizations</string>
+    <string name="toast_battery_whitelist_failed">Failed to request battery whitelist</string>
 
     <!-- Floating ASR status messages -->
     <string name="floating_asr_error">Recognition failed: %1$s</string>
@@ -41,6 +46,11 @@
     <string name="toast_move_mode_on">Move mode enabled. Tap the ball to exit.</string>
     <string name="label_reset_floating_position">Reset floating ball position</string>
     <string name="toast_floating_position_reset">Floating ball position reset</string>
+
+    <string name="notif_channel_floating_keep_alive">Background keep-alive</string>
+    <string name="notif_channel_floating_keep_alive_desc">Keeps the app running with a persistent notification.</string>
+    <string name="notif_floating_keep_alive_title">Background keep-alive enabled</string>
+    <string name="notif_floating_keep_alive_desc">Running a foreground service to strengthen background keep-alive.</string>
 
     <!-- ============================================== -->
     <!-- Floating Settings - Feature Explanations -->
@@ -65,4 +75,8 @@
     <!-- Floating write paste -->
     <string name="feature_floating_write_paste_off_desc">Recognition results are inserted directly into the input field via Accessibility API.</string>
     <string name="feature_floating_write_paste_on_desc">For target packages, recognition results are copied to clipboard only, without automatic insertion. Useful for apps where direct insertion doesn\'t work properly.</string>
+
+    <!-- Floating keep alive -->
+    <string name="feature_floating_keep_alive_off_desc">No foreground service is kept. The system may reclaim the app more aggressively in background.</string>
+    <string name="feature_floating_keep_alive_on_desc">Starts a foreground service with a persistent notification to strengthen background keep-alive.</string>
 </resources>
