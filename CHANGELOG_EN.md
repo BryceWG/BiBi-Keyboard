@@ -10,6 +10,7 @@
 - **Download Source Speed Test**: Added latency speed test display in download source selection dialog for easier fastest mirror selection
 - **Auto Update Check**: Added "Auto Check for Updates" toggle option in About page
 - **New Built-in Post-Processing Models**: Added multiple built-in post-processing models to choose from
+- **[Pro] Quick Access to Hotword Management**: Added "Add as Hotword" option in Android long-press text selection menu for quick hotword addition
 
 ### Improvements
 
@@ -38,7 +39,7 @@
 
 ### Changes
 
-- **Removed Zipformer Engine**: Deprecated Zipformer streaming engine to streamline local ASR solutions. Existing users will be automatically migrated to Paraformer; please reconfirm or switch models in ASR settings. The "zipformer" ID mapping to Paraformer is preserved in the AsrVendor enum to ensure smooth legacy configuration migration, with one-time cleanup logic added to remove downloaded zipformer model directories on first launch
+- **Removed Zipformer Engine**: Deprecated Zipformer streaming engine to streamline local ASR solutions. Existing users will be automatically migrated to Paraformer; please reconfirm or switch models in ASR settings.
 
 ---
 
