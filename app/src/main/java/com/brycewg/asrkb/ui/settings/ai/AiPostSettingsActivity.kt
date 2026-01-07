@@ -375,7 +375,10 @@ class AiPostSettingsActivity : BaseActivity() {
         }
 
         // Builtin reasoning mode switch
-        switchBuiltinReasoningMode.setOnCheckedChangeListener { _, isChecked ->
+        switchBuiltinReasoningMode.setOnCheckedChangeListener { view, isChecked ->
+            if (!isUpdatingProgrammatically) {
+                hapticTapIfEnabled(view)
+            }
             viewModel.updateBuiltinReasoningEnabled(prefs, isChecked)
         }
         etBuiltinReasoningParamsOnJson.addTextChangeListener { text ->
@@ -390,7 +393,10 @@ class AiPostSettingsActivity : BaseActivity() {
         }
 
         // SF reasoning mode switch
-        switchSfReasoningMode.setOnCheckedChangeListener { _, isChecked ->
+        switchSfReasoningMode.setOnCheckedChangeListener { view, isChecked ->
+            if (!isUpdatingProgrammatically) {
+                hapticTapIfEnabled(view)
+            }
             prefs.setLlmVendorReasoningEnabled(LlmVendor.SF_FREE, isChecked)
         }
         etSfReasoningParamsOnJson.addTextChangeListener { text ->
@@ -434,7 +440,10 @@ class AiPostSettingsActivity : BaseActivity() {
         etCustomModelId.addTextChangeListener { text ->
             viewModel.updateActiveLlmProvider(prefs) { it.copy(model = text) }
         }
-        switchCustomReasoningMode.setOnCheckedChangeListener { _, isChecked ->
+        switchCustomReasoningMode.setOnCheckedChangeListener { view, isChecked ->
+            if (!isUpdatingProgrammatically) {
+                hapticTapIfEnabled(view)
+            }
             viewModel.updateActiveLlmProvider(prefs) { it.copy(enableReasoning = isChecked) }
         }
         etCustomReasoningParamsOnJson.addTextChangeListener { text ->
@@ -550,10 +559,13 @@ class AiPostSettingsActivity : BaseActivity() {
         etBuiltinApiKey.setTextIfDifferent(config.apiKey)
         val vendor = viewModel.selectedVendor.value
         val displayModel = config.model.ifBlank { vendor.defaultModel }
-        val isCustom = !vendor.models.contains(displayModel) && displayModel.isNotBlank()
-        tvBuiltinModel.text = if (isCustom) displayModel else displayModel
-        tilBuiltinCustomModelId.visibility = if (isCustom) View.VISIBLE else View.GONE
-        if (isCustom) {
+        val presetModels = prefs.getLlmVendorModels(vendor)
+        val isPresetModel = displayModel.isNotBlank() && presetModels.contains(displayModel)
+        val isBuiltinModel = displayModel.isNotBlank() && vendor.models.contains(displayModel)
+        val showCustomModelInput = displayModel.isNotBlank() && !isPresetModel
+        tvBuiltinModel.text = displayModel
+        tilBuiltinCustomModelId.visibility = if (showCustomModelInput) View.VISIBLE else View.GONE
+        if (showCustomModelInput) {
             etBuiltinCustomModelId.setTextIfDifferent(displayModel)
         }
         // Update slider range based on vendor temperature limits and set value
@@ -565,13 +577,14 @@ class AiPostSettingsActivity : BaseActivity() {
 
         // Update reasoning mode switch visibility and state
         val supportsReasoning = viewModel.supportsReasoningSwitch(vendor, displayModel)
-        val showReasoning = supportsReasoning || isCustom
+        val showCustomReasoningParams = displayModel.isNotBlank() && !isBuiltinModel
+        val showReasoning = supportsReasoning || showCustomReasoningParams
         layoutBuiltinReasoningMode.visibility = if (showReasoning) View.VISIBLE else View.GONE
-        layoutBuiltinReasoningParams.visibility = if (isCustom) View.VISIBLE else View.GONE
+        layoutBuiltinReasoningParams.visibility = if (showCustomReasoningParams) View.VISIBLE else View.GONE
         if (showReasoning) {
             switchBuiltinReasoningMode.isChecked = config.reasoningEnabled
         }
-        if (isCustom) {
+        if (showCustomReasoningParams) {
             etBuiltinReasoningParamsOnJson.setTextIfDifferent(
                 prefs.getLlmVendorReasoningParamsOnJson(vendor)
             )
@@ -619,11 +632,12 @@ class AiPostSettingsActivity : BaseActivity() {
             prefs.sfFreeLlmModel
         }
         // Check if it's a custom model (not in preset list)
-        val staticModels = getSfStaticModels()
-        val isCustom = !staticModels.contains(model) && model.isNotBlank()
-        tvSfFreeLlmModel.text = if (isCustom) model else model
-        tilSfCustomModelId.visibility = if (isCustom) View.VISIBLE else View.GONE
-        if (isCustom) {
+        val presetModels = getSfPresetModels()
+        val isPresetModel = model.isNotBlank() && presetModels.contains(model)
+        val showCustomModelInput = model.isNotBlank() && !isPresetModel
+        tvSfFreeLlmModel.text = if (showCustomModelInput) model else model
+        tilSfCustomModelId.visibility = if (showCustomModelInput) View.VISIBLE else View.GONE
+        if (showCustomModelInput) {
             etSfCustomModelId.setTextIfDifferent(model)
         }
         isUpdatingProgrammatically = false
@@ -646,15 +660,15 @@ class AiPostSettingsActivity : BaseActivity() {
             prefs.sfFreeLlmModel
         }
         val staticModels = getSfStaticModels()
-        val isCustom = model.isNotBlank() && !staticModels.contains(model)
+        val showCustomReasoningParams = model.isNotBlank() && !staticModels.contains(model)
         val supportsReasoning = viewModel.supportsReasoningSwitch(LlmVendor.SF_FREE, model)
-        val showReasoning = supportsReasoning || isCustom
+        val showReasoning = supportsReasoning || showCustomReasoningParams
         layoutSfReasoningMode.visibility = if (showReasoning) View.VISIBLE else View.GONE
-        layoutSfReasoningParams.visibility = if (isCustom) View.VISIBLE else View.GONE
+        layoutSfReasoningParams.visibility = if (showCustomReasoningParams) View.VISIBLE else View.GONE
         if (showReasoning) {
             switchSfReasoningMode.isChecked = prefs.getLlmVendorReasoningEnabled(LlmVendor.SF_FREE)
         }
-        if (isCustom) {
+        if (showCustomReasoningParams) {
             etSfReasoningParamsOnJson.setTextIfDifferent(
                 prefs.getLlmVendorReasoningParamsOnJson(LlmVendor.SF_FREE)
             )
