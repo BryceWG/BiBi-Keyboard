@@ -25,6 +25,7 @@ fcitx5-android-lexi-keyboard/
 website/
 openspec/
 speechrecognizer-tester/
+analysis/
 
 # Node modules for docs
 node_modules/
