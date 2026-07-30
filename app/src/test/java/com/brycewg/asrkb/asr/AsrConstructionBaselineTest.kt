@@ -34,8 +34,6 @@ class AsrConstructionBaselineTest {
             OpenRouter[fileOnly] | app=File:OpenRouterFileAsrEngine | speech=File:OpenRouterFileAsrEngine | external=File:OpenRouterFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(OpenRouterFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(OpenRouterFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(OpenRouterFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(OpenRouterFileAsrEngine)
             Gemini[fileOnly] | app=File:GeminiFileAsrEngine | speech=File:GeminiFileAsrEngine | external=File:GeminiFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(GeminiFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(GeminiFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(GeminiFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(GeminiFileAsrEngine)
             MiMo[fileOnly] | app=File:MiMoFileAsrEngine | speech=File:MiMoFileAsrEngine | external=File:MiMoFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(MiMoFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(MiMoFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(MiMoFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(MiMoFileAsrEngine)
-            Tencent[streaming=true] | app=Stream:TencentStreamAsrEngine | speech=Stream:TencentStreamAsrEngine | external=Stream:TencentStreamAsrEngine | externalPush=PushPcmStream:TencentStreamAsrEngine | recordingPush=PushPcmStream:TencentStreamAsrEngine | recordingMode=PushPcm | parallelDirect=PushPcmStream:TencentStreamAsrEngine | parallelPush=PushPcmStream:TencentStreamAsrEngine
-            Tencent[streaming=false] | app=File:TencentFileAsrEngine | speech=File:TencentFileAsrEngine | external=File:TencentFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine)
             StepAudio[fileOnly] | app=File:StepAudioFileAsrEngine | speech=File:StepAudioFileAsrEngine | external=File:StepAudioFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(StepAudioFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(StepAudioFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(StepAudioFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(StepAudioFileAsrEngine)
             Zhipu[fileOnly] | app=File:ZhipuFileAsrEngine | speech=File:ZhipuFileAsrEngine | external=File:ZhipuFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(ZhipuFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(ZhipuFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(ZhipuFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(ZhipuFileAsrEngine)
             Cohere[fileOnly] | app=File:CohereFileAsrEngine | speech=File:CohereFileAsrEngine | external=File:CohereFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(CohereFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(CohereFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(CohereFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(CohereFileAsrEngine)
@@ -47,6 +45,8 @@ class AsrConstructionBaselineTest {
             FireRedAsr[pseudoStream=false] | app=LocalFile:FireRedAsrFileAsrEngine | speech=LocalFile:FireRedAsrFileAsrEngine | external=LocalFile:FireRedAsrFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(FireRedAsrFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(FireRedAsrFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(FireRedAsrFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(FireRedAsrFileAsrEngine)
             FireRedAsr[pseudoStream=true] | app=LocalPseudoStream:FireRedAsrPseudoStreamAsrEngine | speech=LocalPseudoStream:FireRedAsrPseudoStreamAsrEngine | external=LocalFile:FireRedAsrFileAsrEngine | externalPush=PushPcmPseudoStream:FireRedAsrPushPcmPseudoStreamAsrEngine | recordingPush=PushPcmPseudoStream:FireRedAsrPushPcmPseudoStreamAsrEngine | recordingMode=PushPcm | parallelDirect=PushPcmPseudoStream:FireRedAsrPushPcmPseudoStreamAsrEngine | parallelPush=PushPcmPseudoStream:FireRedAsrPushPcmPseudoStreamAsrEngine
             XAsr[alwaysStreaming] | app=Stream:XAsrStreamAsrEngine | speech=Stream:XAsrStreamAsrEngine | external=Stream:XAsrStreamAsrEngine | externalPush=PushPcmStream:XAsrStreamAsrEngine | recordingPush=PushPcmStream:XAsrStreamAsrEngine | recordingMode=PushPcm | parallelDirect=PushPcmStream:XAsrStreamAsrEngine | parallelPush=PushPcmStream:XAsrStreamAsrEngine
+            Tencent[streaming=true] | app=Stream:TencentStreamAsrEngine | speech=Stream:TencentStreamAsrEngine | external=Stream:TencentStreamAsrEngine | externalPush=PushPcmStream:TencentStreamAsrEngine | recordingPush=PushPcmStream:TencentStreamAsrEngine | recordingMode=PushPcm | parallelDirect=PushPcmStream:TencentStreamAsrEngine | parallelPush=PushPcmStream:TencentStreamAsrEngine
+            Tencent[streaming=false] | app=File:TencentFileAsrEngine | speech=File:TencentFileAsrEngine | external=File:TencentFileAsrEngine | externalPush=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine) | recordingPush=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine) | recordingMode=File | parallelDirect=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine) | parallelPush=PushPcmAdapter:GenericPushFileAsrAdapter(TencentFileAsrEngine)
         """.trimIndent()
 
         assertEquals(expected, renderGoldenMatrix())
@@ -529,7 +529,6 @@ class AsrConstructionBaselineTest {
             fileOnlyRow(AsrVendor.OpenRouter),
             fileOnlyRow(AsrVendor.Gemini),
             fileOnlyRow(AsrVendor.MiMo),
-            streamingRows(AsrVendor.Tencent),
             fileOnlyRow(AsrVendor.StepAudio),
             fileOnlyRow(AsrVendor.Zhipu),
             fileOnlyRow(AsrVendor.Cohere),
@@ -544,7 +543,8 @@ class AsrConstructionBaselineTest {
                     "alwaysStreaming",
                     CurrentAsrConstructionSettings(streamingEnabled = true)
                 )
-            )
+            ),
+            streamingRows(AsrVendor.Tencent)
         ).flatten()
 
         private fun streamingRows(vendor: AsrVendor): List<BaselineRow> = listOf(

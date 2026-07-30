@@ -414,21 +414,6 @@ fun AsrSettingsScreen(
         )
     }
 
-    fun applyTencentStreamingSwitch(target: Boolean) {
-        featureExplainerDialog = settingsFeatureExplainerDialogState(
-            context = context,
-            titleRes = R.string.label_tencent_streaming,
-            offDescRes = R.string.feature_tencent_streaming_off_desc,
-            onDescRes = R.string.feature_tencent_streaming_on_desc,
-            currentState = onlineFields.tencentStreaming,
-            preferenceKey = "tencent_streaming_explained",
-            onConfirm = {
-                onlineFields.tencentStreaming = target
-                viewModel.updateTencentStreaming(target)
-            }
-        )
-    }
-
     fun applyOpenAiStreamingSwitch(target: Boolean) {
         featureExplainerDialog = settingsFeatureExplainerDialogState(
             context = context,
@@ -561,6 +546,21 @@ fun AsrSettingsScreen(
             onConfirm = {
                 onlineFields.geminiTranscribeSmartEnabled = target
                 prefs.gemTranscribeSmartEnabled = target
+            }
+        )
+    }
+
+    fun applyTencentStreamingSwitch(target: Boolean) {
+        featureExplainerDialog = settingsFeatureExplainerDialogState(
+            context = context,
+            titleRes = R.string.label_tencent_streaming,
+            offDescRes = R.string.feature_tencent_streaming_off_desc,
+            onDescRes = R.string.feature_tencent_streaming_on_desc,
+            currentState = onlineFields.tencentStreaming,
+            preferenceKey = "tencent_streaming_explained",
+            onConfirm = {
+                onlineFields.tencentStreaming = target
+                viewModel.updateTencentStreaming(target)
             }
         )
     }

@@ -1456,18 +1456,6 @@ class Prefs(context: Context) {
         }
     }
 
-    // 腾讯云 ASR
-    var tencentAppId: String by stringPref(KEY_TENCENT_APP_ID, "")
-    var tencentSecretId: String by stringPref(KEY_TENCENT_SECRET_ID, "")
-    var tencentSecretKey: String by stringPref(KEY_TENCENT_SECRET_KEY, "")
-    var tencentEngineType: String by stringPref(KEY_TENCENT_ENGINE_TYPE, DEFAULT_TENCENT_ENGINE_TYPE)
-    var tencentStreamingEnabled: Boolean
-        get() = sp.getBoolean(KEY_TENCENT_STREAMING_ENABLED, false)
-        set(value) = sp.edit { putBoolean(KEY_TENCENT_STREAMING_ENABLED, value) }
-    var tencentVadEnabled: Boolean
-        get() = sp.getBoolean(KEY_TENCENT_VAD_ENABLED, false)
-        set(value) = sp.edit { putBoolean(KEY_TENCENT_VAD_ENABLED, value) }
-
     // Google Gemini 语音理解（通过提示词转写）
     var gemEndpoint: String by stringPref(KEY_GEM_ENDPOINT, DEFAULT_GEM_ENDPOINT)
 
@@ -1936,6 +1924,18 @@ class Prefs(context: Context) {
         }
         set(value) = sp.edit { putBoolean(KEY_X_ASR_USE_ITN, value) }
 
+    // 腾讯云 ASR
+    var tencentAppId: String by stringPref(KEY_TENCENT_APP_ID, "")
+    var tencentSecretId: String by stringPref(KEY_TENCENT_SECRET_ID, "")
+    var tencentSecretKey: String by stringPref(KEY_TENCENT_SECRET_KEY, "")
+    var tencentEngineType: String by stringPref(KEY_TENCENT_ENGINE_TYPE, DEFAULT_TENCENT_ENGINE_TYPE)
+    var tencentStreamingEnabled: Boolean
+        get() = sp.getBoolean(KEY_TENCENT_STREAMING_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_TENCENT_STREAMING_ENABLED, value) }
+    var tencentVadEnabled: Boolean
+        get() = sp.getBoolean(KEY_TENCENT_VAD_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_TENCENT_VAD_ENABLED, value) }
+
     // Zipformer 模型清理标记（移除 Zipformer 支持后仅执行一次）
     var zipformerCleanupDone: Boolean
         get() = sp.getBoolean(KEY_ZIPFORMER_CLEANUP_DONE, false)
@@ -1958,9 +1958,6 @@ class Prefs(context: Context) {
         }
         if (v == AsrVendor.MiMo) {
             return mimoAsrApiKey.isNotBlank() && getEffectiveMimoAsrEndpoint().isNotBlank()
-        }
-        if (v == AsrVendor.Tencent) {
-            return tencentAppId.isNotBlank() && tencentSecretId.isNotBlank() && tencentSecretKey.isNotBlank()
         }
         if (v == AsrVendor.StepAudio) {
             return stepAudioApiKey.isNotBlank() && getEffectiveStepAudioAsrEndpoint().isNotBlank()
@@ -2013,11 +2010,11 @@ class Prefs(context: Context) {
     fun hasOpenRouterKeys(): Boolean = hasVendorKeys(AsrVendor.OpenRouter)
     fun hasGeminiKeys(): Boolean = hasVendorKeys(AsrVendor.Gemini)
     fun hasMiMoKeys(): Boolean = hasVendorKeys(AsrVendor.MiMo)
-    fun hasTencentKeys(): Boolean = hasVendorKeys(AsrVendor.Tencent)
     fun hasSonioxKeys(): Boolean = hasVendorKeys(AsrVendor.Soniox)
     fun hasStepAudioKeys(): Boolean = hasVendorKeys(AsrVendor.StepAudio)
     fun hasZhipuKeys(): Boolean = hasVendorKeys(AsrVendor.Zhipu)
     fun hasCohereKeys(): Boolean = hasVendorKeys(AsrVendor.Cohere)
+    fun hasTencentKeys(): Boolean = hasVendorKeys(AsrVendor.Tencent)
     fun hasAsrKeys(): Boolean = hasVendorKeys(asrVendor)
     fun hasLlmKeys(): Boolean {
         // 使用新的 getEffectiveLlmConfig 检查配置有效性

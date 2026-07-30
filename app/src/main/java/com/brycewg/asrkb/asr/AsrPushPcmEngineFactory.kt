@@ -61,10 +61,10 @@ internal enum class AsrPushPcmEngineConstructorKey(
     OpenAiRealtime("OpenAiRealtimeAsrEngine", AsrPushPcmEngineFamily.NativeStream),
     DashscopeStream("DashscopeStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream),
     SonioxStream("SonioxStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream),
-    TencentStream("TencentStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream),
     SenseVoicePushPcmPseudoStream("SenseVoicePushPcmPseudoStreamAsrEngine", AsrPushPcmEngineFamily.PseudoStream),
     FireRedAsrPushPcmPseudoStream("FireRedAsrPushPcmPseudoStreamAsrEngine", AsrPushPcmEngineFamily.PseudoStream),
-    XAsrStream("XAsrStreamAsrEngine", AsrPushPcmEngineFamily.LocalStream)
+    XAsrStream("XAsrStreamAsrEngine", AsrPushPcmEngineFamily.LocalStream),
+    TencentStream("TencentStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream)
 }
 
 internal class AsrPushPcmEngineFactory(
@@ -206,8 +206,8 @@ internal class AsrPushPcmEngineFactory(
         AsrVendor.OpenAI -> AsrPushPcmEngineConstructorKey.OpenAiRealtime
         AsrVendor.DashScope -> AsrPushPcmEngineConstructorKey.DashscopeStream
         AsrVendor.Soniox -> AsrPushPcmEngineConstructorKey.SonioxStream
-        AsrVendor.Tencent -> AsrPushPcmEngineConstructorKey.TencentStream
         AsrVendor.XAsr -> AsrPushPcmEngineConstructorKey.XAsrStream
+        AsrVendor.Tencent -> AsrPushPcmEngineConstructorKey.TencentStream
         else -> error("$vendor has no Push PCM native stream engine")
     }
 
@@ -283,8 +283,6 @@ internal object RealAsrPushPcmEngineConstructorTable : AsrPushPcmEngineConstruct
             DashscopeStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
         AsrPushPcmEngineConstructorKey.SonioxStream ->
             SonioxStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
-        AsrPushPcmEngineConstructorKey.TencentStream ->
-            TencentStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
         AsrPushPcmEngineConstructorKey.SenseVoicePushPcmPseudoStream ->
             SenseVoicePushPcmPseudoStreamAsrEngine(
                 request.context,
@@ -303,6 +301,8 @@ internal object RealAsrPushPcmEngineConstructorTable : AsrPushPcmEngineConstruct
             )
         AsrPushPcmEngineConstructorKey.XAsrStream ->
             XAsrStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
+        AsrPushPcmEngineConstructorKey.TencentStream ->
+            TencentStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
     }
 
     private fun createFileRecognizer(

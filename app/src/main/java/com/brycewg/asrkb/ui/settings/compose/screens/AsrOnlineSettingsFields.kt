@@ -90,12 +90,6 @@ internal class AsrOnlineSettingsFields(
     var mimoPrompt by mutableStateOf(prefs.mimoAsrPrompt)
     var mimoModel by mutableStateOf(prefs.mimoAsrModel)
     var mimoDisableThinking by mutableStateOf(prefs.mimoAsrDisableThinking)
-    var tencentAppId by mutableStateOf(prefs.tencentAppId)
-    var tencentSecretId by mutableStateOf(prefs.tencentSecretId)
-    var tencentSecretKey by mutableStateOf(prefs.tencentSecretKey)
-    var tencentEngineType by mutableStateOf(prefs.tencentEngineType.ifBlank { Prefs.DEFAULT_TENCENT_ENGINE_TYPE })
-    var tencentStreaming by mutableStateOf(prefs.tencentStreamingEnabled)
-    var tencentVadEnabled by mutableStateOf(prefs.tencentVadEnabled)
     var openAiProviders by mutableStateOf(prefs.getOpenAiAsrProviders())
     var openAiActiveProviderId by mutableStateOf(prefs.activeOpenAiAsrProviderId)
     var openAiProfileName by mutableStateOf(prefs.getActiveOpenAiAsrProvider()?.name.orEmpty())
@@ -112,6 +106,12 @@ internal class AsrOnlineSettingsFields(
     var sonioxEndpointSensitivityLevel by mutableStateOf(prefs.sonioxEndpointSensitivityLevel)
     var sonioxLanguages by mutableStateOf(prefs.getSonioxLanguages())
     var sonioxLanguageStrict by mutableStateOf(prefs.sonioxLanguageHintsStrict)
+    var tencentAppId by mutableStateOf(prefs.tencentAppId)
+    var tencentSecretId by mutableStateOf(prefs.tencentSecretId)
+    var tencentSecretKey by mutableStateOf(prefs.tencentSecretKey)
+    var tencentEngineType by mutableStateOf(prefs.tencentEngineType.ifBlank { Prefs.DEFAULT_TENCENT_ENGINE_TYPE })
+    var tencentStreaming by mutableStateOf(prefs.tencentStreamingEnabled)
+    var tencentVadEnabled by mutableStateOf(prefs.tencentVadEnabled)
 
     fun refreshFromPrefs() {
         volcAppKey = prefs.appKey

@@ -66,13 +66,13 @@ internal fun fileRecognizerKeyFor(
     AsrVendor.StepAudio -> AsrFileRecognizerKey.StepAudioFile
     AsrVendor.Zhipu -> AsrFileRecognizerKey.ZhipuFile
     AsrVendor.Cohere -> AsrFileRecognizerKey.CohereFile
-    AsrVendor.Tencent -> AsrFileRecognizerKey.TencentFile
     AsrVendor.SenseVoice -> AsrFileRecognizerKey.SenseVoiceFile
     AsrVendor.FunAsrNano -> AsrFileRecognizerKey.FunAsrNanoFile
     AsrVendor.Qwen3Asr -> AsrFileRecognizerKey.Qwen3AsrFile
     AsrVendor.Parakeet -> AsrFileRecognizerKey.ParakeetFile
     AsrVendor.FireRedAsr -> AsrFileRecognizerKey.FireRedAsrFile
     AsrVendor.XAsr -> error("X-ASR has no file recognizer")
+    AsrVendor.Tencent -> AsrFileRecognizerKey.TencentFile
 }
 
 internal fun interface AsrFileRecognizerConstructorTable {
