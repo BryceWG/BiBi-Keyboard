@@ -31,14 +31,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString.Companion.toByteString
 
 /**
- * 腾讯云实时语音识别（流式 WebSocket）引擎。
- *
- * 调用腾讯云实时识别 WebSocket API：
- *   https://cloud.tencent.com/document/product/1093/48982
- *
- * 鉴权方式：HMAC-SHA1 + Base64 + URLEncode
- * 连接地址：wss://asr.cloud.tencent.com/asr/v2/<AppId>
- * engine_model_type 枚举列表见上述文档。
+ * https://cloud.tencent.com/document/product/1093/48982
  */
 class TencentStreamAsrEngine(
     private val context: Context,
@@ -293,9 +286,10 @@ class TencentStreamAsrEngine(
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 try {
-                    val code = extractJsonInt(text, "code") ?: 0
+                    val obj = org.json.JSONObject(text)
+                    val code = obj.optInt("code", 0)
                     if (code != 0) {
-                        val msg = extractJsonStr(text, "message") ?: "Unknown error"
+                        val msg = obj.optString("message", "Unknown error")
                         listener.onError(
                             context.getString(
                                 R.string.error_recognize_failed_with_reason,
@@ -306,12 +300,12 @@ class TencentStreamAsrEngine(
                         return
                     }
 
-                    val isFinal = extractJsonInt(text, "final") == 1
-                    val resultRaw = extractJsonStrRaw(text, "result")
+                    val isFinal = obj.optInt("final") == 1
+                    val resultObj = obj.optJSONObject("result")
 
-                    if (resultRaw != null) {
-                        val sliceType = extractJsonInt(resultRaw, "slice_type") ?: -1
-                        val voiceText = extractJsonStr(resultRaw, "voice_text_str") ?: ""
+                    if (resultObj != null) {
+                        val sliceType = resultObj.optInt("slice_type", -1)
+                        val voiceText = resultObj.optString("voice_text_str", "")
                         when (sliceType) {
                             0 -> { }
                             1 -> if (voiceText.isNotEmpty()) listener.onPartial(voiceText)
@@ -323,8 +317,8 @@ class TencentStreamAsrEngine(
                     }
 
                     if (isFinal) {
-                        if (resultRaw != null) {
-                            val finalText = extractJsonStr(resultRaw, "voice_text_str") ?: ""
+                        if (resultObj != null) {
+                            val finalText = resultObj.optString("voice_text_str", "")
                             if (finalText.isNotBlank()) {
                                 accumulatedText.setLength(0)
                                 accumulatedText.append(finalText)

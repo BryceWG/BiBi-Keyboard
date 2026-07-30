@@ -14,13 +14,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
 /**
- * 腾讯云一句话识别（SentenceRecognition）引擎。
- *
- * 调用腾讯云一句话识别 API（非流式，单次 HTTP POST）：
- *   https://cloud.tencent.com/document/product/1093/35646
- *
- * 注意：该接口仅支持 60 秒以内的音频，超出会被截断。
- * 实现上的 "File" 命名遵从项目惯例——所有非流式一次性识别引擎均称为 FileAsrEngine。
+ * https://cloud.tencent.com/document/product/1093/35646
  */
 class TencentFileAsrEngine(
     context: Context,
@@ -229,88 +223,4 @@ internal fun formatDate(timestamp: Long): String {
     val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
     sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
     return sdf.format(java.util.Date(timestamp * 1000))
-}
-
-internal fun extractJsonStr(json: String, vararg path: String): String? {
-    var current = json
-    for (key in path) {
-        val search = "\"$key\":"
-        val idx = current.indexOf(search)
-        if (idx < 0) return null
-        val start = idx + search.length
-        val trimmed = current.substring(start).trimStart()
-        if (trimmed.startsWith("\"")) {
-            val end = trimmed.indexOf('"', 1)
-            if (end < 0) return null
-            current = trimmed.substring(1, end)
-        } else {
-            val end = indexOfJsonValueEnd(trimmed)
-            if (end < 0) return null
-            current = trimmed.substring(0, end)
-        }
-    }
-    return current
-}
-
-internal fun extractJsonInt(json: String, vararg path: String): Int? {
-    val str = extractJsonStr(json, *path)
-    return str?.toIntOrNull()
-}
-
-internal fun extractJsonStrRaw(json: String, key: String): String? {
-    val search = "\"$key\":"
-    val idx = json.indexOf(search)
-    if (idx < 0) return null
-    val start = idx + search.length
-    val trimmed = json.substring(start).trimStart()
-    if (trimmed.startsWith("{")) {
-        var depth = 1
-        var inStr = false
-        var escaped = false
-        for (i in 1 until trimmed.length) {
-            val c = trimmed[i]
-            if (escaped) {
-                escaped = false
-                continue
-            }
-            when {
-                c == '\\' && inStr -> escaped = true
-                c == '"' -> inStr = !inStr
-                !inStr -> {
-                    if (c == '{') depth++
-                    if (c == '}') {
-                        depth--
-                        if (depth == 0) return trimmed.substring(1, i)
-                    }
-                }
-            }
-        }
-    }
-    return null
-}
-
-private fun indexOfJsonValueEnd(s: String): Int {
-    var depth = 0
-    var inStr = false
-    var escaped = false
-    for (i in s.indices) {
-        val c = s[i]
-        if (escaped) {
-            escaped = false
-            continue
-        }
-        when {
-            c == '\\' && inStr -> escaped = true
-            c == '"' -> inStr = !inStr
-            !inStr -> when (c) {
-                '{', '[' -> depth++
-                '}', ']' -> {
-                    depth--
-                    if (depth < 0) return i
-                }
-                ',', ' ' -> if (depth == 0) return i
-            }
-        }
-    }
-    return s.length
 }

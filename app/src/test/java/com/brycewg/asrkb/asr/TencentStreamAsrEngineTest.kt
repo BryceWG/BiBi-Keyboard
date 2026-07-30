@@ -3,6 +3,7 @@ package com.brycewg.asrkb.asr
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.brycewg.asrkb.store.Prefs
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -104,41 +105,41 @@ class TencentStreamAsrEngineTest {
     @Test
     fun responseJsonParsingExtractsCode() {
         val json = """{"code":0,"message":"success","voice_id":"abc123"}"""
-        val code = extractJsonInt(json, "code")
-        assertEquals(0, code?.toInt())
+        val code = JSONObject(json).optInt("code", -1)
+        assertEquals(0, code)
     }
 
     @Test
     fun responseJsonParsingExtractsErrorCode() {
         val json = """{"code":4002,"message":"auth failed"}"""
-        val code = extractJsonInt(json, "code")
-        assertEquals(4002, code?.toInt())
+        val code = JSONObject(json).optInt("code", -1)
+        assertEquals(4002, code)
     }
 
     @Test
     fun responseJsonParsingExtractsFinalFlag() {
         val json = """{"code":0,"message":"success","voice_id":"abc","final":1}"""
-        val final = extractJsonInt(json, "final")
-        assertEquals(1, final?.toInt())
+        val final = JSONObject(json).optInt("final", 0)
+        assertEquals(1, final)
     }
 
     @Test
     fun responseJsonParsingExtractsResultWithSliceType() {
-        val json = """{"code":0,"result":{"slice_type":2,"voice_text_str":"腾讯云语音识别测试欢迎您。"}}"""
-        val resultRaw = extractJsonStrRaw(json, "result")
-        assertNotNull(resultRaw)
-        val sliceType = extractJsonInt(resultRaw!!, "slice_type")
-        val voiceText = extractJsonStr(resultRaw, "voice_text_str")
-        assertEquals(2, sliceType?.toInt())
-        assertEquals("腾讯云语音识别测试欢迎您。", voiceText)
+        val json = """{"code":0,"result":{"slice_type":2,"voice_text_str":"hello world"}}"""
+        val resultObj = JSONObject(json).optJSONObject("result")
+        assertNotNull(resultObj)
+        val sliceType = resultObj!!.optInt("slice_type", -1)
+        val voiceText = resultObj.optString("voice_text_str", "")
+        assertEquals(2, sliceType)
+        assertEquals("hello world", voiceText)
     }
 
     @Test
     fun responseJsonHandlesMissingFieldsGracefully() {
         val json = """{"code":0,"message":"success"}"""
-        val resultRaw = extractJsonStrRaw(json, "result")
-        assertEquals(null, resultRaw)
-        val final = extractJsonInt(json, "final")
-        assertEquals(null, final)
+        val resultObj = JSONObject(json).optJSONObject("result")
+        assertEquals(null, resultObj)
+        val final = JSONObject(json).optInt("final", 0)
+        assertEquals(0, final)
     }
 }
