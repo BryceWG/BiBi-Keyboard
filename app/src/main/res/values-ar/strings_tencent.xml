@@ -37,5 +37,7 @@
     <string name="label_tencent_engine_type_16k_zh_PY">16k_zh-PY 中英粤</string>
     <string name="label_tencent_engine_type_16k_zh_dialect">16k_zh_dialect 多方言（23种）</string>
     <string name="label_tencent_vad_enabled">فصل الجمل تلقائيًا</string>
+    <string name="feature_tencent_vad_off_desc">الخادم لا يقسم عند الصمت. يتم التقسيم القسري بعد 60 ثانية.</string>
+    <string name="feature_tencent_vad_on_desc">الخادم يقسم عند الصمت. كل توقف يؤدي إلى قطع الجملة.</string>
     <string name="error_missing_tencent_key">لم يتم ضبط بيانات اعتماد Tencent Cloud</string>
 </resources>

@@ -37,5 +37,7 @@
     <string name="label_tencent_engine_type_16k_zh_PY">16k_zh-PY 中英粤</string>
     <string name="label_tencent_engine_type_16k_zh_dialect">16k_zh_dialect 多方言（23种）</string>
     <string name="label_tencent_vad_enabled">Auto sentence break</string>
+    <string name="feature_tencent_vad_off_desc">Server does not split on silence. Audio exceeding 60s is force-split.</string>
+    <string name="feature_tencent_vad_on_desc">Server splits on silence. Each pause triggers a sentence break.</string>
     <string name="error_missing_tencent_key">Tencent Cloud credentials not set</string>
 </resources>

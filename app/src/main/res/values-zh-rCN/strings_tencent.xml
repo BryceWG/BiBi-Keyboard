@@ -37,5 +37,7 @@
     <string name="label_tencent_engine_type_16k_zh_PY">16k_zh-PY 中英粤</string>
     <string name="label_tencent_engine_type_16k_zh_dialect">16k_zh_dialect 多方言（23种）</string>
     <string name="label_tencent_vad_enabled">自动断句</string>
+    <string name="feature_tencent_vad_off_desc">服务端不按静音断句，超过60秒会被强制切分。</string>
+    <string name="feature_tencent_vad_on_desc">服务端检测到静音时自动断句，一句话结束即切分。</string>
     <string name="error_missing_tencent_key">未配置腾讯云密钥</string>
 </resources>

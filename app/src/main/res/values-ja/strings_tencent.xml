@@ -37,5 +37,7 @@
     <string name="label_tencent_engine_type_16k_zh_PY">16k_zh-PY 中英粤</string>
     <string name="label_tencent_engine_type_16k_zh_dialect">16k_zh_dialect 多方言（23种）</string>
     <string name="label_tencent_vad_enabled">自動文区切り</string>
+    <string name="feature_tencent_vad_off_desc">サーバーは無音で区切らない。60秒超で強制分割。</string>
+    <string name="feature_tencent_vad_on_desc">サーバーが無音を検出して自動で区切る。発話の区切りごとに分割。</string>
     <string name="error_missing_tencent_key">Tencent Cloud の認証情報が未設定です</string>
 </resources>

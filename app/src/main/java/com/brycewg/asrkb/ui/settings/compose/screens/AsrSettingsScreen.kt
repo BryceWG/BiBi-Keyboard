@@ -565,6 +565,21 @@ fun AsrSettingsScreen(
         )
     }
 
+    fun applyTencentVadSwitch(target: Boolean) {
+        featureExplainerDialog = settingsFeatureExplainerDialogState(
+            context = context,
+            titleRes = R.string.label_tencent_vad_enabled,
+            offDescRes = R.string.feature_tencent_vad_off_desc,
+            onDescRes = R.string.feature_tencent_vad_on_desc,
+            currentState = onlineFields.tencentVadEnabled,
+            preferenceKey = "tencent_vad_explained",
+            onConfirm = {
+                onlineFields.tencentVadEnabled = target
+                prefs.tencentVadEnabled = target
+            }
+        )
+    }
+
     fun applyVolcSwitch(
         target: Boolean,
         titleResId: Int,
@@ -746,6 +761,7 @@ fun AsrSettingsScreen(
                 applyDashAutoPolishSwitch = ::applyDashAutoPolishSwitch,
                 applyStepAudioUseItnSwitch = ::applyStepAudioUseItnSwitch,
                 applyTencentStreamingSwitch = ::applyTencentStreamingSwitch,
+                applyTencentVadSwitch = ::applyTencentVadSwitch,
                 openAiDefaultProfileName = { index ->
                     context.getString(R.string.openai_profile_default_name, index)
                 }
