@@ -90,6 +90,8 @@ class AsrSettingsViewModel : ViewModel() {
             // Soniox settings
             sonioxStreamingEnabled = prefs.sonioxStreamingEnabled,
             sonioxLanguages = prefs.getSonioxLanguages(),
+            // Tencent settings
+            tencentStreamingEnabled = prefs.tencentStreamingEnabled,
             // SenseVoice settings
             svModelVariant = prefs.svModelVariant,
             svNumThreads = prefs.svNumThreads,
@@ -366,6 +368,11 @@ class AsrSettingsViewModel : ViewModel() {
     fun updateSonioxStreaming(enabled: Boolean) {
         prefs.sonioxStreamingEnabled = enabled
         _uiState.value = _uiState.value.copy(sonioxStreamingEnabled = enabled)
+    }
+
+    fun updateTencentStreaming(enabled: Boolean) {
+        prefs.tencentStreamingEnabled = enabled
+        _uiState.value = _uiState.value.copy(tencentStreamingEnabled = enabled)
     }
 
     fun updateSonioxLanguages(languages: List<String>) {
@@ -942,6 +949,8 @@ data class AsrSettingsUiState(
     // Soniox settings
     val sonioxStreamingEnabled: Boolean = false,
     val sonioxLanguages: List<String> = emptyList(),
+    // Tencent settings
+    val tencentStreamingEnabled: Boolean = false,
     // SenseVoice settings
     val svModelVariant: String = "small-int8",
     val svNumThreads: Int = 2,

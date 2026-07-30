@@ -165,7 +165,19 @@ internal data class AsrOnlineSettingsRouteState(
     val onSonioxEndpointSensitivityLevelChange: (Int) -> Unit,
     val sonioxLanguages: List<String>,
     val sonioxLanguageStrict: Boolean,
-    val onSonioxLanguageStrictChange: (Boolean) -> Unit
+    val onSonioxLanguageStrictChange: (Boolean) -> Unit,
+    val tencentAppId: String,
+    val onTencentAppIdChange: (String) -> Unit,
+    val tencentSecretId: String,
+    val onTencentSecretIdChange: (String) -> Unit,
+    val tencentSecretKey: String,
+    val onTencentSecretKeyChange: (String) -> Unit,
+    val tencentEngineType: String,
+    val onTencentEngineTypeChange: (String) -> Unit,
+    val tencentStreaming: Boolean,
+    val onTencentStreamingChange: (Boolean) -> Unit,
+    val tencentVadEnabled: Boolean,
+    val onTencentVadEnabledChange: (Boolean) -> Unit
 )
 
 internal data class AsrBackupSettingsRouteState(

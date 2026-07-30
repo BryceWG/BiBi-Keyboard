@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_tencent">騰訊雲 ASR</string>
+    <string name="label_tencent_app_id">AppId</string>
+    <string name="label_tencent_secret_id">SecretId</string>
+    <string name="label_tencent_secret_key">SecretKey</string>
+    <string name="label_tencent_engine_type">引擎模型</string>
+    <string name="label_tencent_streaming">流式辨識</string>
+    <string name="feature_tencent_streaming_off_desc">使用非流式一句話辨識。錄音結束後上傳音訊。</string>
+    <string name="feature_tencent_streaming_on_desc">使用即時 WebSocket 流式辨識，說話即可看到中間結果。</string>
+    <string name="label_tencent_engine_type_16k_zh">16k_zh 中文通用</string>
+    <string name="label_tencent_engine_type_16k_zh_TW">16k_zh-TW 中文繁體</string>
+    <string name="label_tencent_engine_type_16k_zh_edu">16k_zh_edu 中文教育</string>
+    <string name="label_tencent_engine_type_16k_zh_medical">16k_zh_medical 中文醫療</string>
+    <string name="label_tencent_engine_type_16k_zh_court">16k_zh_court 中文法庭</string>
+    <string name="label_tencent_engine_type_16k_yue">16k_yue 粵語</string>
+    <string name="label_tencent_engine_type_16k_en">16k_en 英文通用</string>
+    <string name="label_tencent_engine_type_16k_en_game">16k_en_game 英文遊戲</string>
+    <string name="label_tencent_engine_type_16k_en_edu">16k_en_edu 英文教育</string>
+    <string name="label_tencent_engine_type_16k_ko">16k_ko 韓語</string>
+    <string name="label_tencent_engine_type_16k_ja">16k_ja 日語</string>
+    <string name="label_tencent_engine_type_16k_th">16k_th 泰語</string>
+    <string name="label_tencent_engine_type_16k_id">16k_id 印度尼西亞語</string>
+    <string name="label_tencent_engine_type_16k_vi">16k_vi 越南語</string>
+    <string name="label_tencent_engine_type_16k_ms">16k_ms 馬來語</string>
+    <string name="label_tencent_engine_type_16k_fil">16k_fil 菲律賓語</string>
+    <string name="label_tencent_engine_type_16k_pt">16k_pt 葡萄牙語</string>
+    <string name="label_tencent_engine_type_16k_tr">16k_tr 土耳其語</string>
+    <string name="label_tencent_engine_type_16k_ar">16k_ar 阿拉伯語</string>
+    <string name="label_tencent_engine_type_16k_es">16k_es 西班牙語</string>
+    <string name="label_tencent_engine_type_16k_hi">16k_hi 印地語</string>
+    <string name="label_tencent_engine_type_16k_fr">16k_fr 法語</string>
+    <string name="label_tencent_engine_type_16k_de">16k_de 德語</string>
+    <string name="label_tencent_engine_type_16k_zh_en">16k_zh_en 中英大模型（需大模型1.0計費）</string>
+    <string name="label_tencent_engine_type_16k_multi_lang">16k_multi_lang 多語種大模型（需大模型1.0計費）</string>
+    <string name="label_tencent_engine_type_16k_en_large">16k_en_large 英文大模型（需大模型1.0計費）</string>
+    <string name="label_tencent_engine_type_16k_zh_PY">16k_zh-PY 中英粵</string>
+    <string name="label_tencent_engine_type_16k_zh_dialect">16k_zh_dialect 多方言（23種）</string>
+    <string name="label_tencent_vad_enabled">自動斷句</string>
+    <string name="error_missing_tencent_key">未配置騰訊雲金鑰</string>
+</resources>

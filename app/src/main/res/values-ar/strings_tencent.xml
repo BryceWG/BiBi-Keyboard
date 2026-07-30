@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_tencent">Tencent Cloud ASR</string>
+    <string name="label_tencent_app_id">AppId</string>
+    <string name="label_tencent_secret_id">SecretId</string>
+    <string name="label_tencent_secret_key">SecretKey</string>
+    <string name="label_tencent_engine_type">نموذج المحرك</string>
+    <string name="label_tencent_streaming">التعرف المتدفق</string>
+    <string name="feature_tencent_streaming_off_desc">يستخدم التعرف على الجمل غير المتدفق. يتم رفع الصوت بعد انتهاء التسجيل.</string>
+    <string name="feature_tencent_streaming_on_desc">يستخدم البث الفوري عبر WebSocket لعرض النتائج الوسيطة أثناء التحدث.</string>
+    <string name="label_tencent_engine_type_16k_zh">16k_zh 中文通用</string>
+    <string name="label_tencent_engine_type_16k_zh_TW">16k_zh-TW 中文繁体</string>
+    <string name="label_tencent_engine_type_16k_zh_edu">16k_zh_edu 中文教育</string>
+    <string name="label_tencent_engine_type_16k_zh_medical">16k_zh_medical 中文医疗</string>
+    <string name="label_tencent_engine_type_16k_zh_court">16k_zh_court 中文法庭</string>
+    <string name="label_tencent_engine_type_16k_yue">16k_yue 粤语</string>
+    <string name="label_tencent_engine_type_16k_en">16k_en 英文通用</string>
+    <string name="label_tencent_engine_type_16k_en_game">16k_en_game 英文游戏</string>
+    <string name="label_tencent_engine_type_16k_en_edu">16k_en_edu 英文教育</string>
+    <string name="label_tencent_engine_type_16k_ko">16k_ko 韩语</string>
+    <string name="label_tencent_engine_type_16k_ja">16k_ja 日语</string>
+    <string name="label_tencent_engine_type_16k_th">16k_th 泰语</string>
+    <string name="label_tencent_engine_type_16k_id">16k_id 印度尼西亚语</string>
+    <string name="label_tencent_engine_type_16k_vi">16k_vi 越南语</string>
+    <string name="label_tencent_engine_type_16k_ms">16k_ms 马来语</string>
+    <string name="label_tencent_engine_type_16k_fil">16k_fil 菲律宾语</string>
+    <string name="label_tencent_engine_type_16k_pt">16k_pt 葡萄牙语</string>
+    <string name="label_tencent_engine_type_16k_tr">16k_tr 土耳其语</string>
+    <string name="label_tencent_engine_type_16k_ar">16k_ar 阿拉伯语</string>
+    <string name="label_tencent_engine_type_16k_es">16k_es 西班牙语</string>
+    <string name="label_tencent_engine_type_16k_hi">16k_hi 印地语</string>
+    <string name="label_tencent_engine_type_16k_fr">16k_fr 法语</string>
+    <string name="label_tencent_engine_type_16k_de">16k_de 德语</string>
+    <string name="label_tencent_engine_type_16k_zh_en">16k_zh_en 中英大模型（需大模型1.0计费）</string>
+    <string name="label_tencent_engine_type_16k_multi_lang">16k_multi_lang 多语种大模型（需大模型1.0计费）</string>
+    <string name="label_tencent_engine_type_16k_en_large">16k_en_large 英文大模型（需大模型1.0计费）</string>
+    <string name="label_tencent_engine_type_16k_zh_PY">16k_zh-PY 中英粤</string>
+    <string name="label_tencent_engine_type_16k_zh_dialect">16k_zh_dialect 多方言（23种）</string>
+    <string name="label_tencent_vad_enabled">فصل الجمل تلقائيًا</string>
+    <string name="error_missing_tencent_key">لم يتم ضبط بيانات اعتماد Tencent Cloud</string>
+</resources>

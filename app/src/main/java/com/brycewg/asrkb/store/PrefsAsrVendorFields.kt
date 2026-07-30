@@ -101,6 +101,14 @@ internal object PrefsAsrVendorFields {
             VendorField.prompt(KEY_MIMO_ASR_PROMPT, default = "请将以下音频准确转写为文字"),
             VendorField.boolean(KEY_MIMO_ASR_DISABLE_THINKING, default = false)
         ),
+        AsrVendor.Tencent to listOf(
+            VendorField.credential(KEY_TENCENT_APP_ID, required = false),
+            VendorField.credential(KEY_TENCENT_SECRET_ID, required = false),
+            VendorField.credential(KEY_TENCENT_SECRET_KEY, required = false),
+            VendorField.streamingToggle(KEY_TENCENT_STREAMING_ENABLED, default = false),
+            VendorField(KEY_TENCENT_ENGINE_TYPE, default = Prefs.DEFAULT_TENCENT_ENGINE_TYPE),
+            VendorField.boolean(KEY_TENCENT_VAD_ENABLED, default = false)
+        ),
         AsrVendor.Soniox to listOf(
             VendorField.credential(KEY_SONIOX_API_KEY),
             VendorField.streamingToggle(KEY_SONIOX_STREAMING_ENABLED, default = true),

@@ -284,6 +284,18 @@ internal object AsrVendorRegistry {
                 AsrVendorDisplayTag.Accurate
             ),
             capabilities = localStreamingCapabilities()
+        ),
+        descriptor(
+            vendor = AsrVendor.Tencent,
+            displayNameResId = R.string.vendor_tencent,
+            pickerOrder = 18,
+            tags = listOf(
+                AsrVendorDisplayTag.Online,
+                AsrVendorDisplayTag.Streaming,
+                AsrVendorDisplayTag.NonStreaming,
+                AsrVendorDisplayTag.Accurate
+            ),
+            capabilities = onlineFileAndStreamCapabilities()
         )
     )
 
