@@ -128,6 +128,8 @@ class TencentFileAsrEngine(
                     listener.onError(context.getString(R.string.error_asr_empty_result))
                 }
             }
+        } catch (t: kotlinx.coroutines.CancellationException) {
+            throw t
         } catch (t: Throwable) {
             listener.onError(
                 context.getString(R.string.error_recognize_failed_with_reason, t.message ?: "")
@@ -159,11 +161,17 @@ class TencentFileAsrEngine(
 
     override suspend fun recognizeFromPcm(pcm: ByteArray): Unit = recognize(pcm)
 
-    private fun buildJsonPayload(
+    internal fun buildJsonPayload(
         engineType: String,
         base64Audio: String,
         dataLen: Int
-    ): String = """{"EngSerViceType":"$engineType","SourceType":1,"VoiceFormat":"wav","Data":"$base64Audio","DataLen":$dataLen}"""
+    ): String = JSONObject().apply {
+        put("EngSerViceType", engineType)
+        put("SourceType", 1)
+        put("VoiceFormat", "wav")
+        put("Data", base64Audio)
+        put("DataLen", dataLen)
+    }.toString()
 
     private fun wavHeader(dataLen: Int): ByteArray {
         val sampleRate = 16000
