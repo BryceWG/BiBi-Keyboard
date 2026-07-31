@@ -52,7 +52,6 @@ class TencentStreamAsrEngine(
     private val wsReady = AtomicBoolean(false)
     private var currentVoiceId: String? = null
 
-    private val clientOwned: Boolean = httpClient == null
     private val client: OkHttpClient = httpClient ?: OkHttpClient.Builder()
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .build()
@@ -93,6 +92,8 @@ class TencentStreamAsrEngine(
         wsReady.set(false)
         audioJob?.cancel()
         audioJob = null
+        wssJob?.cancel()
+        wssJob = null
         try {
             audioChan?.close()
         } catch (_: Throwable) { }
@@ -186,7 +187,10 @@ class TencentStreamAsrEngine(
 
     override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) {
         if (!running.get()) return
-        if (sampleRate != this.sampleRate || channels != 1) return
+        if (sampleRate != this.sampleRate || channels != 1) {
+            Log.w(TAG, "ignore frame: sr=$sampleRate ch=$channels")
+            return
+        }
         val leveled = externalVadInputLeveler.process(pcm)
         try {
             listener.onAmplitude(leveled.stableAmplitude)
@@ -199,22 +203,20 @@ class TencentStreamAsrEngine(
      * 就绪后先冲刷预缓冲再发送当前帧（麦克风采集与外部推流共用）。
      */
     private fun enqueuePcm(chunk: ByteArray) {
-        if (!wsReady.get()) {
-            synchronized(prebufferLock) {
+        var flushed: Array<ByteArray>? = null
+        synchronized(prebufferLock) {
+            if (!wsReady.get()) {
                 prebuffer.addLast(chunk)
                 while (prebuffer.size > maxPrebufferFrames) prebuffer.removeFirst()
+                return
             }
-        } else {
-            var flushed: Array<ByteArray>? = null
-            synchronized(prebufferLock) {
-                if (prebuffer.isNotEmpty()) {
-                    flushed = prebuffer.toTypedArray()
-                    prebuffer.clear()
-                }
+            if (prebuffer.isNotEmpty()) {
+                flushed = prebuffer.toTypedArray()
+                prebuffer.clear()
             }
-            flushed?.forEach { b -> audioChan?.trySend(b) }
-            audioChan?.trySend(chunk)
         }
+        flushed?.forEach { b -> audioChan?.trySend(b) }
+        audioChan?.trySend(chunk)
     }
 
     fun buildWsUrl(): String? {
@@ -395,9 +397,6 @@ class TencentStreamAsrEngine(
 
         try {
             ws.close(1000, "client close")
-            if (clientOwned) {
-                client.dispatcher.executorService.shutdown()
-            }
         } catch (_: Exception) { }
 
         if (!finalTextDelivered.getAndSet(true)) {
