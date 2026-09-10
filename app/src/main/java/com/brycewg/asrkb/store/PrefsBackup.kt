@@ -171,6 +171,7 @@ internal object PrefsBackup {
         o.put(KEY_FLOATING_WRITE_COMPAT_PACKAGES, floatingWriteCompatPackages)
         o.put(KEY_FLOATING_WRITE_PASTE_ENABLED, floatingWriteTextPasteEnabled)
         o.put(KEY_FLOATING_WRITE_PASTE_PACKAGES, floatingWritePastePackages)
+        o.put(KEY_FLOATING_A11Y_ANDROID13_API_ENABLED, floatingA11yAndroid13ApiEnabled)
         o.put(KEY_FLOATING_IME_BRIDGE_ENABLED, floatingImeBridgeEnabled)
         o.put(KEY_IME_BRIDGE_PCM_RECORDING_ENABLED, imeBridgePcmRecordingEnabled)
         // 允许外部输入法联动（AIDL）
@@ -373,6 +374,7 @@ internal object PrefsBackup {
             optString(KEY_FLOATING_WRITE_COMPAT_PACKAGES)?.let { floatingWriteCompatPackages = it }
             optBool(KEY_FLOATING_WRITE_PASTE_ENABLED)?.let { floatingWriteTextPasteEnabled = it }
             optString(KEY_FLOATING_WRITE_PASTE_PACKAGES)?.let { floatingWritePastePackages = it }
+            optBool(KEY_FLOATING_A11Y_ANDROID13_API_ENABLED)?.let { floatingA11yAndroid13ApiEnabled = it }
             optBool(KEY_FLOATING_IME_BRIDGE_ENABLED)?.let { floatingImeBridgeEnabled = it }
             optBool(KEY_IME_BRIDGE_PCM_RECORDING_ENABLED)?.let {
                 imeBridgePcmRecordingEnabled = it

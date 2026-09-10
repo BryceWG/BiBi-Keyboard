@@ -7,6 +7,7 @@ package com.brycewg.asrkb.store
 
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Build
 import android.os.LocaleList
 import android.util.Log
 import androidx.annotation.StringRes
@@ -573,6 +574,13 @@ class Prefs(context: Context) {
     var floatingWritePastePackages: String
         get() = sp.getString(KEY_FLOATING_WRITE_PASTE_PACKAGES, "") ?: ""
         set(value) = sp.edit { putString(KEY_FLOATING_WRITE_PASTE_PACKAGES, value) }
+
+    // 无障碍写入：优先走 Android 13 Accessibility IME commitText，默认关闭
+    var floatingA11yAndroid13ApiEnabled: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_A11Y_ANDROID13_API_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_A11Y_ANDROID13_API_ENABLED, value) }
+
+    fun shouldUseA11yAndroid13Api(): Boolean = floatingA11yAndroid13ApiEnabled && Build.VERSION.SDK_INT >= 33
 
     // 输入法 Hook 模块总开关：可见性 / 文字插入 / PCM / 剪贴板 Actor，默认关闭
     var floatingImeBridgeEnabled: Boolean

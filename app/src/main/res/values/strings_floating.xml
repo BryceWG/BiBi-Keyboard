@@ -47,6 +47,7 @@
     <string name="status_floating_ime_bridge_last_failure_injection_unsupported">Last failure: this keyboard window does not support the generic bottom trigger. (%1$s)</string>
     <string name="floating_ime_bridge_sensitive_field">Sensitive input field blocked. Text was not inserted.</string>
     <string name="floating_ime_bridge_insert_failed">IME bridge insertion failed: %1$s</string>
+    <string name="label_floating_a11y_android13_api">Use Android 13 Accessibility IME API</string>
     <string name="label_floating_write_compat">Accessibility write compatibility optimization</string>
     <string name="desc_floating_write_compat">Some apps expose background placeholder text to Accessibility, which contaminates final insertion. When enabled, in target apps the floating ball switches to Select-All + Paste with an invisible marker to avoid placeholder issues. The clipboard may be used temporarily (best-effort restore). Works for Telegram, Douyin, etc.</string>
     <string name="label_floating_write_compat_pkgs">Target package names (one per line)</string>
@@ -143,6 +144,8 @@
     <string name="feature_floating_ime_bridge_on_desc">Enables IME visibility, text insertion, recording, and clipboard capabilities provided by a compatible LSPosed/LSPatch module on the client side. Module settings and status are unaffected.</string>
     <string name="feature_ime_bridge_pcm_recording_off_desc">The bridge can still enter recognition results, but long-press recording inside a third-party keyboard is unavailable.</string>
     <string name="feature_ime_bridge_pcm_recording_on_desc">You can long-press to record in a compatible third-party keyboard and send the recording to BiBi Keyboard for recognition. If recording fails, it does not automatically switch to the floating ball or this app\'s microphone.</string>
+    <string name="feature_floating_a11y_android13_api_off_desc">Recognition results are written with the traditional Accessibility API. Streaming preview stays available and works with write-compatibility optimization. This is for typical apps and older systems.</string>
+    <string name="feature_floating_a11y_android13_api_on_desc">On Android 13 and later, results are inserted first via the new Accessibility API. This works better in terminals, editors, and similar special cases. Write-compatibility optimization is disabled automatically, and streaming preview is turned off.</string>
     <string name="feature_floating_write_compat_off_desc">Recognition results are entered directly into the text field. This works for most apps.</string>
     <string name="feature_floating_write_compat_on_desc">In apps you select, the current text is selected before the result is pasted to avoid including placeholder text. The clipboard is used temporarily, and the app attempts to restore its previous contents afterward.</string>
 

@@ -47,6 +47,7 @@
     <string name="status_floating_ime_bridge_last_failure_injection_unsupported">最近失敗：該輸入法視窗不支援通用底部觸發區。（%1$s）</string>
     <string name="floating_ime_bridge_sensitive_field">已阻止敏感輸入欄位，未寫入文字。</string>
     <string name="floating_ime_bridge_insert_failed">輸入法橋接寫入失敗：%1$s</string>
+    <string name="label_floating_a11y_android13_api">使用 Android13 新版 API</string>
     <string name="label_floating_write_compat">無障礙寫入文字相容優化</string>
     <string name="desc_floating_write_compat">部分應用程式會向無障礙服務暴露背景預留位置文字，這會污染最終插入。啟用後，在目標應用程式中，懸浮球會切換為全選 + 貼上並使用不可見標記來避免預留位置問題。剪貼簿可能會暫時被使用（盡力恢復）。適用於 Telegram、抖音等。</string>
     <string name="label_floating_write_compat_pkgs">相容目標套件名稱（每行一個）</string>
@@ -143,6 +144,8 @@
     <string name="feature_floating_ime_bridge_on_desc">在用戶端啟用相容 LSPosed/LSPatch 模組提供的輸入法可見性、文字插入、錄音與剪貼簿能力，不影響模組自身設定與狀態。</string>
     <string name="feature_ime_bridge_pcm_recording_off_desc">橋接模組仍可輸入辨識結果，但無法在第三方輸入法中長按錄音。</string>
     <string name="feature_ime_bridge_pcm_recording_on_desc">可在相容的第三方輸入法中長按錄音，並將錄音交給說點啥辨識。錄音失敗時不會自動改用懸浮球或本應用程式的麥克風。</string>
+    <string name="feature_floating_a11y_android13_api_off_desc">辨識結果透過傳統無障礙 API 寫入，並保留串流預覽，與相容優化功能配合，適用於一般應用程式和舊系統。</string>
+    <string name="feature_floating_a11y_android13_api_on_desc">在 Android 13 及以上優先透過新的無障礙 API 插入辨識結果，在終端機、編輯器等特殊場景有更好的表現。寫入文字相容優化功能自動失效，但會關閉串流預覽功能。</string>
     <string name="feature_floating_write_compat_off_desc">辨識結果會直接寫入輸入框，適用於大多數應用程式。</string>
     <string name="feature_floating_write_compat_on_desc">在你指定的相容應用程式中，會先選取輸入框內容，再透過貼上寫入辨識結果，以避免混入提示文字。期間會暫時使用剪貼簿，完成後會嘗試恢復原內容。</string>
 

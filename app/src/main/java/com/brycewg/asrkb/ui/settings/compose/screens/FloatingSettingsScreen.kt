@@ -8,6 +8,7 @@
 package com.brycewg.asrkb.ui.settings.compose.screens
 
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -683,6 +684,26 @@ fun FloatingSettingsScreen(
                         )
                     }
                     FloatingSubsectionGap(compact = !uiState.imeBridgeEnabled)
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        FloatingExplainedSwitch(
+                            id = "floating_a11y_android13_api",
+                            titleRes = R.string.label_floating_a11y_android13_api,
+                            checked = uiState.a11yAndroid13ApiEnabled,
+                            onToggle = { target ->
+                                applyExplainedSwitch(
+                                    current = uiState.a11yAndroid13ApiEnabled,
+                                    target = target,
+                                    titleRes = R.string.label_floating_a11y_android13_api,
+                                    offDescRes = R.string.feature_floating_a11y_android13_api_off_desc,
+                                    onDescRes = R.string.feature_floating_a11y_android13_api_on_desc,
+                                    preferenceKey = "floating_a11y_android13_api_explained"
+                                ) { prefs.floatingA11yAndroid13ApiEnabled = it }
+                            },
+                            index = 0,
+                            count = 1
+                        )
+                        FloatingSubsectionGap()
+                    }
                     FloatingExplainedSwitch(
                         id = "floating_write_compat",
                         titleRes = R.string.label_floating_write_compat,

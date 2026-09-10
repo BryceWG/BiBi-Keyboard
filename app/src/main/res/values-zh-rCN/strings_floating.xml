@@ -47,6 +47,7 @@
     <string name="status_floating_ime_bridge_last_failure_injection_unsupported">最近失败：该输入法窗口不支持通用底部触发区。（%1$s）</string>
     <string name="floating_ime_bridge_sensitive_field">已阻止敏感输入框，未写入文字。</string>
     <string name="floating_ime_bridge_insert_failed">输入法桥接写入失败：%1$s</string>
+    <string name="label_floating_a11y_android13_api">使用 Android13 新版 API</string>
     <string name="label_floating_write_compat">无障碍写入文字兼容优化</string>
     <string name="desc_floating_write_compat">在部分应用中文本框会出现背景文字被误识别，导致通过无障碍服务插入文字时会附带背景文字的情况。开启此模式后，在目标软件中使用悬浮球时会尝试"全选+粘贴"写入一个不可见字符，以屏蔽背景文字。</string>
     <string name="label_floating_write_compat_pkgs">兼容目标包名（每行一个）</string>
@@ -143,6 +144,8 @@
     <string name="feature_floating_ime_bridge_on_desc">在客户端侧启用兼容 LSPosed/LSPatch 模块提供的输入法可见性、文字插入、录音和剪贴板能力，不影响模块自身设置和状态。</string>
     <string name="feature_ime_bridge_pcm_recording_off_desc">桥接模块仍可输入识别结果，但无法在第三方键盘中长按录音。</string>
     <string name="feature_ime_bridge_pcm_recording_on_desc">可在兼容的第三方键盘中长按录音，并将录音交给说点啥识别。录音失败时不会自动改用悬浮球或本应用的麦克风。</string>
+    <string name="feature_floating_a11y_android13_api_off_desc">识别结果通过传统无障碍 API 写入，并保留流式预览，与兼容优化功能配合，适用于一般应用和旧系统。</string>
+    <string name="feature_floating_a11y_android13_api_on_desc">在 Android 13 及以上优先通过新的无障碍 API 插入识别结果，在终端、编辑器等特殊场景有更好的表现。写入文字兼容优化功能自动失效，但会关闭流式预览功能。</string>
     <string name="feature_floating_write_compat_off_desc">识别结果会直接写入输入框，适用于大多数应用。</string>
     <string name="feature_floating_write_compat_on_desc">在你指定的兼容应用中，会先选中输入框内容，再通过粘贴写入识别结果，以避免混入提示文字。期间会暂时使用剪贴板，并在完成后尝试恢复原内容。</string>
 

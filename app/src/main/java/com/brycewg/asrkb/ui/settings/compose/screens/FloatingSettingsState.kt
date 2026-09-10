@@ -32,6 +32,7 @@ internal data class FloatingSettingsUiState(
     val volumeKeyStopOnImeHidden: Boolean,
     val writeCompatEnabled: Boolean,
     val writePasteEnabled: Boolean,
+    val a11yAndroid13ApiEnabled: Boolean,
     val imeBridgeEnabled: Boolean
 ) {
     companion object {
@@ -48,6 +49,7 @@ internal data class FloatingSettingsUiState(
             volumeKeyStopOnImeHidden = true,
             writeCompatEnabled = false,
             writePasteEnabled = false,
+            a11yAndroid13ApiEnabled = false,
             imeBridgeEnabled = false
         )
 
@@ -64,6 +66,7 @@ internal data class FloatingSettingsUiState(
             volumeKeyStopOnImeHidden = prefs.volumeKeyStopOnImeHidden,
             writeCompatEnabled = prefs.floatingWriteTextCompatEnabled,
             writePasteEnabled = prefs.floatingWriteTextPasteEnabled,
+            a11yAndroid13ApiEnabled = prefs.floatingA11yAndroid13ApiEnabled,
             imeBridgeEnabled = prefs.floatingImeBridgeEnabled
         )
     }

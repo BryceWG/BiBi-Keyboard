@@ -6,6 +6,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -38,8 +39,18 @@ class AsrAccessibilityService : AccessibilityService() {
      */
     data class FocusContext(val prefix: String, val suffix: String)
 
+    enum class InsertPath(val id: String) {
+        IME("ime"),
+        SET_TEXT("set_text"),
+        PASTE("paste"),
+        CLIPBOARD("clipboard");
+
+        val ok: Boolean get() = this != CLIPBOARD
+    }
+
     companion object {
         private const val TAG = "AsrAccessibilityService"
+        private const val CLIPBOARD_RESTORE_DELAY_MS = 150L
         const val ACTION_INSERT_TEXT = "com.brycewg.asrkb.action.INSERT_TEXT"
         const val EXTRA_TEXT = "text"
 
@@ -110,22 +121,42 @@ class AsrAccessibilityService : AccessibilityService() {
             return (text == hint) || (text == desc)
         }
 
-        fun insertText(context: Context, text: String): Boolean {
-            Log.d(TAG, "insertText called with: $text, service enabled: ${instance != null}")
+        /**
+         * 将识别增量写入当前焦点。
+         * [delta] 为识别结果；[prefix]/[suffix] 仅用于 ACTION_SET_TEXT 整段替换。
+         */
+        fun insertText(
+            context: Context,
+            delta: String,
+            prefix: String = "",
+            suffix: String = ""
+        ): InsertPath {
+            Log.d(
+                TAG,
+                "insertText called, deltaLen=${delta.length}, service enabled: ${instance != null}"
+            )
             val service = instance
             if (service == null) {
-                // 无障碍服务未启用,复制到剪贴板
                 Log.w(TAG, "Accessibility service not enabled, copying to clipboard")
-                copyToClipboard(context, text)
+                DebugLogManager.log(
+                    "insert",
+                    "write",
+                    mapOf(
+                        "ok" to false,
+                        "path" to InsertPath.CLIPBOARD.id,
+                        "reason" to "a11y_disabled"
+                    )
+                )
+                copyToClipboard(context, delta)
                 Toast.makeText(
                     context,
                     context.getString(com.brycewg.asrkb.R.string.floating_asr_copied),
                     Toast.LENGTH_SHORT
                 ).show()
-                return false
+                return InsertPath.CLIPBOARD
             }
 
-            return service.performInsertText(text)
+            return service.performInsertText(delta, prefix, suffix)
         }
 
         /**
@@ -233,6 +264,7 @@ class AsrAccessibilityService : AccessibilityService() {
     }
 
     private val handler = Handler(Looper.getMainLooper())
+    private var pendingClipboardRestore: Runnable? = null
     private val prefsOrNull: Prefs? by lazy(LazyThreadSafetyMode.NONE) {
         try {
             Prefs(this)
@@ -497,148 +529,102 @@ class AsrAccessibilityService : AccessibilityService() {
         return START_NOT_STICKY
     }
 
-    private fun performInsertText(text: String): Boolean {
+    private fun performInsertText(
+        delta: String,
+        prefix: String = "",
+        suffix: String = ""
+    ): InsertPath {
         try {
             Log.d(TAG, "performInsertText called")
-            val rootNode = rootInActiveWindow
-            if (rootNode == null) {
-                Log.w(TAG, "Root node is null")
-                DebugLogManager.log("insert", "fallback_clipboard", mapOf("reason" to "root_null"))
-                copyToClipboard(this, text)
-                Toast.makeText(
-                    this,
-                    getString(com.brycewg.asrkb.R.string.floating_asr_copied),
-                    Toast.LENGTH_SHORT
-                ).show()
-                return false
+            if (isPasteOnlyTarget()) {
+                copyDeltaAndToast(delta, "paste_only")
+                return InsertPath.CLIPBOARD
             }
 
-            val target = findFocusedEditableNode(rootNode)
+            val useImeApi = shouldUseA11yAndroid13Api()
+            if (useImeApi && tryCommitViaA11yIme(delta)) {
+                logWrite(ok = true, path = InsertPath.IME.id)
+                return InsertPath.IME
+            }
 
-            if (target != null) {
-                Log.d(TAG, "Found editable/focusable node; trying ACTION_SET_TEXT")
-                try {
-                    val nodeClass =
-                        try {
-                            target.className?.toString()
-                        } catch (_: Throwable) {
-                            null
-                        } ?: ""
-                    val editable = try {
-                        target.isEditable
-                    } catch (_: Throwable) {
-                        false
+            val rootNode = rootInActiveWindow
+            val target = findInsertTargetNode()
+            val setTextPayload = prefix + delta + suffix
+            try {
+                if (target != null) {
+                    Log.d(TAG, "Found insert target node; trying write/paste")
+                    logInsertCapabilities(target, delta.length, setTextPayload.length, useImeApi)
+                    try {
+                        target.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
+                    } catch (e: Throwable) {
+                        Log.e(TAG, "Error focusing target node", e)
                     }
-                    val hasSetText = nodeHasAction(target, AccessibilityNodeInfo.ACTION_SET_TEXT)
-                    val hasPaste = nodeHasAction(target, AccessibilityNodeInfo.ACTION_PASTE)
-                    val hasLongClick =
-                        nodeHasAction(target, AccessibilityNodeInfo.ACTION_LONG_CLICK)
-                    val textLen = try {
+
+                    val beforeLen = try {
                         target.text?.length ?: 0
                     } catch (_: Throwable) {
-                        0
-                    }
-                    val selStart = try {
-                        target.textSelectionStart
-                    } catch (_: Throwable) {
                         -1
                     }
-                    val selEnd = try {
-                        target.textSelectionEnd
-                    } catch (_: Throwable) {
-                        -1
-                    }
-                    DebugLogManager.log(
-                        "insert",
-                        "cap",
-                        mapOf(
-                            "nodeClass" to nodeClass,
-                            "editable" to editable,
-                            "hasSetText" to hasSetText,
-                            "hasPaste" to hasPaste,
-                            "hasLongClick" to hasLongClick,
-                            "textLen" to textLen,
-                            "toWriteLen" to text.length,
-                            "selStart" to selStart,
-                            "selEnd" to selEnd
+                    val args = Bundle().apply {
+                        putCharSequence(
+                            AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
+                            setTextPayload
                         )
-                    )
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to log insert capabilities", t)
-                }
-                // 先尝试 ACTION_SET_TEXT 直接写入
-                val args = Bundle().apply {
-                    putCharSequence(
-                        AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
-                        text
-                    )
-                }
-                // 保障焦点在目标上
-                try {
-                    target.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
-                } catch (e: Throwable) {
-                    Log.e(TAG, "Error focusing target node", e)
-                }
+                    }
+                    val setOk = try {
+                        target.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
+                    } catch (e: Throwable) {
+                        Log.e(TAG, "Error performing ACTION_SET_TEXT", e)
+                        false
+                    }
 
-                val beforeLen = try {
-                    target.text?.length ?: 0
-                } catch (_: Throwable) {
-                    -1
-                }
-                val setOk = try {
-                    target.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
-                } catch (e: Throwable) {
-                    Log.e(TAG, "Error performing ACTION_SET_TEXT", e)
-                    false
-                }
-
-                if (setOk) {
-                    if (DebugLogManager.isRecording()) {
-                        val afterLen = try {
-                            target.refresh()
-                            target.text?.length ?: -1
-                        } catch (_: Throwable) {
-                            -1
-                        }
-                        DebugLogManager.log(
-                            "insert",
-                            "path_set_text",
-                            mapOf(
-                                "toWriteLen" to text.length,
-                                "beforeLen" to beforeLen,
-                                "afterLen" to afterLen,
-                                "delta" to if (afterLen >= 0 && beforeLen >= 0) afterLen - beforeLen else -1
+                    if (setOk) {
+                        if (DebugLogManager.isRecording()) {
+                            val afterLen = try {
+                                target.refresh()
+                                target.text?.length ?: -1
+                            } catch (_: Throwable) {
+                                -1
+                            }
+                            DebugLogManager.log(
+                                "insert",
+                                "path_set_text",
+                                mapOf(
+                                    "toWriteLen" to setTextPayload.length,
+                                    "deltaLen" to delta.length,
+                                    "beforeLen" to beforeLen,
+                                    "afterLen" to afterLen,
+                                    "lenDelta" to if (afterLen >= 0 && beforeLen >= 0) {
+                                        afterLen - beforeLen
+                                    } else {
+                                        -1
+                                    }
+                                )
                             )
-                        )
+                        }
+                        logWrite(ok = true, path = InsertPath.SET_TEXT.id)
+                        return InsertPath.SET_TEXT
                     }
-                    @Suppress("DEPRECATION")
-                    target.recycle()
-                    return true
+
+                    Log.w(TAG, "ACTION_SET_TEXT skipped or failed; try clipboard paste fallback")
+                    val pasteOk = performPasteFallback(target, delta)
+                    if (pasteOk) {
+                        DebugLogManager.log("insert", "path_paste_fallback")
+                        logWrite(ok = true, path = InsertPath.PASTE.id)
+                        return InsertPath.PASTE
+                    }
+                    copyDeltaAndToast(delta, "paste_failed")
+                    return InsertPath.CLIPBOARD
                 }
 
-                Log.w(TAG, "ACTION_SET_TEXT failed; try clipboard paste fallback")
-                val pasteOk = performPasteFallback(target, text)
-                @Suppress("DEPRECATION")
-                target.recycle()
-                if (pasteOk) {
-                    DebugLogManager.log("insert", "path_paste_fallback")
-                    return true
-                }
-            } else {
-                Log.w(TAG, "No focused editable-like node found")
+                Log.w(TAG, "No focused editable-like or input-focus node found")
+                val clipboardReason = if (rootNode == null) "root_null" else "no_target"
+                copyDeltaAndToast(delta, clipboardReason)
+                return InsertPath.CLIPBOARD
+            } finally {
+                recycleNodeQuietly(target)
             }
-
-            // 兜底：复制剪贴板
-            DebugLogManager.log("insert", "fallback_clipboard", mapOf("reason" to "no_target"))
-            copyToClipboard(this, text)
-            Toast.makeText(
-                this,
-                getString(com.brycewg.asrkb.R.string.floating_asr_copied),
-                Toast.LENGTH_SHORT
-            ).show()
-            return false
         } catch (e: Throwable) {
-            // 发生错误,复制到剪贴板
             Log.e(TAG, "Error inserting text", e)
             DebugLogManager.log(
                 "insert",
@@ -648,13 +634,18 @@ class AsrAccessibilityService : AccessibilityService() {
                     "msg" to (e.message?.take(80) ?: "")
                 )
             )
-            copyToClipboard(this, text)
+            logWrite(
+                ok = false,
+                path = InsertPath.CLIPBOARD.id,
+                extras = mapOf("reason" to (e::class.java.simpleName))
+            )
+            copyToClipboard(this, delta)
             Toast.makeText(
                 this,
                 getString(com.brycewg.asrkb.R.string.floating_asr_copied),
                 Toast.LENGTH_SHORT
             ).show()
-            return false
+            return InsertPath.CLIPBOARD
         }
     }
 
@@ -740,6 +731,19 @@ class AsrAccessibilityService : AccessibilityService() {
         }
     }
 
+    /**
+     * ACTION_PASTE 可能异步读剪贴板，立刻恢复会粘回旧内容。
+     */
+    private fun scheduleClipboardRestore(clipboard: ClipboardManager, previous: ClipData?) {
+        pendingClipboardRestore?.let { handler.removeCallbacks(it) }
+        val task = Runnable {
+            pendingClipboardRestore = null
+            restoreClipboard(clipboard, previous)
+        }
+        pendingClipboardRestore = task
+        handler.postDelayed(task, CLIPBOARD_RESTORE_DELAY_MS)
+    }
+
     // 静默设置选区：不提示、不改剪贴板
     private fun performSetSelectionSilent(start: Int, end: Int): Boolean = withFocusedEditableNode { target ->
         val args = Bundle().apply {
@@ -778,6 +782,64 @@ class AsrAccessibilityService : AccessibilityService() {
         } catch (e: Throwable) {
             Log.e(TAG, "Error in withFocusedEditableNode", e)
             null
+        }
+    }
+
+    /**
+     * 写入目标：优先各应用窗口中的可编辑焦点；找不到时回退到任意 FOCUS_INPUT。
+     * 终端、WebView、自绘输入框经常有焦点但不声明 editable / SET_TEXT / PASTE。
+     */
+    private fun findInsertTargetNode(): AccessibilityNodeInfo? {
+        var focusFallback: AccessibilityNodeInfo? = null
+        try {
+            val ws = windows
+            if (ws != null) {
+                for (w in ws) {
+                    try {
+                        if (w?.type != AccessibilityWindowInfo.TYPE_APPLICATION) continue
+                        val root = w.root ?: continue
+                        val editable = findFocusedEditableNode(root)
+                        if (editable != null) {
+                            recycleNodeQuietly(focusFallback)
+                            return editable
+                        }
+                        val focus = try {
+                            root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+                        } catch (_: Throwable) {
+                            null
+                        } ?: continue
+                        val prefer = w.isActive || w.isFocused
+                        if (focusFallback == null || prefer) {
+                            recycleNodeQuietly(focusFallback)
+                            focusFallback = focus
+                        } else {
+                            recycleNodeQuietly(focus)
+                        }
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "Error searching insert target in app window", t)
+                    }
+                }
+            }
+            if (focusFallback != null) return focusFallback
+            val root = rootInActiveWindow ?: return null
+            findFocusedEditableNode(root)?.let { return it }
+            return try {
+                root.findFocus(AccessibilityNodeInfo.FOCUS_INPUT)
+            } catch (_: Throwable) {
+                null
+            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error finding insert target", e)
+            return focusFallback
+        }
+    }
+
+    private fun recycleNodeQuietly(node: AccessibilityNodeInfo?) {
+        if (node == null) return
+        try {
+            @Suppress("DEPRECATION")
+            node.recycle()
+        } catch (_: Throwable) {
         }
     }
 
@@ -823,8 +885,115 @@ class AsrAccessibilityService : AccessibilityService() {
         false
     }
 
-    private fun performPasteFallback(target: AccessibilityNodeInfo, text: String): Boolean = try {
-        // 将文本放入剪贴板（带备份并恢复）
+    private fun tryCommitViaA11yIme(text: String): Boolean {
+        if (Build.VERSION.SDK_INT < 33) return false
+        return try {
+            val ime = getInputMethod() ?: return false
+            if (!ime.currentInputStarted) {
+                DebugLogManager.log("insert", "ime_not_started")
+                return false
+            }
+            val ic = ime.currentInputConnection ?: return false
+            ic.commitText(text, 1, null)
+            DebugLogManager.log("insert", "path_ime_commit")
+            true
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error committing text via a11y IME", e)
+            false
+        }
+    }
+
+    private fun shouldUseA11yAndroid13Api(): Boolean {
+        val prefs = prefsOrNull ?: return false
+        return prefs.shouldUseA11yAndroid13Api()
+    }
+
+    private fun isPasteOnlyTarget(): Boolean {
+        val prefs = prefsOrNull ?: return false
+        if (!prefs.floatingWriteTextPasteEnabled) return false
+        val pkg = getActiveWindowPackage() ?: return false
+        val rules = prefs.floatingWritePastePackages
+            .split('\n')
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+        if (rules.any { it.equals("all", ignoreCase = true) }) return true
+        return rules.any { rule -> pkg == rule || pkg.startsWith("$rule.") }
+    }
+
+    private fun logWrite(ok: Boolean, path: String, extras: Map<String, Any?> = emptyMap()) {
+        DebugLogManager.log("insert", "write", extras + mapOf("ok" to ok, "path" to path))
+    }
+
+    private fun copyDeltaAndToast(delta: String, reason: String) {
+        DebugLogManager.log("insert", "fallback_clipboard", mapOf("reason" to reason))
+        logWrite(ok = false, path = InsertPath.CLIPBOARD.id, extras = mapOf("reason" to reason))
+        copyToClipboard(this, delta)
+        Toast.makeText(
+            this,
+            getString(com.brycewg.asrkb.R.string.floating_asr_copied),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun logInsertCapabilities(
+        target: AccessibilityNodeInfo,
+        deltaLen: Int,
+        setTextLen: Int,
+        useImeApi: Boolean
+    ) {
+        try {
+            val nodeClass = try {
+                target.className?.toString()
+            } catch (_: Throwable) {
+                null
+            } ?: ""
+            val editable = try {
+                target.isEditable
+            } catch (_: Throwable) {
+                false
+            }
+            val hasSetText = nodeHasAction(target, AccessibilityNodeInfo.ACTION_SET_TEXT)
+            val hasPaste = nodeHasAction(target, AccessibilityNodeInfo.ACTION_PASTE)
+            val textLen = try {
+                target.text?.length ?: 0
+            } catch (_: Throwable) {
+                0
+            }
+            val selStart = try {
+                target.textSelectionStart
+            } catch (_: Throwable) {
+                -1
+            }
+            val selEnd = try {
+                target.textSelectionEnd
+            } catch (_: Throwable) {
+                -1
+            }
+            DebugLogManager.log(
+                "insert",
+                "cap",
+                mapOf(
+                    "nodeClass" to nodeClass,
+                    "editable" to editable,
+                    "hasSetText" to hasSetText,
+                    "hasPaste" to hasPaste,
+                    "textLen" to textLen,
+                    "deltaLen" to deltaLen,
+                    "setTextLen" to setTextLen,
+                    "selStart" to selStart,
+                    "selEnd" to selEnd,
+                    "useImeApi" to useImeApi
+                )
+            )
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to log insert capabilities", t)
+        }
+    }
+
+    private fun performPasteFallback(
+        target: AccessibilityNodeInfo,
+        text: String
+    ): Boolean = try {
         val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         val previous = try {
             clipboard.primaryClip
@@ -840,31 +1009,20 @@ class AsrAccessibilityService : AccessibilityService() {
             Log.e(TAG, "Error setting clip for paste fallback", e)
         }
 
-        // 确保焦点在输入框
-        target.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
-        // 若可长按，尝试长按以唤出粘贴菜单（部分应用要求）
-        target.performAction(AccessibilityNodeInfo.ACTION_LONG_CLICK)
-        // 尝试直接执行粘贴动作（多数输入框支持）
-        var ok = target.performAction(AccessibilityNodeInfo.ACTION_PASTE)
-        if (!ok) {
-            // 延迟再试一次，等待长按菜单弹出
-            handler.postDelayed({
-                target.performAction(AccessibilityNodeInfo.ACTION_PASTE)
-            }, 120)
-            ok = true // 假设延迟后会成功
-        }
-
-        // 恢复剪贴板
         try {
-            if (previous != null) {
-                clipboard.setPrimaryClip(previous)
-            } else {
-                clipboard.clearPrimaryClip()
-            }
+            target.performAction(AccessibilityNodeInfo.ACTION_FOCUS)
         } catch (e: Throwable) {
-            Log.e(TAG, "Error restoring clipboard in paste fallback", e)
+            Log.e(TAG, "Error focusing target for paste fallback", e)
         }
-
+        val ok = try {
+            target.performAction(AccessibilityNodeInfo.ACTION_PASTE)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error performing ACTION_PASTE", e)
+            false
+        }
+        if (ok) {
+            scheduleClipboardRestore(clipboard, previous)
+        }
         ok
     } catch (e: Throwable) {
         Log.e(TAG, "Error in paste fallback", e)

@@ -157,6 +157,13 @@ object SettingsSearchIndex {
         item(R.string.label_volume_key_recording_mode, R.string.section_volume_key_recording, "volume+", "volume-", "音量+", "音量-")
         item(R.string.label_volume_key_status_toast, R.string.section_volume_key_recording, "toast", "音量")
         item(R.string.label_volume_key_stop_on_ime_hidden, R.string.section_volume_key_recording, "volume", "音量")
+        item(
+            R.string.label_floating_a11y_android13_api,
+            R.string.section_floating_compat,
+            "Android 13",
+            "commitText",
+            "新版 API"
+        )
         item(R.string.label_floating_write_compat, R.string.section_floating_compat)
         item(R.string.label_floating_write_compat_pkgs, R.string.section_floating_compat)
         item(R.string.label_floating_write_paste, R.string.section_floating_compat)

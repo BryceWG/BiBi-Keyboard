@@ -5,8 +5,6 @@
  */
 package com.brycewg.asrkb.ui.floatingball
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.os.SystemClock
 import android.util.Log
@@ -31,6 +29,7 @@ import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
 import com.brycewg.asrkb.store.recordPrimaryAsrRuntimeRequestIfSuccessful
 import com.brycewg.asrkb.ui.AsrAccessibilityService.FocusContext
+import com.brycewg.asrkb.ui.AsrAccessibilityService.InsertPath
 import com.brycewg.asrkb.util.TextSanitizer
 import com.brycewg.asrkb.util.TypewriterTextAnimator
 import java.util.UUID
@@ -80,6 +79,9 @@ class AsrSessionManager(
 
     @Volatile
     private var useImeBridgeForSession: Boolean = false
+
+    @Volatile
+    private var skipA11ySetTextPreviewForSession: Boolean = false
 
     @Volatile
     private var useImeBridgeComposingPreviewForSession: Boolean = false
@@ -197,6 +199,7 @@ class AsrSessionManager(
         focusContext = null
         lastPartialForPreview = null
         useImeBridgeForSession = false
+        skipA11ySetTextPreviewForSession = false
         useImeBridgeComposingPreviewForSession = false
         imeBridgeSessionId = null
         markerInserted = false
@@ -326,14 +329,21 @@ class AsrSessionManager(
 
         val useImeBridge = isImeBridgeEnabled()
         useImeBridgeForSession = useImeBridge
+        skipA11ySetTextPreviewForSession = try {
+            prefs.shouldUseA11yAndroid13Api()
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to snapshot Android 13 a11y API preference", e)
+            false
+        }
         imeBridgeSessionId = null
         useImeBridgeComposingPreviewForSession = if (useImeBridge) {
             prepareImeBridgeSession()
         } else {
             false
         }
-        // 写入兼容模式：为命中包名注入占位符（粘贴方式），屏蔽原文本干扰
-        if (!useImeBridge) {
+        // 写入兼容模式：为命中包名注入占位符（粘贴方式），屏蔽原文本干扰。
+        // Android 13 IME commitText 路径不做 SET_TEXT 预览，兼容标记也不需要。
+        if (!useImeBridge && !skipA11ySetTextPreviewForSession) {
             tryFixCompatPlaceholderIfNeeded()
         }
 
@@ -463,6 +473,7 @@ class AsrSessionManager(
     }
 
     private fun rollbackPreviewToSnapshotIfNeeded() {
+        if (shouldSkipA11ySetTextPreview()) return
         if (lastPartialForPreview.isNullOrEmpty() && !markerInserted) return
         val ctx = focusContext ?: return
         val currentText = com.brycewg.asrkb.ui.AsrAccessibilityService.getCurrentFocusedText()
@@ -1397,76 +1408,46 @@ class AsrSessionManager(
 
         val ctx =
             focusContext ?: com.brycewg.asrkb.ui.AsrAccessibilityService.getCurrentFocusContext()
-        var toWrite = if (ctx != null) ctx.prefix + text + ctx.suffix else text
-        toWrite = stripMarkersIfAny(toWrite)
-        Log.d(TAG, "Inserting text: $toWrite (previewCtx=${ctx != null})")
+        val prefix = stripMarkersIfAny(ctx?.prefix ?: "")
+        val suffix = stripMarkersIfAny(ctx?.suffix ?: "")
+        val delta = stripMarkersIfAny(text)
+        Log.d(TAG, "Inserting text: deltaLen=${delta.length} (previewCtx=${ctx != null})")
 
         val pkg = com.brycewg.asrkb.ui.AsrAccessibilityService.getActiveWindowPackage()
-        // 写入粘贴方案：命中规则则仅复制到剪贴板并提示
-        val writePaste = try {
-            prefs.floatingWriteTextPasteEnabled
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to get write paste preference", e)
-            false
-        }
-        val pasteTarget = pkg != null && isPackageInPasteTargets(pkg)
-        if (writePaste && pasteTarget) {
-            try {
-                DebugLogManager.logBase(
-                    category = "float",
-                    event = "insert_final",
-                    data = StreamingPreviewDiag.shape(preview, text) + mapOf(
-                        "path" to "paste",
-                        "hadPreview" to hadPreview,
-                        "pkg" to pkg,
-                        "ok" to false
-                    )
-                )
-            } catch (_: Throwable) { }
-            try {
-                val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                val clip = ClipData.newPlainText("ASR Result", text)
-                cm.setPrimaryClip(clip)
-                android.widget.Toast.makeText(
-                    context,
-                    context.getString(com.brycewg.asrkb.R.string.floating_asr_copied),
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
-            } catch (e: Throwable) {
-                Log.e(TAG, "Failed to copy to clipboard (writePaste)", e)
-            }
-            // 不尝试插入文本：返回 false 表示未写入
-            return false
-        }
-
-        // 统一使用通用插入方法（兼容模式的区别仅在于占位符的注入与清理）
-        val wrote: Boolean = com.brycewg.asrkb.ui.AsrAccessibilityService.insertText(
+        val result = com.brycewg.asrkb.ui.AsrAccessibilityService.insertText(
             context,
-            toWrite
+            delta,
+            prefix,
+            suffix
         )
         logInsertFinal(
             path = "a11y",
             text = text,
             preview = preview,
             hadPreview = hadPreview,
-            ok = wrote,
+            ok = result.ok,
             extra = mapOf(
                 "pkg" to pkg,
-                "prefixLen" to (ctx?.prefix?.length ?: 0),
-                "suffixLen" to (ctx?.suffix?.length ?: 0),
-                "toWriteLen" to toWrite.length
+                "prefixLen" to prefix.length,
+                "suffixLen" to suffix.length,
+                "deltaLen" to delta.length,
+                "android13Api" to skipA11ySetTextPreviewForSession,
+                "writePath" to result.id
             )
         )
 
-        if (wrote) {
+        if (result.ok) {
             recordAsrUsage(text)
-            // 光标应定位到“前缀 + 新文本”的末尾；占位符已从前缀中移除
-            val prefixLenForCursor = stripMarkersIfAny(ctx?.prefix ?: "").length
-            val desiredCursor = (prefixLenForCursor + text.length).coerceAtLeast(0)
-            com.brycewg.asrkb.ui.AsrAccessibilityService.setSelectionSilent(desiredCursor)
+            if (result == InsertPath.SET_TEXT) {
+                // 光标应定位到“前缀 + 新文本”的末尾；占位符已从前缀中移除。
+                // commitText / PASTE 由系统或目标控件自己移动光标，不能按快照前缀重定位。
+                val prefixLenForCursor = stripMarkersIfAny(ctx?.prefix ?: "").length
+                val desiredCursor = (prefixLenForCursor + text.length).coerceAtLeast(0)
+                com.brycewg.asrkb.ui.AsrAccessibilityService.setSelectionSilent(desiredCursor)
+            }
         }
 
-        return wrote
+        return result.ok
     }
 
     private fun showImeBridgeInsertFailure(bridgeResult: ImeBridgeResult) {
@@ -1556,22 +1537,12 @@ class AsrSessionManager(
         }
     }
 
-    private fun isPackageInPasteTargets(pkg: String): Boolean {
-        val raw = try {
-            prefs.floatingWritePastePackages
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to get paste packages", e)
-            ""
-        }
-        val rules = raw.split('\n').map { it.trim() }.filter { it.isNotEmpty() }
-        if (rules.any { it.equals("all", ignoreCase = true) }) return true
-        // 前缀匹配（包名边界）
-        return rules.any { rule -> pkg == rule || pkg.startsWith("$rule.") }
-    }
+    private fun shouldSkipA11ySetTextPreview(): Boolean = skipA11ySetTextPreviewForSession
 
     private fun tryFixCompatPlaceholderIfNeeded() {
         markerInserted = false
         markerChar = null
+        if (shouldSkipA11ySetTextPreview()) return
         val pkg = com.brycewg.asrkb.ui.AsrAccessibilityService.getActiveWindowPackage() ?: return
         val compat = try {
             prefs.floatingWriteTextCompatEnabled
@@ -1621,6 +1592,10 @@ class AsrSessionManager(
             if (useImeBridgeComposingPreviewForSession) {
                 updateImeBridgeComposingPreview(text)
             }
+            return
+        }
+        if (shouldSkipA11ySetTextPreview()) {
+            lastPartialForPreview = text
             return
         }
         val ctx = focusContext ?: return
