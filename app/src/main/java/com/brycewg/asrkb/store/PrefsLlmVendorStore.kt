@@ -3,6 +3,7 @@ package com.brycewg.asrkb.store
 import android.content.SharedPreferences
 import android.util.Log
 import androidx.core.content.edit
+import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.asr.ReasoningMode
 import kotlinx.serialization.json.Json
@@ -50,14 +51,30 @@ internal object PrefsLlmVendorStore {
         }
     }
 
-    fun getLlmVendorReasoningEnabled(sp: SharedPreferences, vendor: LlmVendor): Boolean {
+    private fun getLlmVendorReasoningEnabled(sp: SharedPreferences, vendor: LlmVendor): Boolean {
         val key = "llm_vendor_${vendor.id}_reasoning_enabled"
-        return sp.getBoolean(key, false)
+        return try {
+            sp.getBoolean(key, false)
+        } catch (_: ClassCastException) {
+            false
+        }
     }
 
-    fun setLlmVendorReasoningEnabled(sp: SharedPreferences, vendor: LlmVendor, enabled: Boolean) {
-        val key = "llm_vendor_${vendor.id}_reasoning_enabled"
-        sp.edit { putBoolean(key, enabled) }
+    fun getLlmVendorReasoningCharThreshold(sp: SharedPreferences, vendor: LlmVendor): Int {
+        val key = "llm_vendor_${vendor.id}_reasoning_char_threshold"
+        if (sp.contains(key)) {
+            return try {
+                LlmReasoningThreshold.coerce(sp.getInt(key, LlmReasoningThreshold.NEVER))
+            } catch (_: ClassCastException) {
+                LlmReasoningThreshold.NEVER
+            }
+        }
+        return LlmReasoningThreshold.fromLegacyEnabled(getLlmVendorReasoningEnabled(sp, vendor))
+    }
+
+    fun setLlmVendorReasoningCharThreshold(sp: SharedPreferences, vendor: LlmVendor, threshold: Int) {
+        val key = "llm_vendor_${vendor.id}_reasoning_char_threshold"
+        sp.edit { putInt(key, LlmReasoningThreshold.coerce(threshold)) }
     }
 
     fun getLlmVendorCustomReasoningParamsEnabled(sp: SharedPreferences, vendor: LlmVendor): Boolean {
@@ -163,7 +180,7 @@ internal object PrefsLlmVendorStore {
                         model = model,
                         temperature = getLlmVendorTemperature(sp, LlmVendor.SF_FREE),
                         vendor = vendor,
-                        enableReasoning = getLlmVendorReasoningEnabled(sp, vendor),
+                        reasoningCharThreshold = getLlmVendorReasoningCharThreshold(sp, vendor),
                         useCustomReasoningParams = resolveUseCustomReasoningParams(
                             sp,
                             vendor,
@@ -183,7 +200,7 @@ internal object PrefsLlmVendorStore {
                     model = model,
                     temperature = Prefs.DEFAULT_LLM_TEMPERATURE,
                     vendor = vendor,
-                    enableReasoning = getLlmVendorReasoningEnabled(sp, vendor),
+                    reasoningCharThreshold = getLlmVendorReasoningCharThreshold(sp, vendor),
                     useCustomReasoningParams = resolveUseCustomReasoningParams(
                         sp,
                         vendor,
@@ -205,7 +222,7 @@ internal object PrefsLlmVendorStore {
                     model = provider.model,
                     temperature = provider.temperature,
                     vendor = vendor,
-                    enableReasoning = provider.enableReasoning,
+                    reasoningCharThreshold = provider.resolvedReasoningCharThreshold(),
                     useCustomReasoningParams = provider.useCustomReasoningParams,
                     reasoningParamsOnJson = provider.reasoningParamsOnJson,
                     reasoningParamsOffJson = provider.reasoningParamsOffJson
@@ -227,7 +244,7 @@ internal object PrefsLlmVendorStore {
                     model = model,
                     temperature = getLlmVendorTemperature(sp, vendor),
                     vendor = vendor,
-                    enableReasoning = getLlmVendorReasoningEnabled(sp, vendor),
+                    reasoningCharThreshold = getLlmVendorReasoningCharThreshold(sp, vendor),
                     useCustomReasoningParams = resolveUseCustomReasoningParams(
                         sp,
                         vendor,

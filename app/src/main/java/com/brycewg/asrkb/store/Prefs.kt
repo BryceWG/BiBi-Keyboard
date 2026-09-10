@@ -17,6 +17,7 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.BackupAsrLocalResidency
 import com.brycewg.asrkb.asr.GeminiAsrMode
+import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.asr.VolcAsrModelCatalog
 import com.brycewg.asrkb.clipboard.ClipboardSyncReceiveMode
@@ -656,10 +657,21 @@ class Prefs(context: Context) {
         val temperature: Float,
         val models: List<String> = emptyList(),
         val enableReasoning: Boolean = false,
+        val reasoningCharThreshold: Int? = null,
         val useCustomReasoningParams: Boolean = false,
         val reasoningParamsOnJson: String = "",
         val reasoningParamsOffJson: String = ""
-    )
+    ) {
+        fun resolvedReasoningCharThreshold(): Int = LlmReasoningThreshold.resolve(reasoningCharThreshold, enableReasoning)
+
+        fun withReasoningCharThreshold(threshold: Int): LlmProvider {
+            val coerced = LlmReasoningThreshold.coerce(threshold)
+            return copy(
+                reasoningCharThreshold = coerced,
+                enableReasoning = coerced == LlmReasoningThreshold.ALWAYS
+            )
+        }
+    }
 
     @Serializable
     enum class LlmRequestMode(val id: String) {
@@ -922,9 +934,9 @@ class Prefs(context: Context) {
 
     fun setLlmVendorTemperature(vendor: LlmVendor, temperature: Float) = PrefsLlmVendorStore.setLlmVendorTemperature(sp, vendor, temperature)
 
-    fun getLlmVendorReasoningEnabled(vendor: LlmVendor): Boolean = PrefsLlmVendorStore.getLlmVendorReasoningEnabled(sp, vendor)
+    fun getLlmVendorReasoningCharThreshold(vendor: LlmVendor): Int = PrefsLlmVendorStore.getLlmVendorReasoningCharThreshold(sp, vendor)
 
-    fun setLlmVendorReasoningEnabled(vendor: LlmVendor, enabled: Boolean) = PrefsLlmVendorStore.setLlmVendorReasoningEnabled(sp, vendor, enabled)
+    fun setLlmVendorReasoningCharThreshold(vendor: LlmVendor, threshold: Int) = PrefsLlmVendorStore.setLlmVendorReasoningCharThreshold(sp, vendor, threshold)
 
     fun getLlmVendorCustomReasoningParamsEnabled(vendor: LlmVendor): Boolean = PrefsLlmVendorStore.getLlmVendorCustomReasoningParamsEnabled(sp, vendor)
 
@@ -957,7 +969,7 @@ class Prefs(context: Context) {
         val model: String,
         val temperature: Float,
         val vendor: LlmVendor,
-        val enableReasoning: Boolean,
+        val reasoningCharThreshold: Int,
         val useCustomReasoningParams: Boolean,
         val reasoningParamsOnJson: String,
         val reasoningParamsOffJson: String

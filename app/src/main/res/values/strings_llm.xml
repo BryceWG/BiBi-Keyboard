@@ -110,6 +110,10 @@
 
     <!-- Reasoning mode -->
     <string name="label_reasoning_mode">Enable Deep Thinking</string>
+    <string name="title_ai_reasoning_threshold">Deep thinking threshold</string>
+    <string name="helper_ai_reasoning_threshold">Deep thinking is enabled based on recognized length. 0 always enables it; the maximum never enables it; values in between enable it when the length exceeds the threshold.</string>
+    <string name="value_ai_reasoning_always">Enabled</string>
+    <string name="value_ai_reasoning_never">Disabled</string>
     <string name="label_custom_reasoning_params">Custom reasoning params</string>
     <string name="hint_reasoning_mode">When enabled, the model performs reasoning analysis. Slower but better results for complex tasks.</string>
     <string name="hint_reasoning_not_supported">Current model doesn\'t support reasoning mode</string>

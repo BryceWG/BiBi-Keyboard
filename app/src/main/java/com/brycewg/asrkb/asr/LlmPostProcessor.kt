@@ -11,6 +11,7 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
+import com.brycewg.asrkb.util.TextSanitizer
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.InetSocketAddress
@@ -192,6 +193,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         val temperature: Double,
         val vendor: LlmVendor,
         val enableReasoning: Boolean,
+        val reasoningCharThreshold: Int,
         val supportsReasoningControl: Boolean,
         val useCustomReasoningParams: Boolean,
         val reasoningParamsOnJson: String,
@@ -209,6 +211,16 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
 
         /** 协议完成后异步排空剩余 SSE，便于 HTTP/1.1 把连接放回池 */
         private const val STREAM_DRAIN_TIMEOUT_MS = 300L
+
+        private const val CONNECTIVITY_TEST_PROMPT =
+            "Rewrite each dictated text below as clean written text. " +
+                "Keep the meaning and roughly the same length, output only the two rewritten texts " +
+                "labeled [EN] and [ZH]: " +
+                "[EN] \"um yesterday like me and my friend we went to the park " +
+                "and uh the weather was really nice so we played some football " +
+                "and then we had ice cream\"; " +
+                "[ZH] \"就是昨天吧，我和我朋友然后去了那个公园，嗯天气特别好，" +
+                "我们就踢了会儿足球，然后还吃了个冰淇淋\""
 
         /** 同进程内只允许一个未知供应商执行首次请求模式探测。 */
         private val requestModeProbeMutex = Mutex()
@@ -237,20 +249,26 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         model: String,
         temperature: Double,
         vendor: LlmVendor,
-        enableReasoning: Boolean,
+        reasoningCharThreshold: Int,
+        inputText: String,
         useCustomReasoningParams: Boolean,
         reasoningParamsOnJson: String,
         reasoningParamsOffJson: String,
         capabilityIdentity: String
     ): LlmRequestConfig {
         val supportsReasoning = vendor.supportsReasoningControl(model)
+        val threshold = LlmReasoningThreshold.coerce(reasoningCharThreshold)
         return LlmRequestConfig(
             apiKey = apiKey,
             endpoint = endpoint,
             model = model,
             temperature = temperature,
             vendor = vendor,
-            enableReasoning = enableReasoning,
+            enableReasoning = LlmReasoningThreshold.shouldEnable(
+                threshold,
+                TextSanitizer.countEffectiveChars(inputText)
+            ),
+            reasoningCharThreshold = threshold,
             supportsReasoningControl = supportsReasoning,
             useCustomReasoningParams = useCustomReasoningParams,
             reasoningParamsOnJson = reasoningParamsOnJson,
@@ -263,7 +281,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     /**
      * 从 Prefs 获取活动的 LLM 配置（使用新的供应商架构）
      */
-    private fun getActiveConfig(prefs: Prefs): LlmRequestConfig {
+    private fun getActiveConfig(prefs: Prefs, inputText: String = ""): LlmRequestConfig {
         val vendor = prefs.llmVendor
 
         // SiliconFlow 免费服务特殊处理
@@ -276,7 +294,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
                 model = model,
                 temperature = Prefs.DEFAULT_LLM_TEMPERATURE.toDouble(),
                 vendor = vendor,
-                enableReasoning = prefs.getLlmVendorReasoningEnabled(vendor),
+                reasoningCharThreshold = prefs.getLlmVendorReasoningCharThreshold(vendor),
+                inputText = inputText,
                 useCustomReasoningParams = effective?.useCustomReasoningParams ?: false,
                 reasoningParamsOnJson =
                 effective?.reasoningParamsOnJson ?: Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_ON_JSON,
@@ -300,7 +319,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
                 model = config.model,
                 temperature = config.temperature.toDouble(),
                 vendor = config.vendor,
-                enableReasoning = config.enableReasoning,
+                reasoningCharThreshold = config.reasoningCharThreshold,
+                inputText = inputText,
                 useCustomReasoningParams = config.useCustomReasoningParams,
                 reasoningParamsOnJson = config.reasoningParamsOnJson,
                 reasoningParamsOffJson = config.reasoningParamsOffJson,
@@ -324,7 +344,12 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             model = active?.model ?: prefs.llmModel,
             temperature = (active?.temperature ?: prefs.llmTemperature).toDouble(),
             vendor = vendor,
-            enableReasoning = prefs.getLlmVendorReasoningEnabled(vendor),
+            reasoningCharThreshold = if (vendor == LlmVendor.CUSTOM) {
+                active?.resolvedReasoningCharThreshold() ?: LlmReasoningThreshold.NEVER
+            } else {
+                prefs.getLlmVendorReasoningCharThreshold(vendor)
+            },
+            inputText = inputText,
             useCustomReasoningParams = false,
             reasoningParamsOnJson = Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_ON_JSON,
             reasoningParamsOffJson = Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_OFF_JSON,
@@ -1435,7 +1460,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
      */
     suspend fun testConnectivity(prefs: Prefs): LlmTestResult = withContext(Dispatchers.IO) {
         // 基础必填校验（endpoint / model）
-        val active = getActiveConfig(prefs)
+        val active = getActiveConfig(prefs, CONNECTIVITY_TEST_PROMPT)
         val requiresModel = active.vendor != LlmVendor.CUSTOM
         if (active.endpoint.isBlank() || (requiresModel && active.model.isBlank())) {
             val message = if (active.endpoint.isBlank()) "Missing endpoint" else "Missing model"
@@ -1451,14 +1476,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
                     put("role", "user")
                     put(
                         "content",
-                        "Rewrite each dictated text below as clean written text. " +
-                            "Keep the meaning and roughly the same length, output only the two rewritten texts " +
-                            "labeled [EN] and [ZH]: " +
-                            "[EN] \"um yesterday like me and my friend we went to the park " +
-                            "and uh the weather was really nice so we played some football " +
-                            "and then we had ice cream\"; " +
-                            "[ZH] \"就是昨天吧，我和我朋友然后去了那个公园，嗯天气特别好，" +
-                            "我们就踢了会儿足球，然后还吃了个冰淇淋\""
+                        CONNECTIVITY_TEST_PROMPT
                     )
                 }
             )
@@ -1610,7 +1628,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             )
         }
 
-        val config = getActiveConfig(prefs)
+        val config = getActiveConfig(prefs, input)
         val systemPrompt = (promptOverride ?: prefs.activePromptContent)
         val userInputPrefix = prefs.getLocalizedString(R.string.llm_prompt_user_input_prefix)
         val userContent = "$userInputPrefix$input"
@@ -1645,26 +1663,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         val dt = TimeUnit.NANOSECONDS
             .toMillis((System.nanoTime() - t0).coerceAtLeast(0L))
             .coerceAtLeast(0L)
-        try {
-            DebugLogManager.log(
-                category = "asr",
-                event = "llm_call_complete",
-                data = mapOf(
-                    "ok" to result.ok,
-                    "mode" to result.responseMode?.name?.lowercase(),
-                    // wallMs 覆盖请求模式探测 + 重试等待 + 最终调用；与 totalMs 的差值即这些额外开销。
-                    "wallMs" to dt,
-                    "totalMs" to result.totalMs,
-                    "reused" to result.connectionReused,
-                    "connectionMs" to result.connectionMs,
-                    "headersMs" to result.responseHeadersMs,
-                    "firstVisibleMs" to result.firstVisibleMs,
-                    "outputMs" to result.outputMs,
-                    "bodyMs" to result.responseBodyMs,
-                    "fallback" to result.fallbackUsed
-                )
-            )
-        } catch (_: Throwable) { }
+        logLlmCallComplete(result, config, dt)
 
         if (!result.ok) {
             if (result.httpCode != null) {
@@ -1716,7 +1715,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             )
         }
 
-        val config = getActiveConfig(prefs)
+        val config = getActiveConfig(prefs, original)
 
         val systemPrompt = prefs.getEffectiveAiEditSystemPrompt()
         val instructionLabel = prefs.getLocalizedString(R.string.llm_edit_instruction_label)
@@ -1759,6 +1758,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         val dt = TimeUnit.NANOSECONDS
             .toMillis((System.nanoTime() - t0).coerceAtLeast(0L))
             .coerceAtLeast(0L)
+        logLlmCallComplete(result, config, dt)
         if (!result.ok) {
             if (result.httpCode != null) {
                 Log.w(TAG, "LLM editText() failed: HTTP ${result.httpCode}, ${result.error}")
@@ -1812,6 +1812,35 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     private fun isNonRetryableFailure(result: RawCallResult): Boolean {
         val err = result.error ?: return false
         return err.startsWith("timeout:") || err == "Request canceled"
+    }
+
+    private fun logLlmCallComplete(
+        result: RawCallResult,
+        config: LlmRequestConfig,
+        wallMs: Long
+    ) {
+        try {
+            DebugLogManager.log(
+                category = "asr",
+                event = "llm_call_complete",
+                data = mapOf(
+                    "ok" to result.ok,
+                    "mode" to result.responseMode?.name?.lowercase(),
+                    "reasoning" to config.enableReasoning,
+                    "threshold" to config.reasoningCharThreshold,
+                    // wallMs 覆盖请求模式探测 + 重试等待 + 最终调用；与 totalMs 的差值即这些额外开销。
+                    "wallMs" to wallMs,
+                    "totalMs" to result.totalMs,
+                    "reused" to result.connectionReused,
+                    "connectionMs" to result.connectionMs,
+                    "headersMs" to result.responseHeadersMs,
+                    "firstVisibleMs" to result.firstVisibleMs,
+                    "outputMs" to result.outputMs,
+                    "bodyMs" to result.responseBodyMs,
+                    "fallback" to result.fallbackUsed
+                )
+            )
+        } catch (_: Throwable) { }
     }
 
     private fun logLlmTimeout(

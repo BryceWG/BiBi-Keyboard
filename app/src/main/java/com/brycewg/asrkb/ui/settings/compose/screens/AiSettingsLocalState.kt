@@ -31,7 +31,7 @@ internal class AiSettingsLocalState(
     var sfModel by mutableStateOf(currentSfModel(prefs))
     var sfPresetModels by mutableStateOf(getSfPresetModels(prefs))
     var sfStaticModels by mutableStateOf(getSfStaticModels(prefs))
-    var sfReasoningEnabled by mutableStateOf(prefs.getLlmVendorReasoningEnabled(LlmVendor.SF_FREE))
+    var sfReasoningCharThreshold by mutableStateOf(prefs.getLlmVendorReasoningCharThreshold(LlmVendor.SF_FREE))
     var sfReasoningOnJson by mutableStateOf(prefs.getLlmVendorReasoningParamsOnJson(LlmVendor.SF_FREE))
     var sfReasoningOffJson by mutableStateOf(prefs.getLlmVendorReasoningParamsOffJson(LlmVendor.SF_FREE))
     var sfCustomReasoningParamsEnabled by mutableStateOf(
@@ -57,7 +57,7 @@ internal class AiSettingsLocalState(
         sfModel = currentSfModel(prefs)
         sfPresetModels = getSfPresetModels(prefs)
         sfStaticModels = getSfStaticModels(prefs)
-        sfReasoningEnabled = prefs.getLlmVendorReasoningEnabled(LlmVendor.SF_FREE)
+        sfReasoningCharThreshold = prefs.getLlmVendorReasoningCharThreshold(LlmVendor.SF_FREE)
         sfReasoningOnJson = prefs.getLlmVendorReasoningParamsOnJson(LlmVendor.SF_FREE)
         sfReasoningOffJson = prefs.getLlmVendorReasoningParamsOffJson(LlmVendor.SF_FREE)
         sfCustomReasoningParamsEnabled = prefs.getLlmVendorCustomReasoningParamsEnabled(LlmVendor.SF_FREE)
@@ -103,7 +103,7 @@ internal class AiSettingsLocalState(
         sfUseFreeService = sfUseFreeService,
         sfApiKey = sfApiKey,
         sfModel = sfModel,
-        sfReasoningEnabled = sfReasoningEnabled,
+        sfReasoningCharThreshold = sfReasoningCharThreshold,
         sfReasoningOnJson = sfReasoningOnJson,
         sfReasoningOffJson = sfReasoningOffJson,
         sfCustomReasoningParamsEnabled = sfCustomReasoningParamsEnabled,

@@ -3,6 +3,7 @@ package com.brycewg.asrkb.ui.settings.ai
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.asr.ReasoningMode
 import com.brycewg.asrkb.store.Prefs
@@ -33,7 +34,7 @@ class AiPostSettingsViewModel : ViewModel() {
         val apiKey: String = "",
         val model: String = "",
         val temperature: Float = Prefs.DEFAULT_LLM_TEMPERATURE,
-        val reasoningEnabled: Boolean = false,
+        val reasoningCharThreshold: Int = LlmReasoningThreshold.NEVER,
         val customReasoningParamsEnabled: Boolean = false
     )
 
@@ -99,7 +100,7 @@ class AiPostSettingsViewModel : ViewModel() {
             apiKey = prefs.getLlmVendorApiKey(vendor),
             model = prefs.getLlmVendorModel(vendor),
             temperature = prefs.getLlmVendorTemperature(vendor),
-            reasoningEnabled = prefs.getLlmVendorReasoningEnabled(vendor),
+            reasoningCharThreshold = prefs.getLlmVendorReasoningCharThreshold(vendor),
             customReasoningParamsEnabled = prefs.getLlmVendorCustomReasoningParamsEnabled(vendor)
         )
     }
@@ -166,17 +167,18 @@ class AiPostSettingsViewModel : ViewModel() {
     }
 
     /**
-     * Updates builtin vendor reasoning enabled state
+     * Updates builtin vendor reasoning character threshold
      */
-    fun updateBuiltinReasoningEnabled(prefs: Prefs, enabled: Boolean) {
+    fun updateBuiltinReasoningCharThreshold(prefs: Prefs, threshold: Int) {
         rememberPrefs(prefs)
         val vendor = _selectedVendor.value
         if (vendor == LlmVendor.CUSTOM || vendor == LlmVendor.SF_FREE) return
         try {
-            prefs.setLlmVendorReasoningEnabled(vendor, enabled)
-            _builtinVendorConfig.value = _builtinVendorConfig.value.copy(reasoningEnabled = enabled)
+            val coerced = LlmReasoningThreshold.coerce(threshold)
+            prefs.setLlmVendorReasoningCharThreshold(vendor, coerced)
+            _builtinVendorConfig.value = _builtinVendorConfig.value.copy(reasoningCharThreshold = coerced)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to update builtin reasoning enabled", e)
+            Log.e(TAG, "Failed to update builtin reasoning threshold", e)
         }
     }
 

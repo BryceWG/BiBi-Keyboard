@@ -132,7 +132,7 @@ internal fun AiSettingsRouteContent(
                         sfUseFreeService = sfUseFreeService,
                         sfApiKey = sfApiKey,
                         sfModel = sfModel,
-                        sfReasoningEnabled = sfReasoningEnabled,
+                        sfReasoningCharThreshold = sfReasoningCharThreshold,
                         sfReasoningOnJson = sfReasoningOnJson,
                         sfReasoningOffJson = sfReasoningOffJson,
                         sfTemperature = sfTemperature,
@@ -178,9 +178,9 @@ internal fun AiSettingsRouteContent(
                                     ) { models -> onShowBuiltinModelsPicker(LlmVendor.SF_FREE, models) }
                                 }
                             },
-                            onReasoningChange = { checked ->
-                                onSfReasoningEnabledChange(checked)
-                                prefs.setLlmVendorReasoningEnabled(LlmVendor.SF_FREE, checked)
+                            onReasoningChange = { threshold ->
+                                onSfReasoningCharThresholdChange(threshold)
+                                prefs.setLlmVendorReasoningCharThreshold(LlmVendor.SF_FREE, threshold)
                             },
                             onCustomReasoningParamsEnabledChange = { checked ->
                                 onSfCustomReasoningParamsEnabledChange(checked)
@@ -235,9 +235,9 @@ internal fun AiSettingsRouteContent(
                                 provider?.apiKey?.ifBlank { prefs.llmApiKey } ?: prefs.llmApiKey
                             ) { models -> onShowCustomModelsPicker(models) }
                         },
-                        onCustomReasoningChange = { checked ->
+                        onCustomReasoningChange = { threshold ->
                             viewModel.updateActiveLlmProvider(prefs) {
-                                it.copy(enableReasoning = checked)
+                                it.withReasoningCharThreshold(threshold)
                             }
                         },
                         onCustomReasoningParamsEnabledChange = { checked ->
@@ -286,8 +286,8 @@ internal fun AiSettingsRouteContent(
                                 prefs.getLlmVendorApiKey(selectedVendor)
                             ) { models -> onShowBuiltinModelsPicker(selectedVendor, models) }
                         },
-                        onBuiltinReasoningChange = { checked ->
-                            viewModel.updateBuiltinReasoningEnabled(prefs, checked)
+                        onBuiltinReasoningChange = { threshold ->
+                            viewModel.updateBuiltinReasoningCharThreshold(prefs, threshold)
                         },
                         onBuiltinCustomReasoningParamsEnabledChange = { checked ->
                             viewModel.updateBuiltinCustomReasoningParamsEnabled(prefs, checked)

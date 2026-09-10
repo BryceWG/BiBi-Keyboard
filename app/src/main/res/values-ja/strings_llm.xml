@@ -111,6 +111,10 @@
 
     <!-- 推論モード -->
     <string name="label_reasoning_mode">深い思考を有効化</string>
+    <string name="title_ai_reasoning_threshold">深い思考の文字数しきい値</string>
+    <string name="helper_ai_reasoning_threshold">深い思考は認識文字数で有効化を判断します。0 で常に有効、上限で常に無効、中間値では文字数がしきい値を超えたとき有効になります。</string>
+    <string name="value_ai_reasoning_always">有効</string>
+    <string name="value_ai_reasoning_never">無効</string>
     <string name="label_custom_reasoning_params">カスタム推論パラメータ</string>
     <string name="hint_reasoning_mode">有効にすると、モデルは推論分析を実行します。処理は遅くなりますが、複雑なタスクではより良い結果が得られます。</string>
     <string name="hint_reasoning_not_supported">現在のモデルは推論モードをサポートしていません</string>

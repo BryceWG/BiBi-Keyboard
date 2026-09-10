@@ -285,7 +285,7 @@ fun AiSettingsScreen(
                 onAiEditSystemPromptChange = { localState.aiEditSystemPrompt = it },
                 onSfApiKeyChange = { localState.sfApiKey = it },
                 onSfModelChange = { localState.sfModel = it },
-                onSfReasoningEnabledChange = { localState.sfReasoningEnabled = it },
+                onSfReasoningCharThresholdChange = { localState.sfReasoningCharThreshold = it },
                 onSfReasoningOnJsonChange = { localState.sfReasoningOnJson = it },
                 onSfReasoningOffJsonChange = { localState.sfReasoningOffJson = it },
                 onSfCustomReasoningParamsEnabledChange = {

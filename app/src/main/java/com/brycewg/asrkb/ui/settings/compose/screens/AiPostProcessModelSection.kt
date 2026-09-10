@@ -24,7 +24,7 @@ internal fun AiPostProcessModelSection(
     sfUseFreeService: Boolean,
     sfApiKey: String,
     sfModel: String,
-    sfReasoningEnabled: Boolean,
+    sfReasoningCharThreshold: Int,
     sfReasoningOnJson: String,
     sfReasoningOffJson: String,
     sfTemperature: Float,
@@ -49,7 +49,7 @@ internal fun AiPostProcessModelSection(
     onChooseCustomModel: () -> Unit,
     onCustomModelChange: (String) -> Unit,
     onFetchCustomModels: () -> Unit,
-    onCustomReasoningChange: (Boolean) -> Unit,
+    onCustomReasoningChange: (Int) -> Unit,
     onCustomReasoningParamsEnabledChange: (Boolean) -> Unit,
     onCustomReasoningOnJsonChange: (String) -> Unit,
     onCustomReasoningOffJsonChange: (String) -> Unit,
@@ -60,7 +60,7 @@ internal fun AiPostProcessModelSection(
     onChooseBuiltinModel: () -> Unit,
     onBuiltinCustomModelChange: (String) -> Unit,
     onFetchBuiltinModels: () -> Unit,
-    onBuiltinReasoningChange: (Boolean) -> Unit,
+    onBuiltinReasoningChange: (Int) -> Unit,
     onBuiltinCustomReasoningParamsEnabledChange: (Boolean) -> Unit,
     onBuiltinReasoningOnJsonChange: (String) -> Unit,
     onBuiltinReasoningOffJsonChange: (String) -> Unit,
@@ -72,6 +72,7 @@ internal fun AiPostProcessModelSection(
         val primaryConfigItemCount = when (selectedVendor) {
             LlmVendor.SF_FREE -> sfFreeLlmPrimaryItemCount(
                 presetModels = sfPresetModels,
+                staticModels = sfStaticModels,
                 sfUseFreeService = sfUseFreeService,
                 sfModel = sfModel,
                 customModelInputVisible = sfCustomModelInputVisible
@@ -103,7 +104,7 @@ internal fun AiPostProcessModelSection(
                 sfUseFreeService = sfUseFreeService,
                 sfApiKey = sfApiKey,
                 sfModel = sfModel,
-                sfReasoningEnabled = sfReasoningEnabled,
+                sfReasoningCharThreshold = sfReasoningCharThreshold,
                 sfReasoningOnJson = sfReasoningOnJson,
                 sfReasoningOffJson = sfReasoningOffJson,
                 customReasoningParamsEnabled = sfCustomReasoningParamsEnabled,

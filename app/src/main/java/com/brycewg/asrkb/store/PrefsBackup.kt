@@ -7,6 +7,7 @@ package com.brycewg.asrkb.store
 
 import android.util.Log
 import com.brycewg.asrkb.asr.AsrVendor
+import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.asr.VolcAsrModelCatalog
 import com.brycewg.asrkb.clipboard.ClipboardHistoryStore
@@ -252,7 +253,9 @@ internal object PrefsBackup {
                 o.put("${keyPrefix}_temperature", getLlmVendorTemperature(vendor).toDouble())
             } catch (_: Throwable) {}
             try {
-                o.put("${keyPrefix}_reasoning_enabled", getLlmVendorReasoningEnabled(vendor))
+                val threshold = getLlmVendorReasoningCharThreshold(vendor)
+                o.put("${keyPrefix}_reasoning_char_threshold", threshold)
+                o.put("${keyPrefix}_reasoning_enabled", threshold == LlmReasoningThreshold.ALWAYS)
             } catch (_: Throwable) {}
             try {
                 o.put(
@@ -605,8 +608,16 @@ internal object PrefsBackup {
                 optString("${keyPrefix}_api_key")?.let { setLlmVendorApiKey(vendor, it) }
                 optString("${keyPrefix}_model")?.let { setLlmVendorModel(vendor, it) }
                 optFloat("${keyPrefix}_temperature")?.let { setLlmVendorTemperature(vendor, it) }
-                optBool("${keyPrefix}_reasoning_enabled")?.let {
-                    setLlmVendorReasoningEnabled(vendor, it)
+                val importedThreshold = optInt("${keyPrefix}_reasoning_char_threshold")
+                if (importedThreshold != null) {
+                    setLlmVendorReasoningCharThreshold(vendor, importedThreshold)
+                } else {
+                    optBool("${keyPrefix}_reasoning_enabled")?.let {
+                        setLlmVendorReasoningCharThreshold(
+                            vendor,
+                            LlmReasoningThreshold.fromLegacyEnabled(it)
+                        )
+                    }
                 }
                 optBool("${keyPrefix}_custom_reasoning_params")?.let {
                     setLlmVendorCustomReasoningParamsEnabled(vendor, it)

@@ -31,6 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.LocalSettingsHapticTap
@@ -85,6 +88,7 @@ internal fun SettingsSliderPreference(
         SettingsLayoutMetrics.SliderBottomPadding
     }
     val displayLabel = valueLabel(sliderValue)
+    val sliderA11yModifier = Modifier.semantics { stateDescription = displayLabel }
     val content: @Composable () -> Unit = {
         when (uiMode) {
             BibiUiMode.Material -> SettingsMaterialItemSurface(index = index, count = count) {
@@ -114,6 +118,7 @@ internal fun SettingsSliderPreference(
                         .fillMaxWidth()
                         .padding(horizontal = SettingsLayoutMetrics.SliderHorizontalPadding)
                         .padding(bottom = sliderBottomPadding)
+                        .then(sliderA11yModifier)
                 )
                 SettingsSliderScaleLabels(uiMode, startLabel, endLabel)
             }
@@ -158,6 +163,7 @@ internal fun SettingsSliderPreference(
                                 miuixPointerPressed.value = false
                             }
                         }
+                        .then(sliderA11yModifier)
                 )
                 SettingsSliderScaleLabels(uiMode, startLabel, endLabel)
             }
@@ -242,7 +248,10 @@ internal fun SettingsControlLabel(
                 Text(
                     text = value,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.clearAndSetSemantics {
+                        // 数值由 Slider 的 stateDescription 朗读，避免重复播报
+                    }
                 )
             }
 
@@ -257,7 +266,10 @@ internal fun SettingsControlLabel(
                 MiuixText(
                     text = value,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                    style = MiuixTheme.textStyles.body2
+                    style = MiuixTheme.textStyles.body2,
+                    modifier = Modifier.clearAndSetSemantics {
+                        // 数值由 Slider 的 stateDescription 朗读，避免重复播报
+                    }
                 )
             }
         }

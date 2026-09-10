@@ -240,7 +240,14 @@ object SettingsSearchIndex {
         item(R.string.label_llm_vendor, R.string.section_post_process_model, "llm")
         item(R.string.label_llm_choose_profile, R.string.section_post_process_model)
         item(R.string.label_llm_model_select, R.string.section_post_process_model)
-        item(R.string.label_reasoning_mode, R.string.section_post_process_model)
+        item(
+            R.string.title_ai_reasoning_threshold,
+            R.string.section_post_process_model,
+            "reasoning",
+            "深度思考",
+            "启用深度思考",
+            "Enable Deep Thinking"
+        )
         item(R.string.label_custom_reasoning_params, R.string.section_post_process_model)
         item(R.string.label_llm_prompt_presets, R.string.label_llm_prompt_presets)
     }
