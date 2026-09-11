@@ -1,5 +1,23 @@
 # Changelog
 
+## v4.4.5 (2026-09-11)
+
+### New Features
+
+- **Deep Thinking Threshold**: Deep thinking now turns on based on recognized length. 0 always enables it; the maximum never enables it; values in between enable it when the length exceeds the threshold
+- **Android 13 Accessibility Insert**: Optional new Accessibility IME API for the floating ball, more reliable in terminals and editors. Turns off streaming preview and write-compatibility optimization
+
+### Improvements
+
+- **[Pro] Cursor Glide**: Smoother tracking and more accurate vertical movement in multi-line fields; also available from the AI edit panel
+
+### Bug Fixes
+
+- **History Loss on IME Switch**: Fixed recognition history loss in certain scenarios
+- **[Pro] Cursor Glide**: Fix entering the mode on dynamic keyboard layouts; sliding to the start or end of text no longer makes the cursor disappear
+
+---
+
 ## v4.4.3 (2026-09-06)
 
 ### New Features
