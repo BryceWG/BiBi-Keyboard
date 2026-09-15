@@ -8,7 +8,12 @@ on:
       - "app/build.gradle.kts"
       - "gradle.properties"
       - "app/src/main/AndroidManifest.xml"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: "Build and publish even if versionCode did not change"
+        type: boolean
+        default: false
 
 concurrency:
   group: release-on-version-bump
@@ -45,6 +50,7 @@ jobs:
         id: version
         env:
           GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          FORCE_RELEASE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force_release || 'false' }}
         run: |
           python3 - <<'PY'
           import os, re, subprocess
@@ -113,9 +119,11 @@ jobs:
                   break
           vn_prev, vc_prev = parse_versions(text_prev)
 
-          # 只检查 versionCode 是否变化
+          # 只检查 versionCode 是否变化；手动重跑失败的发版可强制继续
           changed = False
           if vc_head and (vc_head != (vc_prev or '')):
+              changed = True
+          if os.environ.get('FORCE_RELEASE', '').lower() == 'true':
               changed = True
 
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
@@ -226,10 +234,10 @@ jobs:
 
       - name: Set up Android SDK
         if: steps.version.outputs.changed == 'true'
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
-          api-level: 36
-          build-tools: 36.0.0
+          # Google 已下架旧的 `tools` 包，不能再用 action 默认值 `tools platform-tools`
+          packages: platform-tools
 
       - name: Check if keystore is configured
         if: steps.version.outputs.changed == 'true'
