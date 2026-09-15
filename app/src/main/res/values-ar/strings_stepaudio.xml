@@ -9,6 +9,9 @@
     <string name="stepaudio_endpoint_custom">مخصص</string>
     <string name="label_stepaudio_model">نموذج التعرّف</string>
     <string name="stepaudio_model_25_asr">stepaudio-2.5-asr</string>
+    <string name="stepaudio_model_3_asr_max">stepaudio-3-asr-max</string>
+    <string name="stepaudio_model_custom">مخصص</string>
+    <string name="label_stepaudio_custom_model">نموذج تعرّف مخصص</string>
     <string name="label_stepaudio_language">لغة التعرّف</string>
     <string name="stepaudio_lang_zh">الصينية</string>
     <string name="stepaudio_lang_en">الإنجليزية</string>

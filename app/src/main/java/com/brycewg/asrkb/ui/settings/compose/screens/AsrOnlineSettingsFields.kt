@@ -44,6 +44,8 @@ internal class AsrOnlineSettingsFields(
     var stepAudioEndpoint by mutableStateOf(prefs.getEffectiveStepAudioAsrEndpoint())
     var stepAudioEndpointPreset by mutableStateOf(prefs.stepAudioEndpointPreset)
     var stepAudioModel by mutableStateOf(displayStepAudioModel(prefs))
+    var stepAudioCustomModelVisible by mutableStateOf(isCustomStepAudioModel(stepAudioModel))
+    var stepAudioCustomModelDraft by mutableStateOf(stepAudioModel.takeIf(::isCustomStepAudioModel).orEmpty())
     var stepAudioLanguage by mutableStateOf(prefs.stepAudioLanguage.trim())
     var stepAudioUseItn by mutableStateOf(prefs.stepAudioUseItn)
     var zhipuApiKey by mutableStateOf(prefs.zhipuApiKey)
@@ -123,6 +125,8 @@ internal class AsrOnlineSettingsFields(
         stepAudioEndpoint = prefs.getEffectiveStepAudioAsrEndpoint()
         stepAudioEndpointPreset = prefs.stepAudioEndpointPreset
         stepAudioModel = displayStepAudioModel(prefs)
+        stepAudioCustomModelVisible = isCustomStepAudioModel(stepAudioModel)
+        stepAudioCustomModelDraft = stepAudioModel.takeIf(::isCustomStepAudioModel).orEmpty()
         stepAudioLanguage = prefs.stepAudioLanguage.trim()
         stepAudioUseItn = prefs.stepAudioUseItn
         zhipuApiKey = prefs.zhipuApiKey
@@ -308,6 +312,25 @@ internal class AsrOnlineSettingsFields(
             stepAudioApiKey = prefs.stepAudioApiKey
         },
         stepAudioModel = stepAudioModel,
+        stepAudioCustomModelVisible = stepAudioCustomModelVisible,
+        onStepAudioModelSelected = { value ->
+            if (value == STEPAUDIO_CUSTOM_MODEL_OPTION_ID) {
+                stepAudioCustomModelVisible = true
+                stepAudioCustomModelDraft = prefs.stepAudioModel.takeIf(::isCustomStepAudioModel).orEmpty()
+            } else {
+                stepAudioCustomModelVisible = false
+                stepAudioModel = value
+                prefs.stepAudioModel = value
+            }
+        },
+        stepAudioCustomModelDraft = stepAudioCustomModelDraft,
+        onStepAudioCustomModelDraftChange = { value ->
+            stepAudioCustomModelDraft = value
+            if (value.isNotBlank()) {
+                stepAudioModel = value
+                prefs.stepAudioModel = value.trim()
+            }
+        },
         stepAudioLanguage = stepAudioLanguage,
         onStepAudioLanguageChange = { value ->
             stepAudioLanguage = value

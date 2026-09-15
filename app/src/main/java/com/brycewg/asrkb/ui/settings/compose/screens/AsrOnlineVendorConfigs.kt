@@ -62,7 +62,10 @@ internal fun CurrentAsrVendorConfig(
     stepAudioEndpointPreset: String,
     onStepAudioEndpointPresetChange: (String) -> Unit,
     stepAudioModel: String,
-    onChooseStepAudioModel: () -> Unit,
+    stepAudioCustomModelVisible: Boolean,
+    onStepAudioModelSelected: (String) -> Unit,
+    stepAudioCustomModelDraft: String,
+    onStepAudioCustomModelDraftChange: (String) -> Unit,
     stepAudioLanguage: String,
     onStepAudioLanguageSelected: (String) -> Unit,
     stepAudioUseItn: Boolean,
@@ -255,7 +258,8 @@ internal fun CurrentAsrVendorConfig(
             var itemIndex = primaryIndexOffset
             val showCustomEndpoint = stepAudioEndpointPreset == Prefs.STEPAUDIO_ENDPOINT_PRESET_CUSTOM
             val itemCount = primaryGroupCount ?: stepAudioPrimaryItemCount(
-                customEndpointVisible = showCustomEndpoint
+                customEndpointVisible = showCustomEndpoint,
+                customModelVisible = stepAudioCustomModelVisible
             )
             AsrDropdownPreference(
                 titleRes = R.string.label_stepaudio_endpoint_preset,
@@ -297,14 +301,24 @@ internal fun CurrentAsrVendorConfig(
                 index = itemIndex++,
                 count = itemCount
             )
-            AsrValuePreference(
+            AsrDropdownPreference(
                 titleRes = R.string.label_stepaudio_model,
-                value = stepAudioModel.ifBlank { Prefs.DEFAULT_STEPAUDIO_ASR_MODEL },
-                uiMode = uiMode,
+                options = stepAudioModelOptions(context).map { DropdownOption(it.value, it.label) },
+                selectedOptionId = if (stepAudioCustomModelVisible) STEPAUDIO_CUSTOM_MODEL_OPTION_ID else stepAudioModel,
                 index = itemIndex++,
                 count = itemCount,
-                onClick = onChooseStepAudioModel
+                onSelectedOptionChange = onStepAudioModelSelected
             )
+            if (stepAudioCustomModelVisible) {
+                AsrTextField(
+                    uiMode = uiMode,
+                    value = stepAudioCustomModelDraft,
+                    onValueChange = onStepAudioCustomModelDraftChange,
+                    label = stringResource(R.string.label_stepaudio_custom_model),
+                    index = itemIndex++,
+                    count = itemCount
+                )
+            }
             AsrDropdownPreference(
                 titleRes = R.string.label_stepaudio_language,
                 options = stepAudioLanguageOptions(context).map { option ->
@@ -1116,12 +1130,14 @@ internal fun currentOnlineAsrPrimaryItemCount(
     mimoCustomEndpointVisible: Boolean = false,
     mimoPromptVisible: Boolean = false,
     stepAudioCustomEndpointVisible: Boolean = false,
+    stepAudioCustomModelVisible: Boolean = false,
     cohereCustomModelVisible: Boolean = false
 ): Int = when (selectedVendor) {
     AsrVendor.SiliconFlow -> 1
     AsrVendor.ElevenLabs -> 4
     AsrVendor.StepAudio -> stepAudioPrimaryItemCount(
-        customEndpointVisible = stepAudioCustomEndpointVisible
+        customEndpointVisible = stepAudioCustomEndpointVisible,
+        customModelVisible = stepAudioCustomModelVisible
     )
     AsrVendor.Zhipu -> 2
     AsrVendor.Cohere -> coherePrimaryItemCount(cohereCustomModelVisible)
@@ -1157,7 +1173,8 @@ private fun mimoPrimaryItemCount(
     promptVisible: Boolean
 ): Int = 5 + (if (customEndpointVisible) 1 else 0) + (if (promptVisible) 2 else 0)
 
-private fun stepAudioPrimaryItemCount(customEndpointVisible: Boolean): Int = 6 + (if (customEndpointVisible) 1 else 0)
+private fun stepAudioPrimaryItemCount(customEndpointVisible: Boolean, customModelVisible: Boolean): Int =
+    6 + (if (customEndpointVisible) 1 else 0) + (if (customModelVisible) 1 else 0)
 
 private fun mimoGuideUrl(endpointPreset: String): String = if (
     endpointPreset == Prefs.MIMO_ENDPOINT_PRESET_PAYGO ||
@@ -1202,6 +1219,17 @@ internal fun stepAudioLanguageOptions(context: Context): List<OnlineVendorChoice
     OnlineVendorChoice("en", context.getString(R.string.stepaudio_lang_en)),
     OnlineVendorChoice("", context.getString(R.string.stepaudio_lang_auto))
 )
+
+internal const val STEPAUDIO_CUSTOM_MODEL_OPTION_ID = "__custom__"
+
+internal fun stepAudioModelOptions(context: Context): List<OnlineVendorChoice> =
+    Prefs.STEPAUDIO_ASR_MODELS.map { model ->
+        OnlineVendorChoice(model, when (model) {
+            Prefs.DEFAULT_STEPAUDIO_ASR_MODEL -> context.getString(R.string.stepaudio_model_25_asr)
+            Prefs.STEPAUDIO_ASR_MODEL_MAX -> context.getString(R.string.stepaudio_model_3_asr_max)
+            else -> model
+        })
+    } + OnlineVendorChoice(STEPAUDIO_CUSTOM_MODEL_OPTION_ID, context.getString(R.string.stepaudio_model_custom))
 
 internal fun stepAudioLanguageLabel(context: Context, language: String): String {
     val normalized = language.trim()
@@ -1255,9 +1283,11 @@ internal fun sfPaidAsrModels(): List<String> = Prefs.SF_PAID_ASR_MODELS
 
 internal fun isSfOmniModel(model: String): Boolean = model.startsWith("Qwen/Qwen3-Omni-30B-A3B-")
 
-internal fun displayStepAudioModel(prefs: Prefs): String = prefs.stepAudioModel
-    .takeIf { it in Prefs.STEPAUDIO_ASR_MODELS }
-    ?: Prefs.DEFAULT_STEPAUDIO_ASR_MODEL
+internal fun displayStepAudioModel(prefs: Prefs): String = prefs.stepAudioModel.trim()
+    .ifBlank { Prefs.DEFAULT_STEPAUDIO_ASR_MODEL }
+
+internal fun isCustomStepAudioModel(model: String): Boolean =
+    model.trim().isNotBlank() && model.trim() !in Prefs.STEPAUDIO_ASR_MODELS
 
 private fun formatAsrFloat(value: Float): String = String.format(Locale.US, "%.2f", value)
 

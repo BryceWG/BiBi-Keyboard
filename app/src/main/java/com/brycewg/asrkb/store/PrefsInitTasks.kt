@@ -61,11 +61,27 @@ internal object PrefsInitTasks {
         migrateLegacyXAsrPrefsIfNeeded(sp)
         normalizeXAsrVariantIfNeeded(sp)
         migrateVolcAsrModelIfNeeded(sp)
+        normalizeStepAudioModelIfNeeded(sp)
         migrateFunAsrFromSenseVoiceIfNeeded(sp)
         ensureFunAsrItnDefaultIfMissing(sp)
         normalizeFunAsrVariantIfNeeded(sp)
         cleanupLegacyFunAsrModelsIfNeeded(appContext, sp)
         migrateSyncClipboardReceiveModeIfNeeded(sp)
+    }
+
+    /** 保留已存在的 StepAudio 内置模型，避免升级后被 UI 当作自定义模型。 */
+    private fun normalizeStepAudioModelIfNeeded(sp: SharedPreferences) {
+        val stored = sp.getString(KEY_STEPAUDIO_MODEL, null)?.trim()
+        if (stored.isNullOrEmpty()) {
+            sp.edit { putString(KEY_STEPAUDIO_MODEL, Prefs.DEFAULT_STEPAUDIO_ASR_MODEL) }
+        } else if (stored == Prefs.DEFAULT_STEPAUDIO_ASR_MODEL ||
+            stored == Prefs.STEPAUDIO_ASR_MODEL_MAX
+        ) {
+            // Keep the canonical ID exactly as stored; both IDs are built-in choices.
+            if (stored != sp.getString(KEY_STEPAUDIO_MODEL, null)) {
+                sp.edit { putString(KEY_STEPAUDIO_MODEL, stored) }
+            }
+        }
     }
 
     /**

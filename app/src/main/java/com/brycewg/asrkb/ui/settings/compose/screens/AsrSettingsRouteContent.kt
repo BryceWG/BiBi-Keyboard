@@ -184,9 +184,10 @@ internal fun AsrSettingsRouteContent(
                         stepAudioEndpointPreset = onlineState.stepAudioEndpointPreset,
                         onStepAudioEndpointPresetChange = onlineState.onStepAudioEndpointPresetChange,
                         stepAudioModel = onlineState.stepAudioModel,
-                        onChooseStepAudioModel = {
-                            showStepAudioModelPicker()
-                        },
+                        stepAudioCustomModelVisible = onlineState.stepAudioCustomModelVisible,
+                        onStepAudioModelSelected = onlineState.onStepAudioModelSelected,
+                        stepAudioCustomModelDraft = onlineState.stepAudioCustomModelDraft,
+                        onStepAudioCustomModelDraftChange = onlineState.onStepAudioCustomModelDraftChange,
                         stepAudioLanguage = onlineState.stepAudioLanguage,
                         onStepAudioLanguageSelected = { language ->
                             onlineState.onStepAudioLanguageChange(language)
@@ -365,7 +366,8 @@ private fun currentAsrVendorPrimaryItemCount(
         mimoPromptVisible = onlineState.mimoPromptEnabled,
         stepAudioCustomEndpointVisible =
         onlineState.stepAudioEndpointPreset == Prefs.STEPAUDIO_ENDPOINT_PRESET_CUSTOM,
-        cohereCustomModelVisible = onlineState.cohereCustomModelVisible
+        cohereCustomModelVisible = onlineState.cohereCustomModelVisible,
+        stepAudioCustomModelVisible = onlineState.stepAudioCustomModelVisible
     )
 
     AsrVendor.Gemini -> if (onlineState.geminiAsrMode == com.brycewg.asrkb.asr.GeminiAsrMode.Gemini) {

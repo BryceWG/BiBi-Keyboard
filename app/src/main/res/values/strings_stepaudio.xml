@@ -9,6 +9,9 @@
     <string name="stepaudio_endpoint_custom">Custom</string>
     <string name="label_stepaudio_model">Recognition model</string>
     <string name="stepaudio_model_25_asr">stepaudio-2.5-asr</string>
+    <string name="stepaudio_model_3_asr_max">stepaudio-3-asr-max</string>
+    <string name="stepaudio_model_custom">Custom</string>
+    <string name="label_stepaudio_custom_model">Custom recognition model</string>
     <string name="label_stepaudio_language">Recognition language</string>
     <string name="stepaudio_lang_zh">Chinese</string>
     <string name="stepaudio_lang_en">English</string>

@@ -2219,7 +2219,11 @@ class Prefs(context: Context) {
         )
 
         const val DEFAULT_STEPAUDIO_ASR_MODEL = "stepaudio-2.5-asr"
-        val STEPAUDIO_ASR_MODELS: List<String> = listOf(DEFAULT_STEPAUDIO_ASR_MODEL)
+        const val STEPAUDIO_ASR_MODEL_MAX = "stepaudio-3-asr-max"
+        val STEPAUDIO_ASR_MODELS: List<String> = listOf(
+            DEFAULT_STEPAUDIO_ASR_MODEL,
+            STEPAUDIO_ASR_MODEL_MAX
+        )
         const val DEFAULT_COHERE_ASR_MODEL = "cohere-transcribe-03-2026"
         const val COHERE_ARABIC_ASR_MODEL = "cohere-transcribe-arabic-07-2026"
         const val DEFAULT_COHERE_ASR_LANGUAGE = "zh"

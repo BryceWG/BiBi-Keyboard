@@ -9,6 +9,9 @@
     <string name="stepaudio_endpoint_custom">自訂</string>
     <string name="label_stepaudio_model">辨識模型</string>
     <string name="stepaudio_model_25_asr">stepaudio-2.5-asr</string>
+    <string name="stepaudio_model_3_asr_max">stepaudio-3-asr-max</string>
+    <string name="stepaudio_model_custom">自訂</string>
+    <string name="label_stepaudio_custom_model">自訂辨識模型</string>
     <string name="label_stepaudio_language">識別語言</string>
     <string name="stepaudio_lang_zh">中文</string>
     <string name="stepaudio_lang_en">英文</string>
