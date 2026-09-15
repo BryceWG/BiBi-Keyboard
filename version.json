@@ -1,11 +1,11 @@
 {
-  "version": "4.4.3",
-  "version_code": 172,
-  "download_url": "https://github.com/BryceWG/BiBi-Keyboard/releases/tag/v4.4.3",
-  "release_notes": "### 新增功能\n\n- **硅基流动新模型**：免费识别新增星辰 ASR 系列，BYOK 新增 Qwen3-ASR 1.7B\n- **DashScope 恢复 Qwen3**：重新提供 Qwen3-ASR-Flash 非流式与 Qwen3-ASR-Flash-Realtime 流式模型\n- **[Pro] 热词注入润色 Prompt**：可将已启用的热词及其别名追加到 AI 润色提示词；可选仅注入读音相近的热词\n\n### 改进优化\n\n- **识别与润色预热**：开始录音时预热在线识别与 AI 润色连接；录音结束释放改为异步，松手后更快出字、润色更少等待\n- **录音更稳**：预热时输入源探测更快速；预加载离线降噪\n\n### 问题修复\n\n- **数字键盘高度**：修复数字键盘与主键盘高度不对齐问题\n- **剪贴板附件同步**：减少对监听文件夹的重复处理\n- **识别历史分区崩溃**：跨零点后同一条记录不再同时落入「近 2 小时」与「今天」，避免历史页崩溃\n- **输入法按键显示问题**：修复某些情况下出现输入法按键显示异常的问题\n- **键盘识别耗时**：修正键盘识别显示的识别阶段耗时的数据来源",
-  "release_notes_en": "### New Features\n\n- **SiliconFlow Models**: Free recognition adds the XingChen ASR series; BYOK adds Qwen3-ASR 1.7B\n- **DashScope Qwen3 Restored**: Qwen3-ASR-Flash (non-streaming) and Qwen3-ASR-Flash-Realtime are available again\n- **[Pro] Hotwords in Polish Prompt**: Append enabled hotwords and aliases to the AI polish prompt; optionally include only phonetically related ones\n\n### Improvements\n\n- **Recognition and Polish Warmup**: Warm online ASR and polish connections when recording starts; capture release is now async, so results appear sooner and polish waits less after you stop\n- **More Reliable Capture**: Faster input-source probing during warmup; preload offline denoising\n\n### Bug Fixes\n\n- **Numpad Height**: Fix the numpad not matching the main keyboard height\n- **Clipboard Attachments**: Reduce repeat processing of watched folders\n- **History Section Crash**: After midnight, the same record no longer appears in both “Last 2 hours” and “Today”, which crashed the history list\n- **IME Key Display**: Fix keys sometimes showing incorrectly\n- **Keyboard Timing**: Fix the data source for recognition-stage duration shown during keyboard recognition",
+  "version": "4.4.5",
+  "version_code": 173,
+  "download_url": "https://github.com/BryceWG/BiBi-Keyboard/releases/tag/v4.4.5",
+  "release_notes": "### 新增功能\n\n- **深度思考字数阈值**：深度思考改为按识别字数启用。为 0 时始终开启，拉到上限则始终关闭，中间值仅在字数超过阈值时启用\n- **Android 13 无障碍写入**：悬浮球可选使用新版无障碍 IME API 插入文字，终端和编辑器等场景更稳；开启后会关闭流式预览与写入兼容优化\n\n### 改进优化\n\n- **[Pro] 光标滑动**：滑动更跟手，多行上下移动更准；AI 编辑面板也可进入该模式\n\n### 问题修复\n\n- **识别历史丢失**：修复某些场景下识别记录丢失的问题\n- **[Pro] 光标滑动**：修复动态键盘布局下无法进入滑动模式、滑到文本首尾时光标消失的问题",
+  "release_notes_en": "### New Features\n\n- **Deep Thinking Threshold**: Deep thinking now turns on based on recognized length. 0 always enables it; the maximum never enables it; values in between enable it when the length exceeds the threshold\n- **Android 13 Accessibility Insert**: Optional new Accessibility IME API for the floating ball, more reliable in terminals and editors. Turns off streaming preview and write-compatibility optimization\n\n### Improvements\n\n- **[Pro] Cursor Glide**: Smoother tracking and more accurate vertical movement in multi-line fields; also available from the AI edit panel\n\n### Bug Fixes\n\n- **History Loss on IME Switch**: Fixed recognition history loss in certain scenarios\n- **[Pro] Cursor Glide**: Fix entering the mode on dynamic keyboard layouts; sliding to the start or end of text no longer makes the cursor disappear",
   "important_notice": "1. 4.0.0 版本将迎来大量重构和众多更新，欢迎下载尝鲜\n2. BiBi Keyboard Pro版本已上架，欢迎在3.8.6后版本-关于页面中了解详情。\n3. 官方网站和使用文档均已上线,网址分别为: bibi.brycewg.com bibidocs.brycewg.com",
   "notice_level": "info",
   "min_supported_version": "2.6.5",
-  "update_time": "2026-09-05T16:29:07Z"
+  "update_time": "2026-09-15T13:43:32Z"
 }
