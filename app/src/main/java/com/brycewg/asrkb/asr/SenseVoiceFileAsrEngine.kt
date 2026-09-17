@@ -26,8 +26,6 @@ class SenseVoiceFileAsrEngine(
 ) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration, progressiveChunkingEnabled = true),
     PcmBatchRecognizer {
 
-    // 本地 SenseVoice：为降低内存占用，主动限制为 5 分钟
-    override val maxRecordDurationMillis: Int = 5 * 60 * 1000
     override val progressiveVendor: AsrVendor = AsrVendor.SenseVoice
 
     interface LocalModelLoadUi {

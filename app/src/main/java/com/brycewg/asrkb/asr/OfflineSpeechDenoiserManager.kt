@@ -31,6 +31,11 @@ object OfflineSpeechDenoiserManager {
         return getOrCreate(context) != null
     }
 
+    /**
+     * 对一段 PCM 做离线降噪。
+     *
+     * 状态与并发契约：底层 sherpa-onnx GTCRN 在每次 run() 内部都从 GetInitStates()
+     */
     fun denoiseIfEnabled(
         context: Context,
         prefs: Prefs,

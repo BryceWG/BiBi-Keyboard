@@ -17,12 +17,10 @@ class VadInputLevelerRoutingSourceTest {
         val source = sourceFile("BaseFileAsrEngine.kt")
 
         assertTrue(source.contains("currentSeg.write(audioChunk)"))
-        assertTrue(source.contains("currentPcm.write(audioChunk)"))
-        assertTrue(source.contains("encoder?.writePcm(encodedInput)"))
+        assertTrue(source.contains("encoder.writePcm(encodedInput)"))
         assertTrue(source.contains("listener.onAmplitude(leveled.stableAmplitude)"))
         assertTrue(source.contains("vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size)"))
         assertFalse(source.contains("currentSeg.write(leveled"))
-        assertFalse(source.contains("currentPcm.write(leveled"))
         assertFalse(source.contains("writePcm(leveled"))
     }
 

@@ -45,6 +45,19 @@ class AsrFileRecognizerFactoryTest {
     }
 
     @Test
+    fun fileRecognizerKeysEnableProgressiveChunkingWithFamilyWindows() {
+        AsrFileRecognizerKey.entries.forEach { key ->
+            assertTrue(key.progressiveChunkingEnabled)
+            val expected = if (key.family == AsrFileRecognizerFamily.LocalFile) {
+                NonStreamingChunkWindow.Local
+            } else {
+                NonStreamingChunkWindow.Online
+            }
+            assertEquals(expected, key.family.progressiveChunkWindow())
+        }
+    }
+
+    @Test
     fun directAndPushPcmAppFilePlansUseTheSameSharedRecognizerKeys() {
         baselineCases.forEach { case ->
             val directPlan = directFactory.resolvePlan(

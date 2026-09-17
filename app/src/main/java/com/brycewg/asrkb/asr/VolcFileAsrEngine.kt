@@ -39,9 +39,6 @@ class VolcFileAsrEngine(
     private val fileResource: String
         get() = VolcAsrModelCatalog.fromIdOrDefault(effectiveModelId).resourceId
 
-    // 火山引擎非流式：服务端上限 2h，本地稳妥限制为 1h
-    override val maxRecordDurationMillis: Int = 60 * 60 * 1000
-
     override val uploadAudioEncodingSpec: UploadAudioEncodingSpec?
         get() = oggOpusUploadAudioEncodingSpecIfSupported()
 

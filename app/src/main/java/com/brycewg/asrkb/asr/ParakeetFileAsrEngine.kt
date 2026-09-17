@@ -26,7 +26,6 @@ internal class ParakeetFileAsrEngine(
 ) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration, progressiveChunkingEnabled = true),
     PcmBatchRecognizer {
 
-    override val maxRecordDurationMillis: Int = 5 * 60 * 1000
     override val progressiveVendor: AsrVendor = AsrVendor.Parakeet
 
     private fun showToast(resId: Int) {

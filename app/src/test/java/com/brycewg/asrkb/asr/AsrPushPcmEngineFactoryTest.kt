@@ -69,21 +69,23 @@ class AsrPushPcmEngineFactoryTest {
     }
 
     @Test
-    fun progressiveChunkingIsLimitedToResolvedLocalFileAdapters() {
-        val localFileVendors = setOf(
-            AsrVendor.SenseVoice,
-            AsrVendor.FunAsrNano,
-            AsrVendor.Qwen3Asr,
-            AsrVendor.Parakeet,
-            AsrVendor.FireRedAsr
-        )
+    fun progressiveChunkingFollowsResolvedFileAdapters() {
         AsrVendor.entries.forEach { vendor ->
             val plan = factory.resolvePlan(
                 vendor = vendor,
                 invocationMode = AsrEngineInvocationMode.PushPcm,
                 preferences = AsrEngineModePreferences()
             )
-            assertEquals(vendor in localFileVendors, plan.progressiveChunkingEnabled)
+            val key = plan.wrappedFileRecognizerKey
+            assertEquals(key != null, plan.progressiveChunkingEnabled)
+            if (key != null) {
+                val expectedWindow = if (key.family == AsrFileRecognizerFamily.LocalFile) {
+                    NonStreamingChunkWindow.Local
+                } else {
+                    NonStreamingChunkWindow.Online
+                }
+                assertEquals(expectedWindow, key.family.progressiveChunkWindow())
+            }
         }
         assertFalse(
             factory.resolvePlan(

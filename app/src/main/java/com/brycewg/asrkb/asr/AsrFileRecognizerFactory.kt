@@ -19,10 +19,12 @@ internal enum class AsrFileRecognizerFamily {
     LocalFile
 }
 
+internal fun AsrFileRecognizerFamily.progressiveChunkWindow(): NonStreamingChunkWindow = NonStreamingChunkWindow.forLocalFile(this == AsrFileRecognizerFamily.LocalFile)
+
 internal enum class AsrFileRecognizerKey(
     val engineClassName: String,
     val family: AsrFileRecognizerFamily,
-    val progressiveChunkingEnabled: Boolean = family == AsrFileRecognizerFamily.LocalFile
+    val progressiveChunkingEnabled: Boolean = true
 ) {
     VolcFile("VolcFileAsrEngine", AsrFileRecognizerFamily.File),
     VolcStandardFile("VolcStandardFileAsrEngine", AsrFileRecognizerFamily.File),

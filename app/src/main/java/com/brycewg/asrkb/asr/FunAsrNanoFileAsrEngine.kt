@@ -26,8 +26,6 @@ class FunAsrNanoFileAsrEngine(
 ) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration, progressiveChunkingEnabled = true),
     PcmBatchRecognizer {
 
-    // FunASR Nano 本地：同 SenseVoice/FireRedASR，默认限制为 5 分钟以控制内存与处理时长
-    override val maxRecordDurationMillis: Int = 5 * 60 * 1000
     override val progressiveVendor: AsrVendor = AsrVendor.FunAsrNano
 
     private fun showToast(resId: Int) {

@@ -63,7 +63,12 @@ internal class GenericPushFileAsrAdapter(
         results.start()
         progressiveAudioBytes = 0
         progressiveRecognizer?.beginExternalProgressiveSession()
-        progressiveChunker = NonStreamingPcmChunker(sampleRate = 16_000)
+        val window = progressiveRecognizer?.progressiveChunkWindow ?: NonStreamingChunkWindow.Online
+        progressiveChunker = NonStreamingPcmChunker(
+            sampleRate = 16_000,
+            minChunkMs = window.minChunkMs,
+            maxChunkMs = window.maxChunkMs
+        )
         sentenceVadDetector = createNonStreamingSentenceVad(context, 16_000)
         val channel = Channel<ByteArray>(Channel.UNLIMITED)
         chunkChannel = channel
@@ -164,16 +169,14 @@ internal class GenericPushFileAsrAdapter(
             Log.w(TAG, "ignore frame: sr=$sampleRate ch=$channels")
             return
         }
-        val leveled = vadInputLeveler.process(pcm)
-        try {
-            listener.onAmplitude(leveled.stableAmplitude)
-        } catch (
-            t: Throwable
-        ) {
-            Log.w(TAG, "amp cb failed", t)
-        }
         val chunker = progressiveChunker
         if (chunker == null) {
+            val leveled = vadInputLeveler.process(pcm)
+            try {
+                listener.onAmplitude(leveled.stableAmplitude)
+            } catch (t: Throwable) {
+                Log.w(TAG, "amp cb failed", t)
+            }
             try {
                 bos.write(pcm)
             } catch (t: Throwable) {
@@ -181,17 +184,32 @@ internal class GenericPushFileAsrAdapter(
             }
             return
         }
-        val isSpeech = sentenceVadDetector
-            ?.analyzeFrame(leveled.leveledPcm, leveled.leveledPcm.size)
-            ?.isSpeech
-            ?: true
-        progressiveAudioBytes += pcm.size
-        chunker.append(pcm, isSpeech).forEach { chunkChannel?.trySend(it) }
+        appendProgressiveFrame(pcm, chunker)
+    }
+
+    private fun appendProgressiveFrame(pcm: ByteArray, chunker: NonStreamingPcmChunker) {
+        val leveled = vadInputLeveler.process(pcm)
+        try {
+            listener.onAmplitude(leveled.stableAmplitude)
+        } catch (t: Throwable) {
+            Log.w(TAG, "amp cb failed", t)
+        }
+        // 句间 VAD 与分段器按 ≤100ms 子帧推进
+        val leveledPcm = leveled.leveledPcm
+        forEachSentenceVadSubFrame(pcm, 16_000) { offset, end ->
+            val leveledEnd = minOf(end, leveledPcm.size)
+            val isSpeech = sentenceVadDetector
+                ?.analyzeFrame(leveledPcm.copyOfRange(offset, leveledEnd), leveledEnd - offset)
+                ?.isSpeech
+                ?: true
+            val subPcm = if (offset == 0 && end == pcm.size) pcm else pcm.copyOfRange(offset, end)
+            progressiveAudioBytes += end - offset
+            chunker.append(subPcm, isSpeech).forEach { chunkChannel?.trySend(it) }
+        }
     }
 
     private suspend fun recognizePcm(data: ByteArray, progressive: Boolean = false) {
-        // applyAudioPreprocess=false 表示上层（主备 wrapper）已对整段录音做过一次
-        // 人声过滤与降噪，这里必须跳过，否则并行主备下同一段音频会被降噪两次。
+        // applyAudioPreprocess=false 表示上层（主备 wrapper）已对人声过滤与降噪，
         val denoised = if (applyAudioPreprocess) {
             preprocessForRecognition(data) ?: return
         } else {

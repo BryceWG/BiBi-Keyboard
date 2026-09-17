@@ -7,7 +7,6 @@ import android.util.Log
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
-import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.CancellationException
@@ -97,8 +96,6 @@ class ParallelAsrEngine(
     private var primaryConsumer: ExternalPcmConsumer? = null
     private var backupConsumer: ExternalPcmConsumer? = null
     private val pushPcmEngineFactory = AsrPushPcmEngineFactory()
-    private val deferredPcmLock = Any()
-    private val deferredPcmBuffer = ByteArrayOutputStream()
     private val externalVadInputLeveler = VadInputLevelerBranch(sampleRate = SAMPLE_RATE)
 
     override fun start() {
@@ -108,9 +105,6 @@ class ParallelAsrEngine(
         stoppedNotified = false
         audioBytes.set(0L)
         externalVadInputLeveler.reset()
-        synchronized(deferredPcmLock) {
-            deferredPcmBuffer.reset()
-        }
         switchDeadlineJob?.cancel()
         switchDeadlineJob = null
 
@@ -210,17 +204,7 @@ class ParallelAsrEngine(
             audioJob = null
         }
 
-        if (primaryConsumer is GenericPushFileAsrAdapter || backupConsumer is GenericPushFileAsrAdapter) {
-            // 整段前处理（人声过滤 + 降噪）较重，停录常发生在主线程，放到 IO 上执行；
-            // 必须在两个引擎 stop() 之前投递完成，否则 file adapter 会因缓冲为空报空音频。
-            scope.launch(Dispatchers.IO) {
-                flushDeferredPcmToBatchConsumers()
-                stopEngines()
-            }
-        } else {
-            stopEngines()
-        }
-
+        stopEngines()
         scheduleSwitchDeadlineIfNeeded()
     }
 
@@ -254,9 +238,6 @@ class ParallelAsrEngine(
             Log.w(TAG, "cancel switch deadline failed", t)
         } finally {
             switchDeadlineJob = null
-        }
-        synchronized(deferredPcmLock) {
-            deferredPcmBuffer.reset()
         }
         cancelOrStopEngine(primaryEngine, "primary")
         cancelOrStopEngine(backupEngine, "backup")
@@ -436,83 +417,15 @@ class ParallelAsrEngine(
     }
 
     private fun appendPcmToConsumers(pcm: ByteArray, sourceLabel: String) {
-        val primaryDeferred = primaryConsumer is GenericPushFileAsrAdapter
-        val backupDeferred = backupConsumer is GenericPushFileAsrAdapter
-        if (primaryDeferred || backupDeferred) {
-            try {
-                synchronized(deferredPcmLock) {
-                    deferredPcmBuffer.write(pcm)
-                }
-            } catch (t: Throwable) {
-                Log.w(TAG, "buffer deferred PCM failed ($sourceLabel)", t)
-            }
+        try {
+            primaryConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
+        } catch (t: Throwable) {
+            Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
         }
-
-        if (!primaryDeferred) {
-            try {
-                primaryConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
-            } catch (t: Throwable) {
-                Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
-            }
-        }
-        if (!backupDeferred) {
-            try {
-                backupConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
-            } catch (t: Throwable) {
-                Log.w(TAG, "backup appendPcm failed ($sourceLabel)", t)
-            }
-        }
-    }
-
-    private fun flushDeferredPcmToBatchConsumers() {
-        val hasPrimaryDeferred = primaryConsumer is GenericPushFileAsrAdapter
-        val hasBackupDeferred = backupConsumer is GenericPushFileAsrAdapter
-        if (!hasPrimaryDeferred && !hasBackupDeferred) return
-        if (terminalCoordinator.terminalDelivered) return
-
-        val pcm = synchronized(deferredPcmLock) {
-            val out = deferredPcmBuffer.toByteArray()
-            deferredPcmBuffer.reset()
-            out
-        }
-        if (pcm.isEmpty()) return
-
-        val processed = RecordedAudioVoiceFilter.processIfEnabled(
-            context = context,
-            prefs = prefs,
-            pcm = pcm,
-            sampleRate = SAMPLE_RATE,
-            chunkMillis = CHUNK_MS
-        )
-        if (processed.droppedAsEmptyAudio) {
-            val message = context.getString(R.string.error_audio_empty_skipped)
-            if (hasPrimaryDeferred) onTerminal(Source.PRIMARY, Terminal.Error(message))
-            if (hasBackupDeferred) onTerminal(Source.BACKUP, Terminal.Error(message))
-            return
-        }
-
-        // 两个 adapter 均以 applyAudioPreprocess=false 构造，降噪在此统一做一次，
-        // 避免同一段录音被两条识别链各降噪一遍。
-        val preprocessed = OfflineSpeechDenoiserManager.denoiseIfEnabled(
-            context = context,
-            prefs = prefs,
-            pcm = processed.pcm,
-            sampleRate = SAMPLE_RATE
-        )
-
-        if (hasPrimaryDeferred) {
-            try {
-                primaryConsumer?.appendPcm(preprocessed, SAMPLE_RATE, CHANNELS)
-            } catch (t: Throwable) {
-                Log.w(TAG, "primary append deferred PCM failed", t)
-            }
-        }
-        if (hasBackupDeferred) {
-            try {
-                backupConsumer?.appendPcm(preprocessed, SAMPLE_RATE, CHANNELS)
-            } catch (t: Throwable) {
-                Log.w(TAG, "backup append deferred PCM failed", t)
-            }
+        try {
+            backupConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
+        } catch (t: Throwable) {
+            Log.w(TAG, "backup appendPcm failed ($sourceLabel)", t)
         }
     }
 
@@ -764,7 +677,7 @@ class ParallelAsrEngine(
             preferences = modePreferences,
             source = AsrEngineConstructionSource.App,
             onRequestDuration = onRequestDuration,
-            applyAudioPreprocess = false,
+            applyAudioPreprocess = true,
             modelOverride = modelOverride
         )
     }

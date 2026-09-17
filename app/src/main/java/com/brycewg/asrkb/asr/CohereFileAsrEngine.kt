@@ -35,9 +35,6 @@ internal class CohereFileAsrEngine(
         internal const val ENDPOINT = "https://api.cohere.com/v2/audio/transcriptions"
     }
 
-    // 16 kHz/16-bit/mono WAV at 12 minutes remains below Cohere's 25 MB limit.
-    override val maxRecordDurationMillis: Int = 12 * 60 * 1000
-
     // Cohere documents OGG uploads; use the existing OGG Opus encoder on Android 10+.
     override val uploadAudioEncodingSpec: UploadAudioEncodingSpec?
         get() = cohereUploadAudioEncodingSpecIfSupported()

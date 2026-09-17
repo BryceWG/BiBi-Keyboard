@@ -38,9 +38,6 @@ class StepAudioFileAsrEngine(
         private const val TAG = "StepAudioFileAsrEngine"
     }
 
-    // StepAudio 文档未给出客户端侧上限；按在线文件识别常规限制为 20 分钟。
-    override val maxRecordDurationMillis: Int = 20 * 60 * 1000
-
     override val uploadAudioEncodingSpec: UploadAudioEncodingSpec?
         get() = oggOpusUploadAudioEncodingSpecIfSupported()
 

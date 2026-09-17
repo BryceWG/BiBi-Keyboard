@@ -36,9 +36,6 @@ class GeminiFileAsrEngine(
         private const val TAG = "GeminiFileAsrEngine"
     }
 
-    // Gemini：官方约 9.5 小时，本地限制为 4 小时
-    override val maxRecordDurationMillis: Int = 4 * 60 * 60 * 1000
-
     private val http: OkHttpClient = httpClient ?: AsrHttpClientProvider.newBuilder()
         .addInterceptor(ApiLogInterceptor())
         // Inline base64 可能接近 20MB，转写本身也可能较慢

@@ -50,6 +50,54 @@ class NonStreamingProgressiveChunkingTest {
     }
 
     @Test
+    fun onlineSilenceBeforeFortyFiveSecondsDoesNotCut() {
+        val chunker = NonStreamingPcmChunker(
+            sampleRate,
+            minChunkMs = ONLINE_NON_STREAMING_MIN_CHUNK_MS,
+            maxChunkMs = ONLINE_NON_STREAMING_MAX_CHUNK_MS
+        )
+
+        assertTrue(chunker.append(pcm(20_000), isSpeech = true).isEmpty())
+        assertTrue(chunker.append(pcm(400), isSpeech = false).isEmpty())
+        assertEquals(20_400, durationMs(chunker.finish()!!))
+    }
+
+    @Test
+    fun onlineFirstPauseAfterMinimumDurationCutsImmediately() {
+        val chunker = NonStreamingPcmChunker(
+            sampleRate,
+            minChunkMs = ONLINE_NON_STREAMING_MIN_CHUNK_MS,
+            maxChunkMs = ONLINE_NON_STREAMING_MAX_CHUNK_MS
+        )
+
+        assertTrue(chunker.append(pcm(45_000), isSpeech = true).isEmpty())
+        assertTrue(chunker.append(pcm(200), isSpeech = false).isEmpty())
+        val chunks = chunker.append(pcm(200), isSpeech = false)
+
+        assertEquals(listOf(45_200), chunks.map(::durationMs))
+        assertEquals(200, durationMs(chunker.finish()!!))
+    }
+
+    @Test
+    fun onlineContinuousSpeechHardCutsAtMaximumDurationWithoutLosingPcm() {
+        val chunker = NonStreamingPcmChunker(
+            sampleRate,
+            minChunkMs = ONLINE_NON_STREAMING_MIN_CHUNK_MS,
+            maxChunkMs = ONLINE_NON_STREAMING_MAX_CHUNK_MS
+        )
+        val input = ByteArray(121_000 * 2) { (it % 251).toByte() }
+        val outputs = ArrayList<ByteArray>()
+
+        input.asList().chunked(400).forEach { bytes ->
+            outputs += chunker.append(bytes.toByteArray(), isSpeech = true)
+        }
+        chunker.finish()?.let(outputs::add)
+
+        assertEquals(listOf(60_000, 60_000, 1_000), outputs.map(::durationMs))
+        assertArrayEquals(input, outputs.fold(ByteArray(0)) { all, next -> all + next })
+    }
+
+    @Test
     fun collectorCachesChunksAndPublishesOneFinalOnFinish() = runTest {
         val events = ArrayList<String>()
         val durations = ArrayList<Long>()

@@ -8,7 +8,65 @@ import java.io.ByteArrayOutputStream
 
 internal const val NON_STREAMING_MIN_CHUNK_MS = 15_000
 internal const val NON_STREAMING_MAX_CHUNK_MS = 24_000
+internal const val ONLINE_NON_STREAMING_MIN_CHUNK_MS = 45_000
+internal const val ONLINE_NON_STREAMING_MAX_CHUNK_MS = 60_000
 internal const val NON_STREAMING_MIN_SILENCE_MS = 300
+
+/**
+ * 句间静音检测的子帧步长，必须小于 [NON_STREAMING_MIN_SILENCE_MS]：
+ */
+internal const val NON_STREAMING_SENTENCE_VAD_FRAME_MS = 100
+
+internal data class NonStreamingChunkWindow(
+    val minChunkMs: Int,
+    val maxChunkMs: Int
+) {
+    init {
+        require(minChunkMs > 0 && maxChunkMs >= minChunkMs)
+    }
+
+    companion object {
+        val Local = NonStreamingChunkWindow(
+            minChunkMs = NON_STREAMING_MIN_CHUNK_MS,
+            maxChunkMs = NON_STREAMING_MAX_CHUNK_MS
+        )
+        val Online = NonStreamingChunkWindow(
+            minChunkMs = ONLINE_NON_STREAMING_MIN_CHUNK_MS,
+            maxChunkMs = ONLINE_NON_STREAMING_MAX_CHUNK_MS
+        )
+
+        /**
+         * 本地/在线 File 引擎共用这一处窗口选择逻辑
+         */
+        fun forLocalFile(localFile: Boolean): NonStreamingChunkWindow = if (localFile) Local else Online
+    }
+}
+
+/**
+ * 把一帧采集 PCM 按 [NON_STREAMING_SENTENCE_VAD_FRAME_MS] 子帧切块迭代，
+ * 供句间 VAD 与分段器以子帧粒度推进；边界保持 PCM16 对齐。
+ */
+internal inline fun forEachSentenceVadSubFrame(
+    pcm: ByteArray,
+    sampleRate: Int,
+    block: (offset: Int, end: Int) -> Unit
+) {
+    if (pcm.isEmpty()) return
+    val step = (sampleRate.toLong() * 2L * NON_STREAMING_SENTENCE_VAD_FRAME_MS / 1_000L)
+        .coerceAtMost(Int.MAX_VALUE.toLong())
+        .toInt()
+        .let { if (it >= 2) it and -2 else pcm.size }
+    if (step >= pcm.size) {
+        block(0, pcm.size)
+        return
+    }
+    var offset = 0
+    while (offset < pcm.size) {
+        val end = minOf(offset + step, pcm.size)
+        block(offset, end)
+        offset = end
+    }
+}
 
 internal fun joinNonStreamingChunkTexts(texts: List<String>): String = buildString {
     for (text in texts) {

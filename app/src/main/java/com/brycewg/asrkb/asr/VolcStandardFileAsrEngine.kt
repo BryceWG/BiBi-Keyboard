@@ -43,9 +43,6 @@ class VolcStandardFileAsrEngine(
         private const val POLL_INTERVAL_MS = 1000L
     }
 
-    // 火山录音文件识别：服务端上限 2h，本地限制 1h
-    override val maxRecordDurationMillis: Int = 60 * 60 * 1000
-
     override val uploadAudioEncodingSpec: UploadAudioEncodingSpec?
         get() = oggOpusUploadAudioEncodingSpecIfSupported()
 

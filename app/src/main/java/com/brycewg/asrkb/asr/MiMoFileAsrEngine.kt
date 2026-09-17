@@ -46,8 +46,6 @@ class MiMoFileAsrEngine(
         private const val AUDIO_UNDERSTANDING_MAX_TOKENS = 4096
     }
 
-    override val maxRecordDurationMillis: Int = 20 * 60 * 1000
-
     private val http: OkHttpClient = httpClient ?: AsrHttpClientProvider.newBuilder()
         .addInterceptor(ApiLogInterceptor())
         .callTimeout(90, TimeUnit.SECONDS)

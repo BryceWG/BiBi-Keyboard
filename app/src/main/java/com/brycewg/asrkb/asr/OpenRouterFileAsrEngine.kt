@@ -35,9 +35,6 @@ class OpenRouterFileAsrEngine(
         private const val TAG = "OpenRouterFileAsrEngine"
     }
 
-    // OpenRouter 通过 JSON Base64 上传音频，本地按在线文件识别常规限制为 20 分钟。
-    override val maxRecordDurationMillis: Int = 20 * 60 * 1000
-
     private val http: OkHttpClient = httpClient ?: AsrHttpClientProvider.newBuilder()
         .addInterceptor(ApiLogInterceptor())
         .callTimeout(90, TimeUnit.SECONDS)

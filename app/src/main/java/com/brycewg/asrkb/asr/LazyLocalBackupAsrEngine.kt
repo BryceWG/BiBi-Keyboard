@@ -196,16 +196,7 @@ internal class LazyLocalBackupAsrEngine(
             audioJob = null
         }
 
-        if (primaryConsumer is GenericPushFileAsrAdapter) {
-            // 整段前处理（人声过滤 + 降噪）较重，停录常发生在主线程，放到 IO 上执行；
-            // 必须在 primary stop() 之前投递完成，否则 adapter 会因缓冲为空报空音频。
-            scope.launch(Dispatchers.IO) {
-                flushPrimaryDeferredIfNeeded()
-                stopPrimaryEngine()
-            }
-        } else {
-            stopPrimaryEngine()
-        }
+        stopPrimaryEngine()
         scheduleBackupSwitchPlan()
         maybeFeedBackupIfReady()
     }
@@ -374,25 +365,12 @@ internal class LazyLocalBackupAsrEngine(
                 pcmBuffer.size() >= maxBufferedPcmBytes
             }
 
-        // Deferred/file primaries can only be flushed from the capped buffer on stop.
-        if (primaryConsumer is GenericPushFileAsrAdapter) return capReached
         try {
             primaryConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
         } catch (t: Throwable) {
             Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
         }
         return capReached
-    }
-
-    private fun flushPrimaryDeferredIfNeeded() {
-        val primaryDeferred = primaryConsumer is GenericPushFileAsrAdapter
-        if (!primaryDeferred) return
-        val processed = processedBufferedPcmOrError(Source.PRIMARY) ?: return
-        try {
-            primaryConsumer?.appendPcm(processed, SAMPLE_RATE, CHANNELS)
-        } catch (t: Throwable) {
-            Log.w(TAG, "primary append deferred PCM failed", t)
-        }
     }
 
     private fun processedBufferedPcmOrError(errorSource: Source): ByteArray? {
@@ -800,7 +778,7 @@ internal class LazyLocalBackupAsrEngine(
                         preferences = modePreferences,
                         source = AsrEngineConstructionSource.App,
                         onRequestDuration = onPrimaryRequestDuration,
-                        applyAudioPreprocess = false,
+                        applyAudioPreprocess = true,
                         modelOverride = modelOverride
                     )
                 },
@@ -826,8 +804,8 @@ internal class LazyLocalBackupAsrEngine(
                     AsrLocalVendorLifecycles.isReady(backupVendor)
                 },
                 processBufferedPcm = { pcm ->
-                    // primary/backup adapter 均以 applyAudioPreprocess=false 构造，
-                    // 人声过滤与降噪统一在这里完成，adapter 侧不再重复。
+                    // 备用引擎仍在停录后一次性投喂整段缓冲；人声过滤与降噪在这里完成，
+                    // backup adapter 以 applyAudioPreprocess=false 构造，避免重复处理。
                     val filtered = RecordedAudioVoiceFilter.processIfEnabled(
                         context = context,
                         prefs = prefs,

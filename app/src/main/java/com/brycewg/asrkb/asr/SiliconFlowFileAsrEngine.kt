@@ -43,9 +43,6 @@ class SiliconFlowFileAsrEngine(
         private const val TAG = "SiliconFlowFileAsrEngine"
     }
 
-    // SiliconFlow：未明确限制，本地限制为 20 分钟
-    override val maxRecordDurationMillis: Int = 20 * 60 * 1000
-
     override val uploadAudioEncodingSpec: UploadAudioEncodingSpec?
         get() = oggOpusUploadAudioEncodingSpecIfSupported()
 

@@ -31,7 +31,7 @@ abstract class BaseFileAsrEngine(
     protected val prefs: Prefs,
     listener: StreamingAsrEngine.Listener,
     onRequestDuration: ((Long) -> Unit)? = null,
-    private val progressiveChunkingEnabled: Boolean = false
+    private val progressiveChunkingEnabled: Boolean = true
 ) : StreamingAsrEngine,
     AudioFrameSinkOwner {
 
@@ -55,6 +55,8 @@ abstract class BaseFileAsrEngine(
         onRequestDuration
     }
     protected open val progressiveVendor: AsrVendor? = null
+    internal val progressiveChunkWindow: NonStreamingChunkWindow
+        get() = NonStreamingChunkWindow.forLocalFile(progressiveVendor != null)
     protected val isProgressiveChunkDecode: Boolean
         get() = progressiveChunkDecode
 
@@ -81,10 +83,6 @@ abstract class BaseFileAsrEngine(
     protected open val audioFormat: Int = AudioFormat.ENCODING_PCM_16BIT
     protected open val chunkMillis: Int = 200
     protected open val uploadAudioEncodingSpec: UploadAudioEncodingSpec? = null
-
-    // 非流式录音的最大时长（子类按供应商覆盖）。
-    // 达到该时长会立即结束录音并触发一次识别请求，以避免超过服务商限制。
-    protected open val maxRecordDurationMillis: Int = 30 * 60 * 1000 // 默认 30 分钟
 
     private val bytesPerSample = 2 // 16bit mono
 
@@ -214,14 +212,18 @@ abstract class BaseFileAsrEngine(
                 segmentChan = null
             }
         }
-        // 持续录音并按上限切段，投递到识别队列
+        // 持续录音：渐进切段在采集侧完成，编码上传在每段 recognize() 内进行
         audioJob = scope.launch(Dispatchers.IO) {
             try {
                 val needsPcmVoiceProcessing =
                     prefs.autoCancelEmptyAudioInputEnabled ||
                         prefs.autoFilterSilentAudioSegmentsEnabled
                 val encodingSpec =
-                    if (prefs.uploadAudioCompressionEnabled && !needsPcmVoiceProcessing) {
+                    if (
+                        !progressiveChunkingEnabled &&
+                        prefs.uploadAudioCompressionEnabled &&
+                        !needsPcmVoiceProcessing
+                    ) {
                         uploadAudioEncodingSpec
                     } else {
                         null
@@ -296,11 +298,12 @@ abstract class BaseFileAsrEngine(
     protected open fun ensureReady(): Boolean = true
 
     /**
-     * 连续录音并按 [maxRecordDurationMillis] 切分，将片段依次投递到 [chan]。
+     * 连续录音并将片段依次投递到 [chan]。
      *
      * 使用 AudioCaptureManager 封装音频采集逻辑，简化代码并提高可维护性。
      * - 段间不停止/重建 AudioRecord，尽量保证采集连续
      * - 仅在静音判停或用户停止时回调 onStopped()，切段不打断 UI 的"正在聆听"
+     * - 开启渐进切段时按句间静音在窗口内切开，边录边识别
      */
     private suspend fun recordAndEnqueueSegments(chan: Channel<RecordedSegment>) {
         val audioManager = AudioCaptureManager(
@@ -342,7 +345,11 @@ abstract class BaseFileAsrEngine(
         val vadInputLeveler = VadInputLevelerBranch(sampleRate = sampleRate)
         var vadLevelerFinishReason = "capture_end"
         val progressiveChunker = if (progressiveChunkingEnabled) {
-            NonStreamingPcmChunker(sampleRate)
+            NonStreamingPcmChunker(
+                sampleRate,
+                minChunkMs = progressiveChunkWindow.minChunkMs,
+                maxChunkMs = progressiveChunkWindow.maxChunkMs
+            )
         } else {
             null
         }
@@ -352,8 +359,6 @@ abstract class BaseFileAsrEngine(
             null
         }
 
-        // 计算分段阈值
-        val maxBytes = (maxRecordDurationMillis / 1000.0 * sampleRate * bytesPerSample).toInt()
         val currentSeg = ByteArrayOutputStream()
         val pendingList = java.util.ArrayDeque<ByteArray>()
 
@@ -388,11 +393,16 @@ abstract class BaseFileAsrEngine(
                 if (progressiveChunker == null) {
                     currentSeg.write(audioChunk)
                 } else {
-                    val isSpeech = sentenceVadDetector
-                        ?.analyzeFrame(leveled.leveledPcm, leveled.leveledPcm.size)
-                        ?.isSpeech
-                        ?: true
-                    progressiveChunker.append(audioChunk, isSpeech).forEach(::enqueuePcm)
+                    // 句间 VAD 与分段器按 ≤100ms 子帧推进，300ms 静音阈值不被 200ms 采集帧放大
+                    val leveledPcm = leveled.leveledPcm
+                    forEachSentenceVadSubFrame(audioChunk, sampleRate) { offset, end ->
+                        val isSpeech = sentenceVadDetector
+                            ?.analyzeFrame(leveledPcm.copyOfRange(offset, end), end - offset)
+                            ?.isSpeech
+                            ?: true
+                        val subPcm = if (offset == 0 && end == audioChunk.size) audioChunk else audioChunk.copyOfRange(offset, end)
+                        progressiveChunker.append(subPcm, isSpeech).forEach(::enqueuePcm)
+                    }
                 }
 
                 val stopReason = when {
@@ -442,34 +452,6 @@ abstract class BaseFileAsrEngine(
                         Log.d(TAG, "Pending segment sent (${head.size} bytes)")
                     } else {
                         break
-                    }
-                }
-
-                // 达到上限：切出一个片段，不打断录音
-                if (progressiveChunker == null && currentSeg.size() >= maxBytes) {
-                    val out = currentSeg.toByteArray()
-                    currentSeg.reset()
-                    logUncompressedUploadSegment(out)
-                    Log.d(TAG, "Segment threshold reached, cutting segment (${out.size} bytes)")
-
-                    // 先尝试刷出之前的待发送段
-                    while (!pendingList.isEmpty()) {
-                        val head = pendingList.peekFirst() ?: break
-                        val ok = chan.trySend(RecordedSegment.Pcm(head)).isSuccess
-                        if (ok) {
-                            pendingList.removeFirst()
-                        } else {
-                            break
-                        }
-                    }
-
-                    // 再投递当前片段；不成则加入待发送队列
-                    val ok2 = chan.trySend(RecordedSegment.Pcm(out)).isSuccess
-                    if (!ok2) {
-                        pendingList.addLast(out)
-                        Log.d(TAG, "Segment queued for later sending")
-                    } else {
-                        Log.d(TAG, "Segment sent immediately")
                     }
                 }
             }
@@ -571,7 +553,6 @@ abstract class BaseFileAsrEngine(
         val vadInputLeveler = VadInputLevelerBranch(sampleRate = sampleRate)
         var vadLevelerFinishReason = "capture_end"
 
-        val maxBytes = (maxRecordDurationMillis / 1000.0 * sampleRate * bytesPerSample).toInt()
         // 首个编码器仍在采集启动前创建，让不支持的容器格式沿用既有的向上抛出路径。
         val initialEncoder = createUploadAudioEncodingSession(
             context = context,
@@ -586,11 +567,9 @@ abstract class BaseFileAsrEngine(
             runEncodeWorker(
                 chan = chan,
                 encodeChan = encodeChan,
-                encodingSpec = encodingSpec,
                 initialEncoder = initialEncoder
             )
         }
-        var pendingEncodeBytes = 0
 
         try {
             audioManager.startCapture().collect { audioChunk ->
@@ -604,8 +583,7 @@ abstract class BaseFileAsrEngine(
                     Log.w(TAG, "Failed to calculate amplitude", t)
                 }
 
-                encodeChan.send(EncodeRequest.Frame(audioChunk))
-                pendingEncodeBytes += audioChunk.size
+                encodeChan.send(EncodeRequest(audioChunk))
 
                 val stopReason = when {
                     vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true ->
@@ -634,12 +612,6 @@ abstract class BaseFileAsrEngine(
                     }
                     return@collect
                 }
-
-                if (pendingEncodeBytes >= maxBytes) {
-                    Log.d(TAG, "Encoded segment threshold reached, cutting segment")
-                    encodeChan.send(EncodeRequest.Cut)
-                    pendingEncodeBytes = 0
-                }
             }
         } catch (t: Throwable) {
             if (t is kotlinx.coroutines.CancellationException) {
@@ -657,7 +629,7 @@ abstract class BaseFileAsrEngine(
         } finally {
             vadInputLeveler.finishDebugSession(vadLevelerFinishReason)
             logCallLatency("t_capture_exit")
-            Log.d(TAG, "Cleaning up encoded capture: $pendingEncodeBytes bytes awaiting encode")
+            Log.d(TAG, "Cleaning up encoded capture")
             // 关闭后 worker 会把队列里剩余帧编码完并冲刷尾段；join 必须不可取消，否则尾段丢失。
             encodeChan.close()
             val drainStartedAt = System.nanoTime()
@@ -666,7 +638,7 @@ abstract class BaseFileAsrEngine(
             // drainMs 反映编码是否跟不上采集：明显大于 chunkMillis 说明队列积压。
             logCallLatency(
                 "upload_encode_drained",
-                mapOf("drain_ms" to drainMs, "tail_bytes" to pendingEncodeBytes)
+                mapOf("drain_ms" to drainMs)
             )
             try {
                 vadDetector?.release()
@@ -677,18 +649,17 @@ abstract class BaseFileAsrEngine(
     }
 
     /**
-     * 消费采集协程投递的 PCM 帧：降噪 → 上传编码 → 切段投递。
+     * 消费采集协程投递的 PCM 帧：降噪 → 上传编码 → 录音结束后投递。
      *
      * 编码器与待投递队列都由本协程独占，避免与采集协程竞争同一 [UploadAudioEncodingSession]。
      */
     private suspend fun runEncodeWorker(
         chan: Channel<RecordedSegment>,
         encodeChan: Channel<EncodeRequest>,
-        encodingSpec: UploadAudioEncodingSpec,
         initialEncoder: UploadAudioEncodingSession
     ) {
         val pendingList = java.util.ArrayDeque<RecordedSegment>()
-        var encoder: UploadAudioEncodingSession = initialEncoder
+        val encoder: UploadAudioEncodingSession = initialEncoder
         var encodedBytes = 0
 
         fun flushPending() {
@@ -702,7 +673,7 @@ abstract class BaseFileAsrEngine(
             }
         }
 
-        fun cutSegment(createNext: Boolean) {
+        fun cutSegment() {
             if (encodedBytes <= 0) return
             val audio = encoder.finish()
             logUploadAudioCompression(
@@ -722,33 +693,21 @@ abstract class BaseFileAsrEngine(
             if (!chan.trySend(segment).isSuccess) {
                 pendingList.addLast(segment)
             }
-            if (createNext) {
-                encoder = createUploadAudioEncodingSession(
-                    context = context,
-                    sampleRate = sampleRate,
-                    spec = encodingSpec
-                )
-            }
         }
 
         try {
             for (request in encodeChan) {
-                when (request) {
-                    is EncodeRequest.Frame -> {
-                        val encodedInput = OfflineSpeechDenoiserManager.denoiseIfEnabled(
-                            context = context,
-                            prefs = prefs,
-                            pcm = request.pcm,
-                            sampleRate = sampleRate
-                        )
-                        encoder.writePcm(encodedInput)
-                        encodedBytes += request.pcm.size
-                    }
-                    EncodeRequest.Cut -> cutSegment(createNext = true)
-                }
+                val encodedInput = OfflineSpeechDenoiserManager.denoiseIfEnabled(
+                    context = context,
+                    prefs = prefs,
+                    pcm = request.pcm,
+                    sampleRate = sampleRate
+                )
+                encoder.writePcm(encodedInput)
+                encodedBytes += request.pcm.size
                 flushPending()
             }
-            cutSegment(createNext = false)
+            cutSegment()
             flushPending()
         } catch (t: Throwable) {
             // 编码器已不可用：主动废弃队列，让采集侧的 send 立即失败并结束会话。
@@ -775,11 +734,7 @@ abstract class BaseFileAsrEngine(
         }
     }
 
-    private sealed interface EncodeRequest {
-        class Frame(val pcm: ByteArray) : EncodeRequest
-
-        object Cut : EncodeRequest
-    }
+    private class EncodeRequest(val pcm: ByteArray)
 
     /**
      * 将 PCM 格式音频转换为 WAV 格式
@@ -940,7 +895,8 @@ abstract class BaseFileAsrEngine(
                                 context = context,
                                 prefs = prefs,
                                 pcm = data.pcm,
-                                sampleRate = sampleRate
+                                sampleRate = sampleRate,
+                                window = progressiveChunkWindow
                             )
                         } else {
                             listOf(data.pcm)
@@ -1022,18 +978,20 @@ abstract class BaseFileAsrEngine(
     }
 
     internal fun logProgressiveSuccess(text: String, audioBytes: Int) {
-        progressiveLog(audioBytes).successWithText(text)
+        val vendor = progressiveVendor ?: return
+        progressiveLog(vendor, audioBytes).successWithText(text)
     }
 
     internal fun logProgressiveFailure(message: String, audioBytes: Int) {
-        progressiveLog(audioBytes).failure(message)
+        val vendor = progressiveVendor ?: return
+        progressiveLog(vendor, audioBytes).failure(message)
     }
 
     protected open suspend fun finalizeCombinedProgressiveText(text: String): String = text
 
-    private fun progressiveLog(audioBytes: Int): LocalAsrCallLogger.Session = LocalAsrCallLogger.startInference(
+    private fun progressiveLog(vendor: AsrVendor, audioBytes: Int): LocalAsrCallLogger.Session = LocalAsrCallLogger.startInference(
         prefs = prefs,
-        vendor = checkNotNull(progressiveVendor),
+        vendor = vendor,
         source = "file",
         audioBytes = audioBytes,
         sampleRate = sampleRate,
