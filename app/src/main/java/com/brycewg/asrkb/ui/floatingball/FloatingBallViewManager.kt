@@ -75,6 +75,7 @@ class FloatingBallViewManager(
     private var currentState: FloatingBallState = FloatingBallState.Idle
     private var lastAppliedAlpha: Float? = null
     private var lastAppliedBallSizeDp: Int? = null
+    private var keepScreenOnRequested: Boolean = false
 
     // 贴边半隐时仅显示“箭头把手”的宽度（需与布局一致）
 
@@ -87,6 +88,33 @@ class FloatingBallViewManager(
     /** 获取布局参数 */
     fun getLayoutParams(): WindowManager.LayoutParams? = lp
 
+    /** 录音期间保持悬浮球窗口常亮；视图重建时会沿用上次请求。 */
+    fun setKeepScreenOn(enabled: Boolean): Boolean {
+        keepScreenOnRequested = enabled
+        return applyKeepScreenOnToCurrentView()
+    }
+
+    private fun applyKeepScreenOnToCurrentView(): Boolean {
+        val view = ballView ?: return !keepScreenOnRequested
+        return try {
+            view.keepScreenOn = keepScreenOnRequested
+            val params = lp ?: return true
+            val newFlags = if (keepScreenOnRequested) {
+                params.flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            } else {
+                params.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
+            }
+            if (newFlags != params.flags) {
+                params.flags = newFlags
+                windowManager.updateViewLayout(view, params)
+            }
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to apply keepScreenOn=$keepScreenOnRequested", e)
+            false
+        }
+    }
+
     /** 显示悬浮球 */
     fun showBall(
         onClickListener: (View) -> Unit,
@@ -97,6 +125,7 @@ class FloatingBallViewManager(
             applyBallTheme()
             applyBallAlpha()
             applyBallSize()
+            applyKeepScreenOnToCurrentView()
             try {
                 updateStateVisual(currentState)
             } catch (
@@ -156,6 +185,7 @@ class FloatingBallViewManager(
             // 添加视图
             windowManager.addView(view, params)
             ballView = view
+            applyKeepScreenOnToCurrentView()
             applyBallAlpha()
             applyBallSize()
             // 应用初始状态
@@ -1090,13 +1120,18 @@ class FloatingBallViewManager(
             56
         }
         val logicalSizePx = dp(size)
+        val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+            WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         val params = WindowManager.LayoutParams(
             logicalSizePx,
             logicalSizePx,
             type,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+            if (keepScreenOnRequested) {
+                flags or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            } else {
+                flags
+            },
             PixelFormat.TRANSLUCENT
         )
         params.gravity = Gravity.TOP or Gravity.START

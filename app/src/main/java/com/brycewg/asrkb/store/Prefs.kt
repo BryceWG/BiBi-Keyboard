@@ -215,6 +215,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_CONTINUOUS_CAPTURE_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_CONTINUOUS_CAPTURE_ENABLED, value) }
 
+    // 录音时保持屏幕常亮，默认关闭
+    var keepScreenOnWhileRecording: Boolean
+        get() = sp.getBoolean(KEY_KEEP_SCREEN_ON_WHILE_RECORDING, false)
+        set(value) = sp.edit { putBoolean(KEY_KEEP_SCREEN_ON_WHILE_RECORDING, value) }
+
     // 录音时音频避让（请求短时独占音频焦点以暂停/静音媒体），默认开启
     var duckMediaOnRecordEnabled: Boolean
         get() = sp.getBoolean(KEY_DUCK_MEDIA_ON_RECORD, true)

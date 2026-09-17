@@ -22,6 +22,7 @@ internal const val KEY_AUTO_START_RECORDING_ON_SHOW = "auto_start_recording_on_s
 internal const val KEY_AUTO_ENTER_AFTER_ASR = "auto_enter_after_asr"
 internal const val KEY_AUTO_SWITCH_IME_AFTER_ASR = "auto_switch_ime_after_asr"
 internal const val KEY_CONTINUOUS_CAPTURE_ENABLED = "continuous_capture_enabled"
+internal const val KEY_KEEP_SCREEN_ON_WHILE_RECORDING = "keep_screen_on_while_recording"
 internal const val KEY_DUCK_MEDIA_ON_RECORD = "duck_media_on_record"
 internal const val KEY_AUTO_CANCEL_EMPTY_AUDIO_INPUT = "auto_cancel_empty_audio_input"
 internal const val KEY_AUTO_FILTER_SILENT_AUDIO_SEGMENTS = "auto_filter_silent_audio_segments"

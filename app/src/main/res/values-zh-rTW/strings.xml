@@ -47,6 +47,7 @@
   <string name="label_ai_edit_default_use_last_asr">只對上次識別結果部分生效</string>
   <string name="label_auto_start_recording_on_show">鍵盤出現自動開始錄音</string>
   <string name="label_continuous_capture">可見時持續錄音</string>
+  <string name="label_keep_screen_on_while_recording">錄音時螢幕常亮</string>
   <string name="label_auto_enter_after_asr">輸入完成後自動Enter</string>
   <string name="label_auto_switch_ime_after_asr">輸入完成後切換到指定輸入法</string>
   <string name="btn_retry">連線失敗，重試？</string>
@@ -364,6 +365,8 @@
   <string name="feature_auto_start_recording_on_show_on_desc">鍵盤出現時自動開始錄音，省去一次點擊操作。</string>
   <string name="feature_continuous_capture_off_desc">鍵盤或懸浮球可見時不會持續錄音，按麥後才開始錄音。</string>
   <string name="feature_continuous_capture_on_desc">鍵盤或懸浮球可見期間在本機持續錄音，按麥後可以更快開始辨識。開始辨識前不會上傳音訊。</string>
+  <string name="feature_keep_screen_on_while_recording_off_desc">關閉後，錄音過程中螢幕仍會依系統逾時自動熄滅。</string>
+  <string name="feature_keep_screen_on_while_recording_on_desc">開啟後，透過主鍵盤或懸浮球錄音時保持螢幕常亮，避免中途熄屏。</string>
 
   <!-- Auto enter after input -->
   <string name="feature_auto_enter_after_asr_off_desc">辨識（及開啟時的 AI 後處理）完成後僅提交文字，不會自動 Enter。仍可在錄音時右滑麥克風，讓本次結果提交後 Enter 傳送。</string>

@@ -144,7 +144,14 @@ class FloatingAsrService : Service() {
             startRecordingForeground = { startRecordingForeground() },
             stopRecordingForeground = { stopRecordingForeground() }
         )
-        asrSessionManager = AsrSessionManager(this, prefs, serviceScope, interactionController)
+        asrSessionManager = AsrSessionManager(
+            this,
+            prefs,
+            serviceScope,
+            interactionController
+        ) { enabled ->
+            viewManager.setKeepScreenOn(enabled)
+        }
         interactionController.asrSessionManager = asrSessionManager
         touchHandler =
             FloatingBallTouchHandler(this, prefs, viewManager, windowManager, interactionController)

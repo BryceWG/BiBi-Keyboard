@@ -109,6 +109,15 @@ object SettingsSearchIndex {
         item(R.string.label_mic_tap_toggle, R.string.section_input_behavior)
         item(R.string.label_auto_start_recording_on_show, R.string.section_input_behavior)
         item(R.string.label_continuous_capture, R.string.section_input_behavior)
+        item(
+            R.string.label_keep_screen_on_while_recording,
+            R.string.section_input_behavior,
+            "常亮",
+            "息屏",
+            "亮屏",
+            "screen",
+            "wake"
+        )
         item(R.string.label_auto_enter_after_asr, R.string.section_input_behavior, "enter", "回车", "发送")
         item(R.string.label_auto_switch_ime_after_asr, R.string.section_input_behavior, "ime", "输入法", "二次编辑")
         item(R.string.label_fcitx5_return_on_switcher, R.string.section_input_behavior, "fcitx5")

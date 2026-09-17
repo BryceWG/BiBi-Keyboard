@@ -51,7 +51,8 @@ class AsrSessionManager(
     private val context: Context,
     private val prefs: Prefs,
     private val serviceScope: CoroutineScope,
-    private val listener: AsrSessionListener
+    private val listener: AsrSessionListener,
+    keepScreenOnApply: (Boolean) -> Boolean
 ) {
 
     companion object {
@@ -139,6 +140,10 @@ class AsrSessionManager(
     private val recordingAudioFocusController = RecordingAudioFocusController(context) { loss ->
         onRecordingAudioFocusLost(loss)
     }
+    private val keepScreenOnController = RecordingKeepScreenOnController(
+        surface = "float",
+        apply = keepScreenOnApply
+    )
     private val sessionTokenCounter = AtomicLong(0L)
     private val bridgePreviewSequence = AtomicLong(0L)
     private val bridgeOperationLock = Any()
@@ -264,6 +269,7 @@ class AsrSessionManager(
 
     private fun releaseRecordingResources(reason: String) {
         recordingAudioFocusController.release()
+        setRecordingKeepScreenOn(active = false)
         try {
             BluetoothRouteManager.onRecordingStopped(context)
         } catch (t: Throwable) {
@@ -373,6 +379,7 @@ class AsrSessionManager(
         } else {
             Log.d(TAG, "Audio ducking disabled by user; skip audio focus request")
         }
+        setRecordingKeepScreenOn(active = true)
         listener.onSessionStateChanged(FloatingBallState.Recording)
         asrEngine?.let { engine ->
             (engine as? AudioFrameSinkOwner)?.audioFrameSink = historyAudioCapture
@@ -1042,6 +1049,7 @@ class AsrSessionManager(
             if (!isSessionActive(sessionToken)) return@launch
             // 确保归还音频焦点
             recordingAudioFocusController.release()
+            setRecordingKeepScreenOn(active = false)
             if (!isSessionActive(sessionToken)) return@launch
             startProcessingTimeout(sessionToken, lastAudioMsForStats)
         }
@@ -1051,6 +1059,14 @@ class AsrSessionManager(
         Log.w(TAG, "Recording audio focus lost: $loss")
         if (activeSessionToken == 0L) return
         stopRecording()
+    }
+
+    private fun setRecordingKeepScreenOn(active: Boolean) {
+        if (active && prefs.keepScreenOnWhileRecording) {
+            keepScreenOnController.acquire()
+        } else {
+            keepScreenOnController.release()
+        }
     }
 
     private fun onPartial(sessionToken: Long, text: String) {

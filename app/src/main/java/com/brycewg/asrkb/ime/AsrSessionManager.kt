@@ -6,10 +6,12 @@
 package com.brycewg.asrkb.ime
 
 import android.content.Context
+import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
+import android.view.WindowManager
 import com.brycewg.asrkb.asr.*
 import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.store.AsrHistoryAudioCapture
@@ -109,6 +111,10 @@ class AsrSessionManager(
     private val recordingAudioFocusController = RecordingAudioFocusController(context) { loss ->
         onRecordingAudioFocusLost(loss)
     }
+    private val keepScreenOnController = RecordingKeepScreenOnController(
+        surface = "ime",
+        apply = ::applyImeKeepScreenOn
+    )
 
     // ASR 请求耗时记录
     private var lastRequestDurationMs: Long? = null
@@ -488,7 +494,8 @@ class AsrSessionManager(
                     "vendor" to prefs.asrVendor.id,
                     "engine" to asrEngineDiagnosticName(eng, directEngineIdentity),
                     "state" to state.diagnosticName,
-                    "duckMedia" to prefs.duckMediaOnRecordEnabled
+                    "duckMedia" to prefs.duckMediaOnRecordEnabled,
+                    "keepScreenOn" to prefs.keepScreenOnWhileRecording
                 )
             )
         } catch (_: Throwable) { }
@@ -513,6 +520,7 @@ class AsrSessionManager(
         } else {
             Log.d(TAG, "Audio ducking disabled by user; skip audio focus request")
         }
+        setRecordingKeepScreenOn(active = true)
         asrEngine?.let { engine ->
             (engine as? AudioFrameSinkOwner)?.audioFrameSink = historyAudioCapture
             ContinuousCaptureCoordinator.beginSession(activeSeq)
@@ -560,6 +568,7 @@ class AsrSessionManager(
             )
         } catch (_: Throwable) { }
         recordingAudioFocusController.release()
+        setRecordingKeepScreenOn(active = false)
         // 若无键盘可见，录音结束后可撤销预热
         try {
             BluetoothRouteManager.onRecordingStopped(context)
@@ -797,6 +806,7 @@ class AsrSessionManager(
      */
     fun cleanup() {
         recordingAudioFocusController.release()
+        setRecordingKeepScreenOn(active = false)
         clearActiveSession()
         ContinuousCaptureCoordinator.endAnySession()
         asrEngine?.stop()
@@ -991,6 +1001,7 @@ class AsrSessionManager(
             )
         } catch (_: Throwable) { }
         recordingAudioFocusController.release()
+        setRecordingKeepScreenOn(active = false)
         archiveHistoryFailure(
             status = AsrHistoryStore.AsrHistoryStatus.FAILED,
             failStage = currentHistoryFailStage(),
@@ -1042,6 +1053,7 @@ class AsrSessionManager(
         }
         // 确保归还音频焦点（覆盖静音判停等路径）
         recordingAudioFocusController.release()
+        setRecordingKeepScreenOn(active = false)
         try {
             val ms = lastAudioMsForStats
             DebugLogManager.log(
@@ -1188,6 +1200,25 @@ class AsrSessionManager(
         stopRecording()
         // 部分流式引擎显式 stop() 不立即回调 onStopped；主动补齐并由 gate 去重。
         onStopped(seq)
+    }
+
+    private fun setRecordingKeepScreenOn(active: Boolean) {
+        if (active && prefs.keepScreenOnWhileRecording) {
+            keepScreenOnController.acquire()
+        } else {
+            keepScreenOnController.release()
+        }
+    }
+
+    private fun applyImeKeepScreenOn(enabled: Boolean): Boolean {
+        val window = (context as? InputMethodService)?.window?.window ?: return !enabled
+        window.decorView.keepScreenOn = enabled
+        if (enabled) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        return true
     }
 }
 

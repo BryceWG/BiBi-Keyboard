@@ -88,7 +88,7 @@ internal fun InputSettingsRouteContent(
 ) {
     val context = LocalContext.current
     val imeOptions = context.buildImeOptions()
-    val behaviorItemCount = if (uiState.trimTrailingPunct) 10 else 9
+    val behaviorItemCount = if (uiState.trimTrailingPunct) 11 else 10
     val behaviorTrimThresholdOffset = if (uiState.trimTrailingPunct) 1 else 0
 
     SettingsLazyColumn(
@@ -222,6 +222,25 @@ internal fun InputSettingsRouteContent(
                     count = behaviorItemCount
                 )
                 InputExplainedSwitch(
+                    id = "keep_screen_on_while_recording",
+                    titleRes = R.string.label_keep_screen_on_while_recording,
+                    checked = uiState.keepScreenOnWhileRecording,
+                    onToggle = { target ->
+                        onApplyExplainedSwitch(
+                            uiState.keepScreenOnWhileRecording,
+                            target,
+                            R.string.label_keep_screen_on_while_recording,
+                            R.string.feature_keep_screen_on_while_recording_off_desc,
+                            R.string.feature_keep_screen_on_while_recording_on_desc,
+                            "keep_screen_on_while_recording_explained",
+                            null,
+                            null
+                        ) { prefs.keepScreenOnWhileRecording = it }
+                    },
+                    index = 4 + behaviorTrimThresholdOffset,
+                    count = behaviorItemCount
+                )
+                InputExplainedSwitch(
                     id = "auto_enter_after_asr",
                     titleRes = R.string.label_auto_enter_after_asr,
                     checked = uiState.autoEnterAfterAsr,
@@ -237,7 +256,7 @@ internal fun InputSettingsRouteContent(
                             null
                         ) { prefs.autoEnterAfterAsrEnabled = it }
                     },
-                    index = 4 + behaviorTrimThresholdOffset,
+                    index = 5 + behaviorTrimThresholdOffset,
                     count = behaviorItemCount
                 )
                 InputExplainedSwitch(
@@ -256,7 +275,7 @@ internal fun InputSettingsRouteContent(
                             null
                         ) { prefs.autoSwitchImeAfterAsrEnabled = it }
                     },
-                    index = 5 + behaviorTrimThresholdOffset,
+                    index = 6 + behaviorTrimThresholdOffset,
                     count = behaviorItemCount
                 )
                 InputExplainedSwitch(
@@ -275,7 +294,7 @@ internal fun InputSettingsRouteContent(
                             null
                         ) { prefs.fcitx5ReturnOnImeSwitch = it }
                     },
-                    index = 6 + behaviorTrimThresholdOffset,
+                    index = 7 + behaviorTrimThresholdOffset,
                     count = behaviorItemCount
                 )
                 InputExplainedSwitch(
@@ -294,7 +313,7 @@ internal fun InputSettingsRouteContent(
                             null
                         ) { prefs.returnPrevImeOnHide = it }
                     },
-                    index = 7 + behaviorTrimThresholdOffset,
+                    index = 8 + behaviorTrimThresholdOffset,
                     count = behaviorItemCount
                 )
                 SettingsPreference(
@@ -310,7 +329,7 @@ internal fun InputSettingsRouteContent(
                             onRefreshState()
                         }
                     ),
-                    index = 8 + behaviorTrimThresholdOffset,
+                    index = 9 + behaviorTrimThresholdOffset,
                     count = behaviorItemCount
                 )
             }

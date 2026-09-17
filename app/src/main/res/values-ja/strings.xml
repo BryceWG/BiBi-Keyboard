@@ -48,6 +48,7 @@
   <string name="label_ai_edit_default_use_last_asr">前回の認識結果部分のみに適用</string>
   <string name="label_auto_start_recording_on_show">キーボード表示時に自動的に録音を開始</string>
   <string name="label_continuous_capture">表示中は継続録音</string>
+  <string name="label_keep_screen_on_while_recording">録音中は画面を常時点灯</string>
   <string name="label_auto_enter_after_asr">入力完了後に自動Enter</string>
   <string name="label_auto_switch_ime_after_asr">入力完了後に指定入力方法へ自動切替</string>
   <string name="btn_retry">接続に失敗しました。再試行しますか?</string>
@@ -365,6 +366,8 @@
   <string name="feature_auto_start_recording_on_show_on_desc">キーボードが表示されたときに自動的に録音を開始し、1タップを節約します。</string>
   <string name="feature_continuous_capture_off_desc">キーボードまたはフローティングボールの表示中は継続録音せず、マイクボタンを押した後に録音を開始します。</string>
   <string name="feature_continuous_capture_on_desc">キーボードまたはフローティングボールの表示中、ローカルで継続録音し、ボタン押下後の認識開始を速くします。認識を開始するまで音声はアップロードされません。</string>
+  <string name="feature_keep_screen_on_while_recording_off_desc">オフの場合、録音中もシステムのタイムアウトに従って画面が消灯します。</string>
+  <string name="feature_keep_screen_on_while_recording_on_desc">キーボードまたはフローティングボールで録音している間、画面を点灯したままにし、途中で消灯しないようにします。</string>
 
   <!-- Auto enter after input -->
   <string name="feature_auto_enter_after_asr_off_desc">認識（および有効時の AI 後処理）完了後はテキストのみ確定し、自動 Enter しません。録音中にマイクを右スワイプすれば、今回の結果確定後に Enter 送信できます。</string>

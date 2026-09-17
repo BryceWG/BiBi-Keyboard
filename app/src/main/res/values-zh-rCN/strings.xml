@@ -47,6 +47,7 @@
   <string name="label_ai_edit_default_use_last_asr">只对上次识别结果部分生效</string>
   <string name="label_auto_start_recording_on_show">键盘出现自动开始录音</string>
   <string name="label_continuous_capture">可见时持续录音</string>
+  <string name="label_keep_screen_on_while_recording">录音时屏幕常亮</string>
   <string name="label_auto_enter_after_asr">输入完成后自动回车</string>
   <string name="label_auto_switch_ime_after_asr">输入完成后切换到指定输入法</string>
   <string name="btn_retry">连接失败, 重试?</string>
@@ -364,6 +365,8 @@
   <string name="feature_auto_start_recording_on_show_on_desc">键盘出现时自动开始录音，省去一次点击操作。</string>
   <string name="feature_continuous_capture_off_desc">键盘或悬浮球可见时不会持续录音，按麦后才开始录音。</string>
   <string name="feature_continuous_capture_on_desc">键盘或悬浮球可见期间在本机持续录音，按麦后可以更快开始识别。开始识别前不会上传音频。</string>
+  <string name="feature_keep_screen_on_while_recording_off_desc">关闭后，录音过程中屏幕仍会按系统超时自动熄灭。</string>
+  <string name="feature_keep_screen_on_while_recording_on_desc">开启后，通过主键盘或悬浮球录音时保持屏幕常亮，避免中途熄屏。</string>
 
   <!-- Auto enter after input -->
   <string name="feature_auto_enter_after_asr_off_desc">识别（及开启时的 AI 后处理）完成后仅提交文本，不会自动回车。仍可在录音时右滑麦克风，让本次结果提交后回车发送。</string>

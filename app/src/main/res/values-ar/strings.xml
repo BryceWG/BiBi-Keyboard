@@ -49,6 +49,7 @@
   <string name="label_ai_edit_default_use_last_asr">تطبيق على مقطع النسخ النصي الأخير فقط</string>
   <string name="label_auto_start_recording_on_show">بدء التسجيل تلقائياً عند ظهور اللوحة</string>
   <string name="label_continuous_capture">تسجيل مستمر أثناء الظهور</string>
+  <string name="label_keep_screen_on_while_recording">إبقاء الشاشة مضاءة أثناء التسجيل</string>
   <string name="label_auto_enter_after_asr">إدخال تلقائي بعد اكتمال التعرّف</string>
   <string name="label_auto_switch_ime_after_asr">التبديل إلى IME محدد بعد اكتمال الإدخال</string>
   <string name="btn_retry">فشل الاتصال، إعادة المحاولة؟</string>
@@ -366,6 +367,8 @@
   <string name="feature_auto_start_recording_on_show_on_desc">يبدأ التسجيل تلقائياً عند ظهور اللوحة، لتوفير ضغطة.</string>
   <string name="feature_continuous_capture_off_desc">لا يستمر التسجيل أثناء ظهور اللوحة أو الكرة العائمة؛ يبدأ فقط بعد الضغط على الميكروفون.</string>
   <string name="feature_continuous_capture_on_desc">أثناء ظهور اللوحة أو الكرة العائمة، يُسجَّل الصوت محلياً في الخلفية ليبدأ التعرّف أسرع عند الضغط على الميكروفون. لا يُرفع الصوت حتى تبدأ التعرّف.</string>
+  <string name="feature_keep_screen_on_while_recording_off_desc">عند الإيقاف، يمكن أن تنطفئ الشاشة أثناء التسجيل وفق مهلة النظام.</string>
+  <string name="feature_keep_screen_on_while_recording_on_desc">أثناء التسجيل عبر لوحة المفاتيح أو الكرة العائمة، تبقى الشاشة مضاءة حتى لا تنام في منتصف التسجيل.</string>
 
   <!-- Auto enter after input -->
   <string name="feature_auto_enter_after_asr_off_desc">بعد التعرّف (ومعالجة الذكاء الاصطناعي إن فُعّلت)، يُدرج النص فقط. يمكنك السحب يميناً على الميكروفون للإرسال بـ Enter في تلك الجلسة.</string>

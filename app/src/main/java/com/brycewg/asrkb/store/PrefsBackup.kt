@@ -38,6 +38,7 @@ internal object PrefsBackup {
         o.put(KEY_AUTO_ENTER_AFTER_ASR, autoEnterAfterAsrEnabled)
         o.put(KEY_AUTO_SWITCH_IME_AFTER_ASR, autoSwitchImeAfterAsrEnabled)
         o.put(KEY_CONTINUOUS_CAPTURE_ENABLED, continuousCaptureEnabled)
+        o.put(KEY_KEEP_SCREEN_ON_WHILE_RECORDING, keepScreenOnWhileRecording)
         o.put(KEY_DUCK_MEDIA_ON_RECORD, duckMediaOnRecordEnabled)
         o.put(KEY_AUTO_CANCEL_EMPTY_AUDIO_INPUT, autoCancelEmptyAudioInputEnabled)
         o.put(KEY_AUTO_FILTER_SILENT_AUDIO_SEGMENTS, autoFilterSilentAudioSegmentsEnabled)
@@ -302,6 +303,7 @@ internal object PrefsBackup {
             optBool(KEY_AUTO_ENTER_AFTER_ASR)?.let { autoEnterAfterAsrEnabled = it }
             optBool(KEY_AUTO_SWITCH_IME_AFTER_ASR)?.let { autoSwitchImeAfterAsrEnabled = it }
             optBool(KEY_CONTINUOUS_CAPTURE_ENABLED)?.let { continuousCaptureEnabled = it }
+            optBool(KEY_KEEP_SCREEN_ON_WHILE_RECORDING)?.let { keepScreenOnWhileRecording = it }
             optBool(KEY_DUCK_MEDIA_ON_RECORD)?.let { duckMediaOnRecordEnabled = it }
             optBool(KEY_AUTO_CANCEL_EMPTY_AUDIO_INPUT)?.let { autoCancelEmptyAudioInputEnabled = it }
             optBool(KEY_AUTO_FILTER_SILENT_AUDIO_SEGMENTS)?.let { autoFilterSilentAudioSegmentsEnabled = it }

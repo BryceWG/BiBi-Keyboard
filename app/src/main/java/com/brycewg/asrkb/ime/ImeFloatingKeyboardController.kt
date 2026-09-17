@@ -662,7 +662,8 @@ internal class ImeFloatingKeyboardController(
         val nextY = requestedY.coerceIn(0, maxY)
         val floatingGravity = Gravity.START or Gravity.TOP
         if (dockedWindowFlags == null) {
-            dockedWindowFlags = attrs.flags
+            // 常亮是录音会话态，不能写进贴底快照，否则停录后回贴底会把常亮带回来。
+            dockedWindowFlags = attrs.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()
         }
         if (dockedWindowAnimations == null) {
             dockedWindowAnimations = attrs.windowAnimations
@@ -705,7 +706,11 @@ internal class ImeFloatingKeyboardController(
         attrs.gravity = Gravity.BOTTOM
         attrs.x = 0
         attrs.y = 0
-        dockedWindowFlags?.let { attrs.flags = it }
+        dockedWindowFlags?.let { restored ->
+            val keepScreenOn = attrs.flags and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            attrs.flags = (restored and WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON.inv()) or
+                keepScreenOn
+        }
         dockedWindowFlags = null
         dockedWindowAnimations?.let { attrs.windowAnimations = it }
         dockedWindowAnimations = null

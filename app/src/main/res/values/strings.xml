@@ -49,6 +49,7 @@
   <string name="label_ai_edit_default_use_last_asr">Only apply to the last transcript segment</string>
   <string name="label_auto_start_recording_on_show">Auto start recording when keyboard appears</string>
   <string name="label_continuous_capture">Continuous recording while visible</string>
+  <string name="label_keep_screen_on_while_recording">Keep screen on while recording</string>
   <string name="label_auto_enter_after_asr">Auto enter after input</string>
   <string name="label_auto_switch_ime_after_asr">Switch to specified IME after input</string>
   <string name="btn_retry">Connect failed, retry?</string>
@@ -366,6 +367,8 @@
   <string name="feature_auto_start_recording_on_show_on_desc">Recording starts automatically when the keyboard appears, saving you one tap.</string>
   <string name="feature_continuous_capture_off_desc">Recording does not continue while the keyboard or floating ball is visible; it starts only after you press the mic button.</string>
   <string name="feature_continuous_capture_on_desc">While the keyboard or floating ball is visible, audio is recorded locally in the background so recognition can start faster when you press the mic. Audio is not uploaded until you start recognition.</string>
+  <string name="feature_keep_screen_on_while_recording_off_desc">The screen can turn off during recording according to the system timeout.</string>
+  <string name="feature_keep_screen_on_while_recording_on_desc">While recording from the keyboard or floating ball, the screen stays on so it will not sleep mid-recording.</string>
 
   <!-- Auto enter after input -->
   <string name="feature_auto_enter_after_asr_off_desc">After recognition (and AI post-processing if enabled), only the text is committed. You can still swipe right on the mic to send with Enter for that session.</string>
