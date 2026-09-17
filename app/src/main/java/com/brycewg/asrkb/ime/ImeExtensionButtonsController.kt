@@ -58,6 +58,7 @@ internal class ImeExtensionButtonsController(
         updateSelectExtButtonsUi()
         updateDynamicSelectButtons()
         updateSilenceAutoStopExtButtonsUi()
+        updateKeepScreenOnWhileRecordingExtButtonsUi()
         updateMicTapToggleExtButtonsUi()
         updateFloatingKeyboardExtButtonsUi()
         updateAutoEnterAfterAsrExtButtonsUi()
@@ -227,6 +228,11 @@ internal class ImeExtensionButtonsController(
         ) {
             updateSilenceAutoStopExtButtonsUi()
         }
+        if (action == ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE &&
+            result == KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
+        ) {
+            updateKeepScreenOnWhileRecordingExtButtonsUi()
+        }
         if (action == ExtensionButtonAction.MIC_TAP_TOGGLE &&
             result == KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
         ) {
@@ -286,6 +292,12 @@ internal class ImeExtensionButtonsController(
         }
     }
 
+    private fun updateKeepScreenOnWhileRecordingExtButtonsUi() {
+        updateDynamicToggleButtons(ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE) { enabled ->
+            if (enabled) R.drawable.lightbulb_filament_fill else R.drawable.lightbulb_filament
+        }
+    }
+
     private fun updateMicTapToggleExtButtonsUi() {
         updateDynamicToggleButtons(ExtensionButtonAction.MIC_TAP_TOGGLE) { enabled ->
             if (enabled) R.drawable.hand_pointing else R.drawable.hand_pointing_fill
@@ -322,6 +334,7 @@ internal class ImeExtensionButtonsController(
     ) {
         val enabled = when (action) {
             ExtensionButtonAction.SILENCE_AUTOSTOP_TOGGLE -> prefs.autoStopOnSilenceEnabled
+            ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE -> prefs.keepScreenOnWhileRecording
             ExtensionButtonAction.MIC_TAP_TOGGLE -> prefs.micTapToggleEnabled
             ExtensionButtonAction.FLOATING_KEYBOARD_TOGGLE -> prefs.imeTabletFloatingKeyboardEnabled
             ExtensionButtonAction.AUTO_ENTER_AFTER_ASR_TOGGLE -> prefs.autoEnterAfterAsrEnabled

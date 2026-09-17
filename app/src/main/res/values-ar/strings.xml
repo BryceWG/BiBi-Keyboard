@@ -227,6 +227,7 @@
   <string name="ext_btn_undo">تراجع</string>
   <string name="ext_btn_hide">إخفاء اللوحة</string>
   <string name="ext_btn_silence_autostop">إيقاف تلقائي عند الصمت</string>
+  <string name="ext_btn_keep_screen_on_while_recording">إبقاء الشاشة مضاءة أثناء التسجيل</string>
   <string name="ext_btn_mic_tap_toggle">وضع التسجيل</string>
   <string name="ext_btn_floating_keyboard">لوحة عائمة</string>
   <string name="ext_btn_auto_enter_after_asr">إدخال تلقائي بعد اكتمال التعرّف</string>
@@ -330,6 +331,8 @@
   <string name="toast_accessibility_enabled">خدمة إمكانية الوصول مفعّلة. الإدراج التلقائي متاح الآن.</string>
   <string name="toast_silence_autostop_on">الإيقاف التلقائي عند الصمت مفعّل</string>
   <string name="toast_silence_autostop_off">الإيقاف التلقائي عند الصمت معطّل</string>
+  <string name="toast_keep_screen_on_while_recording_on">إبقاء الشاشة مضاءة أثناء التسجيل مفعّل</string>
+  <string name="toast_keep_screen_on_while_recording_off">إبقاء الشاشة مضاءة أثناء التسجيل معطّل</string>
   <string name="toast_mic_tap_mode_on">تم التبديل إلى الضغط للبدء</string>
   <string name="toast_mic_tap_mode_off">تم التبديل إلى الضغط المطوّل للكلام</string>
   <string name="toast_floating_keyboard_on">اللوحة العائمة مفعّلة</string>

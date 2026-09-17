@@ -225,6 +225,7 @@
   <string name="ext_btn_undo">撤销</string>
   <string name="ext_btn_hide">收起键盘</string>
   <string name="ext_btn_silence_autostop">录音判停</string>
+  <string name="ext_btn_keep_screen_on_while_recording">录音屏幕常亮</string>
   <string name="ext_btn_mic_tap_toggle">录音模式切换</string>
   <string name="ext_btn_floating_keyboard">悬浮键盘</string>
   <string name="ext_btn_auto_enter_after_asr">输入完成后自动回车</string>
@@ -328,6 +329,8 @@
   <string name="toast_accessibility_enabled">无障碍服务已启用，现在可以自动插入文本了</string>
   <string name="toast_silence_autostop_on">已开启录音判停</string>
   <string name="toast_silence_autostop_off">已关闭录音判停</string>
+  <string name="toast_keep_screen_on_while_recording_on">已开启录音屏幕常亮</string>
+  <string name="toast_keep_screen_on_while_recording_off">已关闭录音屏幕常亮</string>
   <string name="toast_mic_tap_mode_on">已切换为点按启停</string>
   <string name="toast_mic_tap_mode_off">已切换为长按说话</string>
   <string name="toast_floating_keyboard_on">已开启悬浮键盘</string>

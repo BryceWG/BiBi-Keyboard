@@ -93,6 +93,15 @@ enum class ExtensionButtonAction(val id: String, val titleResId: Int, val iconRe
     ),
 
     /**
+     * 录音时屏幕常亮开关
+     */
+    KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE(
+        id = "keep_screen_on_while_recording_toggle",
+        titleResId = R.string.ext_btn_keep_screen_on_while_recording,
+        iconResId = R.drawable.lightbulb_filament
+    ),
+
+    /**
      * 麦克风录音模式切换（长按说话 / 点按启停）
      */
     MIC_TAP_TOGGLE(

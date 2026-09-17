@@ -227,6 +227,7 @@
   <string name="ext_btn_undo">Undo</string>
   <string name="ext_btn_hide">Hide keyboard</string>
   <string name="ext_btn_silence_autostop">Auto-stop on silence</string>
+  <string name="ext_btn_keep_screen_on_while_recording">Keep screen on while recording</string>
   <string name="ext_btn_mic_tap_toggle">Recording mode</string>
   <string name="ext_btn_floating_keyboard">Floating keyboard</string>
   <string name="ext_btn_auto_enter_after_asr">Auto enter after input</string>
@@ -330,6 +331,8 @@
   <string name="toast_accessibility_enabled">Accessibility service enabled. Auto-insert is now available.</string>
   <string name="toast_silence_autostop_on">Auto-stop on silence enabled</string>
   <string name="toast_silence_autostop_off">Auto-stop on silence disabled</string>
+  <string name="toast_keep_screen_on_while_recording_on">Keep screen on while recording enabled</string>
+  <string name="toast_keep_screen_on_while_recording_off">Keep screen on while recording disabled</string>
   <string name="toast_mic_tap_mode_on">Switched to tap-to-start</string>
   <string name="toast_mic_tap_mode_off">Switched to hold-to-talk</string>
   <string name="toast_floating_keyboard_on">Floating keyboard enabled</string>

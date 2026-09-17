@@ -39,6 +39,7 @@ internal class ExtensionButtonActionDispatcher(
         ExtensionButtonAction.NUMPAD -> KeyboardActionHandler.ExtensionButtonActionResult.NEED_SHOW_NUMPAD
         ExtensionButtonAction.CLIPBOARD -> KeyboardActionHandler.ExtensionButtonActionResult.NEED_SHOW_CLIPBOARD
         ExtensionButtonAction.SILENCE_AUTOSTOP_TOGGLE -> toggleSilenceAutoStop()
+        ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE -> toggleKeepScreenOnWhileRecording()
         ExtensionButtonAction.MIC_TAP_TOGGLE -> toggleMicTapMode()
         ExtensionButtonAction.FLOATING_KEYBOARD_TOGGLE -> toggleFloatingKeyboard()
         ExtensionButtonAction.AUTO_ENTER_AFTER_ASR_TOGGLE -> toggleAutoEnterAfterAsr()
@@ -137,6 +138,18 @@ internal class ExtensionButtonActionDispatcher(
             R.string.toast_silence_autostop_on
         } else {
             R.string.toast_silence_autostop_off
+        }
+        uiListenerProvider()?.onStatusMessage(context.getString(msgRes))
+        return KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
+    }
+
+    private fun toggleKeepScreenOnWhileRecording(): KeyboardActionHandler.ExtensionButtonActionResult {
+        val newValue = !prefs.keepScreenOnWhileRecording
+        prefs.keepScreenOnWhileRecording = newValue
+        val msgRes = if (newValue) {
+            R.string.toast_keep_screen_on_while_recording_on
+        } else {
+            R.string.toast_keep_screen_on_while_recording_off
         }
         uiListenerProvider()?.onStatusMessage(context.getString(msgRes))
         return KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS

@@ -226,6 +226,7 @@
   <string name="ext_btn_undo">取り消す</string>
   <string name="ext_btn_hide">キーボードを非表示</string>
   <string name="ext_btn_silence_autostop">無音時自動停止</string>
+  <string name="ext_btn_keep_screen_on_while_recording">録音中は画面を常時点灯</string>
   <string name="ext_btn_mic_tap_toggle">録音モード</string>
   <string name="ext_btn_floating_keyboard">フローティングキーボード</string>
   <string name="ext_btn_auto_enter_after_asr">入力完了後に自動Enter</string>
@@ -329,6 +330,8 @@
   <string name="toast_accessibility_enabled">アクセシビリティサービスが有効になりました。自動挿入が利用可能になりました。</string>
   <string name="toast_silence_autostop_on">無音時自動停止が有効になりました</string>
   <string name="toast_silence_autostop_off">無音時自動停止が無効になりました</string>
+  <string name="toast_keep_screen_on_while_recording_on">録音中の画面常時点灯が有効になりました</string>
+  <string name="toast_keep_screen_on_while_recording_off">録音中の画面常時点灯が無効になりました</string>
   <string name="toast_mic_tap_mode_on">タップで録音開始/停止に切り替えました</string>
   <string name="toast_mic_tap_mode_off">長押し録音に切り替えました</string>
   <string name="toast_floating_keyboard_on">フローティングキーボードを有効にしました</string>

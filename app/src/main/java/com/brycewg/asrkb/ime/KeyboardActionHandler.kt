@@ -765,7 +765,16 @@ class KeyboardActionHandler(
     fun handleExtensionButtonClick(
         action: com.brycewg.asrkb.ime.ExtensionButtonAction,
         ic: InputConnection?
-    ): ExtensionButtonActionResult = extensionButtonDispatcher.dispatch(action, ic)
+    ): ExtensionButtonActionResult {
+        val result = extensionButtonDispatcher.dispatch(action, ic)
+        if (
+            action == com.brycewg.asrkb.ime.ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE &&
+            result == ExtensionButtonActionResult.SUCCESS
+        ) {
+            asrManager.syncRecordingKeepScreenOn()
+        }
+        return result
+    }
 
     /**
      * 扩展按钮动作结果

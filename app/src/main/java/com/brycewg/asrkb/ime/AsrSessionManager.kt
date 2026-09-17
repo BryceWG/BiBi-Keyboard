@@ -1202,6 +1202,11 @@ class AsrSessionManager(
         onStopped(seq)
     }
 
+    /** 按当前 prefs 与录音状态同步窗口常亮，供布局开关中途切换。 */
+    fun syncRecordingKeepScreenOn() {
+        setRecordingKeepScreenOn(active = isRunning())
+    }
+
     private fun setRecordingKeepScreenOn(active: Boolean) {
         if (active && prefs.keepScreenOnWhileRecording) {
             keepScreenOnController.acquire()

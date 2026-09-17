@@ -225,6 +225,7 @@
   <string name="ext_btn_undo">復原</string>
   <string name="ext_btn_hide">隱藏鍵盤</string>
   <string name="ext_btn_silence_autostop">錄音判停</string>
+  <string name="ext_btn_keep_screen_on_while_recording">錄音螢幕常亮</string>
   <string name="ext_btn_mic_tap_toggle">錄音模式切換</string>
   <string name="ext_btn_floating_keyboard">懸浮鍵盤</string>
   <string name="ext_btn_auto_enter_after_asr">輸入完成後自動Enter</string>
@@ -328,6 +329,8 @@
   <string name="toast_accessibility_enabled">無障礙服務已啟用，現在可以自動插入文字了</string>
   <string name="toast_silence_autostop_on">已開啟錄音判停</string>
   <string name="toast_silence_autostop_off">已關閉錄音判停</string>
+  <string name="toast_keep_screen_on_while_recording_on">已開啟錄音螢幕常亮</string>
+  <string name="toast_keep_screen_on_while_recording_off">已關閉錄音螢幕常亮</string>
   <string name="toast_mic_tap_mode_on">已切換為點按啟停</string>
   <string name="toast_mic_tap_mode_off">已切換為長按說話</string>
   <string name="toast_floating_keyboard_on">已開啟懸浮鍵盤</string>

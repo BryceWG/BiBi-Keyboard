@@ -1623,6 +1623,7 @@ private val trayKeyOrder = listOf(
     "undo",
     "hide_keyboard",
     "silence_autostop_toggle",
+    "keep_screen_on_while_recording_toggle",
     "mic_tap_toggle",
     "auto_enter_after_asr_toggle",
     "gesture_cancel",
