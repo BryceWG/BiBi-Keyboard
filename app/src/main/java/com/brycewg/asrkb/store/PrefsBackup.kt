@@ -134,6 +134,10 @@ internal object PrefsBackup {
             Log.w(TAG, "Failed to export prompt selection candidates", t)
         }
         o.put(KEY_PROMPT_SELECTOR_MODEL, getPrefString(KEY_PROMPT_SELECTOR_MODEL, ""))
+        o.put(KEY_JEV_TYPESAFE_API_KEY, jevTypesafeApiKey)
+        o.put(KEY_JEV_OPENROUTER_API_KEY, jevOpenRouterApiKey)
+        o.put(KEY_JEV_CLOUDFLARE_API_KEY, jevCloudflareApiKey)
+        o.put(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, jevCloudflareAccountId)
         // 语音预设
         o.put(KEY_SPEECH_PRESETS, speechPresetsJson)
         o.put(KEY_SPEECH_PRESET_ACTIVE_ID, activeSpeechPresetId)
@@ -464,6 +468,10 @@ internal object PrefsBackup {
                 this,
                 optString(KEY_PROMPT_SELECTOR_MODEL)
             )
+            optString(KEY_JEV_TYPESAFE_API_KEY)?.let { jevTypesafeApiKey = it }
+            optString(KEY_JEV_OPENROUTER_API_KEY)?.let { jevOpenRouterApiKey = it }
+            optString(KEY_JEV_CLOUDFLARE_API_KEY)?.let { jevCloudflareApiKey = it }
+            optString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID)?.let { jevCloudflareAccountId = it }
             // 语音预设
             optString(KEY_SPEECH_PRESETS)?.let { speechPresetsJson = it }
             optString(KEY_SPEECH_PRESET_ACTIVE_ID)?.let { activeSpeechPresetId = it }

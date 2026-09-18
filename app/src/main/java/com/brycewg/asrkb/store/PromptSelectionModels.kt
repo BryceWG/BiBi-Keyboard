@@ -5,6 +5,24 @@ import kotlinx.serialization.Serializable
 
 const val PROMPT_SELECTION_SKIP_POLISH_ID = "candidate.skip_polish"
 
+const val JEV_MODEL_ID = "jev-latest"
+
+enum class JevClassifierProvider(val id: String) {
+    TYPESAFE("typesafe"),
+    OPENROUTER("openrouter"),
+    CLOUDFLARE("cloudflare");
+
+    companion object {
+        fun fromId(id: String): JevClassifierProvider? = entries.firstOrNull { it.id == id }
+    }
+
+    fun displayName(): String = when (this) {
+        TYPESAFE -> "TypeSafe"
+        OPENROUTER -> "OpenRouter"
+        CLOUDFLARE -> "Cloudflare"
+    }
+}
+
 fun isPromptSelectionSkipPolishId(id: String): Boolean = id == PROMPT_SELECTION_SKIP_POLISH_ID
 
 /** A selectable prompt preset or the special action that keeps the transcript unchanged. */
@@ -45,6 +63,10 @@ sealed interface PromptSelectorModelRef {
     @Serializable
     @SerialName("custom")
     data class Custom(val providerId: String, val model: String) : PromptSelectorModelRef
+
+    @Serializable
+    @SerialName("jev")
+    data class Jev(val providerId: String, val model: String = JEV_MODEL_ID) : PromptSelectorModelRef
 }
 
 @Serializable

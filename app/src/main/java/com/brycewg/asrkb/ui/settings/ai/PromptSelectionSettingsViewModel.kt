@@ -3,6 +3,7 @@ package com.brycewg.asrkb.ui.settings.ai
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.brycewg.asrkb.asr.LlmVendor
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.LlmCustomProviderOption
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmVendorOption
@@ -154,6 +155,20 @@ class PromptSelectionSettingsViewModel : ViewModel() {
         }
     }
 
+    fun updateJevApiKey(prefs: Prefs, provider: JevClassifierProvider, value: String) {
+        when (provider) {
+            JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey = value
+            JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey = value
+            JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey = value
+        }
+        refresh(prefs)
+    }
+
+    fun updateJevAccountId(prefs: Prefs, value: String) {
+        prefs.jevCloudflareAccountId = value
+        refresh(prefs)
+    }
+
     /** 第二层模型列表：已保存模型 + 当前模型，顺序稳定且不提供自由输入。 */
     fun savedModels(prefs: Prefs, ref: PromptSelectorModelRef): List<String> = try {
         LlmModelConfigResolver.savedModels(prefs, ref)
@@ -180,6 +195,9 @@ class PromptSelectionSettingsViewModel : ViewModel() {
             state.customOptions.forEach { option ->
                 add(PromptSelectorModelRef.Custom(providerId = option.providerId, model = ""))
             }
+            JevClassifierProvider.entries.forEach { provider ->
+                add(PromptSelectorModelRef.Jev(providerId = provider.id))
+            }
         }
     }
 
@@ -203,6 +221,8 @@ class PromptSelectionSettingsViewModel : ViewModel() {
         a is PromptSelectorModelRef.Builtin && b is PromptSelectorModelRef.Builtin ->
             a.vendorId == b.vendorId
         a is PromptSelectorModelRef.Custom && b is PromptSelectorModelRef.Custom ->
+            a.providerId == b.providerId
+        a is PromptSelectorModelRef.Jev && b is PromptSelectorModelRef.Jev ->
             a.providerId == b.providerId
         else -> false
     }

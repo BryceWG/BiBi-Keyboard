@@ -865,6 +865,22 @@ class Prefs(context: Context) {
         get() = PromptSelectionStore.readModelRef(this)
         set(value) = PromptSelectionStore.writeModelRef(this, value)
 
+    var jevTypesafeApiKey: String
+        get() = sp.getString(KEY_JEV_TYPESAFE_API_KEY, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_TYPESAFE_API_KEY, value.trim()) }
+
+    var jevOpenRouterApiKey: String
+        get() = sp.getString(KEY_JEV_OPENROUTER_API_KEY, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_OPENROUTER_API_KEY, value.trim()) }
+
+    var jevCloudflareApiKey: String
+        get() = sp.getString(KEY_JEV_CLOUDFLARE_API_KEY, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_API_KEY, value.trim()) }
+
+    var jevCloudflareAccountId: String
+        get() = sp.getString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, value.trim()) }
+
     // 语音预置信息（触发短语 -> 替换内容）
     var speechPresetsJson: String
         get() = sp.getString(KEY_SPEECH_PRESETS, "") ?: ""

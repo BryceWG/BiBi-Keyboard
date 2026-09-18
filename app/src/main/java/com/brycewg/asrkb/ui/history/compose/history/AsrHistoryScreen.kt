@@ -80,6 +80,7 @@ import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.AsrHistoryTimingOrigin
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectionFailReason
 import com.brycewg.asrkb.store.PromptSelectionStatus
@@ -1022,6 +1023,7 @@ private fun promptSelectionModelLabel(
         vendorId != null -> LlmVendor.allVendors()
             .firstOrNull { it.id == vendorId }
             ?.let { stringResource(it.displayNameResId) }
+            ?: JevClassifierProvider.fromId(vendorId)?.displayName()
             ?: vendorId
         else -> null
     }

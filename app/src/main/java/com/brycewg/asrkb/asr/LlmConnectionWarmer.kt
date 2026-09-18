@@ -8,9 +8,11 @@ package com.brycewg.asrkb.asr
 
 import android.os.SystemClock
 import android.util.Log
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmModelResolution
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectorModelRef
 import com.brycewg.asrkb.store.ResolvedLlmModelConfig
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import java.io.IOException
@@ -75,6 +77,7 @@ internal object LlmConnectionWarmer {
         }
         if (targets.isEmpty()) return
         targets.forEach { warmConnection(it.endpoint) }
+        buildJevWarmEndpoint(prefs)?.let(::warmConnection)
         prewarmRequestModes(prefs, targets)
     }
 
@@ -101,6 +104,17 @@ internal object LlmConnectionWarmer {
         }
         // 同一个模型配置只需预热一次（例如选择模型跟随默认润色模型时）。
         return targets.distinctBy { it.resolved.requestModeCapabilityKey }
+    }
+
+    private fun buildJevWarmEndpoint(prefs: Prefs): String? {
+        if (!prefs.promptAutoSelectEnabled) return null
+        val ref = prefs.promptSelectorModelRef as? PromptSelectorModelRef.Jev ?: return null
+        return when (JevClassifierProvider.fromId(ref.providerId)) {
+            JevClassifierProvider.TYPESAFE -> "https://api.typesafe.ai/v1/systemone"
+            JevClassifierProvider.OPENROUTER -> "https://openrouter.ai/api/alpha/decisions"
+            JevClassifierProvider.CLOUDFLARE -> "https://api.cloudflare.com/client/v4"
+            null -> null
+        }
     }
 
     private fun warmConnection(endpoint: String) {

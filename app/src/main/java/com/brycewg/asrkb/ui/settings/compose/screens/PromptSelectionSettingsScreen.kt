@@ -22,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmVendor
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectorModelRef
 import com.brycewg.asrkb.ui.settings.ai.PromptSelectionSettingsViewModel
@@ -163,6 +164,7 @@ fun PromptSelectionSettingsScreen(
                                     val currentModel = when (ref) {
                                         is PromptSelectorModelRef.Builtin -> ref.model
                                         is PromptSelectorModelRef.Custom -> ref.model
+                                        is PromptSelectorModelRef.Jev -> ref.model
                                         PromptSelectorModelRef.FollowDefault -> ""
                                     }
                                     val models = viewModel.savedModels(prefs, ref)
@@ -193,6 +195,46 @@ fun PromptSelectionSettingsScreen(
                                 uiMode = uiMode,
                                 textRes = R.string.prompt_selection_model_unavailable
                             )
+                        }
+                    }
+                }
+            }
+
+            (state.modelSummary?.ref as? PromptSelectorModelRef.Jev)?.let { ref ->
+                val provider = JevClassifierProvider.fromId(ref.providerId)
+                if (provider != null) {
+                    item("prompt_selection_jev_credentials") {
+                        AiSection(
+                            uiMode = uiMode,
+                            titleRes = R.string.section_prompt_selection_jev_credentials
+                        ) {
+                            AiBodyText(
+                                uiMode = uiMode,
+                                textRes = R.string.helper_prompt_selection_jev_only
+                            )
+                            AiTextField(
+                                uiMode = uiMode,
+                                value = jevApiKey(prefs, provider),
+                                onValueChange = { value ->
+                                    viewModel.updateJevApiKey(prefs, provider, value)
+                                },
+                                label = stringResource(R.string.label_prompt_selection_jev_api_key),
+                                password = true,
+                                index = 0,
+                                count = if (provider == JevClassifierProvider.CLOUDFLARE) 2 else 1
+                            )
+                            if (provider == JevClassifierProvider.CLOUDFLARE) {
+                                AiTextField(
+                                    uiMode = uiMode,
+                                    value = prefs.jevCloudflareAccountId,
+                                    onValueChange = { value ->
+                                        viewModel.updateJevAccountId(prefs, value)
+                                    },
+                                    label = stringResource(R.string.label_prompt_selection_jev_account_id),
+                                    index = 1,
+                                    count = 2
+                                )
+                            }
                         }
                     }
                 }
@@ -268,6 +310,7 @@ private fun modelSummaryLabel(
         summary.vendorNameResId != null -> context.getString(summary.vendorNameResId)
         summary.customProviderName != null ->
             summary.customProviderName.ifBlank { context.getString(R.string.untitled_profile) }
+        summary.jevProviderName != null -> summary.jevProviderName
         else -> context.getString(R.string.prompt_selection_model_follow_default)
     }
     val model = summary.model.ifBlank { context.getString(R.string.prompt_selection_model_unconfigured) }
@@ -311,6 +354,11 @@ private fun modelRefChoiceSheet(
                 val option = state.customOptions.firstOrNull { it.providerId == ref.providerId }
                 title = option?.name?.ifBlank { untitledProfile } ?: untitledProfile
                 configured = option?.configured == true
+            }
+            is PromptSelectorModelRef.Jev -> {
+                val provider = JevClassifierProvider.fromId(ref.providerId)
+                title = provider?.displayName() ?: ref.providerId
+                configured = provider?.let { isJevConfigured(prefs, it) } == true
             }
         }
         Option(
@@ -383,4 +431,18 @@ private fun withModel(
     PromptSelectorModelRef.FollowDefault -> PromptSelectorModelRef.FollowDefault
     is PromptSelectorModelRef.Builtin -> ref.copy(model = model)
     is PromptSelectorModelRef.Custom -> ref.copy(model = model)
+    is PromptSelectorModelRef.Jev -> ref.copy(model = model)
+}
+
+private fun isJevConfigured(prefs: Prefs, provider: JevClassifierProvider): Boolean = when (provider) {
+    JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
+    JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
+    JevClassifierProvider.CLOUDFLARE ->
+        prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
+}
+
+private fun jevApiKey(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {
+    JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey
+    JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey
+    JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey
 }

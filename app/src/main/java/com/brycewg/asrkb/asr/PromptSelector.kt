@@ -7,6 +7,7 @@ package com.brycewg.asrkb.asr
 
 import android.util.Log
 import com.brycewg.asrkb.R
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmModelResolution
 import com.brycewg.asrkb.store.LlmModelUnavailableReason
@@ -148,6 +149,84 @@ internal object PromptSelector {
                 ),
                 candidate = null
             )
+        }
+
+        if (modelRef is PromptSelectorModelRef.Jev) {
+            val provider = JevClassifierProvider.fromId(modelRef.providerId)
+            if (provider == null) {
+                return PromptSelectionOutcome(
+                    status = PromptSelectionStatus.failure(
+                        reason = PromptSelectionFailReason.INVALID_CONFIG,
+                        requestSent = false,
+                        elapsedMs = elapsedMs()
+                    ),
+                    candidate = null
+                )
+            }
+            val credentialsReady = when (provider) {
+                JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
+                JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
+                JevClassifierProvider.CLOUDFLARE ->
+                    prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
+            }
+            if (!credentialsReady || modelRef.model != com.brycewg.asrkb.store.JEV_MODEL_ID) {
+                return PromptSelectionOutcome(
+                    status = PromptSelectionStatus.failure(
+                        reason = PromptSelectionFailReason.INVALID_CONFIG,
+                        requestSent = false,
+                        elapsedMs = elapsedMs()
+                    ),
+                    candidate = null
+                )
+            }
+            val classifier = JevClassifier()
+            val result = try {
+                onRequestStarted?.invoke()
+                try {
+                    classifier.select(
+                        prefs = prefs,
+                        provider = provider,
+                        candidates = candidates,
+                        asrText = asrText
+                    )
+                } finally {
+                    onRequestFinished?.invoke()
+                }
+            } catch (t: CancellationException) {
+                classifier.cancel()
+                throw t
+            }
+            val matchedIndex = result.choice?.let { candidatePromptIds(candidates).indexOf(it.trim()) }
+            val matched = matchedIndex?.takeIf { it >= 0 }?.let(candidates::get)
+            if (matched == null) {
+                return PromptSelectionOutcome(
+                    status = PromptSelectionStatus.failure(
+                        reason = result.failureReason ?: PromptSelectionFailReason.INVALID_OUTPUT,
+                        requestSent = result.requestSent,
+                        vendorId = result.vendorId,
+                        model = result.model,
+                        elapsedMs = result.elapsedMs
+                    ),
+                    candidate = null
+                )
+            }
+            val status = if (matched.skipsPolish) {
+                PromptSelectionStatus.skippedPolishSuccess(
+                    vendorId = result.vendorId,
+                    model = result.model,
+                    elapsedMs = result.elapsedMs
+                )
+            } else {
+                PromptSelectionStatus.success(
+                    presetId = matched.id,
+                    presetTitle = matched.displayTitle,
+                    vendorId = result.vendorId,
+                    customProviderId = null,
+                    model = result.model,
+                    elapsedMs = result.elapsedMs
+                )
+            }
+            return PromptSelectionOutcome(status = status, candidate = matched)
         }
 
         val resolved = when (val r = LlmModelConfigResolver.resolve(prefs, modelRef)) {
