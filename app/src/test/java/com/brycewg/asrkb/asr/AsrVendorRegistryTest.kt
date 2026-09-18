@@ -99,6 +99,7 @@ class AsrVendorRegistryTest {
             AsrVendor.Volc to metadata(
                 R.string.vendor_volc,
                 AsrVendorDisplayTag.Online,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.Streaming,
                 AsrVendorDisplayTag.NonStreaming,
                 AsrVendorDisplayTag.ChineseDialect,
@@ -132,6 +133,7 @@ class AsrVendorRegistryTest {
             AsrVendor.DashScope to metadata(
                 R.string.vendor_dashscope,
                 AsrVendorDisplayTag.Online,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.Streaming,
                 AsrVendorDisplayTag.NonStreaming,
                 AsrVendorDisplayTag.ChineseDialect,
@@ -141,14 +143,12 @@ class AsrVendorRegistryTest {
                 R.string.vendor_gemini,
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate,
                 AsrVendorDisplayTag.Custom
             ),
             AsrVendor.MiMo to metadata(
                 R.string.vendor_mimo,
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate,
                 AsrVendorDisplayTag.Custom
             ),
             AsrVendor.Soniox to metadata(
@@ -162,6 +162,7 @@ class AsrVendorRegistryTest {
                 R.string.vendor_stepaudio,
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
+                AsrVendorDisplayTag.ChineseDialect,
                 AsrVendorDisplayTag.Accurate
             ),
             AsrVendor.Zhipu to metadata(
@@ -174,7 +175,6 @@ class AsrVendorRegistryTest {
                 R.string.vendor_cohere,
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate,
                 AsrVendorDisplayTag.Custom
             ),
             AsrVendor.SenseVoice to metadata(
@@ -187,12 +187,12 @@ class AsrVendorRegistryTest {
                 R.string.vendor_funasr_nano,
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.ChineseDialect,
-                AsrVendorDisplayTag.Accurate
+                AsrVendorDisplayTag.ChineseDialect
             ),
             AsrVendor.Qwen3Asr to metadata(
                 R.string.vendor_qwen3_asr,
                 AsrVendorDisplayTag.Local,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.NonStreaming,
                 AsrVendorDisplayTag.ChineseDialect,
                 AsrVendorDisplayTag.Accurate
@@ -211,6 +211,7 @@ class AsrVendorRegistryTest {
             AsrVendor.XAsr to metadata(
                 R.string.vendor_x_asr,
                 AsrVendorDisplayTag.Local,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.Streaming,
                 AsrVendorDisplayTag.Accurate
             )
@@ -428,6 +429,7 @@ class AsrVendorRegistryTest {
     private fun AsrVendorDisplayTag.toUiTag(): AsrVendorTag = when (this) {
         AsrVendorDisplayTag.Online -> AsrVendorTag.Online
         AsrVendorDisplayTag.Local -> AsrVendorTag.Local
+        AsrVendorDisplayTag.Recommended -> AsrVendorTag.Recommended
         AsrVendorDisplayTag.Streaming -> AsrVendorTag.Streaming
         AsrVendorDisplayTag.NonStreaming -> AsrVendorTag.NonStreaming
         AsrVendorDisplayTag.PseudoStreaming -> AsrVendorTag.PseudoStreaming

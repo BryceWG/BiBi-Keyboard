@@ -19,6 +19,7 @@
     <string name="asr_vendor_tag_non_streaming">非ストリーミング</string>
     <string name="asr_vendor_tag_online">オンライン</string>
     <string name="asr_vendor_tag_local">端末内</string>
+    <string name="asr_vendor_tag_recommended">おすすめ</string>
     <string name="asr_vendor_tag_custom">カスタム</string>
     <string name="asr_vendor_tag_pseudo_streaming">擬似ストリーミング</string>
     <string name="asr_vendor_tag_chinese_dialect">中国語方言</string>

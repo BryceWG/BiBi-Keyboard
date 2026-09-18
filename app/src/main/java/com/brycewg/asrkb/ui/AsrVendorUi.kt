@@ -32,6 +32,7 @@ object AsrVendorUi {
     private fun AsrVendorDisplayTag.toUiTag(): AsrVendorTag = when (this) {
         AsrVendorDisplayTag.Online -> AsrVendorTag.Online
         AsrVendorDisplayTag.Local -> AsrVendorTag.Local
+        AsrVendorDisplayTag.Recommended -> AsrVendorTag.Recommended
         AsrVendorDisplayTag.Streaming -> AsrVendorTag.Streaming
         AsrVendorDisplayTag.NonStreaming -> AsrVendorTag.NonStreaming
         AsrVendorDisplayTag.PseudoStreaming -> AsrVendorTag.PseudoStreaming

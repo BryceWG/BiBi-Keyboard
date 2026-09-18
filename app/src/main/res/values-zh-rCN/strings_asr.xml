@@ -20,6 +20,7 @@
     <string name="asr_vendor_tag_non_streaming">非流</string>
     <string name="asr_vendor_tag_online">在线</string>
     <string name="asr_vendor_tag_local">本地</string>
+    <string name="asr_vendor_tag_recommended">推荐</string>
     <string name="asr_vendor_tag_custom">自定义</string>
     <string name="asr_vendor_tag_pseudo_streaming">伪流</string>
     <string name="asr_vendor_tag_chinese_dialect">中文方言</string>
