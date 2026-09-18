@@ -185,6 +185,7 @@ internal object AsrVendorRegistry {
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
+                AsrVendorDisplayTag.ChineseDialect,
                 AsrVendorDisplayTag.Accurate
             ),
             capabilities = onlineFileCapabilities()

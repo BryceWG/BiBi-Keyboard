@@ -162,6 +162,7 @@ class AsrVendorRegistryTest {
                 R.string.vendor_stepaudio,
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
+                AsrVendorDisplayTag.ChineseDialect,
                 AsrVendorDisplayTag.Accurate
             ),
             AsrVendor.Zhipu to metadata(
