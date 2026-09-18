@@ -19,6 +19,11 @@ enum class AsrVendorTag(
         bgColorResId = R.color.asr_tag_bg_local,
         textColorResId = R.color.asr_tag_fg_local
     ),
+    Recommended(
+        labelResId = R.string.asr_vendor_tag_recommended,
+        bgColorResId = R.color.asr_tag_bg_recommended,
+        textColorResId = R.color.asr_tag_fg_recommended
+    ),
     Streaming(
         labelResId = R.string.asr_vendor_tag_streaming,
         bgColorResId = R.color.asr_tag_bg_streaming,

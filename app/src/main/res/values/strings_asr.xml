@@ -19,6 +19,7 @@
     <string name="asr_vendor_tag_non_streaming">Non-streaming</string>
     <string name="asr_vendor_tag_online">Online</string>
     <string name="asr_vendor_tag_local">On-device</string>
+    <string name="asr_vendor_tag_recommended">Recommended</string>
     <string name="asr_vendor_tag_custom">Custom</string>
     <string name="asr_vendor_tag_pseudo_streaming">Pseudo-streaming</string>
     <string name="asr_vendor_tag_chinese_dialect">Chinese dialects</string>

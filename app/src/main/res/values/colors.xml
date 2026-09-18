@@ -15,6 +15,9 @@
     <color name="asr_tag_bg_local">#E2EEE7</color>
     <color name="asr_tag_fg_local">#2E5A45</color>
 
+    <color name="asr_tag_bg_recommended">#F8EBE2</color>
+    <color name="asr_tag_fg_recommended">#844C27</color>
+
     <color name="asr_tag_bg_streaming">#F2EBD9</color>
     <color name="asr_tag_fg_streaming">#6B5630</color>
 

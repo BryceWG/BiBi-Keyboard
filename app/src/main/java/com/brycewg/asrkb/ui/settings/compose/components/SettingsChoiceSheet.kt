@@ -345,6 +345,8 @@ private fun asrTagColor(@ColorRes colorResId: Int, isDark: Boolean): Color = whe
     R.color.asr_tag_fg_online -> if (isDark) Color(0xFFBBD4F4) else Color(0xFF2F4A67)
     R.color.asr_tag_bg_local -> if (isDark) Color(0xFF1D3328) else Color(0xFFE2EEE7)
     R.color.asr_tag_fg_local -> if (isDark) Color(0xFFBFE6D2) else Color(0xFF2E5A45)
+    R.color.asr_tag_bg_recommended -> if (isDark) Color(0xFF382419) else Color(0xFFF8EBE2)
+    R.color.asr_tag_fg_recommended -> if (isDark) Color(0xFFFFCCA6) else Color(0xFF844C27)
     R.color.asr_tag_bg_streaming -> if (isDark) Color(0xFF3A321E) else Color(0xFFF2EBD9)
     R.color.asr_tag_fg_streaming -> if (isDark) Color(0xFFFFE7B6) else Color(0xFF6B5630)
     R.color.asr_tag_bg_non_streaming -> if (isDark) Color(0xFF263233) else Color(0xFFE6EDEC)

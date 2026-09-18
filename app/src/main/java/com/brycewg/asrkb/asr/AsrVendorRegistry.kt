@@ -36,6 +36,7 @@ internal data class AsrVendorDescriptor(
 internal enum class AsrVendorDisplayTag {
     Online,
     Local,
+    Recommended,
     Streaming,
     NonStreaming,
     PseudoStreaming,
@@ -84,6 +85,7 @@ internal object AsrVendorRegistry {
             pickerOrder = 1,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.Streaming,
                 AsrVendorDisplayTag.NonStreaming,
                 AsrVendorDisplayTag.ChineseDialect,
@@ -132,6 +134,7 @@ internal object AsrVendorRegistry {
             pickerOrder = 5,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.Streaming,
                 AsrVendorDisplayTag.NonStreaming,
                 AsrVendorDisplayTag.ChineseDialect,
@@ -146,7 +149,6 @@ internal object AsrVendorRegistry {
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate,
                 AsrVendorDisplayTag.Custom
             ),
             capabilities = onlineFileCapabilities(customEndpoint = true)
@@ -159,7 +161,6 @@ internal object AsrVendorRegistry {
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate,
                 AsrVendorDisplayTag.Custom
             ),
             capabilities = onlineFileCapabilities(customEndpoint = true)
@@ -206,7 +207,6 @@ internal object AsrVendorRegistry {
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate,
                 AsrVendorDisplayTag.Custom
             ),
             capabilities = onlineFileCapabilities()
@@ -230,8 +230,7 @@ internal object AsrVendorRegistry {
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.ChineseDialect,
-                AsrVendorDisplayTag.Accurate
+                AsrVendorDisplayTag.ChineseDialect
             ),
             capabilities = localFileCapabilities()
         ),
@@ -242,6 +241,7 @@ internal object AsrVendorRegistry {
             pickerOrder = 14,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.NonStreaming,
                 AsrVendorDisplayTag.ChineseDialect,
                 AsrVendorDisplayTag.Accurate
@@ -278,6 +278,7 @@ internal object AsrVendorRegistry {
             pickerOrder = 17,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
+                AsrVendorDisplayTag.Recommended,
                 AsrVendorDisplayTag.Streaming,
                 AsrVendorDisplayTag.Accurate
             ),

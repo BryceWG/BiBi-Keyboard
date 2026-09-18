@@ -19,6 +19,7 @@
     <string name="asr_vendor_tag_non_streaming">غير متدفق</string>
     <string name="asr_vendor_tag_online">سحابي</string>
     <string name="asr_vendor_tag_local">على الجهاز</string>
+    <string name="asr_vendor_tag_recommended">موصى به</string>
     <string name="asr_vendor_tag_custom">مخصص</string>
     <string name="asr_vendor_tag_pseudo_streaming">شبه بث</string>
     <string name="asr_vendor_tag_chinese_dialect">لهجات صينية</string>
