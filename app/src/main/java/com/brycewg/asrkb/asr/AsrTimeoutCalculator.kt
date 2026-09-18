@@ -78,13 +78,20 @@ object AsrTimeoutCalculator {
         backupVendor: AsrVendor? = null,
         backupStatsSnapshot: AsrRuntimeVendorSnapshot? = null,
         sensitivityTier: Int = 1,
-        primaryStreaming: Boolean = true
+        primaryStreaming: Boolean = true,
+        pendingRetryCount: Int = 0
     ): Long {
         val primaryTimeoutMs = calculateProcessingTimeoutMs(
             audioMs = audioMs,
             vendor = primaryVendor,
             statsSnapshot = primaryStatsSnapshot
         )
+        val retryAllowanceMs = progressiveRetryAllowanceMs(
+            pendingRetryCount = pendingRetryCount,
+            primaryVendor = primaryVendor,
+            primaryStatsSnapshot = primaryStatsSnapshot
+        )
+        val primaryTimeoutWithRetriesMs = saturatedAdd(primaryTimeoutMs, retryAllowanceMs)
         return when (backupStrategy) {
             AsrParallelEngineDecision.UseParallel -> {
                 val backupProcessingTimeoutMs = calculateProcessingTimeoutMs(
@@ -92,7 +99,10 @@ object AsrTimeoutCalculator {
                     vendor = backupVendor,
                     statsSnapshot = backupStatsSnapshot
                 )
-                maxOf(primaryTimeoutMs, backupProcessingTimeoutMs) + BACKUP_PROCESSING_MARGIN_MS
+                saturatedAdd(
+                    maxOf(primaryTimeoutWithRetriesMs, backupProcessingTimeoutMs),
+                    BACKUP_PROCESSING_MARGIN_MS
+                )
             }
             AsrParallelEngineDecision.UseLazyLocalBackup -> {
                 // Processing timeout is the final session fuse. It must leave room after
@@ -106,7 +116,8 @@ object AsrTimeoutCalculator {
                     primaryStatsSnapshot = primaryStatsSnapshot,
                     backupStrategy = AsrParallelEngineDecision.UseLazyLocalBackup,
                     backupStatsSnapshot = backupStatsSnapshot,
-                    sensitivityTier = sensitivityTier
+                    sensitivityTier = sensitivityTier,
+                    pendingRetryCount = pendingRetryCount
                 )
                 val backupInferenceMs = calculateProcessingTimeoutMs(
                     audioMs = audioMs,
@@ -114,15 +125,17 @@ object AsrTimeoutCalculator {
                     statsSnapshot = backupStatsSnapshot
                 )
                 maxOf(
-                    primaryTimeoutMs + BACKUP_PROCESSING_MARGIN_MS,
+                    saturatedAdd(primaryTimeoutWithRetriesMs, BACKUP_PROCESSING_MARGIN_MS),
                     switchPlan.switchDeadlineMs +
                         switchPlan.lazyEstimatedBackupReadyMs +
                         backupInferenceMs +
                         BACKUP_PROCESSING_MARGIN_MS
-                ).coerceAtMost(LAZY_LOCAL_BACKUP_ABSOLUTE_MAX_MS)
+                ).coerceAtMost(
+                    saturatedAdd(LAZY_LOCAL_BACKUP_ABSOLUTE_MAX_MS, retryAllowanceMs)
+                )
             }
             AsrParallelEngineDecision.UsePrimaryOnly,
-            null -> primaryTimeoutMs
+            null -> primaryTimeoutWithRetriesMs
         }
     }
 
@@ -133,7 +146,8 @@ object AsrTimeoutCalculator {
         sensitivityTier: Int,
         primaryStatsSnapshot: AsrRuntimeVendorSnapshot? = null,
         backupStrategy: AsrParallelEngineDecision? = null,
-        backupStatsSnapshot: AsrRuntimeVendorSnapshot? = null
+        backupStatsSnapshot: AsrRuntimeVendorSnapshot? = null,
+        pendingRetryCount: Int = 0
     ): BackupSwitchPlan {
         val staticBaselineMs = staticSwitchDeadlineBaseMs(sensitivityTier)
         val audioLengthAdjustmentMs = switchDeadlineAudioLengthAdjustmentMs(audioMs)
@@ -156,9 +170,15 @@ object AsrTimeoutCalculator {
             staticFallbackMs
         }
         val profile = profileFor(primaryVendor)
-        val switchDeadlineMs = (dynamicBaselineMs ?: staticFallbackMs)
+        val baseSwitchDeadlineMs = (dynamicBaselineMs ?: staticFallbackMs)
             .coerceAtLeast(minDeadlineMs)
             .coerceAtMost(profile.maxTimeoutMs)
+        val retryAllowanceMs = progressiveRetryAllowanceMs(
+            pendingRetryCount = pendingRetryCount,
+            primaryVendor = primaryVendor,
+            primaryStatsSnapshot = primaryStatsSnapshot
+        )
+        val switchDeadlineMs = saturatedAdd(baseSwitchDeadlineMs, retryAllowanceMs)
         val lazyEstimatedBackupReadyMs = estimatedLazyBackupReadyMs(backupStatsSnapshot)
         val lazyResidencyFactor = lazyResidencyFactor(sensitivityTier)
         val lazyBackupStartAtMs = if (backupStrategy == AsrParallelEngineDecision.UseLazyLocalBackup) {
@@ -184,6 +204,29 @@ object AsrTimeoutCalculator {
     private fun dynamicSlowBaselineMs(snapshot: AsrRuntimeVendorSnapshot?): Long? {
         if (snapshot?.hasEnoughRequestSamples != true) return null
         return snapshot.slowRequestMs?.takeIf { it > 0L }
+    }
+
+    private fun progressiveRetryAllowanceMs(
+        pendingRetryCount: Int,
+        primaryVendor: AsrVendor?,
+        primaryStatsSnapshot: AsrRuntimeVendorSnapshot?
+    ): Long {
+        val retryCount = pendingRetryCount.coerceAtLeast(0)
+        if (retryCount == 0) return 0L
+        val profile = profileFor(primaryVendor)
+        val perRetryMs = primaryStatsSnapshot
+            ?.takeIf { it.hasEnoughRequestSamples }
+            ?.p90RequestMs
+            ?.takeIf { it > 0L }
+            ?.coerceIn(BASE_TIMEOUT_MS, profile.maxTimeoutMs)
+            ?: BASE_TIMEOUT_MS
+        return perRetryMs * retryCount.toLong().coerceAtMost(Long.MAX_VALUE / perRetryMs)
+    }
+
+    private fun saturatedAdd(left: Long, right: Long): Long = if (right > Long.MAX_VALUE - left) {
+        Long.MAX_VALUE
+    } else {
+        left + right
     }
 
     private fun dynamicSwitchDeadlineBaselineMs(

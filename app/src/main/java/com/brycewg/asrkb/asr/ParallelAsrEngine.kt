@@ -33,12 +33,15 @@ class ParallelAsrEngine(
     override val primaryVendor: AsrVendor,
     override val backupVendor: AsrVendor,
     private val onPrimaryRequestDuration: ((Long) -> Unit)? = null,
+    private val onBackupRequestDuration: ((Long) -> Unit)? = null,
     private val externalPcmInput: Boolean = false
 ) : StreamingAsrEngine,
     BackupAwareAsrEngine,
     ExternalPcmConsumer,
     CancelableAsrEngine,
-    AudioFrameSinkOwner {
+    AudioFrameSinkOwner,
+    SessionAudioSourceOwner,
+    ProgressiveRetryStatusOwner {
 
     companion object {
         private const val TAG = "ParallelAsrEngine"
@@ -93,10 +96,19 @@ class ParallelAsrEngine(
 
     private var primaryEngine: StreamingAsrEngine? = null
     private var backupEngine: StreamingAsrEngine? = null
+    @Volatile private var backupRequestDurationMs: Long? = null
     private var primaryConsumer: ExternalPcmConsumer? = null
     private var backupConsumer: ExternalPcmConsumer? = null
     private val pushPcmEngineFactory = AsrPushPcmEngineFactory()
     private val externalVadInputLeveler = VadInputLevelerBranch(sampleRate = SAMPLE_RATE)
+
+    override val sessionAudioStore: SessionAudioSegmentStore?
+        get() = (primaryEngine as? SessionAudioSourceOwner)?.sessionAudioStore
+
+    override fun peekPendingRetryCount(): Int = maxOf(
+        (primaryEngine as? ProgressiveRetryStatusOwner)?.peekPendingRetryCount() ?: 0,
+        (backupEngine as? ProgressiveRetryStatusOwner)?.peekPendingRetryCount() ?: 0
+    )
 
     override fun start() {
         if (!running.compareAndSet(false, true)) return
@@ -104,6 +116,7 @@ class ParallelAsrEngine(
         stopRequested.set(false)
         stoppedNotified = false
         audioBytes.set(0L)
+        backupRequestDurationMs = null
         externalVadInputLeveler.reset()
         switchDeadlineJob?.cancel()
         switchDeadlineJob = null
@@ -133,7 +146,7 @@ class ParallelAsrEngine(
             vendor = backupVendor,
             engineListener = backupListener,
             invocationMode = AsrEngineInvocationMode.ParallelBackup,
-            onRequestDuration = null
+            onRequestDuration = { backupRequestDurationMs = it }
         )
         primaryConsumer = primaryEngine as? ExternalPcmConsumer
         backupConsumer = backupEngine as? ExternalPcmConsumer
@@ -468,7 +481,9 @@ class ParallelAsrEngine(
             primaryStreaming = primaryStreaming,
             sensitivityTier = sensitivityTier,
             primaryStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(primaryVendor, audioMs),
-            backupStrategy = AsrParallelEngineDecision.UseParallel
+            backupStrategy = AsrParallelEngineDecision.UseParallel,
+            pendingRetryCount = (primaryEngine as? ProgressiveRetryStatusOwner)
+                ?.peekPendingRetryCount() ?: 0
         )
         val switchDeadlineMs = switchPlan.switchDeadlineMs
 
@@ -582,6 +597,9 @@ class ParallelAsrEngine(
         text: String,
         source: AsrBackupArbitrationSource
     ) {
+        if (source == AsrBackupArbitrationSource.Backup) {
+            backupRequestDurationMs?.let { onBackupRequestDuration?.invoke(it) }
+        }
         try {
             switchDeadlineJob?.cancel()
         } catch (t: Throwable) {

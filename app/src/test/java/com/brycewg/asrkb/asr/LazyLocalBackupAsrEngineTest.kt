@@ -598,7 +598,7 @@ class LazyLocalBackupAsrEngineTest {
                             outputDurationMs = 0L
                         )
                     },
-                    backupSwitchPlan = { _, _ ->
+                    backupSwitchPlan = { _, _, _ ->
                         BackupSwitchPlan(
                             switchDeadlineMs = switchDeadlineMs,
                             usedStaticFallback = true,

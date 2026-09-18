@@ -67,7 +67,6 @@ internal class AsrCommitRecorder(
         val recordId = historyTiming?.recordId ?: asrManager.consumeHistoryCommitContext(null)
         val audioMs = asrManager.popLastAudioMsForStats()
         val totalElapsedMs = asrManager.popLastTotalElapsedMsForStats()
-        val procMs = asrManager.getLastRequestDuration() ?: 0L
         val vendor = try {
             asrManager.peekLastFinalVendorForStats()
         } catch (t: Throwable) {
@@ -85,6 +84,11 @@ internal class AsrCommitRecorder(
                 asrManager.consumeHistoryCommitContext(timingContext)
             }
         }
+        val procMs = timingTrace
+            ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+            ?.takeIf { it > 0L }
+            ?: asrManager.getLastRequestDuration()
+            ?: 0L
         val prepared = PreparedCommit(
             recordId = recordId,
             timestamp = System.currentTimeMillis(),

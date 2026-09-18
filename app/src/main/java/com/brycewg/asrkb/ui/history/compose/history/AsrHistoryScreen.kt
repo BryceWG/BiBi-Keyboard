@@ -702,7 +702,9 @@ private fun buildMeta(
     parts.add(stringResource(R.string.meta_total_seconds, record.audioMs / 1000.0))
     val recognitionMs = record.timingTrace?.let { trace ->
         trace.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
-    } ?: record.procMs
+    }?.takeIf { it > 0L }
+        ?: record.procMs.takeIf { it > 0L }
+        ?: 0L
     if (recognitionMs > 0) {
         parts.add(stringResource(R.string.meta_proc_seconds, recognitionMs / 1000.0))
     }

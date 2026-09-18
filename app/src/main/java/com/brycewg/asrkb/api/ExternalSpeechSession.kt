@@ -194,6 +194,10 @@ internal class ExternalSpeechSession(
     }
 
     private fun computeProcMsForStats(): Long {
+        historyTiming?.snapshot()
+            ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+            ?.takeIf { it > 0L }
+            ?.let { return it }
         val fromEngine = lastRequestDurationMs
         if (fromEngine != null) return fromEngine
         val start = processingStartUptimeMs
@@ -244,7 +248,9 @@ internal class ExternalSpeechSession(
             backupVendor = backupVendor,
             backupStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(backupVendor, audioMs),
             sensitivityTier = safeBackupSensitivityTier(),
-            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+            pendingRetryCount = (engine as? ProgressiveRetryStatusOwner)
+                ?.peekPendingRetryCount() ?: 0
         )
         synchronized(processingTimeoutLock) {
             if (processingTimeoutJob != null) return
@@ -318,7 +324,8 @@ internal class ExternalSpeechSession(
             primaryVendor = primaryVendor,
             backupVendor = backupVendor,
             externalPcmInput = false,
-            onPrimaryRequestDuration = ::onRequestDuration
+            onPrimaryRequestDuration = ::onRequestDuration,
+            onBackupRequestDuration = ::onRequestDuration
         ) ?: directMicrophoneEngineFactory.createOrNull(
             context = context,
             scope = CoroutineScope(Dispatchers.Main),
@@ -345,7 +352,8 @@ internal class ExternalSpeechSession(
             primaryVendor = primaryVendor,
             backupVendor = backupVendor,
             externalPcmInput = true,
-            onPrimaryRequestDuration = ::onRequestDuration
+            onPrimaryRequestDuration = ::onRequestDuration,
+            onBackupRequestDuration = ::onRequestDuration
         ) ?: pushPcmEngineFactory.createOrNull(
             context = context,
             scope = CoroutineScope(Dispatchers.Main),
@@ -397,6 +405,7 @@ internal class ExternalSpeechSession(
         }
         ensureAutoStopSuppressed()
         engine?.let { startedEngine ->
+            historyAudioCapture?.bind(startedEngine as? SessionAudioSourceOwner)
             (startedEngine as? AudioFrameSinkOwner)?.audioFrameSink =
                 historyAudioCapture.takeUnless { pushPcmInput }
             AsrConnectionWarmer.warmForImmediateUse(context, prefs)
@@ -938,7 +947,11 @@ internal class ExternalSpeechSession(
             vendorId = resolveFinalVendorForRecord().id,
             audioMs = lastAudioMsForStats,
             totalElapsedMs = timingTrace?.totalElapsedMs ?: peekTotalElapsedMsForStats(),
-            procMs = lastRequestDurationMs ?: 0L,
+            procMs = timingTrace
+                ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+                ?.takeIf { it > 0L }
+                ?: lastRequestDurationMs
+                ?: 0L,
             rawText = rawText,
             status = status,
             failStage = failStage,

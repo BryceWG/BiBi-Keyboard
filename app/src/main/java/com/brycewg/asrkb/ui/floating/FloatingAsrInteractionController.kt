@@ -458,7 +458,6 @@ internal class FloatingAsrInteractionController(
             val historyRecordId = asrSessionManager.popLastHistoryRecordId()
             val historyRawText = asrSessionManager.popLastHistoryRawText() ?: text
             val totalElapsedMs = asrSessionManager.popLastTotalElapsedMsForStats()
-            val procMs = asrSessionManager.getLastRequestDuration() ?: 0L
             val chars = com.brycewg.asrkb.util.TextSanitizer.countEffectiveChars(text)
             val ai = try {
                 asrSessionManager.wasLastAiUsed()
@@ -491,6 +490,11 @@ internal class FloatingAsrInteractionController(
                 prefs.asrVendor
             }
             val timingTrace = asrSessionManager.completeLastHistoryTiming()
+            val procMs = timingTrace
+                ?.stageDurationMs(com.brycewg.asrkb.store.AsrHistoryTimingStage.RECOGNITION)
+                ?.takeIf { it > 0L }
+                ?: asrSessionManager.getLastRequestDuration()
+                ?: 0L
             val disableHistory = prefs.disableAsrHistory
             val disableStats = prefs.disableUsageStats
             val retention = prefs.audioHistoryRetentionCount

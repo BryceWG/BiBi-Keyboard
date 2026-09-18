@@ -32,3 +32,8 @@ interface CancelableAsrEngine {
 interface PcmBatchRecognizer {
     suspend fun recognizeFromPcm(pcm: ByteArray)
 }
+
+/** 暴露渐进分段重试的待处理计数，供停录后的处理超时计算加余量。 */
+interface ProgressiveRetryStatusOwner {
+    fun peekPendingRetryCount(): Int
+}

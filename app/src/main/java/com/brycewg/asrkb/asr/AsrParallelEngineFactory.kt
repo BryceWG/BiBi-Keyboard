@@ -15,6 +15,7 @@ internal data class AsrParallelEngineRequest(
     val externalPcmInput: Boolean = false,
     val modePreferences: AsrEngineModePreferences = prefs.asrEngineModePreferencesSnapshot(),
     val onPrimaryRequestDuration: ((Long) -> Unit)? = null,
+    val onBackupRequestDuration: ((Long) -> Unit)? = null,
     val modelOverride: AsrRequestModelOverride = AsrRequestModelOverride()
 )
 
@@ -63,6 +64,7 @@ internal class AsrParallelEngineFactory(
                     primaryVendor = plan.primaryVendor,
                     backupVendor = plan.backupVendor,
                     onPrimaryRequestDuration = request.onPrimaryRequestDuration,
+                    onBackupRequestDuration = request.onBackupRequestDuration,
                     externalPcmInput = plan.externalPcmInput
                 ).also {
                     it.modePreferencesOverride = request.modePreferences
@@ -76,6 +78,7 @@ internal class AsrParallelEngineFactory(
                     primaryVendor = plan.primaryVendor,
                     backupVendor = plan.backupVendor,
                     onPrimaryRequestDuration = request.onPrimaryRequestDuration,
+                    onBackupRequestDuration = request.onBackupRequestDuration,
                     externalPcmInput = plan.externalPcmInput,
                     modePreferences = request.modePreferences,
                     modelOverride = request.modelOverride
@@ -96,6 +99,7 @@ internal class AsrParallelEngineFactory(
         externalPcmInput: Boolean = false,
         modePreferences: AsrEngineModePreferences = prefs.asrEngineModePreferencesSnapshot(),
         onPrimaryRequestDuration: ((Long) -> Unit)? = null,
+        onBackupRequestDuration: ((Long) -> Unit)? = null,
         modelOverride: AsrRequestModelOverride = AsrRequestModelOverride()
     ): StreamingAsrEngine? = createOrNull(
         AsrParallelEngineRequest(
@@ -108,6 +112,7 @@ internal class AsrParallelEngineFactory(
             externalPcmInput = externalPcmInput,
             modePreferences = modePreferences,
             onPrimaryRequestDuration = onPrimaryRequestDuration,
+            onBackupRequestDuration = onBackupRequestDuration,
             modelOverride = modelOverride
         )
     )

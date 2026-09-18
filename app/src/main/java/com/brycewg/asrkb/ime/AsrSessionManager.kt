@@ -228,7 +228,20 @@ class AsrSessionManager(
     private fun createEngineListener(seq: Long): SessionBoundEngineListener = SessionBoundEngineListener(seq)
 
     private fun snapshotAudioDurationIfPossible() {
-        if (sessionStartUptimeMs == 0L || lastAudioMsForStats != 0L) return
+        if (lastAudioMsForStats != 0L) return
+        historyAudioCapture?.audioDurationMs()?.takeIf { it > 0L }?.let {
+            lastAudioMsForStats = it
+            sessionStartUptimeMs = 0L
+            return
+        }
+        (asrEngine as? SessionAudioSourceOwner)?.sessionAudioStore?.totalBytes
+            ?.takeIf { it > 0L }
+            ?.let {
+                lastAudioMsForStats = it * 1_000L / (16_000L * 2L)
+                sessionStartUptimeMs = 0L
+                return
+            }
+        if (sessionStartUptimeMs == 0L) return
         try {
             val now = SystemClock.uptimeMillis()
             if (now >= sessionStartUptimeMs) {
@@ -236,6 +249,8 @@ class AsrSessionManager(
             }
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to snapshot audio duration on stopRecording", t)
+        } finally {
+            sessionStartUptimeMs = 0L
         }
     }
 
@@ -286,7 +301,8 @@ class AsrSessionManager(
             primaryVendor = primaryVendor,
             backupVendor = backupVendor,
             externalPcmInput = false,
-            onPrimaryRequestDuration = requestDurationCallback
+            onPrimaryRequestDuration = requestDurationCallback,
+            onBackupRequestDuration = requestDurationCallback
         )
         if (parallelEngine != null) {
             return BuiltEngine(
@@ -523,6 +539,7 @@ class AsrSessionManager(
         setRecordingKeepScreenOn(active = true)
         asrEngine?.let { engine ->
             (engine as? AudioFrameSinkOwner)?.audioFrameSink = historyAudioCapture
+            historyAudioCapture?.bind(engine as? SessionAudioSourceOwner)
             ContinuousCaptureCoordinator.beginSession(activeSeq)
             engine.start()
         }
@@ -704,7 +721,11 @@ class AsrSessionManager(
             vendorId = peekLastFinalVendorForStats().id,
             audioMs = lastAudioMsForStats,
             totalElapsedMs = resolvedTimingTrace?.totalElapsedMs ?: peekTotalElapsedMsForStats(),
-            procMs = lastRequestDurationMs ?: 0L,
+            procMs = resolvedTimingTrace
+                ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+                ?.takeIf { it > 0L }
+                ?: lastRequestDurationMs
+                ?: 0L,
             rawText = rawText,
             status = status,
             failStage = failStage,
@@ -879,10 +900,12 @@ class AsrSessionManager(
         Log.d(TAG, "onFinal: text='$text', state=$currentState")
         transitionAudioInputToRecognition()
         activeHistoryTiming?.end(AsrHistoryTimingStage.RECOGNITION)
+        snapshotAudioDurationIfPossible()
         lastRecognitionStageMs = activeHistoryTiming
-            ?.snapshot()
-            ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
-            ?.takeIf { it > 0L }
+                ?.snapshot()
+                ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+                ?.takeIf { it > 0L }
+            ?: lastRequestDurationMs?.takeIf { it > 0L }
         lastFinalVendorForStats = when (val e = asrEngine) {
             is BackupAwareAsrEngine -> if (e.wasLastResultFromBackup()) e.backupVendor else e.primaryVendor
             else -> sessionPrimaryVendor
@@ -945,6 +968,7 @@ class AsrSessionManager(
                 it.begin(AsrHistoryTimingStage.AUDIO_INPUT)
             }
             (asrEngine as? AudioFrameSinkOwner)?.audioFrameSink = historyAudioCapture
+            historyAudioCapture?.bind(asrEngine as? SessionAudioSourceOwner)
         }
         listener?.onAsrFinal(text, currentState)
     }
@@ -1038,19 +1062,7 @@ class AsrSessionManager(
         ContinuousCaptureCoordinator.endSession(seq)
         transitionAudioInputToRecognition()
         markLocalModelProcessingStartIfNeeded(seq)
-        // 计算本次会话录音时长
-        if (sessionStartUptimeMs > 0L) {
-            try {
-                if (lastAudioMsForStats == 0L) {
-                    val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(0)
-                    lastAudioMsForStats = dur
-                }
-            } catch (t: Throwable) {
-                Log.w(TAG, "Failed to compute audio duration on onStopped", t)
-            } finally {
-                sessionStartUptimeMs = 0L
-            }
-        }
+        snapshotAudioDurationIfPossible()
         // 确保归还音频焦点（覆盖静音判停等路径）
         recordingAudioFocusController.release()
         setRecordingKeepScreenOn(active = false)

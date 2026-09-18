@@ -9,6 +9,8 @@ import com.brycewg.asrkb.asr.AsrParallelEngineFactory
 import com.brycewg.asrkb.asr.AsrPushPcmEngineFactory
 import com.brycewg.asrkb.asr.AsrRecordedAudioRouteDecision
 import com.brycewg.asrkb.asr.AsrRecordedAudioRouteResolver
+import com.brycewg.asrkb.asr.AsrTimeoutCalculator
+import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.BackupAwareAsrEngine
 import com.brycewg.asrkb.asr.CancelableAsrEngine
 import com.brycewg.asrkb.asr.ExternalPcmConsumer
@@ -21,6 +23,7 @@ import com.brycewg.asrkb.store.AsrHistoryTimingRecorder
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
+import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
 import com.brycewg.asrkb.util.AsrFinalFilters
 import com.brycewg.asrkb.util.TextSanitizer
 import kotlinx.coroutines.CancellationException
@@ -130,7 +133,7 @@ internal class AsrHistoryRerunCoordinator(
             runningEngine.stop()
             timingRecorder.end(AsrHistoryTimingStage.AUDIO_INPUT)
             timingRecorder.begin(AsrHistoryTimingStage.RECOGNITION)
-            val raw = withTimeout(120_000L) { finalText.await() }
+            val raw = withTimeout(calculateRecognitionTimeoutMs(pcm.size, primary)) { finalText.await() }
             if (raw.isBlank()) error("empty_result")
             timingRecorder.end(AsrHistoryTimingStage.RECOGNITION)
             timingRecorder.begin(AsrHistoryTimingStage.POSTPROCESS)
@@ -306,6 +309,20 @@ internal class AsrHistoryRerunCoordinator(
         }
     }
 
+    private fun calculateRecognitionTimeoutMs(
+        pcmBytes: Int,
+        primaryVendor: AsrVendor
+    ): Long {
+        val audioMs = pcmBytes.toLong() * 1_000L / PCM_BYTES_PER_SECOND
+        val segmentCount = (audioMs + SEGMENT_ESTIMATE_MS - 1L) / SEGMENT_ESTIMATE_MS
+        val perSegmentMs = prefs.getAsrRuntimeStatsSnapshotOrNull(
+            vendor = primaryVendor,
+            targetAudioMs = SEGMENT_TIMEOUT_AUDIO_MS
+        )?.p90RequestMs?.takeIf { it > 0L }
+            ?: AsrTimeoutCalculator.calculateTimeoutMs(SEGMENT_TIMEOUT_AUDIO_MS, primaryVendor)
+        return maxOf(MIN_RECOGNITION_TIMEOUT_MS, segmentCount * perSegmentMs * SEGMENT_ATTEMPTS)
+    }
+
     private fun stableFailReason(t: Throwable): String {
         val message = t.message?.trim().orEmpty()
         return if (message in STABLE_FAIL_REASONS) message else "recognize_failed"
@@ -316,6 +333,12 @@ internal class AsrHistoryRerunCoordinator(
     }
 
     companion object {
+        private const val PCM_BYTES_PER_SECOND = 16_000L * 2L
+        private const val SEGMENT_ESTIMATE_MS = 45_000L
+        private const val SEGMENT_TIMEOUT_AUDIO_MS = 60_000L
+        private const val SEGMENT_ATTEMPTS = 2L
+        private const val MIN_RECOGNITION_TIMEOUT_MS = 120_000L
+
         private val STABLE_FAIL_REASONS = setOf(
             "audio_unavailable",
             "engine_unavailable",

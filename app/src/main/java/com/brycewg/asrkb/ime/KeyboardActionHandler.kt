@@ -11,6 +11,7 @@ import com.brycewg.asrkb.asr.AsrFailReasonCodes
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.BackupAwareAsrEngine
 import com.brycewg.asrkb.asr.LlmPostProcessor
+import com.brycewg.asrkb.asr.ProgressiveRetryStatusOwner
 import com.brycewg.asrkb.asr.VadAutoStopGuard
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.Prefs
@@ -84,6 +85,9 @@ class KeyboardActionHandler(
         audioMsProvider = { asrManager.peekLastAudioMsForStats() },
         backupEngineProvider = {
             asrManager.getEngine() as? BackupAwareAsrEngine
+        },
+        pendingRetryOwnerProvider = {
+            asrManager.getEngine() as? ProgressiveRetryStatusOwner
         },
         onTimeout = {
             dropPendingFinal = true

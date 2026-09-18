@@ -11,6 +11,7 @@ import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicReference
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,11 +29,16 @@ internal interface BackupAsrStatusListener {
 internal data class LazyLocalBackupAsrEngineHooks(
     val createPrimaryEngine: (StreamingAsrEngine.Listener) -> StreamingAsrEngine?,
     val createBackupEngine: (StreamingAsrEngine.Listener) -> StreamingAsrEngine?,
+    val onBackupRequestDuration: ((Long) -> Unit)? = null,
     val preloadBackupVendor: (AsrLocalVendorPreloadRequest) -> Boolean,
     val isBackupReady: () -> Boolean,
     val processBufferedPcm: (ByteArray) -> RecordedAudioVoiceFilter.Result,
     val primaryNetworkGateEvent: () -> AsrBackupArbitrationEvent.PrimaryError? = { null },
-    val backupSwitchPlan: (audioMs: Long, primaryStreaming: Boolean) -> BackupSwitchPlan = { _, _ ->
+    val backupSwitchPlan: (
+        audioMs: Long,
+        primaryStreaming: Boolean,
+        pendingRetryCount: Int
+    ) -> BackupSwitchPlan = { _, _, _ ->
         BackupSwitchPlan(
             switchDeadlineMs = 0L,
             usedStaticFallback = true,
@@ -57,6 +63,8 @@ internal class LazyLocalBackupAsrEngine(
     override val primaryVendor: AsrVendor,
     override val backupVendor: AsrVendor,
     private val onPrimaryRequestDuration: ((Long) -> Unit)? = null,
+    private val onBackupRequestDuration: ((Long) -> Unit)? = null,
+    private val backupRequestDurationHolder: AtomicReference<Long?> = AtomicReference(null),
     private val externalPcmInput: Boolean = false,
     private val modePreferences: AsrEngineModePreferences = prefs.asrEngineModePreferencesSnapshot(),
     private val modelOverride: AsrRequestModelOverride = AsrRequestModelOverride(),
@@ -68,13 +76,17 @@ internal class LazyLocalBackupAsrEngine(
         primaryVendor = primaryVendor,
         backupVendor = backupVendor,
         onPrimaryRequestDuration = onPrimaryRequestDuration,
+        onBackupRequestDuration = onBackupRequestDuration,
+        backupRequestDurationHolder = backupRequestDurationHolder,
         modePreferences = modePreferences,
         modelOverride = modelOverride
     )
 ) : BackupAwareAsrEngine,
     ExternalPcmConsumer,
     CancelableAsrEngine,
-    AudioFrameSinkOwner {
+    AudioFrameSinkOwner,
+    SessionAudioSourceOwner,
+    ProgressiveRetryStatusOwner {
 
     private enum class Source { PRIMARY, BACKUP }
 
@@ -123,6 +135,14 @@ internal class LazyLocalBackupAsrEngine(
     private var primaryConsumer: ExternalPcmConsumer? = null
     private var backupConsumer: ExternalPcmConsumer? = null
 
+    override val sessionAudioStore: SessionAudioSegmentStore?
+        get() = (primaryEngine as? SessionAudioSourceOwner)?.sessionAudioStore
+
+    override fun peekPendingRetryCount(): Int = maxOf(
+        (primaryEngine as? ProgressiveRetryStatusOwner)?.peekPendingRetryCount() ?: 0,
+        (backupEngine as? ProgressiveRetryStatusOwner)?.peekPendingRetryCount() ?: 0
+    )
+
     private val primaryListener = EngineListener(Source.PRIMARY)
     private val backupListener = EngineListener(Source.BACKUP)
 
@@ -139,6 +159,7 @@ internal class LazyLocalBackupAsrEngine(
         stoppedNotified = false
         lastBackupStatus = null
         audioBytes.set(0L)
+        backupRequestDurationHolder.set(null)
         externalVadInputLeveler.reset()
         synchronized(pcmLock) {
             pcmBuffer.reset()
@@ -387,7 +408,10 @@ internal class LazyLocalBackupAsrEngine(
     }
 
     private fun triggerBackup(reason: String) {
-        if (!backupTriggered.compareAndSet(false, true)) return
+        val shouldStart = synchronized(stateLock) {
+            !terminalCoordinator.terminalDelivered && backupTriggered.compareAndSet(false, true)
+        }
+        if (!shouldStart) return
         Log.d(TAG, "Trigger lazy local backup: reason=$reason vendor=$backupVendor")
         notifyBackupLoading()
         var backupLoadStartUptimeMs = 0L
@@ -400,21 +424,29 @@ internal class LazyLocalBackupAsrEngine(
                 notifyBackupLoading()
             },
             onLoadDone = {
-                if (!backupLoadRecorded) {
-                    backupLoadRecorded = true
-                    recordBackupLoadDuration(backupLoadStartUptimeMs)
+                if (!terminalCoordinator.terminalDelivered) {
+                    if (!backupLoadRecorded) {
+                        backupLoadRecorded = true
+                        recordBackupLoadDuration(backupLoadStartUptimeMs)
+                    }
+                    notifyBackupRecognizing()
+                    maybeFeedBackupIfReady(forceReady = true)
                 }
-                notifyBackupRecognizing()
-                maybeFeedBackupIfReady(forceReady = true)
             },
             suppressToastOnStart = true,
             forImmediateUse = true
         )
-        val accepted = try {
-            hooks.preloadBackupVendor(request)
-        } catch (t: Throwable) {
-            Log.e(TAG, "backup preload failed", t)
-            false
+        val accepted = synchronized(stateLock) {
+            if (terminalCoordinator.terminalDelivered) {
+                false
+            } else {
+                try {
+                    hooks.preloadBackupVendor(request)
+                } catch (t: Throwable) {
+                    Log.e(TAG, "backup preload failed", t)
+                    false
+                }
+            }
         }
         if (!accepted) {
             onTerminal(Source.BACKUP, Terminal.Error("backup preload failed"))
@@ -498,7 +530,8 @@ internal class LazyLocalBackupAsrEngine(
         cancelBackupPlanJobs()
         val plan = hooks.backupSwitchPlan(
             audioMsFromBytes(audioBytes.get()),
-            isPrimaryStreamingForSwitchPlan()
+            isPrimaryStreamingForSwitchPlan(),
+            (primaryEngine as? ProgressiveRetryStatusOwner)?.peekPendingRetryCount() ?: 0
         )
         val backupStartAtMs = plan.lazyBackupStartAtMs ?: plan.switchDeadlineMs
         if (!backupTriggered.get()) {
@@ -598,6 +631,9 @@ internal class LazyLocalBackupAsrEngine(
         text: String,
         source: AsrBackupArbitrationSource
     ) {
+        if (source == AsrBackupArbitrationSource.Backup) {
+            backupRequestDurationHolder.get()?.let { onBackupRequestDuration?.invoke(it) }
+        }
         cancelBackupPlanJobs()
         try {
             listener.onFinal(text)
@@ -725,10 +761,7 @@ internal class LazyLocalBackupAsrEngine(
             }
         }
 
-        override fun onStopped() {
-            if (source == Source.PRIMARY) notifyStoppedIfNeeded()
-        }
-
+        // 子引擎可能在分段失败时提前停止；整场录音的 onStopped 只由外层采集生命周期发出。
         override fun onAmplitude(amplitude: Float) {
             if (source != Source.PRIMARY) return
             try {
@@ -762,11 +795,14 @@ internal class LazyLocalBackupAsrEngine(
             primaryVendor: AsrVendor,
             backupVendor: AsrVendor,
             onPrimaryRequestDuration: ((Long) -> Unit)?,
+            onBackupRequestDuration: ((Long) -> Unit)?,
+            backupRequestDurationHolder: AtomicReference<Long?>,
             modePreferences: AsrEngineModePreferences,
             modelOverride: AsrRequestModelOverride
         ): LazyLocalBackupAsrEngineHooks {
             val pushPcmFactory = AsrPushPcmEngineFactory()
             return LazyLocalBackupAsrEngineHooks(
+                onBackupRequestDuration = onBackupRequestDuration,
                 createPrimaryEngine = { engineListener ->
                     pushPcmFactory.createOrNull(
                         context = context,
@@ -792,7 +828,7 @@ internal class LazyLocalBackupAsrEngine(
                         invocationMode = AsrEngineInvocationMode.ParallelBackup,
                         preferences = modePreferences,
                         source = AsrEngineConstructionSource.App,
-                        onRequestDuration = null,
+                        onRequestDuration = { ms -> backupRequestDurationHolder.set(ms) },
                         applyAudioPreprocess = false,
                         modelOverride = modelOverride
                     )
@@ -833,7 +869,7 @@ internal class LazyLocalBackupAsrEngine(
                         message = context.getString(R.string.asr_error_network_unavailable)
                     )
                 },
-                backupSwitchPlan = { audioMs, primaryStreaming ->
+                backupSwitchPlan = { audioMs, primaryStreaming, pendingRetryCount ->
                     val sensitivityTier = try {
                         prefs.backupAsrTimeoutSensitivity
                     } catch (_: Throwable) {
@@ -852,7 +888,8 @@ internal class LazyLocalBackupAsrEngine(
                             backupVendor,
                             audioMs
                         ),
-                        sensitivityTier = sensitivityTier
+                        sensitivityTier = sensitivityTier,
+                        pendingRetryCount = pendingRetryCount
                     )
                 },
                 residencyManager = LocalBackupResidencyManagers.forVendor(backupVendor),

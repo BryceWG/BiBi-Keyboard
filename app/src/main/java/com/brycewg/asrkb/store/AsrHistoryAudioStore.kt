@@ -4,6 +4,7 @@ package com.brycewg.asrkb.store
 import android.content.Context
 import android.util.Log
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -59,6 +60,41 @@ class AsrHistoryAudioStore(context: Context) {
                 AsrHistoryAudioStore(appContext).prune(ids, maxCount)
             }
         }
+
+        /**
+         * 把已写好的 PCM 文件同步晋升为录音历史音频（rename 优先，跨分区退回流式拷贝）。
+         * 与 [saveAsync] 同一套校验（generation/deletedIds/偏好），供会话段存储晋升调用；
+         * 成功返回目标文件，失败返回 null。
+         */
+        fun saveFromFile(context: Context, recordId: String, sourceFile: File): File? {
+            val appContext = context.applicationContext
+            val scheduledGeneration = storageGeneration.get()
+            val prefs = Prefs(appContext)
+            if (scheduledGeneration != storageGeneration.get() ||
+                recordId in deletedIds ||
+                prefs.disableAsrHistory ||
+                prefs.audioHistoryRetentionCount <= 0
+            ) {
+                return null
+            }
+            if (!sourceFile.isFile || sourceFile.length() <= 0L) return null
+            val store = AsrHistoryAudioStore(appContext)
+            val target = store.saveFile(recordId, sourceFile) ?: return null
+            val latestPrefs = Prefs(appContext)
+            if (scheduledGeneration != storageGeneration.get() ||
+                recordId in deletedIds ||
+                latestPrefs.disableAsrHistory ||
+                latestPrefs.audioHistoryRetentionCount <= 0
+            ) {
+                store.delete(recordId)
+                return null
+            }
+            val ids = AsrHistoryStore(appContext).listIdsNewestFirstOrNull()
+            if (ids != null) {
+                store.prune(ids, latestPrefs.audioHistoryRetentionCount)
+            }
+            return target
+        }
     }
 
     private val directory = File(context.noBackupFilesDir, DIRECTORY)
@@ -97,6 +133,37 @@ class AsrHistoryAudioStore(context: Context) {
             Log.e(TAG, "Failed to archive audio", e)
             runCatching { File(directory, "$recordId.tmp").delete() }
             false
+        }
+    }
+
+    /** 与 [save] 等价，但数据来自已写好的文件；rename 失败退回 4KB 流式拷贝。成功返回目标文件。 */
+    fun saveFile(recordId: String, sourceFile: File): File? {
+        if (recordId in deletedIds) return null
+        return try {
+            if (!directory.exists() && !directory.mkdirs()) return null
+            val target = audioFile(recordId)
+            if (target.exists() && !target.delete()) return null
+            if (sourceFile.renameTo(target)) {
+                if (recordId in deletedIds) {
+                    target.delete()
+                    return null
+                }
+                return target
+            }
+            val temp = File(directory, "$recordId.tmp")
+            FileInputStream(sourceFile).use { input ->
+                FileOutputStream(temp).use { output -> input.copyTo(output) }
+            }
+            if (recordId in deletedIds || !temp.renameTo(target)) {
+                temp.delete()
+                return null
+            }
+            sourceFile.delete()
+            target
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to archive audio from file", e)
+            runCatching { File(directory, "$recordId.tmp").delete() }
+            null
         }
     }
 

@@ -239,7 +239,20 @@ class AsrSessionManager(
     }
 
     private fun snapshotAudioDurationIfPossible() {
-        if (sessionStartUptimeMs == 0L || lastAudioMsForStats != 0L) return
+        if (lastAudioMsForStats != 0L) return
+        historyAudioCapture?.audioDurationMs()?.takeIf { it > 0L }?.let {
+            lastAudioMsForStats = it
+            sessionStartUptimeMs = 0L
+            return
+        }
+        (asrEngine as? SessionAudioSourceOwner)?.sessionAudioStore?.totalBytes
+            ?.takeIf { it > 0L }
+            ?.let {
+                lastAudioMsForStats = it * 1_000L / (16_000L * 2L)
+                sessionStartUptimeMs = 0L
+                return
+            }
+        if (sessionStartUptimeMs == 0L) return
         try {
             val now = SystemClock.uptimeMillis()
             if (now >= sessionStartUptimeMs) {
@@ -247,6 +260,8 @@ class AsrSessionManager(
             }
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to snapshot audio duration on stopRecording", t)
+        } finally {
+            sessionStartUptimeMs = 0L
         }
     }
 
@@ -383,6 +398,7 @@ class AsrSessionManager(
         listener.onSessionStateChanged(FloatingBallState.Recording)
         asrEngine?.let { engine ->
             (engine as? AudioFrameSinkOwner)?.audioFrameSink = historyAudioCapture
+            historyAudioCapture?.bind(engine as? SessionAudioSourceOwner)
             AsrConnectionWarmer.warmForImmediateUse(context, prefs)
             LlmConnectionWarmer.warmForImmediateUse(prefs)
             preloadLocalAsrForImmediateUse(context, prefs)
@@ -614,7 +630,11 @@ class AsrSessionManager(
             vendorId = peekLastFinalVendorForStats().id,
             audioMs = lastAudioMsForStats,
             totalElapsedMs = resolvedTimingTrace?.totalElapsedMs ?: peekTotalElapsedMsForStats(),
-            procMs = lastRequestDurationMs ?: 0L,
+            procMs = resolvedTimingTrace
+                ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+                ?.takeIf { it > 0L }
+                ?: lastRequestDurationMs
+                ?: 0L,
             rawText = rawText,
             status = status,
             failStage = failStage,
@@ -724,6 +744,7 @@ class AsrSessionManager(
         }
         transitionAudioInputToRecognition()
         activeHistoryTiming?.end(AsrHistoryTimingStage.RECOGNITION)
+        snapshotAudioDurationIfPossible()
         if (text.isNotBlank()) {
             completedHistoryRecordId = activeHistoryRecordId
             completedHistoryRawText = text
@@ -1031,21 +1052,7 @@ class AsrSessionManager(
         serviceScope.launch {
             if (!isSessionActive(sessionToken)) return@launch
             listener.onSessionStateChanged(FloatingBallState.Processing)
-            // 计算本次会话录音时长
-            if (sessionStartUptimeMs > 0L) {
-                try {
-                    if (lastAudioMsForStats == 0L) {
-                        val dur = (SystemClock.uptimeMillis() - sessionStartUptimeMs).coerceAtLeast(
-                            0
-                        )
-                        lastAudioMsForStats = dur
-                    }
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to compute audio duration in onStopped", t)
-                } finally {
-                    sessionStartUptimeMs = 0L
-                }
-            }
+            snapshotAudioDurationIfPossible()
             if (!isSessionActive(sessionToken)) return@launch
             // 确保归还音频焦点
             recordingAudioFocusController.release()
@@ -1154,7 +1161,8 @@ class AsrSessionManager(
             primaryVendor = primaryVendor,
             backupVendor = backupVendor,
             externalPcmInput = false,
-            onPrimaryRequestDuration = requestDurationCallback
+            onPrimaryRequestDuration = requestDurationCallback,
+            onBackupRequestDuration = requestDurationCallback
         )
         if (parallelEngine != null) return parallelEngine
         if (!isPrimaryVendorConstructible(primaryVendor)) return null
@@ -1233,7 +1241,9 @@ class AsrSessionManager(
             backupVendor = backupVendor,
             backupStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(backupVendor, audioMs),
             sensitivityTier = safeBackupSensitivityTier(),
-            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+            pendingRetryCount = (asrEngine as? ProgressiveRetryStatusOwner)
+                ?.peekPendingRetryCount() ?: 0
         )
         processingTimeoutJob = serviceScope.launch {
             if (!isSessionActive(sessionToken)) return@launch

@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,6 +19,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -33,13 +35,18 @@ abstract class BaseFileAsrEngine(
     onRequestDuration: ((Long) -> Unit)? = null,
     private val progressiveChunkingEnabled: Boolean = true
 ) : StreamingAsrEngine,
-    AudioFrameSinkOwner {
+    AudioFrameSinkOwner,
+    SessionAudioSourceOwner,
+    ProgressiveRetryStatusOwner {
 
     companion object {
         private const val TAG = "BaseFileAsrEngine"
 
         // 编码队列的帧数上限；满队列时采集侧挂起等待，退化为背压而不是静默丢帧。
         private const val ENCODE_QUEUE_CAPACITY = 16
+
+        // 会话结束后未晋升的临时段文件保留时长（供"重试最近一次识别"使用），到期清理。
+        private const val RETRY_SOURCE_RETENTION_MS = 10 * 60 * 1000L
     }
 
     private val running = AtomicBoolean(false)
@@ -71,8 +78,19 @@ abstract class BaseFileAsrEngine(
     private var audioJob: Job? = null
     private var processingJob: Job? = null
     private var segmentChan: Channel<RecordedSegment>? = null
-    private var lastSegmentForRetry: RecordedSegment? = null
-    private var progressiveRetryPcm: ByteArrayOutputStream? = null
+
+    // 当前会话的段级落盘存储；会话结束后转存为 retrySourceStore 供重试使用。
+    @Volatile private var currentStore: SessionAudioSegmentStore? = null
+    private var retrySourceStore: SessionAudioSegmentStore? = null
+    private var lastNonProgressiveSegmentForRetry: RecordedSegment? = null
+    private var retryScheduler: ProgressiveSegmentRetryScheduler? = null
+    private val pendingRetrySegments = AtomicInteger(0)
+    private var progressiveAudioBytes = 0
+
+    override val sessionAudioStore: SessionAudioSegmentStore?
+        get() = currentStore
+
+    override fun peekPendingRetryCount(): Int = pendingRetrySegments.get()
 
     @Volatile private var discardOnStop: Boolean = false
 
@@ -104,7 +122,11 @@ abstract class BaseFileAsrEngine(
         AsrCallLatencyProbe.reset()
         if (progressiveChunkingEnabled) {
             chunkResults.start()
-            progressiveRetryPcm = ByteArrayOutputStream()
+            retrySourceStore?.closeAndDelete()
+            retrySourceStore = null
+            currentStore = SessionAudioSegmentStore(context)
+            progressiveAudioBytes = 0
+            pendingRetrySegments.set(0)
             progressiveStoppedAtMs = 0L
         }
         // 使用有界队列并在溢出时丢弃最旧的数据，避免内存溢出
@@ -117,6 +139,14 @@ abstract class BaseFileAsrEngine(
             )
         }
         segmentChan = chan
+        retryScheduler = if (progressiveChunkingEnabled) {
+            ProgressiveSegmentRetryScheduler(
+                scope = scope,
+                onRetryDue = { segmentIndex -> enqueueSegmentRetry(chan, segmentIndex) }
+            )
+        } else {
+            null
+        }
         // 顺序消费识别请求，确保结果按段落顺序提交
         processingJob = scope.launch(Dispatchers.IO) {
             try {
@@ -131,12 +161,17 @@ abstract class BaseFileAsrEngine(
                         )
                         when (seg) {
                             is RecordedSegment.Pcm -> {
+                                if (seg.attempt > 0) {
+                                    pendingRetrySegments.updateAndGet { (it - 1).coerceAtLeast(0) }
+                                }
+                                chunkResults.beginSegment(seg.segmentIndex)
                                 val preprocessStartedAt = SystemClock.elapsedRealtime()
                                 val processed = processPcmForRecognition(seg.pcm) ?: continue
                                 val preprocessMs =
                                     (SystemClock.elapsedRealtime() - preprocessStartedAt).coerceAtLeast(0L)
-                                // 记录最近一次真正用于识别的片段，供“重试”功能使用
-                                lastSegmentForRetry = RecordedSegment.Pcm(processed)
+                                if (!progressiveChunkingEnabled) {
+                                    lastNonProgressiveSegmentForRetry = RecordedSegment.Pcm(processed)
+                                }
                                 val denoiseStartedAt = SystemClock.elapsedRealtime()
                                 val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(
                                     context = context,
@@ -151,13 +186,15 @@ abstract class BaseFileAsrEngine(
                                     mapOf(
                                         "bytes" to denoised.size,
                                         "preprocess_ms" to preprocessMs,
-                                        "denoise_ms" to denoiseMs
+                                        "denoise_ms" to denoiseMs,
+                                        "attempt" to seg.attempt
                                     )
                                 )
                                 recognizeProgressiveChunk(denoised)
+                                handleSegmentRecognitionOutcome(seg)
                             }
                             is RecordedSegment.Encoded -> {
-                                lastSegmentForRetry = seg
+                                lastNonProgressiveSegmentForRetry = seg
                                 logCallLatency(
                                     "t_recognize_enter",
                                     mapOf(
@@ -172,7 +209,8 @@ abstract class BaseFileAsrEngine(
                     } catch (t: Throwable) {
                         Log.e(TAG, "Recognition failed for segment", t)
                         try {
-                            listener.onError(
+                            // 崩溃路径按会话级错误收口，保持既有语义
+                            chunkResults.failSession(
                                 context.getString(
                                     R.string.error_recognize_failed_with_reason,
                                     t.message ?: ""
@@ -195,21 +233,37 @@ abstract class BaseFileAsrEngine(
                     }
                 }
             } finally {
-                if (progressiveChunkingEnabled) {
-                    val retryPcm = progressiveRetryPcm?.toByteArray()
-                    if (retryPcm != null && retryPcm.isNotEmpty()) {
-                        lastSegmentForRetry = RecordedSegment.Pcm(retryPcm)
+                try {
+                    if (progressiveChunkingEnabled) {
+                        retryScheduler?.cancel()
+                        retryScheduler = null
+                        val store = currentStore
+                        if (discardOnStop) {
+                            store?.closeAndDelete()
+                            retrySourceStore?.closeAndDelete()
+                            retrySourceStore = null
+                            chunkResults.cancel()
+                            currentStore = null
+                        } else {
+                            try {
+                                finishProgressiveResults(chunkResults, progressiveAudioBytes)
+                            } finally {
+                                // 终态回调期间保持 currentStore 可见，供历史捕获晋升或丢弃；
+                                // 回调后仅保留仍有音频的来源，未晋升临时文件到期清理。
+                                retrySourceStore = store?.takeIf { it.hasAudio }
+                                if (store != null && store.hasAudio && !store.isTransferred) {
+                                    scheduleRetrySourceCleanup(store)
+                                } else if (store != null && !store.hasAudio) {
+                                    store.closeAndDelete()
+                                }
+                                currentStore = null
+                            }
+                        }
                     }
-                    progressiveRetryPcm = null
-                    if (discardOnStop) {
-                        chunkResults.cancel()
-                    } else {
-                        val audioBytes = retryPcm?.size ?: 0
-                        finishProgressiveResults(chunkResults, audioBytes)
-                    }
+                } finally {
+                    processingJob = null
+                    segmentChan = null
                 }
-                processingJob = null
-                segmentChan = null
             }
         }
         // 持续录音：渐进切段在采集侧完成，编码上传在每段 recognize() 内进行
@@ -256,6 +310,18 @@ abstract class BaseFileAsrEngine(
                         stoppedDelivered = true
                     }
                 }
+                // 录音结束（用户停止/静音判停/时长上限/采集异常）统一在这里冲刷未到期的段重试，
+                // 保证处理循环在通道关闭前收到重试段并完成收口。
+                val scheduler = retryScheduler
+                if (scheduler != null && scheduler.pendingRetryCount() > 0) {
+                    DebugLogManager.logBase(
+                        context,
+                        "asr",
+                        "segment_retry_flushed",
+                        mapOf("count" to scheduler.pendingRetryCount())
+                    )
+                }
+                scheduler?.flushNow()
                 try {
                     chan.close()
                 } catch (t: Throwable) {
@@ -319,7 +385,8 @@ abstract class BaseFileAsrEngine(
         if (!audioManager.hasPermission()) {
             Log.w(TAG, "Missing RECORD_AUDIO permission")
             try {
-                listener.onError(context.getString(R.string.error_record_permission_denied))
+                // 会话级错误走 failSession，避免误记到当前段槽
+                chunkResults.failSession(context.getString(R.string.error_record_permission_denied))
             } catch (t: Throwable) {
                 Log.e(TAG, "Failed to notify permission error", t)
             }
@@ -360,21 +427,13 @@ abstract class BaseFileAsrEngine(
         }
 
         val currentSeg = ByteArrayOutputStream()
-        val pendingList = java.util.ArrayDeque<ByteArray>()
 
         fun enqueuePcm(pcm: ByteArray) {
             if (pcm.isEmpty()) return
-            progressiveRetryPcm?.write(pcm)
+            progressiveAudioBytes += pcm.size
+            val segmentIndex = currentStore?.appendSegment(pcm) ?: -1
             logUncompressedUploadSegment(pcm)
-            while (!pendingList.isEmpty()) {
-                val head = pendingList.peekFirst() ?: break
-                if (chan.trySend(RecordedSegment.Pcm(head)).isSuccess) {
-                    pendingList.removeFirst()
-                } else {
-                    break
-                }
-            }
-            if (!chan.trySend(RecordedSegment.Pcm(pcm)).isSuccess) pendingList.addLast(pcm)
+            chan.trySend(RecordedSegment.Pcm(pcm, segmentIndex))
         }
 
         try {
@@ -442,18 +501,6 @@ abstract class BaseFileAsrEngine(
                     }
                     return@collect
                 }
-
-                // 尝试非阻塞地刷出待发送片段（若存在）
-                while (!pendingList.isEmpty()) {
-                    val head = pendingList.peekFirst() ?: break
-                    val r = chan.trySend(RecordedSegment.Pcm(head))
-                    if (r.isSuccess) {
-                        pendingList.removeFirst()
-                        Log.d(TAG, "Pending segment sent (${head.size} bytes)")
-                    } else {
-                        break
-                    }
-                }
             }
         } catch (t: Throwable) {
             if (t is kotlinx.coroutines.CancellationException) {
@@ -463,7 +510,8 @@ abstract class BaseFileAsrEngine(
                 vadLevelerFinishReason = "capture_error"
                 Log.e(TAG, "Audio capture failed", t)
                 try {
-                    listener.onError(context.getString(R.string.error_audio_error, t.message ?: ""))
+                    // 会话级错误走 failSession，避免误记到当前段槽
+                    chunkResults.failSession(context.getString(R.string.error_audio_error, t.message ?: ""))
                 } catch (e: Throwable) {
                     Log.e(TAG, "Failed to notify audio error", e)
                 }
@@ -471,20 +519,7 @@ abstract class BaseFileAsrEngine(
         } finally {
             vadInputLeveler.finishDebugSession(vadLevelerFinishReason)
             logCallLatency("t_capture_exit")
-            // 录音结束后，推送任何遗留的待发送段与缓冲
-            Log.d(
-                TAG,
-                "Cleaning up: ${pendingList.size} pending segments, ${currentSeg.size()} bytes in buffer"
-            )
-            while (!pendingList.isEmpty()) {
-                try {
-                    val head = pendingList.removeFirst()
-                    chan.trySend(RecordedSegment.Pcm(head))
-                } catch (t: Throwable) {
-                    Log.e(TAG, "Failed to send pending segment during cleanup", t)
-                    break
-                }
-            }
+            // 录音结束后，推送缓冲里的尾段
             val tail = progressiveChunker?.finish() ?: currentSeg.toByteArray()
             if (tail.isNotEmpty()) {
                 try {
@@ -856,8 +891,13 @@ abstract class BaseFileAsrEngine(
      */
     fun markDiscardOnStop() {
         discardOnStop = true
-        lastSegmentForRetry = null
-        progressiveRetryPcm = null
+        retryScheduler?.cancel()
+        pendingRetrySegments.set(0)
+        currentStore?.closeAndDelete()
+        currentStore = null
+        retrySourceStore?.closeAndDelete()
+        retrySourceStore = null
+        lastNonProgressiveSegmentForRetry = null
         if (progressiveChunkingEnabled) chunkResults.cancel()
         try {
             processingJob?.cancel()
@@ -867,57 +907,65 @@ abstract class BaseFileAsrEngine(
     }
 
     /**
-     * 是否存在可用于重试的片段
+     * 是否存在可用于重试的会话音频
      */
-    fun hasRetryableSegment(): Boolean = lastSegmentForRetry != null
+    fun hasRetryableSegment(): Boolean = if (progressiveChunkingEnabled) {
+        retrySourceStore?.hasAudio == true
+    } else {
+        lastNonProgressiveSegmentForRetry != null
+    }
 
     /**
-     * 对最近一次片段发起重新识别（不重新录音）。
+     * 对最近一次会话音频发起重新识别（不重新录音）。
      * 该操作不会修改 running 状态；仅触发一次识别请求。
      */
     fun retryLastSegment() {
-        val data = lastSegmentForRetry
-        if (data == null) {
-            Log.w(TAG, "retryLastSegment: no segment available")
+        if (!progressiveChunkingEnabled) {
+            retryLastNonProgressiveSegment()
+            return
+        }
+        val store = retrySourceStore
+        if (store == null || !store.hasAudio) {
+            Log.w(TAG, "retryLastSegment: no session audio available")
             return
         }
         scope.launch(Dispatchers.IO) {
+            val pcm = store.readAll()
+            if (pcm == null || pcm.isEmpty()) {
+                Log.w(TAG, "retryLastSegment: session audio unavailable")
+                return@launch
+            }
             if (progressiveChunkingEnabled) {
                 chunkResults.start()
                 chunkResults.onStopped()
                 progressiveStoppedAtMs = SystemClock.uptimeMillis()
             }
             try {
-                when (data) {
-                    is RecordedSegment.Pcm -> {
-                        val chunks = if (progressiveChunkingEnabled) {
-                            splitLocalOfflinePcm16WithVad(
-                                context = context,
-                                prefs = prefs,
-                                pcm = data.pcm,
-                                sampleRate = sampleRate,
-                                window = progressiveChunkWindow
-                            )
-                        } else {
-                            listOf(data.pcm)
-                        }
-                        for (chunk in chunks) {
-                            val pcm = if (progressiveChunkingEnabled) {
-                                processPcmForRecognition(chunk) ?: continue
-                            } else {
-                                chunk
-                            }
-                            val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(
-                                context = context,
-                                prefs = prefs,
-                                pcm = pcm,
-                                sampleRate = sampleRate
-                            )
-                            recognizeProgressiveChunk(denoised)
-                            if (progressiveChunkingEnabled && chunkResults.hasFatalError) break
-                        }
+                val chunks = if (progressiveChunkingEnabled) {
+                    splitLocalOfflinePcm16WithVad(
+                        context = context,
+                        prefs = prefs,
+                        pcm = pcm,
+                        sampleRate = sampleRate,
+                        window = progressiveChunkWindow
+                    )
+                } else {
+                    listOf(pcm)
+                }
+                for (chunk in chunks) {
+                    val processed = if (progressiveChunkingEnabled) {
+                        processPcmForRecognition(chunk) ?: continue
+                    } else {
+                        chunk
                     }
-                    is RecordedSegment.Encoded -> recognizeEncoded(data.audio)
+                    val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(
+                        context = context,
+                        prefs = prefs,
+                        pcm = processed,
+                        sampleRate = sampleRate
+                    )
+                    recognizeProgressiveChunk(denoised)
+                    if (progressiveChunkingEnabled && chunkResults.hasFatalError) break
                 }
             } catch (t: Throwable) {
                 Log.e(TAG, "retryLastSegment recognize failed", t)
@@ -933,8 +981,43 @@ abstract class BaseFileAsrEngine(
                 }
             } finally {
                 if (progressiveChunkingEnabled) {
-                    val audioBytes = (data as? RecordedSegment.Pcm)?.pcm?.size ?: 0
-                    finishProgressiveResults(chunkResults, audioBytes)
+                    finishProgressiveResults(chunkResults, pcm.size)
+                }
+            }
+        }
+    }
+
+    private fun retryLastNonProgressiveSegment() {
+        val segment = lastNonProgressiveSegmentForRetry
+        if (segment == null) {
+            Log.w(TAG, "retryLastSegment: no segment available")
+            return
+        }
+        scope.launch(Dispatchers.IO) {
+            try {
+                when (segment) {
+                    is RecordedSegment.Pcm -> {
+                        val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(
+                            context = context,
+                            prefs = prefs,
+                            pcm = segment.pcm,
+                            sampleRate = sampleRate
+                        )
+                        recognizeProgressiveChunk(denoised)
+                    }
+                    is RecordedSegment.Encoded -> recognizeEncoded(segment.audio)
+                }
+            } catch (t: Throwable) {
+                Log.e(TAG, "retryLastSegment recognize failed", t)
+                try {
+                    listener.onError(
+                        context.getString(
+                            R.string.error_recognize_failed_with_reason,
+                            t.message ?: ""
+                        )
+                    )
+                } catch (e: Throwable) {
+                    Log.e(TAG, "Failed to notify recognition error (retry)", e)
                 }
             }
         }
@@ -946,6 +1029,46 @@ abstract class BaseFileAsrEngine(
             recognize(pcm)
         } finally {
             progressiveChunkDecode = false
+        }
+    }
+
+    /** 段识别返回后的失败处置：首次失败调度 10s 重试，重试耗尽升级为会话级错误。 */
+    private fun handleSegmentRecognitionOutcome(seg: RecordedSegment.Pcm) {
+        if (!chunkResults.segmentFailed(seg.segmentIndex)) return
+        if (seg.attempt == 0 && seg.segmentIndex >= 0) {
+            pendingRetrySegments.incrementAndGet()
+            retryScheduler?.scheduleRetry(seg.segmentIndex)
+            DebugLogManager.logBase(
+                context,
+                "asr",
+                "segment_retry_scheduled",
+                mapOf("segment" to seg.segmentIndex)
+            )
+        } else {
+            chunkResults.failSegment(seg.segmentIndex)
+            DebugLogManager.logBase(
+                context,
+                "asr",
+                "segment_retry_exhausted",
+                mapOf("segment" to seg.segmentIndex)
+            )
+        }
+    }
+
+    private fun enqueueSegmentRetry(chan: Channel<RecordedSegment>, segmentIndex: Int) {
+        if (discardOnStop) return
+        val pcm = currentStore?.readSegment(segmentIndex)
+        if (pcm == null || !chan.trySend(RecordedSegment.Pcm(pcm, segmentIndex, attempt = 1)).isSuccess) {
+            // 读取失败或通道已收尾：该段重试丢失，按失败收口
+            pendingRetrySegments.updateAndGet { (it - 1).coerceAtLeast(0) }
+            chunkResults.failSegment(segmentIndex)
+        }
+    }
+
+    private fun scheduleRetrySourceCleanup(store: SessionAudioSegmentStore) {
+        scope.launch(Dispatchers.IO) {
+            delay(RETRY_SOURCE_RETENTION_MS)
+            store.closeAndDelete()
         }
     }
 
@@ -1008,7 +1131,12 @@ abstract class BaseFileAsrEngine(
     }
 
     private sealed interface RecordedSegment {
-        data class Pcm(val pcm: ByteArray) : RecordedSegment
+        data class Pcm(
+            val pcm: ByteArray,
+            val segmentIndex: Int = -1,
+            val attempt: Int = 0
+        ) : RecordedSegment
+
         data class Encoded(val audio: UploadAudioData) : RecordedSegment
     }
 }

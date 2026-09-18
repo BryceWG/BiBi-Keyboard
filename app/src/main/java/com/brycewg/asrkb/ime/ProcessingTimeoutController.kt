@@ -4,6 +4,7 @@ import android.util.Log
 import com.brycewg.asrkb.asr.AsrTimeoutCalculator
 import com.brycewg.asrkb.asr.BackupAwareAsrEngine
 import com.brycewg.asrkb.asr.LOCAL_MODEL_READY_WAIT_MAX_MS
+import com.brycewg.asrkb.asr.ProgressiveRetryStatusOwner
 import com.brycewg.asrkb.asr.awaitLocalAsrReady
 import com.brycewg.asrkb.asr.isLocalAsrVendor
 import com.brycewg.asrkb.store.Prefs
@@ -22,6 +23,7 @@ internal class ProcessingTimeoutController(
     private val opSeqProvider: () -> Long,
     private val audioMsProvider: () -> Long,
     private val backupEngineProvider: () -> BackupAwareAsrEngine?,
+    private val pendingRetryOwnerProvider: () -> ProgressiveRetryStatusOwner?,
     private val onTimeout: () -> Unit
 ) {
     private var job: Job? = null
@@ -53,7 +55,8 @@ internal class ProcessingTimeoutController(
             backupVendor = backupVendor,
             backupStatsSnapshot = backupSnapshot,
             sensitivityTier = safeBackupSensitivityTier(),
-            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+            pendingRetryCount = safePendingRetryCount()
         )
 
         val shouldDeferForLocalModel = shouldDeferForLocalModel(backupEngine != null)
@@ -101,6 +104,12 @@ internal class ProcessingTimeoutController(
         backupEngineProvider()
     } catch (_: Throwable) {
         null
+    }
+
+    private fun safePendingRetryCount(): Int = try {
+        pendingRetryOwnerProvider()?.peekPendingRetryCount() ?: 0
+    } catch (_: Throwable) {
+        0
     }
 
     private fun safePrimaryVendor(): com.brycewg.asrkb.asr.AsrVendor? = try {

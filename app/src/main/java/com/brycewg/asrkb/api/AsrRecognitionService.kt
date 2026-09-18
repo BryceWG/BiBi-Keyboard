@@ -203,7 +203,8 @@ class AsrRecognitionService : RecognitionService() {
             listener = listener,
             primaryVendor = vendor,
             backupVendor = backupVendor,
-            onPrimaryRequestDuration = requestDurationCallback
+            onPrimaryRequestDuration = requestDurationCallback,
+            onBackupRequestDuration = requestDurationCallback
         )?.let { return it }
 
         return directMicrophoneEngineFactory.createOrNull(
@@ -705,7 +706,9 @@ class AsrRecognitionService : RecognitionService() {
                 backupVendor = backupVendor,
                 backupStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(backupVendor, audioMs),
                 sensitivityTier = safeBackupSensitivityTier(),
-                primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+                primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+                pendingRetryCount = (engine as? ProgressiveRetryStatusOwner)
+                    ?.peekPendingRetryCount() ?: 0
             )
             processingTimeoutJob = serviceScope.launch {
                 val shouldDeferForLocalModel =

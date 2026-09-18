@@ -188,6 +188,14 @@ internal class NonStreamingPcmChunker(
     }
 }
 
+/**
+ * 渐进分段识别的段级结果收口。
+ *
+ * 段感知语义：处理循环在识别每段前调用 [beginSegment]，该段识别期间产生的
+ * [onFinal]/[onError] 记入对应段槽；失败段由循环决定重试或经 [failSegment] 升级为
+ * 会话级错误（沿用"首个致命错误终止会话"语义）。无段号（落盘降级）或会话级错误走
+ * [failSession] 直接置致命错误。文本按段号顺序拼接，重试晚到不乱序。
+ */
 internal class NonStreamingChunkResultCollector(
     private val delegate: StreamingAsrEngine.Listener,
     private val emptyResultMessage: String,
@@ -196,7 +204,10 @@ internal class NonStreamingChunkResultCollector(
     private val nanoTime: () -> Long = System::nanoTime
 ) : StreamingAsrEngine.Listener {
     private val lock = Any()
-    private val texts = ArrayList<String>()
+    private val texts = ArrayList<String?>()
+    private val unindexedTexts = ArrayList<String>()
+    private val segmentErrors = HashMap<Int, String>()
+    private var activeSegmentIndex = -1
     private var state = State.Idle
     private var fatalError: String? = null
     private var stoppedAtNanos = 0L
@@ -207,11 +218,36 @@ internal class NonStreamingChunkResultCollector(
 
     fun start() = synchronized(lock) {
         texts.clear()
+        unindexedTexts.clear()
+        segmentErrors.clear()
+        activeSegmentIndex = -1
         fatalError = null
         stoppedAtNanos = 0L
         canceled = false
         state = State.Active
     }
+
+    /** 处理循环在识别某段前调用；与该段识别回调同属处理协程，单写者。 */
+    fun beginSegment(index: Int) = synchronized(lock) {
+        if (state != State.Active || index < 0) return
+        activeSegmentIndex = index
+        while (texts.size <= index) texts.add(null)
+    }
+
+    /** 识别返回后查询该段是否失败（空段等可忽略错误不算失败）。 */
+    fun segmentFailed(index: Int): Boolean = synchronized(lock) {
+        index >= 0 && segmentErrors.containsKey(index)
+    }
+
+    /** 段级重试耗尽（或不可重试）时升级为会话级致命错误。 */
+    fun failSegment(index: Int) = synchronized(lock) {
+        if (state != State.Active || index < 0) return
+        val message = segmentErrors[index] ?: return
+        if (fatalError == null) fatalError = message
+    }
+
+    /** 会话级错误（采集失败、权限等非段级来源）直接置致命错误。 */
+    fun failSession(message: String) = onErrorInternal(message, scopeToSegment = false)
 
     suspend fun finish(
         transformFinal: suspend (String) -> String = { it },
@@ -221,8 +257,9 @@ internal class NonStreamingChunkResultCollector(
         val completed = synchronized(lock) {
             if (state != State.Active) return
             state = State.Terminal
-            val outcome = fatalError?.let(Outcome::Error) ?: run {
-                val text = joinNonStreamingChunkTexts(texts)
+            val unresolvedSegmentError = segmentErrors.minByOrNull { it.key }?.value
+            val outcome = (fatalError ?: unresolvedSegmentError)?.let(Outcome::Error) ?: run {
+                val text = joinNonStreamingChunkTexts(texts.filterNotNull() + unindexedTexts)
                 if (text.isBlank()) Outcome.Error(emptyResultMessage) else Outcome.Final(text)
             }
             stoppedAtNanos to outcome
@@ -254,6 +291,9 @@ internal class NonStreamingChunkResultCollector(
 
     fun cancel() = synchronized(lock) {
         texts.clear()
+        unindexedTexts.clear()
+        segmentErrors.clear()
+        activeSegmentIndex = -1
         fatalError = null
         stoppedAtNanos = 0L
         canceled = true
@@ -265,7 +305,16 @@ internal class NonStreamingChunkResultCollector(
             when (state) {
                 State.Idle -> true
                 State.Active -> {
-                    text.trim().takeIf(String::isNotEmpty)?.let(texts::add)
+                    val trimmed = text.trim()
+                    if (trimmed.isNotEmpty()) {
+                        val index = activeSegmentIndex
+                        if (index >= 0) {
+                            texts[index] = trimmed
+                            segmentErrors.remove(index)
+                        } else {
+                            unindexedTexts.add(trimmed)
+                        }
+                    }
                     false
                 }
                 State.Terminal -> false
@@ -274,12 +323,20 @@ internal class NonStreamingChunkResultCollector(
         if (forward) delegate.onFinal(text)
     }
 
-    override fun onError(message: String) {
+    override fun onError(message: String) = onErrorInternal(message, scopeToSegment = true)
+
+    private fun onErrorInternal(message: String, scopeToSegment: Boolean) {
         val forward = synchronized(lock) {
             when (state) {
                 State.Idle -> true
                 State.Active -> {
-                    if (message !in ignorableEmptyErrors && fatalError == null) fatalError = message
+                    if (message !in ignorableEmptyErrors) {
+                        if (scopeToSegment && activeSegmentIndex >= 0) {
+                            segmentErrors[activeSegmentIndex] = message
+                        } else if (fatalError == null) {
+                            fatalError = message
+                        }
+                    }
                     false
                 }
                 State.Terminal -> false
