@@ -24,7 +24,7 @@ import org.json.JSONObject
  * 使用阿里云百炼（DashScope）的非流式 ASR 引擎。
  * - Fun-ASR-Flash 与 Qwen-Audio 3.0 走 DashScope REST multimodal-generation + Base64 音频。
  * - Qwen3-ASR-Flash 走同一 REST 入口，使用 asr_options / system prompt。
- * - Qwen3.5-Omni 非实时模型走 OpenAI 兼容 chat/completions + Base64 音频输入。
+ * - Qwen3.5 / Qwen3.8 Omni 非实时模型走 OpenAI 兼容 chat/completions + Base64 音频输入。
  */
 class DashscopeFileAsrEngine(
     context: Context,
@@ -180,7 +180,7 @@ class DashscopeFileAsrEngine(
     }
 
     /**
-     * Qwen3.5-Omni 非实时识别路径。
+     * Qwen Omni 非实时识别路径。
      */
     private fun recognizeWithOmni(audio: UploadAudioData, model: String) {
         try {
@@ -233,60 +233,6 @@ class DashscopeFileAsrEngine(
                 context.getString(R.string.error_recognize_failed_with_reason, t.message ?: "")
             )
         }
-    }
-
-    private fun buildDashOmniRequestBody(
-        model: String,
-        base64Audio: String,
-        audio: UploadAudioData,
-        prompt: String
-    ): String {
-        val systemMessage = JSONObject().apply {
-            put("role", "system")
-            put(
-                "content",
-                JSONArray().apply {
-                    put(
-                        JSONObject().apply {
-                            put("type", "text")
-                            put("text", prompt)
-                        }
-                    )
-                }
-            )
-        }
-        val userMessage = JSONObject().apply {
-            put("role", "user")
-            put(
-                "content",
-                JSONArray().apply {
-                    put(
-                        JSONObject().apply {
-                            put("type", "input_audio")
-                            put(
-                                "input_audio",
-                                JSONObject().apply {
-                                    put("data", "data:${audio.mimeType};base64,$base64Audio")
-                                    put("format", audio.format)
-                                }
-                            )
-                        }
-                    )
-                }
-            )
-        }
-        return JSONObject().apply {
-            put("model", model)
-            put("stream", true)
-            put("modalities", JSONArray().put("text"))
-            put(
-                "messages",
-                JSONArray().apply {
-                    put(systemMessage)
-                    put(userMessage)
-                }
-            )
-        }.toString()
     }
 
     private fun dispatchFinalText(text: String, startedAtNanos: Long) {
@@ -475,6 +421,63 @@ internal fun dashscopeUploadAudioEncodingSpecForModel(model: String): UploadAudi
     UploadAudioEncodingSpec.AAC_ADTS
 } else {
     UploadAudioEncodingSpec.M4A_AAC_LC
+}
+
+internal fun buildDashOmniRequestBody(
+    model: String,
+    base64Audio: String,
+    audio: UploadAudioData,
+    prompt: String
+): String {
+    val systemMessage = JSONObject().apply {
+        put("role", "system")
+        put(
+            "content",
+            JSONArray().apply {
+                put(
+                    JSONObject().apply {
+                        put("type", "text")
+                        put("text", prompt)
+                    }
+                )
+            }
+        )
+    }
+    val userMessage = JSONObject().apply {
+        put("role", "user")
+        put(
+            "content",
+            JSONArray().apply {
+                put(
+                    JSONObject().apply {
+                        put("type", "input_audio")
+                        put(
+                            "input_audio",
+                            JSONObject().apply {
+                                put("data", "data:${audio.mimeType};base64,$base64Audio")
+                                put("format", audio.format)
+                            }
+                        )
+                    }
+                )
+            }
+        )
+    }
+    return JSONObject().apply {
+        put("model", model)
+        put("stream", true)
+        put("modalities", JSONArray().put("text"))
+        if (DashScopePrefsCompat.isQwen38OmniFlash(model)) {
+            put("reasoning_effort", "none")
+        }
+        put(
+            "messages",
+            JSONArray().apply {
+                put(systemMessage)
+                put(userMessage)
+            }
+        )
+    }.toString()
 }
 
 internal fun buildDashGenerationAsrRequestBody(

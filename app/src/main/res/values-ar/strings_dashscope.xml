@@ -10,6 +10,7 @@
     <string name="dash_model_qwen_audio_flash">Qwen-Audio-3.0-ASR-Flash (غير متدفق)</string>
     <string name="dash_model_qwen3_flash">Qwen3-ASR-Flash (غير متدفق)</string>
     <string name="dash_model_qwen35_omni_flash">Qwen3.5-Omni-Flash (غير متدفق)</string>
+    <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash (غير متدفق)</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus (غير متدفق)</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime (بث)</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming (بث)</string>
@@ -43,7 +44,7 @@
     <!-- ============================================== -->
 
     <!-- DashScope - Streaming -->
-    <string name="feature_dash_streaming_off_desc">يستخدم تعرّفاً غير متدفق. تبدأ المعالجة بعد انتهاء التسجيل وقد يحدث تأخير. متاح لنماذج Qwen-Audio-3.0-ASR-Flash وFun-ASR-Flash وQwen3.5-Omni.</string>
+    <string name="feature_dash_streaming_off_desc">يستخدم تعرّفاً غير متدفق. تبدأ المعالجة بعد انتهاء التسجيل وقد يحدث تأخير. متاح لنماذج Qwen-Audio-3.0-ASR-Flash وFun-ASR-Flash وQwen3.5/3.8-Omni.</string>
     <string name="feature_dash_streaming_on_desc">يستخدم التعرّف بالبث. تُعرض نتائج النسخ النصي فوراً أثناء الكلام. الافتراضي Qwen-Audio-3.0-ASR-Flash-Streaming؛ يمكنك التبديل إلى Fun-ASR-Realtime أدناه.</string>
 
     <!-- DashScope - Fun-ASR model (streaming) -->

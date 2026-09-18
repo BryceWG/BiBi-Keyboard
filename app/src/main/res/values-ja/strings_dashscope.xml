@@ -10,6 +10,7 @@
     <string name="dash_model_qwen_audio_flash">Qwen-Audio-3.0-ASR-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen3_flash">Qwen3-ASR-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen35_omni_flash">Qwen3.5-Omni-Flash（非ストリーミング）</string>
+    <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非ストリーミング）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（ストリーミング）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（ストリーミング）</string>
@@ -43,7 +44,7 @@
     <!-- ============================================== -->
 
     <!-- 通義千問 - ストリーミング -->
-    <string name="feature_dash_streaming_off_desc">非ストリーミング認識を使用します。録音終了後に処理が開始されるため、遅延が発生する可能性があります。Qwen-Audio-3.0-ASR-Flash、Fun-ASR-Flash、Qwen3.5-Omni 系列で利用できます。</string>
+    <string name="feature_dash_streaming_off_desc">非ストリーミング認識を使用します。録音終了後に処理が開始されるため、遅延が発生する可能性があります。Qwen-Audio-3.0-ASR-Flash、Fun-ASR-Flash、Qwen3.5/3.8-Omni 系列で利用できます。</string>
     <string name="feature_dash_streaming_on_desc">ストリーミング認識を使用します。話しながら文字起こし結果がリアルタイムで表示されます。既定はQwen-Audio-3.0-ASR-Flash-Streamingで、下でFun-ASR-Realtimeに切り替えできます。</string>
 
     <!-- Fun-ASR モデル（ストリーミングのみ） -->

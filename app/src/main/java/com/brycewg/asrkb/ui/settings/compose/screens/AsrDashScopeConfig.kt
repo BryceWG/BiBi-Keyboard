@@ -160,6 +160,10 @@ internal fun dashModelOptions(context: Context): List<DashChoice> = listOf(
         context.getString(R.string.dash_model_qwen3_flash)
     ),
     DashChoice(
+        Prefs.DASH_MODEL_QWEN38_OMNI_FLASH,
+        context.getString(R.string.dash_model_qwen38_omni_flash)
+    ),
+    DashChoice(
         Prefs.DASH_MODEL_QWEN35_OMNI_FLASH,
         context.getString(R.string.dash_model_qwen35_omni_flash)
     ),

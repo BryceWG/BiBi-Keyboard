@@ -10,6 +10,7 @@
     <string name="dash_model_qwen_audio_flash">Qwen-Audio-3.0-ASR-Flash（非流式）</string>
     <string name="dash_model_qwen3_flash">Qwen3-ASR-Flash（非流式）</string>
     <string name="dash_model_qwen35_omni_flash">Qwen3.5-Omni-Flash（非流式）</string>
+    <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非流式）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非流式）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（流式）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（流式）</string>
@@ -44,7 +45,7 @@
     <!-- ============================================== -->
 
     <!-- 流式识别 - Streaming recognition -->
-    <string name="feature_dash_streaming_off_desc">使用非流式识别。录音结束后开始处理，可能有延迟。可用于 Qwen-Audio-3.0-ASR-Flash、Fun-ASR-Flash 与 Qwen3.5-Omni 系列模型。</string>
+    <string name="feature_dash_streaming_off_desc">使用非流式识别。录音结束后开始处理，可能有延迟。可用于 Qwen-Audio-3.0-ASR-Flash、Fun-ASR-Flash 与 Qwen3.5/3.8-Omni 系列模型。</string>
     <string name="feature_dash_streaming_on_desc">使用流式识别。边说话边实时显示转写结果。默认使用 Qwen-Audio-3.0-ASR-Flash-Streaming；也可在下方切换 Fun-ASR-Realtime。</string>
 
     <!-- Fun-ASR 模型（仅流式） -->

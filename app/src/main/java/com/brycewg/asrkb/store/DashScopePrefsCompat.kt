@@ -14,6 +14,7 @@ internal object DashScopePrefsCompat {
         Prefs.DASH_MODEL_QWEN_AUDIO_FLASH,
         Prefs.DASH_MODEL_QWEN3_FLASH,
         Prefs.DASH_MODEL_QWEN35_OMNI_FLASH,
+        Prefs.DASH_MODEL_QWEN38_OMNI_FLASH,
         Prefs.DASH_MODEL_QWEN35_OMNI_PLUS,
         Prefs.DASH_MODEL_FUN_ASR_REALTIME,
         Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME,
@@ -91,8 +92,12 @@ internal object DashScopePrefsCompat {
 
     fun isOmniModel(model: String): Boolean = normalizeDashAsrModel(model).let {
         it.equals(Prefs.DASH_MODEL_QWEN35_OMNI_FLASH, ignoreCase = true) ||
+            it.equals(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH, ignoreCase = true) ||
             it.equals(Prefs.DASH_MODEL_QWEN35_OMNI_PLUS, ignoreCase = true)
     }
+
+    fun isQwen38OmniFlash(model: String): Boolean = normalizeDashAsrModel(model)
+        .equals(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH, ignoreCase = true)
 
     fun isPromptSupported(model: String): Boolean {
         val normalized = normalizeDashAsrModel(model)

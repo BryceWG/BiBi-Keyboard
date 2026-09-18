@@ -354,6 +354,8 @@ internal object AsrRecordedAudioRouteResolver {
                 R.string.dash_model_qwen3_flash
             model.equals(Prefs.DASH_MODEL_QWEN35_OMNI_FLASH, ignoreCase = true) ->
                 R.string.dash_model_qwen35_omni_flash
+            model.equals(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH, ignoreCase = true) ->
+                R.string.dash_model_qwen38_omni_flash
             model.equals(Prefs.DASH_MODEL_QWEN35_OMNI_PLUS, ignoreCase = true) ->
                 R.string.dash_model_qwen35_omni_plus
             model.equals(Prefs.DASH_MODEL_FUN_ASR_REALTIME, ignoreCase = true) ->

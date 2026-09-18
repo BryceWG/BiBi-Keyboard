@@ -27,6 +27,34 @@ class DashscopeRequestBuildersTest {
             UploadAudioEncodingSpec.AAC_ADTS,
             dashscopeUploadAudioEncodingSpecForModel(Prefs.DASH_MODEL_QWEN35_OMNI_FLASH)
         )
+        assertEquals(
+            UploadAudioEncodingSpec.AAC_ADTS,
+            dashscopeUploadAudioEncodingSpecForModel(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH)
+        )
+    }
+
+    @Test
+    fun omniRequestDisablesThinkingOnlyForQwen38Flash() {
+        val flashBody = JSONObject(
+            buildDashOmniRequestBody(
+                model = Prefs.DASH_MODEL_QWEN35_OMNI_FLASH,
+                base64Audio = "AA==",
+                audio = wavAudio(),
+                prompt = "transcribe"
+            )
+        )
+        assertFalse(flashBody.has("reasoning_effort"))
+
+        val omni38Body = JSONObject(
+            buildDashOmniRequestBody(
+                model = Prefs.DASH_MODEL_QWEN38_OMNI_FLASH,
+                base64Audio = "AA==",
+                audio = wavAudio(),
+                prompt = "transcribe"
+            )
+        )
+        assertEquals("none", omni38Body.getString("reasoning_effort"))
+        assertEquals(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH, omni38Body.getString("model"))
     }
 
     @Test

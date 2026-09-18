@@ -78,6 +78,17 @@ class DashScopePrefsCompatTest {
     }
 
     @Test
+    fun qwen38OmniFlashUsesNonStreamingOmniPath() {
+        assertEquals(true, DashScopePrefsCompat.isKnownAsrModel(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isOmniModel(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isQwen38OmniFlash(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH))
+        assertEquals(false, DashScopePrefsCompat.isQwen38OmniFlash(Prefs.DASH_MODEL_QWEN35_OMNI_FLASH))
+        assertEquals(false, DashScopePrefsCompat.isStreamingModel(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isPromptSupported(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH))
+        assertEquals(false, DashScopePrefsCompat.isLanguageSupported(Prefs.DASH_MODEL_QWEN38_OMNI_FLASH))
+    }
+
+    @Test
     fun dashLanguagesKeepAtMostFourDistinctHints() {
         assertEquals(
             listOf("zh", "en", "ja", "de"),

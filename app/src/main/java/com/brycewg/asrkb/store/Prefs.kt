@@ -1022,7 +1022,7 @@ class Prefs(context: Context) {
     // - fun-asr-flash-2026-06-15：非流式
     // - qwen-audio-3.0-asr-flash：非流式
     // - qwen3-asr-flash：非流式
-    // - qwen3.5-omni-flash / qwen3.5-omni-plus：非流式多模态转写
+    // - qwen3.8-omni-flash / qwen3.5-omni-flash / qwen3.5-omni-plus：非流式多模态转写
     // - fun-asr-realtime：流式（Fun-ASR）
     // - qwen-audio-3.0-asr-flash-streaming：流式（Qwen-Audio 3.0）
     // - qwen3-asr-flash-realtime：流式（Qwen3）
@@ -2192,6 +2192,7 @@ class Prefs(context: Context) {
         // DashScope 默认
         const val DEFAULT_DASH_MODEL = "qwen-audio-3.0-asr-flash"
         const val DASH_MODEL_QWEN35_OMNI_FLASH = "qwen3.5-omni-flash"
+        const val DASH_MODEL_QWEN38_OMNI_FLASH = "qwen3.8-omni-flash"
         const val DASH_MODEL_QWEN35_OMNI_PLUS = "qwen3.5-omni-plus"
         const val DASH_MODEL_FUN_ASR_FLASH = "fun-asr-flash-2026-06-15"
         const val DASH_MODEL_QWEN_AUDIO_FLASH = "qwen-audio-3.0-asr-flash"
