@@ -259,6 +259,36 @@ object SettingsSearchIndex {
         )
         item(R.string.label_custom_reasoning_params, R.string.section_post_process_model)
         item(R.string.label_llm_prompt_presets, R.string.label_llm_prompt_presets)
+        item(R.string.label_llm_prompt_skill, R.string.label_llm_prompt_presets, "skill", "prompt")
+        addPromptSelectionEntries()
+    }
+
+    private fun MutableList<DeclarativeEntry>.addPromptSelectionEntries() {
+        val route = BibiSettingsRoute.PromptSelection
+        val screen = R.string.title_prompt_selection
+        fun item(@StringRes title: Int, @StringRes section: Int, vararg keywords: String) {
+            add(DeclarativeEntry(title, screen, route, section, keywords.toList()))
+        }
+        item(R.string.title_prompt_selection, R.string.section_prompt_selection_switch)
+        item(
+            R.string.label_prompt_auto_select_enabled,
+            R.string.section_prompt_selection_switch,
+            "auto select",
+            "自动选择",
+            "分类"
+        )
+        item(
+            R.string.label_prompt_selection_candidates,
+            R.string.section_prompt_selection_candidates,
+            "candidates",
+            "候选"
+        )
+        item(
+            R.string.label_prompt_selection_model,
+            R.string.section_prompt_selection_model,
+            "selector model",
+            "选择模型"
+        )
     }
 
     private fun MutableList<DeclarativeEntry>.addOtherEntries() {

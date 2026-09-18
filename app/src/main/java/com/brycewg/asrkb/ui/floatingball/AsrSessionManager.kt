@@ -24,6 +24,7 @@ import com.brycewg.asrkb.store.AsrHistoryTimingOrigin
 import com.brycewg.asrkb.store.AsrHistoryTimingRecorder
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
@@ -120,6 +121,7 @@ class AsrSessionManager(
     private var lastAiPostMs: Long = 0L
     private var lastAiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE
     private var lastLlmVendorId: String? = null
+    private var lastPromptSelection: PromptSelectionStatus? = null
 
     // 统计/历史：最近一次最终结果的实际供应商（备用引擎场景下不再固定记录 prefs.asrVendor）
     private var sessionPrimaryVendor: AsrVendor = try {
@@ -315,6 +317,7 @@ class AsrSessionManager(
         lastAiPostMs = 0L
         lastAiPostStatus = AsrHistoryStore.AiPostStatus.NONE
         lastLlmVendorId = null
+        lastPromptSelection = null
 
         val localModelError = checkLocalModelError()
         if (localModelError != null) {
@@ -462,6 +465,7 @@ class AsrSessionManager(
             lastAiPostMs = 0L
             lastAiPostStatus = AsrHistoryStore.AiPostStatus.NONE
             lastLlmVendorId = null
+            lastPromptSelection = null
             transitionPostprocessToDelivery()
             val success = insertTextToFocus(commitText)
             hasCommittedResult = true
@@ -680,6 +684,9 @@ class AsrSessionManager(
     /** 最近一次实际尝试后处理使用的 LLM 渠道。 */
     fun getLastLlmVendorId(): String? = lastLlmVendorId
 
+    /** 最近一次自动选择提示词的结果快照；未启用自动选择时为 null。 */
+    fun getLastPromptSelection(): PromptSelectionStatus? = lastPromptSelection
+
     fun peekLastFinalVendorForStats(): AsrVendor = lastFinalVendorForStats ?: sessionPrimaryVendor
 
     /** 清理会话 */
@@ -777,6 +784,7 @@ class AsrSessionManager(
             lastAiPostMs = 0L
             lastAiPostStatus = AsrHistoryStore.AiPostStatus.NONE
             lastLlmVendorId = null
+            lastPromptSelection = null
             val stillRecording = (asrEngine?.isRunning == true)
             // 若未收到 onStopped，则在此近似计算录音时长
             if (lastAudioMsForStats == 0L && sessionStartUptimeMs > 0L) {
@@ -873,7 +881,20 @@ class AsrSessionManager(
                                 completedHistoryTiming?.end(AsrHistoryTimingStage.AI_POSTPROCESS)
                                 completedHistoryTiming?.begin(AsrHistoryTimingStage.POSTPROCESS)
                             }
-                        }
+
+                            override fun onPromptSelectionStarted() {
+                                completedHistoryTiming?.end(AsrHistoryTimingStage.POSTPROCESS)
+                                completedHistoryTiming?.begin(AsrHistoryTimingStage.PROMPT_SELECTION)
+                            }
+
+                            override fun onPromptSelectionFinished() {
+                                completedHistoryTiming?.end(AsrHistoryTimingStage.PROMPT_SELECTION)
+                                completedHistoryTiming?.begin(AsrHistoryTimingStage.POSTPROCESS)
+                            }
+                        },
+                        // 悬浮球录音属于自动流程。
+                        promptSelectionMode = com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
+                        isCancelled = { !isSessionActive(sessionToken) }
                     )
                 } catch (t: Throwable) {
                     Log.e(TAG, "applyWithAi failed", t)
@@ -900,6 +921,7 @@ class AsrSessionManager(
                     else -> AsrHistoryStore.AiPostStatus.NONE
                 }
                 lastLlmVendorId = res.llmVendorId
+                lastPromptSelection = res.promptSelectionStatus
                 finalText = res.text.ifBlank { text }
                 rememberAiPostProcessingResolvedText(sessionToken, finalText)
                 if (typewriter != null &&
@@ -958,6 +980,7 @@ class AsrSessionManager(
                 lastAiPostMs = 0L
                 lastAiPostStatus = AsrHistoryStore.AiPostStatus.NONE
                 lastLlmVendorId = null
+                lastPromptSelection = null
             }
             if (!isSessionActive(sessionToken)) return@launch
 
@@ -1233,7 +1256,8 @@ class AsrSessionManager(
             backupVendor = backupVendor,
             backupStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(backupVendor, audioMs),
             sensitivityTier = safeBackupSensitivityTier(),
-            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+            extraAiBudgetMs = promptSelectionSessionSlackMs(prefs)
         )
         processingTimeoutJob = serviceScope.launch {
             if (!isSessionActive(sessionToken)) return@launch
@@ -1333,7 +1357,20 @@ class AsrSessionManager(
                             activeHistoryTiming?.end(AsrHistoryTimingStage.AI_POSTPROCESS)
                             activeHistoryTiming?.begin(AsrHistoryTimingStage.POSTPROCESS)
                         }
-                    }
+
+                        override fun onPromptSelectionStarted() {
+                            activeHistoryTiming?.end(AsrHistoryTimingStage.POSTPROCESS)
+                            activeHistoryTiming?.begin(AsrHistoryTimingStage.PROMPT_SELECTION)
+                        }
+
+                        override fun onPromptSelectionFinished() {
+                            activeHistoryTiming?.end(AsrHistoryTimingStage.PROMPT_SELECTION)
+                            activeHistoryTiming?.begin(AsrHistoryTimingStage.POSTPROCESS)
+                        }
+                    },
+                    // 超时兜底仍属自动流程。
+                    promptSelectionMode = com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
+                    isCancelled = { !isSessionActive(sessionToken) }
                 )
                 if (!isSessionActive(sessionToken)) return
                 val aiUsed = (res.usedAi && res.ok)
@@ -1345,6 +1382,7 @@ class AsrSessionManager(
                     else -> AsrHistoryStore.AiPostStatus.NONE
                 }
                 lastLlmVendorId = res.llmVendorId
+                lastPromptSelection = res.promptSelectionStatus
                 res.text.ifBlank {
                     com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, candidate)
                 }
@@ -1357,6 +1395,7 @@ class AsrSessionManager(
                 lastAiPostMs = 0L
                 lastAiPostStatus = AsrHistoryStore.AiPostStatus.FAILED
                 lastLlmVendorId = null
+                lastPromptSelection = null
                 com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, candidate)
             }
         } else {
@@ -1365,6 +1404,7 @@ class AsrSessionManager(
             lastAiPostMs = 0L
             lastAiPostStatus = AsrHistoryStore.AiPostStatus.NONE
             lastLlmVendorId = null
+            lastPromptSelection = null
             com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, candidate)
         }
         if (!isSessionActive(sessionToken)) return

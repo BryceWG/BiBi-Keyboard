@@ -20,6 +20,7 @@ import com.brycewg.asrkb.store.AsrHistoryTimingRecorder
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
 import com.brycewg.asrkb.store.AsrHistoryTimingTrace
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
@@ -244,7 +245,8 @@ internal class ExternalSpeechSession(
             backupVendor = backupVendor,
             backupStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(backupVendor, audioMs),
             sensitivityTier = safeBackupSensitivityTier(),
-            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+            primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+            extraAiBudgetMs = promptSelectionSessionSlackMs(prefs)
         )
         synchronized(processingTimeoutLock) {
             if (processingTimeoutJob != null) return
@@ -583,6 +585,7 @@ internal class ExternalSpeechSession(
                 var aiPostMs = 0L
                 var aiPostStatus = com.brycewg.asrkb.store.AsrHistoryStore.AiPostStatus.NONE
                 var llmVendorId: String? = null
+                var promptSelection: com.brycewg.asrkb.store.PromptSelectionStatus? = null
                 val out = try {
                     val res = com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
                         context,
@@ -599,7 +602,20 @@ internal class ExternalSpeechSession(
                                 historyTiming?.end(AsrHistoryTimingStage.AI_POSTPROCESS)
                                 historyTiming?.begin(AsrHistoryTimingStage.POSTPROCESS)
                             }
-                        }
+
+                            override fun onPromptSelectionStarted() {
+                                historyTiming?.end(AsrHistoryTimingStage.POSTPROCESS)
+                                historyTiming?.begin(AsrHistoryTimingStage.PROMPT_SELECTION)
+                            }
+
+                            override fun onPromptSelectionFinished() {
+                                historyTiming?.end(AsrHistoryTimingStage.PROMPT_SELECTION)
+                                historyTiming?.begin(AsrHistoryTimingStage.POSTPROCESS)
+                            }
+                        },
+                        // 外部识别链路同样属于自动流程。
+                        promptSelectionMode = com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
+                        isCancelled = { canceled }
                     )
                     aiUsed = (res.usedAi && res.ok)
                     aiPostMs = if (res.attempted) res.llmMs else 0L
@@ -609,6 +625,7 @@ internal class ExternalSpeechSession(
                         else -> com.brycewg.asrkb.store.AsrHistoryStore.AiPostStatus.NONE
                     }
                     llmVendorId = res.llmVendorId
+                    promptSelection = res.promptSelectionStatus
 
                     val processed = res.text
                     val finalOut = processed.ifBlank {
@@ -727,7 +744,8 @@ internal class ExternalSpeechSession(
                                 aiProcessed = aiUsed,
                                 aiPostMs = aiPostMs,
                                 aiPostStatus = aiPostStatus,
-                                llmVendorId = llmVendorId
+                                llmVendorId = llmVendorId,
+                                promptSelection = promptSelection
                             )
                         }
                     }
@@ -973,7 +991,8 @@ internal class ExternalSpeechSession(
         aiProcessed: Boolean,
         aiPostMs: Long = 0L,
         aiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE,
-        llmVendorId: String? = null
+        llmVendorId: String? = null,
+        promptSelection: PromptSelectionStatus? = null
     ) {
         val timingTrace = takeSuccessfulTimingTrace()
         val record = AsrHistoryStore.AsrHistoryRecord(
@@ -991,7 +1010,8 @@ internal class ExternalSpeechSession(
             aiPostStatus = aiPostStatus,
             llmVendorId = llmVendorId,
             charCount = chars,
-            timingTrace = timingTrace
+            timingTrace = timingTrace,
+            promptSelection = promptSelection
         )
         val retention = prefs.audioHistoryRetentionCount
         sessionScope.launch(Dispatchers.IO) {

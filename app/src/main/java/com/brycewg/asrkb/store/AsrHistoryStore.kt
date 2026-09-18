@@ -90,7 +90,9 @@ class AsrHistoryStore(context: Context) {
         // 稳定失败原因码，不存本地化文案。成功记录为 null。
         val failReasonCode: String? = null,
         // 阶段耗时轨迹。旧版本创建的记录没有该字段。
-        val timingTrace: AsrHistoryTimingTrace? = null
+        val timingTrace: AsrHistoryTimingTrace? = null,
+        // 自动选择提示词的结果快照。旧记录与未启用自动选择的记录为 null。
+        val promptSelection: PromptSelectionStatus? = null
     ) {
         val isUnsuccessful: Boolean
             get() = status != AsrHistoryStatus.SUCCESS

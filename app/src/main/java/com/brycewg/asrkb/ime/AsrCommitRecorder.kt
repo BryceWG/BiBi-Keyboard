@@ -10,6 +10,7 @@ import com.brycewg.asrkb.store.AsrHistoryTimingDiagnostics
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
 import com.brycewg.asrkb.store.AsrHistoryTimingTrace
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.util.TextSanitizer
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,7 @@ internal class AsrCommitRecorder(
         val aiPostMs: Long,
         val aiPostStatus: AsrHistoryStore.AiPostStatus,
         val llmVendorId: String?,
+        val promptSelection: PromptSelectionStatus?,
         val chars: Int,
         val audioMs: Long,
         val totalElapsedMs: Long,
@@ -56,6 +58,7 @@ internal class AsrCommitRecorder(
         aiPostMs: Long = 0L,
         aiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE,
         llmVendorId: String? = null,
+        promptSelection: PromptSelectionStatus? = null,
         historyTiming: AsrSessionManager.HistoryCommitContext? = null
     ): PreparedCommit {
         val chars = try {
@@ -94,6 +97,7 @@ internal class AsrCommitRecorder(
             aiPostMs = aiPostMs,
             aiPostStatus = aiPostStatus,
             llmVendorId = llmVendorId,
+            promptSelection = promptSelection,
             chars = chars,
             audioMs = audioMs,
             totalElapsedMs = timingTrace?.totalElapsedMs ?: totalElapsedMs,
@@ -137,6 +141,7 @@ internal class AsrCommitRecorder(
         aiPostMs: Long = 0L,
         aiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE,
         llmVendorId: String? = null,
+        promptSelection: PromptSelectionStatus? = null,
         historyTiming: AsrSessionManager.HistoryCommitContext? = null
     ) {
         val prepared = prepare(
@@ -146,6 +151,7 @@ internal class AsrCommitRecorder(
             aiPostMs = aiPostMs,
             aiPostStatus = aiPostStatus,
             llmVendorId = llmVendorId,
+            promptSelection = promptSelection,
             historyTiming = historyTiming
         )
         synchronized(recordLock) {
@@ -203,6 +209,7 @@ internal class AsrCommitRecorder(
                         aiPostMs = prepared.aiPostMs,
                         aiPostStatus = prepared.aiPostStatus,
                         llmVendorId = prepared.llmVendorId,
+                        promptSelection = prepared.promptSelection,
                         charCount = prepared.chars,
                         timingTrace = prepared.timingTrace
                     )

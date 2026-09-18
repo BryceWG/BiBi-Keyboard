@@ -81,6 +81,8 @@ import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.AsrHistoryTimingOrigin
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionFailReason
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.ui.history.AsrHistoryFailDisplay
 import com.brycewg.asrkb.ui.history.AsrHistoryRerunErrorMessages
 import com.brycewg.asrkb.ui.settings.compose.components.MaterialSettingsAlertDialog
@@ -694,6 +696,7 @@ private fun buildMeta(
         vendor,
         source,
         aiStatus,
+        promptSelectionPart(record),
         "${record.charCount}${stringResource(R.string.unit_chars)}"
     )
     if (record.totalElapsedMs > 0) {
@@ -925,7 +928,118 @@ private fun HistoryDetailsSections(
                 secondary = true
             )
         }
+        HistoryPromptSelectionSection(record = record, uiMode = uiMode)
     }
+}
+
+/**
+ * 详情中的自动选择阶段：状态、实际使用的预设、选择模型与失败原因。
+ */
+@Composable
+private fun HistoryPromptSelectionSection(
+    record: AsrHistoryStore.AsrHistoryRecord,
+    uiMode: BibiUiMode
+) {
+    val selection = record.promptSelection
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        HistoryText(
+            text = stringResource(R.string.history_prompt_selection_section_title),
+            uiMode = uiMode,
+            compact = true,
+            emphasized = true
+        )
+        HistoryText(
+            text = promptSelectionPart(record),
+            uiMode = uiMode,
+            compact = true,
+            secondary = true
+        )
+        if (selection == null) return@Column
+        val modelLabel = promptSelectionModelLabel(selection)
+        if (modelLabel != null) {
+            HistoryText(
+                text = stringResource(R.string.history_prompt_selection_model, modelLabel),
+                uiMode = uiMode,
+                compact = true,
+                secondary = true
+            )
+        }
+        if (selection.requestSent) {
+            HistoryText(
+                text = stringResource(
+                    R.string.history_prompt_selection_elapsed,
+                    formatHistoryTimingDuration(selection.elapsedMs)
+                ),
+                uiMode = uiMode,
+                compact = true,
+                secondary = true
+            )
+        }
+        selection.failReasonEnum?.let { reason ->
+            HistoryText(
+                text = stringResource(promptSelectionReasonLabel(reason)),
+                uiMode = uiMode,
+                compact = true,
+                secondary = true,
+                error = true
+            )
+        }
+    }
+}
+
+/** 卡片与详情共用的选择结果短句。 */
+@Composable
+private fun promptSelectionPart(record: AsrHistoryStore.AsrHistoryRecord): String {
+    val selection = record.promptSelection ?: return stringResource(
+        R.string.history_prompt_selection_none
+    )
+    return when {
+        selection.skippedPolish -> stringResource(
+            R.string.history_prompt_selection_skipped,
+            formatHistoryTimingDuration(selection.elapsedMs)
+        )
+
+        selection.ok -> stringResource(
+            R.string.history_prompt_selection_auto,
+            selection.usedPresetTitle.orEmpty(),
+            formatHistoryTimingDuration(selection.elapsedMs)
+        )
+
+        else -> stringResource(R.string.history_prompt_selection_failed)
+    }
+}
+
+/** 选择模型展示：内置供应商用本地化名称，自定义配置用配置 ID。 */
+@Composable
+private fun promptSelectionModelLabel(
+    selection: PromptSelectionStatus
+): String? {
+    val model = selection.model.orEmpty()
+    val vendorId = selection.vendorId
+    val providerId = selection.customProviderId
+    val target = when {
+        providerId != null -> providerId
+        vendorId != null -> LlmVendor.allVendors()
+            .firstOrNull { it.id == vendorId }
+            ?.let { stringResource(it.displayNameResId) }
+            ?: vendorId
+        else -> null
+    }
+    return when {
+        target != null && model.isNotBlank() -> "$target · $model"
+        target != null -> target
+        model.isNotBlank() -> model
+        else -> null
+    }
+}
+
+private fun promptSelectionReasonLabel(reason: PromptSelectionFailReason): Int = when (reason) {
+    PromptSelectionFailReason.INVALID_CONFIG -> R.string.prompt_selection_reason_invalid_config
+    PromptSelectionFailReason.MODEL_UNAVAILABLE -> R.string.prompt_selection_reason_model_unavailable
+    PromptSelectionFailReason.TIMEOUT -> R.string.prompt_selection_reason_timeout
+    PromptSelectionFailReason.REQUEST_FAILED -> R.string.prompt_selection_reason_request_failed
+    PromptSelectionFailReason.INVALID_OUTPUT -> R.string.prompt_selection_reason_invalid_output
+    PromptSelectionFailReason.CANCELLED -> R.string.prompt_selection_reason_cancelled
 }
 
 @Composable
@@ -1044,6 +1158,11 @@ private fun historyTimingStageStyles(source: String): List<HistoryTimingStageSty
         stage = AsrHistoryTimingStage.POSTPROCESS,
         label = stringResource(R.string.history_timing_postprocess),
         color = colorResource(R.color.history_timing_postprocess)
+    ),
+    HistoryTimingStageStyle(
+        stage = AsrHistoryTimingStage.PROMPT_SELECTION,
+        label = stringResource(R.string.history_timing_prompt_selection),
+        color = colorResource(R.color.history_timing_prompt_selection)
     ),
     HistoryTimingStageStyle(
         stage = AsrHistoryTimingStage.AI_POSTPROCESS,

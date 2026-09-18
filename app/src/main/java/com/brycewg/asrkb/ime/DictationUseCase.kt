@@ -9,6 +9,7 @@ import com.brycewg.asrkb.asr.AsrFailReasonCodes
 import com.brycewg.asrkb.asr.BackupAwareAsrEngine
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 
@@ -99,8 +100,21 @@ internal class DictationUseCase(
                         context.timing.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.AI_POSTPROCESS)
                         context.timing.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
                     }
+
+                    override fun onPromptSelectionStarted() {
+                        context.timing.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
+                        context.timing.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.PROMPT_SELECTION)
+                    }
+
+                    override fun onPromptSelectionFinished() {
+                        context.timing.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.PROMPT_SELECTION)
+                        context.timing.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
+                    }
                 }
-            }
+            },
+            // 首次语音识别属于自动流程，允许按开关自动选择预设。
+            promptSelectionMode =
+            com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED
         ) ?: return
 
         if (isCancelled(seq)) return
@@ -180,6 +194,7 @@ internal class DictationUseCase(
             aiPostMs = aiPostMs,
             aiPostStatus = aiPostStatus,
             llmVendorId = postprocessResult.llmVendorId,
+            promptSelection = postprocessResult.promptSelection,
             historyTiming = historyTiming
         )
     }
@@ -316,6 +331,7 @@ internal class DictationUseCase(
         aiPostMs: Long = 0L,
         aiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE,
         llmVendorId: String? = null,
+        promptSelection: PromptSelectionStatus? = null,
         historyTiming: AsrSessionManager.HistoryCommitContext?
     ) {
         val prepared = try {
@@ -326,6 +342,7 @@ internal class DictationUseCase(
                 aiPostMs = aiPostMs,
                 aiPostStatus = aiPostStatus,
                 llmVendorId = llmVendorId,
+                promptSelection = promptSelection,
                 historyTiming = historyTiming
             )
         } catch (t: Throwable) {

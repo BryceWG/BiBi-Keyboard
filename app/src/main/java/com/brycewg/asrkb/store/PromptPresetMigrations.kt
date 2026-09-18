@@ -12,6 +12,7 @@ import com.brycewg.asrkb.R
  *
  * 当前用途：
  * - 从旧版单一 `llmPrompt` 字段迁移为一个新的预设项
+ * - 跨语言同步内置预设的 title/content/skill
  */
 internal object PromptPresetMigrations {
     fun migrateLegacyPromptIfNeeded(
@@ -124,20 +125,36 @@ internal object PromptPresetMigrations {
             .flatten()
             .groupBy { it.id }
             .mapValues { (_, list) -> list.map { it.title to it.content }.toSet() }
+        // 内置预设在各语言下的合法 skill 取值；用户改动过的 skill 不在其中。
+        val knownSkillsById: Map<String, Set<String>> = knownDefaultVariants
+            .flatten()
+            .groupBy { it.id }
+            .mapValues { (_, list) -> list.map { it.skill }.filter { it.isNotBlank() }.toSet() }
+
         var changed = false
         val mapped = current.map { preset ->
             val localized = defaultById[preset.id] ?: return@map preset
             val knownValues = knownDefaultsById[preset.id] ?: return@map preset
+            // title/content 已被用户修改：整条视为自定义预设，不做任何覆盖。
             if ((preset.title to preset.content) !in knownValues) return@map preset
+            // skill 已被用户修改：同样不做任何覆盖（含 title/content）。
+            if (preset.skill.isNotBlank() &&
+                preset.skill !in (knownSkillsById[preset.id] ?: emptySet())
+            ) {
+                return@map preset
+            }
 
+            val localizedSkill = localized.skill.ifBlank { preset.skill }
             val titleChanged = preset.title != localized.title
             val contentChanged = preset.content != localized.content
-            if (!titleChanged && !contentChanged) return@map preset
+            val skillChanged = preset.skill != localizedSkill
+            if (!titleChanged && !contentChanged && !skillChanged) return@map preset
 
             changed = true
             preset.copy(
                 title = localized.title,
-                content = localized.content
+                content = localized.content,
+                skill = localizedSkill
             )
         }
         if (!changed) return current

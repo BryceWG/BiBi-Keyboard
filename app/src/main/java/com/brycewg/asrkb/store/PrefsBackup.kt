@@ -126,6 +126,14 @@ internal object PrefsBackup {
         o.put(KEY_LLM_PROMPT, llmPrompt)
         o.put(KEY_LLM_PROMPT_PRESETS, promptPresetsJson)
         o.put(KEY_LLM_PROMPT_ACTIVE_ID, activePromptId)
+        // 自动选择提示词（润色模式）
+        o.put(KEY_PROMPT_AUTO_SELECT_ENABLED, promptAutoSelectEnabled)
+        try {
+            o.put(KEY_PROMPT_SELECT_CANDIDATE_IDS, getPromptSelectionCandidateIds())
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to export prompt selection candidates", t)
+        }
+        o.put(KEY_PROMPT_SELECTOR_MODEL, getPrefString(KEY_PROMPT_SELECTOR_MODEL, ""))
         // 语音预设
         o.put(KEY_SPEECH_PRESETS, speechPresetsJson)
         o.put(KEY_SPEECH_PRESET_ACTIVE_ID, activeSpeechPresetId)
@@ -446,6 +454,16 @@ internal object PrefsBackup {
             if (importedPresets.isNullOrBlank()) {
                 optString(KEY_LLM_PROMPT)?.let { llmPrompt = it }
             }
+            // 自动选择提示词（润色模式）
+            optBool(KEY_PROMPT_AUTO_SELECT_ENABLED)?.let { promptAutoSelectEnabled = it }
+            PromptSelectionStore.importCandidateIdsIfPresent(
+                this,
+                optString(KEY_PROMPT_SELECT_CANDIDATE_IDS)
+            )
+            PromptSelectionStore.importModelRefIfPresent(
+                this,
+                optString(KEY_PROMPT_SELECTOR_MODEL)
+            )
             // 语音预设
             optString(KEY_SPEECH_PRESETS)?.let { speechPresetsJson = it }
             optString(KEY_SPEECH_PRESET_ACTIVE_ID)?.let { activeSpeechPresetId = it }

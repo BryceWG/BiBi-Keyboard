@@ -454,7 +454,9 @@ class AsrRecognitionService : RecognitionService() {
                             this@AsrRecognitionService,
                             prefs,
                             text,
-                            onStreamingUpdate = onStreamingUpdate
+                            onStreamingUpdate = onStreamingUpdate,
+                            promptSelectionMode = com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
+                            isCancelled = { canceled }
                         )
                         val aiUsed = (res.usedAi && res.ok)
                         val finalOut = res.text.ifBlank {
@@ -705,7 +707,8 @@ class AsrRecognitionService : RecognitionService() {
                 backupVendor = backupVendor,
                 backupStatsSnapshot = prefs.getAsrRuntimeStatsSnapshotOrNull(backupVendor, audioMs),
                 sensitivityTier = safeBackupSensitivityTier(),
-                primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true
+                primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
+                extraAiBudgetMs = promptSelectionSessionSlackMs(prefs)
             )
             processingTimeoutJob = serviceScope.launch {
                 val shouldDeferForLocalModel =

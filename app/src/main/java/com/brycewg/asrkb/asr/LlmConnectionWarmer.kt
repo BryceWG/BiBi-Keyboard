@@ -8,7 +8,10 @@ package com.brycewg.asrkb.asr
 
 import android.os.SystemClock
 import android.util.Log
+import com.brycewg.asrkb.store.LlmModelConfigResolver
+import com.brycewg.asrkb.store.LlmModelResolution
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.ResolvedLlmModelConfig
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
@@ -58,20 +61,46 @@ internal object LlmConnectionWarmer {
     }
 
     /**
-     * 录音会话即将开始时调用。仅在 AI 润色已启用且密钥就绪时生效，
+     * 录音会话即将开始时调用。
+     *
+     * 同时预热默认润色模型与（启用自动选择时的）独立选择模型；同一个 origin 只预热一次。
      * 异步执行、失败静默，不影响会话状态。
      */
     fun warmForImmediateUse(prefs: Prefs) {
-        val endpoint = try {
-            if (!prefs.postProcessEnabled || !prefs.hasLlmKeys()) return
-            prefs.getEffectiveLlmConfig()?.endpoint
+        val targets = try {
+            buildWarmTargets(prefs)
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to read LLM config for warmup", t)
             return
         }
-        if (endpoint.isNullOrBlank()) return
-        warmConnection(endpoint)
-        prewarmRequestMode(prefs)
+        if (targets.isEmpty()) return
+        targets.forEach { warmConnection(it.endpoint) }
+        prewarmRequestModes(prefs, targets)
+    }
+
+    private data class WarmTarget(
+        val endpoint: String,
+        val resolved: ResolvedLlmModelConfig
+    )
+
+    private fun buildWarmTargets(prefs: Prefs): List<WarmTarget> {
+        val targets = mutableListOf<WarmTarget>()
+        if (prefs.postProcessEnabled && prefs.hasLlmKeys()) {
+            val resolved = LlmModelConfigResolver.resolveActiveConfig(prefs)
+            if (resolved.endpoint.isNotBlank()) {
+                targets += WarmTarget(resolved.endpoint, resolved)
+            }
+        }
+        if (prefs.promptAutoSelectEnabled) {
+            val ref = prefs.promptSelectorModelRef
+            val resolved = (LlmModelConfigResolver.resolve(prefs, ref) as? LlmModelResolution.Resolved)
+                ?.config
+            if (resolved != null && resolved.endpoint.isNotBlank()) {
+                targets += WarmTarget(resolved.endpoint, resolved)
+            }
+        }
+        // 同一个模型配置只需预热一次（例如选择模型跟随默认润色模型时）。
+        return targets.distinctBy { it.resolved.requestModeCapabilityKey }
     }
 
     private fun warmConnection(endpoint: String) {
@@ -122,27 +151,30 @@ internal object LlmConnectionWarmer {
      * 首次探测请求模式会发一次完整的 LLM 往返；这里在后台跑，把它挪出停录后的等待窗口。
      * 已探测过的 vendor+endpoint 不会产生任何请求。
      */
-    private fun prewarmRequestMode(prefs: Prefs) {
+    private fun prewarmRequestModes(prefs: Prefs, targets: List<WarmTarget>) {
         if (requestModePrewarmInFlight) return
         requestModePrewarmInFlight = true
         prewarmScope.launch {
-            val startedAt = SystemClock.elapsedRealtime()
-            try {
-                val probed = LlmPostProcessor().prewarmRequestMode(prefs)
-                if (probed) {
-                    DebugLogManager.log(
-                        category = "asr",
-                        event = "llm_request_mode_prewarm",
-                        data = mapOf(
-                            "elapsed_ms" to (SystemClock.elapsedRealtime() - startedAt)
+            val processor = LlmPostProcessor()
+            targets.forEach { target ->
+                val startedAt = SystemClock.elapsedRealtime()
+                try {
+                    val probed = processor.prewarmRequestMode(prefs, target.resolved)
+                    if (probed) {
+                        DebugLogManager.log(
+                            category = "asr",
+                            event = "llm_request_mode_prewarm",
+                            data = mapOf(
+                                "elapsed_ms" to (SystemClock.elapsedRealtime() - startedAt),
+                                "vendor" to target.resolved.vendorId
+                            )
                         )
-                    )
+                    }
+                } catch (t: Throwable) {
+                    Log.w(TAG, "LLM request mode prewarm failed", t)
                 }
-            } catch (t: Throwable) {
-                Log.w(TAG, "LLM request mode prewarm failed", t)
-            } finally {
-                requestModePrewarmInFlight = false
             }
+            requestModePrewarmInFlight = false
         }
     }
 

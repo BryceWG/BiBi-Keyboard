@@ -23,7 +23,7 @@ internal class AsrHistoryDatabase private constructor(
     companion object {
         private const val TAG = "AsrHistoryDatabase"
         private const val DB_NAME = "asr_history.db"
-        private const val DB_VERSION = 1
+        private const val DB_VERSION = 2
 
         const val TABLE = "asr_history"
         const val COL_ID = "id"
@@ -44,12 +44,47 @@ internal class AsrHistoryDatabase private constructor(
         const val COL_FAIL_STAGE = "fail_stage"
         const val COL_FAIL_REASON_CODE = "fail_reason_code"
         const val COL_TIMING_TRACE = "timing_trace"
+        const val COL_PROMPT_SELECTION = "prompt_selection"
 
         @Volatile
         private var instance: AsrHistoryDatabase? = null
 
         fun get(context: Context): AsrHistoryDatabase = instance ?: synchronized(this) {
             instance ?: AsrHistoryDatabase(context.applicationContext).also { instance = it }
+        }
+
+        /** 版本升级实现（拆出便于单测直接验证 v1 → v2 的列迁移）。 */
+        internal fun applyUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            if (oldVersion < 2) {
+                // v2：自动选择提示词的结果快照，旧记录保持 NULL（视为未使用）。
+                addColumnIfMissing(db, COL_PROMPT_SELECTION, "TEXT")
+            }
+        }
+
+        private fun addColumnIfMissing(db: SQLiteDatabase, column: String, type: String) {
+            if (hasColumn(db, column)) return
+            try {
+                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $column $type")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to add column $column to $TABLE", e)
+            }
+        }
+
+        private fun hasColumn(db: SQLiteDatabase, column: String): Boolean = try {
+            db.rawQuery("PRAGMA table_info($TABLE)", null).use { cursor ->
+                val nameIndex = cursor.getColumnIndex("name")
+                var found = false
+                while (cursor.moveToNext()) {
+                    if (nameIndex >= 0 && cursor.getString(nameIndex) == column) {
+                        found = true
+                        break
+                    }
+                }
+                found
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to inspect $TABLE schema", e)
+            false
         }
     }
 
@@ -85,7 +120,8 @@ internal class AsrHistoryDatabase private constructor(
                 $COL_STATUS TEXT NOT NULL DEFAULT 'SUCCESS',
                 $COL_FAIL_STAGE TEXT NOT NULL DEFAULT 'NONE',
                 $COL_FAIL_REASON_CODE TEXT,
-                $COL_TIMING_TRACE TEXT
+                $COL_TIMING_TRACE TEXT,
+                $COL_PROMPT_SELECTION TEXT
             )
             """.trimIndent()
         )
@@ -94,7 +130,7 @@ internal class AsrHistoryDatabase private constructor(
         )
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = applyUpgrade(db, oldVersion, newVersion)
 
     fun writableOrNull(): SQLiteDatabase? = openOrNull(writable = true)
 
@@ -227,6 +263,10 @@ internal class AsrHistoryDatabase private constructor(
         put(COL_FAIL_STAGE, record.failStage.name)
         putNullable(COL_FAIL_REASON_CODE, record.failReasonCode)
         putNullable(COL_TIMING_TRACE, record.timingTrace?.let { json.encodeToString(it) })
+        putNullable(
+            COL_PROMPT_SELECTION,
+            record.promptSelection?.let { json.encodeToString(it) }
+        )
     }
 
     private fun readRecords(cursor: Cursor): List<AsrHistoryStore.AsrHistoryRecord> {
@@ -271,6 +311,14 @@ internal class AsrHistoryDatabase private constructor(
                 Log.w(TAG, "Failed to parse timing trace", e)
                 null
             }
+        },
+        promptSelection = cursor.optionalString(COL_PROMPT_SELECTION)?.let { raw ->
+            try {
+                json.decodeFromString<PromptSelectionStatus>(raw)
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to parse prompt selection status", e)
+                null
+            }
         }
     )
 
@@ -279,7 +327,9 @@ internal class AsrHistoryDatabase private constructor(
     }
 
     private fun Cursor.optionalString(column: String): String? {
-        val idx = getColumnIndexOrThrow(column)
+        // 迁移未落地的库可能缺列，这里按“不存在即 NULL”处理，避免整表读取失败。
+        val idx = getColumnIndex(column)
+        if (idx < 0) return null
         return if (isNull(idx)) null else getString(idx)
     }
 

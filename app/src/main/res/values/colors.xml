@@ -50,6 +50,7 @@
     <color name="history_timing_audio_input">#4DD0C8</color>
     <color name="history_timing_recognition">#5BA7FF</color>
     <color name="history_timing_postprocess">#F6D15B</color>
+    <color name="history_timing_prompt_selection">#C08BFF</color>
     <color name="history_timing_ai_postprocess">#FF8BB1</color>
     <color name="history_timing_text_delivery">#57D2E1</color>
 </resources>

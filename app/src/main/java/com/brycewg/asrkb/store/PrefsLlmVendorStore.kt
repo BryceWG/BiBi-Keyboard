@@ -161,9 +161,26 @@ internal object PrefsLlmVendorStore {
         sp.edit { putString(key, json.trim()) }
     }
 
-    fun getEffectiveLlmConfig(prefs: Prefs, sp: SharedPreferences): Prefs.EffectiveLlmConfig? = when (val vendor = prefs.llmVendor) {
+    fun getEffectiveLlmConfig(prefs: Prefs, sp: SharedPreferences): Prefs.EffectiveLlmConfig? = getEffectiveLlmConfigForVendor(prefs, sp, prefs.llmVendor, modelOverride = null)
+
+    /**
+     * 解析指定供应商的有效配置（不依赖当前激活供应商）。
+     *
+     * @param modelOverride 显式模型名；为空时回退该供应商的已选/默认模型。
+     * @param customProviderId 自定义供应商配置 ID；为空时使用当前激活配置。
+     */
+    fun getEffectiveLlmConfigForVendor(
+        prefs: Prefs,
+        sp: SharedPreferences,
+        vendor: LlmVendor,
+        modelOverride: String?,
+        customProviderId: String? = null
+    ): Prefs.EffectiveLlmConfig? = when (vendor) {
         LlmVendor.SF_FREE -> {
-            val model = if (prefs.sfFreeLlmUsePaidKey) {
+            val explicitModel = modelOverride?.trim().orEmpty()
+            val model = if (explicitModel.isNotBlank()) {
+                explicitModel
+            } else if (prefs.sfFreeLlmUsePaidKey) {
                 getLlmVendorModel(sp, LlmVendor.SF_FREE).ifBlank { prefs.sfFreeLlmModel }
             } else {
                 prefs.sfFreeLlmModel
@@ -214,12 +231,16 @@ internal object PrefsLlmVendorStore {
         }
         LlmVendor.CUSTOM -> {
             // 自定义供应商：使用用户配置的 LlmProvider
-            val provider = prefs.getActiveLlmProvider()
+            val provider = if (customProviderId == null) {
+                prefs.getActiveLlmProvider()
+            } else {
+                prefs.getLlmProviders().firstOrNull { it.id == customProviderId }
+            }
             if (provider != null && provider.endpoint.isNotBlank()) {
                 Prefs.EffectiveLlmConfig(
                     endpoint = provider.endpoint,
                     apiKey = provider.apiKey,
-                    model = provider.model,
+                    model = modelOverride?.trim().takeUnless { it.isNullOrEmpty() } ?: provider.model,
                     temperature = provider.temperature,
                     vendor = vendor,
                     reasoningCharThreshold = provider.resolvedReasoningCharThreshold(),
@@ -234,7 +255,8 @@ internal object PrefsLlmVendorStore {
         else -> {
             // 内置供应商：使用预设端点 + 用户 API Key + 用户选择的模型
             val apiKey = getLlmVendorApiKey(sp, vendor)
-            val model = getLlmVendorModel(sp, vendor).ifBlank { vendor.defaultModel }
+            val model = modelOverride?.trim().takeUnless { it.isNullOrEmpty() }
+                ?: getLlmVendorModel(sp, vendor).ifBlank { vendor.defaultModel }
             if (vendor.requiresApiKey && apiKey.isBlank()) {
                 null // 需要 API Key 但未配置
             } else {
