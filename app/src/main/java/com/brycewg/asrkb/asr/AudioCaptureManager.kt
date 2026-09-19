@@ -80,6 +80,7 @@ class AudioCaptureManager(
          * 底噪是持续的，120ms 足够判定；探测到的音频会保留下来交给下游，不再丢弃。
          */
         private const val WARMUP_PROBE_MILLIS = 120
+        private const val WARMUP_MAX_READS = 2
 
         /**
          * 采集收尾（AudioRecord.stop/release 与音频路由恢复）与音频数据已无关系，
@@ -129,6 +130,37 @@ class AudioCaptureManager(
             bufferSize
         )
     }
+
+    private fun createRecorderForSource(source: Int, bufferSize: Int): AudioRecord? = try {
+        createAudioRecord(source, bufferSize).let { recorder ->
+            if (recorder.state == AudioRecord.STATE_INITIALIZED) {
+                recorder
+            } else {
+                recorder.release()
+                null
+            }
+        }
+    } catch (t: Throwable) {
+        Log.e(TAG, "Failed to create AudioRecord with source=$source", t)
+        null
+    }
+
+    private fun startRecorderForSource(source: Int, bufferSize: Int): AudioRecord? {
+        val recorder = createRecorderForSource(source, bufferSize) ?: return null
+        return try {
+            recorder.startRecording()
+            recorder
+        } catch (t: Throwable) {
+            try {
+                recorder.release()
+            } catch (_: Throwable) { }
+            Log.w(TAG, "Failed to start AudioRecord with source=$source", t)
+            null
+        }
+    }
+
+    private fun deviceIdentifier(): String = listOf(Build.MANUFACTURER, Build.MODEL)
+        .joinToString("|") { it.trim().lowercase() }
 
     @RequiresApi(Build.VERSION_CODES.S)
     private object Api31 {
@@ -334,27 +366,27 @@ class AudioCaptureManager(
             ((sampleRate * READ_SLICE_MILLIS) / 1000) * bytesPerSample
         ).coerceAtLeast(bytesPerSample)
 
-        // 3. 初始化 AudioRecord（优先 VOICE_RECOGNITION）
-        var recorder: AudioRecord? = try {
-            createAudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
-        } catch (t: Throwable) {
-            Log.e(TAG, "Failed to create AudioRecord with VOICE_RECOGNITION", t)
-            null
-        }
-
-        // 4. 回退到 MIC（如果 VOICE_RECOGNITION 失败：构造异常或未初始化）
+        // 3. 优先使用已验证的设备级音源；耳机路由始终绕过该缓存。
+        val deviceId = deviceIdentifier()
+        val useSourceCache = preferredInputDevice == null && !routePrepared
+        var cachedSource = if (useSourceCache) prefs.getAudioSourceCache(deviceId) else null
+        var selectedSource = cachedSource ?: MediaRecorder.AudioSource.VOICE_RECOGNITION
+        var recorder: AudioRecord? = createRecorderForSource(cachedSource ?: MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
+        var sourceIsCached = cachedSource != null
         if (recorder == null || recorder.state != AudioRecord.STATE_INITIALIZED) {
-            Log.w(TAG, "VOICE_RECOGNITION source unavailable, falling back to MIC")
-            try {
-                recorder?.release()
-            } catch (t: Throwable) {
-                Log.e(TAG, "Failed to release failed recorder", t)
+            recorder?.release()
+            if (sourceIsCached) {
+                prefs.clearAudioSourceCache(deviceId)
+                cachedSource = null
+                sourceIsCached = false
+                recorder = createRecorderForSource(MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
+                selectedSource = MediaRecorder.AudioSource.VOICE_RECOGNITION
             }
-            recorder = try {
-                createAudioRecord(MediaRecorder.AudioSource.MIC, bufferSize)
-            } catch (t: Throwable) {
-                Log.e(TAG, "Failed to create AudioRecord with MIC", t)
-                null
+            if (recorder == null || recorder.state != AudioRecord.STATE_INITIALIZED) {
+                Log.w(TAG, "VOICE_RECOGNITION source unavailable, falling back to MIC")
+                recorder?.release()
+                recorder = createRecorderForSource(MediaRecorder.AudioSource.MIC, bufferSize)
+                selectedSource = MediaRecorder.AudioSource.MIC
             }
         }
 
@@ -378,7 +410,7 @@ class AudioCaptureManager(
             throw error
         }
 
-        var activeRecorder = recorder
+        var activeRecorder: AudioRecord = requireNotNull(recorder)
         // 优先路由到选中的输入设备（若存在）
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && preferredInputDevice != null) {
             try {
@@ -395,7 +427,28 @@ class AudioCaptureManager(
         try {
             // 6. 启动录音
             try {
-                activeRecorder.startRecording()
+                try {
+                    activeRecorder.startRecording()
+                } catch (t: Throwable) {
+                    if (!sourceIsCached) throw t
+                    prefs.clearAudioSourceCache(deviceId)
+                    cachedSource = null
+                    try {
+                        activeRecorder.release()
+                    } catch (releaseError: Throwable) {
+                        Log.w(TAG, "Failed to release cached recorder after start failure", releaseError)
+                    }
+                    sourceIsCached = false
+                    val retryVoice = startRecorderForSource(MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
+                    selectedSource = if (retryVoice != null) {
+                        activeRecorder = retryVoice
+                        MediaRecorder.AudioSource.VOICE_RECOGNITION
+                    } else {
+                        activeRecorder = startRecorderForSource(MediaRecorder.AudioSource.MIC, bufferSize)
+                            ?: throw t
+                        MediaRecorder.AudioSource.MIC
+                    }
+                }
                 Log.d(TAG, "AudioRecord started successfully")
                 try {
                     DebugLogManager.log("audio", "recorder_started")
@@ -447,15 +500,27 @@ class AudioCaptureManager(
                 prefs.headsetMicPriorityEnabled &&
                     (routePrepared || preferredInputDevice != null || scoStarted)
             val probeTargetBytes = ((sampleRate * WARMUP_PROBE_MILLIS) / 1000) * bytesPerSample
-            val warmupResult = warmupRecorder(
-                activeRecorder,
-                buf,
-                readSliceBytes,
-                probeTargetBytes,
-                bufferSize,
-                avoidMicFallback
-            )
+            val warmupResult = if (sourceIsCached) {
+                WarmupResult(activeRecorder, null, cachedSource!!, true)
+            } else {
+                warmupRecorder(
+                    activeRecorder,
+                    buf,
+                    readSliceBytes,
+                    probeTargetBytes,
+                    bufferSize,
+                    avoidMicFallback,
+                    selectedSource
+                )
+            }
             activeRecorder = warmupResult.recorder
+            var pendingCacheSource: Int? = null
+            if (useSourceCache && cachedSource == null && warmupResult.verified) {
+                prefs.setAudioSourceCache(deviceId, warmupResult.source)
+                sourceIsCached = true
+            } else if (useSourceCache && cachedSource == null) {
+                pendingCacheSource = warmupResult.source
+            }
 
             // 8. 探测期间读到的音频不丢弃，走同一套聚合逻辑，保证下游帧长仍是 chunkMillis
             val probedBytes = warmupResult.probedBytes
@@ -470,6 +535,7 @@ class AudioCaptureManager(
                 val read = try {
                     activeRecorder.read(buf, 0, readSliceBytes)
                 } catch (t: Throwable) {
+                    if (sourceIsCached) prefs.clearAudioSourceCache(deviceId)
                     Log.e(TAG, "Error reading audio data", t)
                     DebugLogManager.logError(
                         context,
@@ -487,7 +553,7 @@ class AudioCaptureManager(
                             )
                         )
                     } catch (_: Throwable) { }
-                    throw IllegalStateException("Error reading audio data", t)
+                    AudioRecord.ERROR_INVALID_OPERATION
                 }
                 lastReadEndedAtMs = SystemClock.elapsedRealtime()
                 lastReadMs = lastReadEndedAtMs - readStartedAtMs
@@ -496,8 +562,15 @@ class AudioCaptureManager(
                 currentCoroutineContext().ensureActive()
 
                 if (read > 0) {
+                    pendingCacheSource?.let { source ->
+                        prefs.setAudioSourceCache(deviceId, source)
+                        sourceIsCached = true
+                        pendingCacheSource = null
+                    }
                     pendingSize = emitChunks(buf, read, pending, chunkBytes, pendingSize)
                 } else if (read < 0) {
+                    val shouldRecover = sourceIsCached
+                    if (shouldRecover) prefs.clearAudioSourceCache(deviceId)
                     val error = IllegalStateException("AudioRecord read error: $read")
                     Log.e(TAG, "AudioRecord read returned error code", error)
                     DebugLogManager.logError(
@@ -507,7 +580,49 @@ class AudioCaptureManager(
                         error,
                         data = mapOf("code" to read)
                     )
-                    throw error
+                    if (!shouldRecover) throw error
+
+                    try {
+                        activeRecorder.stop()
+                    } catch (_: Throwable) { }
+                    try {
+                        activeRecorder.release()
+                    } catch (releaseError: Throwable) {
+                        Log.w(TAG, "Failed to release cached recorder after read failure", releaseError)
+                    }
+                    sourceIsCached = false
+                    cachedSource = null
+                    val retryVoice = startRecorderForSource(
+                        MediaRecorder.AudioSource.VOICE_RECOGNITION,
+                        bufferSize
+                    )
+                    selectedSource = if (retryVoice != null) {
+                        activeRecorder = retryVoice
+                        MediaRecorder.AudioSource.VOICE_RECOGNITION
+                    } else {
+                        activeRecorder = startRecorderForSource(MediaRecorder.AudioSource.MIC, bufferSize)
+                            ?: throw error
+                        MediaRecorder.AudioSource.MIC
+                    }
+                    val recovered = warmupRecorder(
+                        activeRecorder,
+                        buf,
+                        readSliceBytes,
+                        probeTargetBytes,
+                        bufferSize,
+                        false,
+                        selectedSource
+                    )
+                    activeRecorder = recovered.recorder
+                    recovered.probedBytes?.takeIf { it.isNotEmpty() }?.let {
+                        pendingSize = emitChunks(it, it.size, pending, chunkBytes, pendingSize)
+                    }
+                    if (recovered.verified) {
+                        prefs.setAudioSourceCache(deviceId, recovered.source)
+                        sourceIsCached = true
+                    } else {
+                        pendingCacheSource = recovered.source
+                    }
                 }
             }
         } finally {
@@ -579,7 +694,9 @@ class AudioCaptureManager(
     /** 探测结果：可能被换掉的 recorder，以及探测期间读到的、应当交给下游的音频。 */
     private class WarmupResult(
         val recorder: AudioRecord,
-        val probedBytes: ByteArray?
+        val probedBytes: ByteArray?,
+        val source: Int,
+        val verified: Boolean
     )
 
     /**
@@ -596,7 +713,8 @@ class AudioCaptureManager(
         readSliceBytes: Int,
         probeTargetBytes: Int,
         bufferSize: Int,
-        avoidMicFallback: Boolean
+        avoidMicFallback: Boolean,
+        initialSource: Int
     ): WarmupResult {
         if (!hasPermission()) {
             val error = SecurityException("RECORD_AUDIO permission was revoked during warmup")
@@ -608,7 +726,7 @@ class AudioCaptureManager(
         // 耳机优先且路由已就绪时，探测结果不会改变音源选择，整段探测没有意义，直接跳过。
         if (avoidMicFallback) {
             logWarmupResult("skipped", 0, 0L)
-            return WarmupResult(recorder, null)
+            return WarmupResult(recorder, null, initialSource, false)
         }
 
         val probeStartedAtMs = SystemClock.elapsedRealtime()
@@ -616,7 +734,9 @@ class AudioCaptureManager(
         var sawFrame = false
         var hasSignal = false
         var nearZero = true
-        while (probed.size() < probeTargetBytes) {
+        var reads = 0
+        while (probed.size() < probeTargetBytes && reads < WARMUP_MAX_READS) {
+            reads++
             val read = try {
                 recorder.read(buf, 0, readSliceBytes)
             } catch (t: Throwable) {
@@ -642,13 +762,18 @@ class AudioCaptureManager(
         val probeElapsedMs = SystemClock.elapsedRealtime() - probeStartedAtMs
         val probedBytes = probed.toByteArray()
 
-        if (!sawFrame || !nearZero) {
+        if (!sawFrame || !nearZero || initialSource == MediaRecorder.AudioSource.MIC) {
             logWarmupResult(
                 if (hasSignal) "signal" else "no_signal",
                 probedBytes.size,
                 probeElapsedMs
             )
-            return WarmupResult(recorder, probedBytes.takeIf { it.isNotEmpty() })
+            return WarmupResult(
+                recorder,
+                probedBytes.takeIf { it.isNotEmpty() },
+                initialSource,
+                sawFrame
+            )
         }
         // 近乎全零：探测数据来自坏音源，丢弃并重建为 MIC 源
         Log.i(TAG, "Warmup: near-zero source, rebuilding with MIC")
@@ -726,7 +851,7 @@ class AudioCaptureManager(
             data = mapOf("probed_ms" to probeElapsedMs)
         )
         // 重建后的第一帧交给主读循环，这里不再额外读一帧。
-        return WarmupResult(recorder, null)
+        return WarmupResult(recorder, null, MediaRecorder.AudioSource.MIC, false)
     }
 
     private fun logWarmupResult(result: String, probedBytes: Int, elapsedMs: Long) {

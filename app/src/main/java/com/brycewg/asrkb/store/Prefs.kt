@@ -25,6 +25,7 @@ import com.brycewg.asrkb.imebridge.ImeBridgeRuntimeShutdown
 import kotlin.reflect.KProperty
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import org.json.JSONObject
 
 internal fun resolveRecordingAutoStopMode(
     storedModeId: String?,
@@ -92,6 +93,48 @@ class Prefs(context: Context) {
 
     internal fun setPrefInt(key: String, value: Int) {
         sp.edit { putInt(key, value) }
+    }
+
+    /** Internal runtime cache; deliberately excluded from backup/import/export. */
+    internal fun getAudioSourceCache(deviceId: String): Int? = synchronized(sp) {
+        val value = try {
+            JSONObject(sp.getString(KEY_AUDIO_SOURCE_CACHE_JSON, "{}") ?: "{}").optInt(deviceId, -1)
+        } catch (_: Throwable) {
+            -1
+        }
+        value.takeIf {
+            it == android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION ||
+                it == android.media.MediaRecorder.AudioSource.MIC
+        }
+    }
+
+    internal fun setAudioSourceCache(deviceId: String, source: Int) {
+        if (source != android.media.MediaRecorder.AudioSource.VOICE_RECOGNITION &&
+            source != android.media.MediaRecorder.AudioSource.MIC
+        ) {
+            return
+        }
+        synchronized(sp) {
+            val json = try {
+                JSONObject(sp.getString(KEY_AUDIO_SOURCE_CACHE_JSON, "{}") ?: "{}")
+            } catch (_: Throwable) {
+                JSONObject()
+            }
+            json.put(deviceId, source)
+            sp.edit { putString(KEY_AUDIO_SOURCE_CACHE_JSON, json.toString()) }
+        }
+    }
+
+    internal fun clearAudioSourceCache(deviceId: String) {
+        synchronized(sp) {
+            val json = try {
+                JSONObject(sp.getString(KEY_AUDIO_SOURCE_CACHE_JSON, "{}") ?: "{}")
+            } catch (_: Throwable) {
+                JSONObject()
+            }
+            json.remove(deviceId)
+            sp.edit { putString(KEY_AUDIO_SOURCE_CACHE_JSON, json.toString()) }
+        }
     }
 
     private fun normalizeAppLanguageTag(tag: String): String = when (tag.trim().lowercase()) {
