@@ -176,10 +176,31 @@ internal class JevClassifier(
                 "https://api.cloudflare.com/client/v4/accounts/${prefs.jevCloudflareAccountId}/ai/run/typesafe/jev" to
                     prefs.jevCloudflareApiKey
         }
+        val payloadModel = when (provider) {
+            JevClassifierProvider.TYPESAFE -> JEV_MODEL_ID
+            JevClassifierProvider.OPENROUTER -> "~typesafe/jev-latest"
+            JevClassifierProvider.CLOUDFLARE -> "typesafe/jev"
+        }
+        val requestStructure = when (provider) {
+            JevClassifierProvider.CLOUDFLARE ->
+                "json object keys=model,input; input keys=state,questions"
+            JevClassifierProvider.TYPESAFE,
+            JevClassifierProvider.OPENROUTER ->
+                "json object keys=model, state, questions"
+        }
         return Request.Builder()
             .url(url)
             .header("Authorization", "Bearer $apiKey")
             .header("Content-Type", "application/json")
+            .tag(
+                ApiLogMeta::class.java,
+                ApiLogRecorder.meta(
+                    category = "LLM",
+                    vendor = LlmVendor.TYPESAFE.id,
+                    model = payloadModel,
+                    requestStructure = "$requestStructure; channel=${provider.id}"
+                )
+            )
             .post(payload.toString().toRequestBody(JSON_MEDIA))
             .build()
     }
