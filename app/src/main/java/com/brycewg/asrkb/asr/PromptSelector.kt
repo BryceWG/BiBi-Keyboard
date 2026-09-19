@@ -151,18 +151,8 @@ internal object PromptSelector {
             )
         }
 
-        if (modelRef is PromptSelectorModelRef.Jev) {
-            val provider = JevClassifierProvider.fromId(modelRef.providerId)
-            if (provider == null) {
-                return PromptSelectionOutcome(
-                    status = PromptSelectionStatus.failure(
-                        reason = PromptSelectionFailReason.INVALID_CONFIG,
-                        requestSent = false,
-                        elapsedMs = elapsedMs()
-                    ),
-                    candidate = null
-                )
-            }
+        if (modelRef is PromptSelectorModelRef.Builtin && modelRef.vendorId == LlmVendor.TYPESAFE.id) {
+            val provider = prefs.jevClassifierProvider
             val credentialsReady = when (provider) {
                 JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
                 JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()

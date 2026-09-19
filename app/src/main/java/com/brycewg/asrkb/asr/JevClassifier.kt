@@ -173,7 +173,7 @@ internal class JevClassifier(
             JevClassifierProvider.OPENROUTER ->
                 "https://openrouter.ai/api/alpha/decisions" to prefs.jevOpenRouterApiKey
             JevClassifierProvider.CLOUDFLARE ->
-                "https://api.cloudflare.com/client/v4/accounts/${prefs.jevCloudflareAccountId}/ai/run" to
+                "https://api.cloudflare.com/client/v4/accounts/${prefs.jevCloudflareAccountId}/ai/run/typesafe/jev" to
                     prefs.jevCloudflareApiKey
         }
         return Request.Builder()

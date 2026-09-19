@@ -63,10 +63,6 @@ sealed interface PromptSelectorModelRef {
     @Serializable
     @SerialName("custom")
     data class Custom(val providerId: String, val model: String) : PromptSelectorModelRef
-
-    @Serializable
-    @SerialName("jev")
-    data class Jev(val providerId: String, val model: String = JEV_MODEL_ID) : PromptSelectorModelRef
 }
 
 @Serializable

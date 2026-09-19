@@ -176,6 +176,29 @@ internal object PrefsLlmVendorStore {
         modelOverride: String?,
         customProviderId: String? = null
     ): Prefs.EffectiveLlmConfig? = when (vendor) {
+        LlmVendor.TYPESAFE -> {
+            val configured = when (prefs.jevClassifierProvider) {
+                JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
+                JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
+                JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey.isNotBlank() &&
+                    prefs.jevCloudflareAccountId.isNotBlank()
+            }
+            if (!configured) {
+                null
+            } else {
+                Prefs.EffectiveLlmConfig(
+                    endpoint = "",
+                    apiKey = "",
+                    model = LlmVendor.TYPESAFE.defaultModel,
+                    temperature = 0f,
+                    vendor = vendor,
+                    reasoningCharThreshold = LlmReasoningThreshold.NEVER,
+                    useCustomReasoningParams = false,
+                    reasoningParamsOnJson = "",
+                    reasoningParamsOffJson = ""
+                )
+            }
+        }
         LlmVendor.SF_FREE -> {
             val explicitModel = modelOverride?.trim().orEmpty()
             val model = if (explicitModel.isNotBlank()) {

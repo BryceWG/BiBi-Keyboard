@@ -94,7 +94,6 @@ internal fun PromptPresetSection(
         index = itemIndex++,
         count = itemCount
     )
-    AiBodyText(uiMode = uiMode, textRes = R.string.helper_llm_prompt_skill)
     AiTextField(
         uiMode = uiMode,
         value = preset?.content.orEmpty(),

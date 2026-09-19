@@ -27,7 +27,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text as MaterialText
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -73,6 +75,35 @@ internal data class SettingsChoiceSheetState(
     val selectedIndex: Int,
     val onSelected: (Int) -> Unit
 )
+
+/** Reusable state holder for provider -> model and other cascading choice sheets. */
+@Stable
+internal class SettingsChoiceSheetNavigator {
+    var current by mutableStateOf<SettingsChoiceSheetState?>(null)
+        private set
+    private var next: SettingsChoiceSheetState? = null
+
+    fun show(state: SettingsChoiceSheetState?) {
+        next = null
+        current = state
+    }
+
+    fun showAfterDismiss(state: SettingsChoiceSheetState?) {
+        next = state
+    }
+
+    fun finishAfterDismiss() {
+        next = null
+    }
+
+    fun onDismiss() {
+        current = next
+        next = null
+    }
+}
+
+@Composable
+internal fun rememberSettingsChoiceSheetNavigator(): SettingsChoiceSheetNavigator = remember { SettingsChoiceSheetNavigator() }
 
 internal fun settingsChoiceSheetState(
     title: String,
@@ -127,16 +158,18 @@ private fun MaterialChoiceSheet(
     onDismiss: () -> Unit
 ) {
     if (state == null) return
-    MaterialSettingsSheetScaffold(
-        title = state.title,
-        onDismiss = onDismiss,
-        bottomPadding = 0.dp
-    ) { dismissSheet ->
-        ChoiceSheetList(
-            state = state,
-            uiMode = BibiUiMode.Material,
-            onDismiss = dismissSheet
-        )
+    key(state.title, state.groups, state.selectedIndex) {
+        MaterialSettingsSheetScaffold(
+            title = state.title,
+            onDismiss = onDismiss,
+            bottomPadding = 0.dp
+        ) { dismissSheet ->
+            ChoiceSheetList(
+                state = state,
+                uiMode = BibiUiMode.Material,
+                onDismiss = dismissSheet
+            )
+        }
     }
 }
 

@@ -869,6 +869,11 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_JEV_TYPESAFE_API_KEY, "") ?: ""
         set(value) = sp.edit { putString(KEY_JEV_TYPESAFE_API_KEY, value.trim()) }
 
+    var jevClassifierProvider: JevClassifierProvider
+        get() = JevClassifierProvider.fromId(sp.getString(KEY_JEV_PROVIDER, "").orEmpty())
+            ?: JevClassifierProvider.TYPESAFE
+        set(value) = sp.edit { putString(KEY_JEV_PROVIDER, value.id) }
+
     var jevOpenRouterApiKey: String
         get() = sp.getString(KEY_JEV_OPENROUTER_API_KEY, "") ?: ""
         set(value) = sp.edit { putString(KEY_JEV_OPENROUTER_API_KEY, value.trim()) }

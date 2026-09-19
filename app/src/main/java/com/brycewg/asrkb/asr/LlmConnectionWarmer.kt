@@ -108,12 +108,12 @@ internal object LlmConnectionWarmer {
 
     private fun buildJevWarmEndpoint(prefs: Prefs): String? {
         if (!prefs.promptAutoSelectEnabled) return null
-        val ref = prefs.promptSelectorModelRef as? PromptSelectorModelRef.Jev ?: return null
-        return when (JevClassifierProvider.fromId(ref.providerId)) {
+        val ref = prefs.promptSelectorModelRef as? PromptSelectorModelRef.Builtin ?: return null
+        if (ref.vendorId != LlmVendor.TYPESAFE.id) return null
+        return when (prefs.jevClassifierProvider) {
             JevClassifierProvider.TYPESAFE -> "https://api.typesafe.ai/v1/systemone"
             JevClassifierProvider.OPENROUTER -> "https://openrouter.ai/api/alpha/decisions"
             JevClassifierProvider.CLOUDFLARE -> "https://api.cloudflare.com/client/v4"
-            null -> null
         }
     }
 

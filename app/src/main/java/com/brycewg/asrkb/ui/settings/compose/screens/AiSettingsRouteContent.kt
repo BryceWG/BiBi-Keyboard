@@ -43,22 +43,6 @@ internal fun AiSettingsRouteContent(
                 contentPadding = SettingsLayoutMetrics.pageContentPadding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(SettingsLayoutMetrics.SectionSpacing)
             ) {
-                item("prompt_selection_entry") {
-                    AiSection(uiMode = uiMode, titleRes = R.string.section_prompt_selection_switch) {
-                        AiActionPreference(
-                            id = "prompt_selection_entry",
-                            titleRes = R.string.title_prompt_selection,
-                            index = 0,
-                            count = 1,
-                            onClick = onOpenPromptSelection
-                        )
-                        AiBodyText(
-                            uiMode = uiMode,
-                            textRes = R.string.helper_prompt_auto_select_enabled
-                        )
-                    }
-                }
-
                 item("post_process_scope") {
                     AiPostProcessSection(
                         uiMode = uiMode,
@@ -99,7 +83,8 @@ internal fun AiSettingsRouteContent(
                             onSkipUnderCharsChange(next)
                             prefs.postprocSkipUnderChars = next
                         },
-                        onSkipUnderCharsFinished = {}
+                        onSkipUnderCharsFinished = {},
+                        onOpenPromptSelection = onOpenPromptSelection
                     )
                 }
 
@@ -141,6 +126,7 @@ internal fun AiSettingsRouteContent(
                 item("post_process_model") {
                     AiPostProcessModelSection(
                         uiMode = uiMode,
+                        prefs = prefs,
                         selectedVendor = selectedVendor,
                         selectedVendorName = stringResource(selectedVendor.displayNameResId),
                         builtinConfig = builtinConfig,

@@ -17,6 +17,7 @@ import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 @Composable
 internal fun AiPostProcessModelSection(
     uiMode: BibiUiMode,
+    prefs: Prefs,
     selectedVendor: LlmVendor,
     selectedVendorName: String,
     builtinConfig: AiPostSettingsViewModel.BuiltinVendorConfig,
@@ -70,6 +71,7 @@ internal fun AiPostProcessModelSection(
 ) {
     AiSection(uiMode = uiMode, titleRes = R.string.section_post_process_model) {
         val primaryConfigItemCount = when (selectedVendor) {
+            LlmVendor.TYPESAFE -> if (prefs.jevClassifierProvider == com.brycewg.asrkb.store.JevClassifierProvider.CLOUDFLARE) 4 else 3
             LlmVendor.SF_FREE -> sfFreeLlmPrimaryItemCount(
                 presetModels = sfPresetModels,
                 staticModels = sfStaticModels,
@@ -97,6 +99,15 @@ internal fun AiPostProcessModelSection(
             onClick = onChooseVendor
         )
         when (selectedVendor) {
+            LlmVendor.TYPESAFE -> {
+                TypeSafeLlmSection(
+                    uiMode = uiMode,
+                    prefs = prefs,
+                    onChooseModel = onChooseBuiltinModel,
+                    primaryIndexOffset = 1,
+                    primaryGroupCount = primaryGroupCount
+                )
+            }
             LlmVendor.SF_FREE -> SfFreeLlmSection(
                 uiMode = uiMode,
                 presetModels = sfPresetModels,

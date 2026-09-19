@@ -111,7 +111,9 @@ class AiPostSettingsViewModel : ViewModel() {
     fun selectVendor(prefs: Prefs, vendor: LlmVendor) {
         rememberPrefs(prefs)
         try {
-            prefs.llmVendor = vendor
+            if (!vendor.classifierOnly) {
+                prefs.llmVendor = vendor
+            }
             _selectedVendor.value = vendor
             loadBuiltinVendorConfig(prefs, vendor)
             Log.d(TAG, "Selected LLM vendor: ${vendor.id}")

@@ -71,9 +71,7 @@ data class PromptSelectorModelSummary(
     /** 自定义供应商配置 ID；内置供应商为 null。 */
     val customProviderId: String?,
     val available: Boolean,
-    val unavailableReason: LlmModelUnavailableReason?,
-    /** Fixed Jev classifier provider label; null for ordinary LLM references. */
-    val jevProviderName: String? = null
+    val unavailableReason: LlmModelUnavailableReason?
 )
 
 /** 模型选择第一层：内置供应商及其配置状态。 */
@@ -184,6 +182,34 @@ object LlmModelConfigResolver {
                 if (vendor == null) {
                     return LlmModelResolution.Unavailable(LlmModelUnavailableReason.PROVIDER_MISSING)
                 }
+                if (vendor == LlmVendor.TYPESAFE) {
+                    val configured = when (prefs.jevClassifierProvider) {
+                        JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
+                        JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
+                        JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey.isNotBlank() &&
+                            prefs.jevCloudflareAccountId.isNotBlank()
+                    }
+                    return if (configured) {
+                        LlmModelResolution.Resolved(
+                            ResolvedLlmModelConfig(
+                                vendor = vendor,
+                                vendorId = vendor.id,
+                                customProviderId = null,
+                                endpoint = "jev://typesafe",
+                                apiKey = "configured",
+                                model = JEV_MODEL_ID,
+                                temperature = 0.0,
+                                reasoningCharThreshold = LlmReasoningThreshold.NEVER,
+                                useCustomReasoningParams = false,
+                                reasoningParamsOnJson = "",
+                                reasoningParamsOffJson = "",
+                                capabilityIdentity = vendor.id
+                            )
+                        )
+                    } else {
+                        LlmModelResolution.Unavailable(LlmModelUnavailableReason.MISSING_API_KEY)
+                    }
+                }
                 val config = prefs.effectiveLlmConfigForVendor(vendor, ref.model)
                     ?.let { resolvedFromEffective(it, null, vendor.id) }
                     ?.let { base -> applyFreeTierKeyIfNeeded(prefs, vendor, base) }
@@ -217,9 +243,6 @@ object LlmModelConfigResolver {
                 return validate(config)?.let { LlmModelResolution.Unavailable(it) }
                     ?: LlmModelResolution.Resolved(config)
             }
-
-            is PromptSelectorModelRef.Jev ->
-                return LlmModelResolution.Unavailable(LlmModelUnavailableReason.NO_ACTIVE_CONFIG)
         }
     }
 
@@ -240,7 +263,9 @@ object LlmModelConfigResolver {
         return provider.endpoint.isNotBlank() && provider.apiKey.isNotBlank()
     }
 
-    fun builtinVendorOptions(prefs: Prefs): List<LlmVendorOption> = LlmVendor.builtinVendors().map { LlmVendorOption(it, isBuiltinVendorConfigured(prefs, it)) }
+    fun builtinVendorOptions(prefs: Prefs): List<LlmVendorOption> = LlmVendor.builtinVendors()
+        .distinctBy { it.id }
+        .map { LlmVendorOption(it, isBuiltinVendorConfigured(prefs, it)) }
 
     fun customProviderOptions(prefs: Prefs): List<LlmCustomProviderOption> = prefs.getLlmProviders().map {
         LlmCustomProviderOption(
@@ -256,12 +281,10 @@ object LlmModelConfigResolver {
      * 不提供自由输入：候选来源只有供应商配置里已保存的模型集合。
      */
     fun savedModels(prefs: Prefs, ref: PromptSelectorModelRef): List<String> {
-        if (ref is PromptSelectorModelRef.Jev) return listOf(JEV_MODEL_ID)
         val currentModel = when (ref) {
             PromptSelectorModelRef.FollowDefault -> resolveActiveConfig(prefs).model
             is PromptSelectorModelRef.Builtin -> ref.model
             is PromptSelectorModelRef.Custom -> ref.model
-            is PromptSelectorModelRef.Jev -> JEV_MODEL_ID
         }.trim()
         val stored = when (ref) {
             PromptSelectorModelRef.FollowDefault -> {
@@ -281,7 +304,6 @@ object LlmModelConfigResolver {
                 .firstOrNull { it.id == ref.providerId }
                 ?.models
                 .orEmpty()
-            is PromptSelectorModelRef.Jev -> listOf(JEV_MODEL_ID)
         }
         return (listOf(currentModel) + stored)
             .map { it.trim() }
@@ -327,27 +349,6 @@ object LlmModelConfigResolver {
                     customProviderId = ref.providerId,
                     available = resolution is LlmModelResolution.Resolved,
                     unavailableReason = (resolution as? LlmModelResolution.Unavailable)?.reason
-                )
-            }
-
-            is PromptSelectorModelRef.Jev -> {
-                val provider = JevClassifierProvider.fromId(ref.providerId)
-                val available = when (provider) {
-                    JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
-                    JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
-                    JevClassifierProvider.CLOUDFLARE ->
-                        prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
-                    null -> false
-                }
-                return PromptSelectorModelSummary(
-                    ref = ref,
-                    model = JEV_MODEL_ID,
-                    vendorNameResId = null,
-                    customProviderName = null,
-                    customProviderId = null,
-                    available = available,
-                    unavailableReason = if (available) null else LlmModelUnavailableReason.MISSING_API_KEY,
-                    jevProviderName = provider?.displayName()
                 )
             }
         }

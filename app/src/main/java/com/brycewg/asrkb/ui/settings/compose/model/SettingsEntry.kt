@@ -12,6 +12,7 @@ sealed interface SettingsEntry {
     val id: String
 
     @get:StringRes val titleRes: Int
+    val title: String?
 
     @get:StringRes val summaryRes: Int?
     val summary: String?
@@ -21,6 +22,7 @@ sealed interface SettingsEntry {
     data class Action(
         override val id: String,
         @param:StringRes override val titleRes: Int,
+        override val title: String? = null,
         @param:StringRes override val summaryRes: Int? = null,
         override val summary: String? = null,
         override val icon: ImageVector? = null,
@@ -31,6 +33,7 @@ sealed interface SettingsEntry {
     data class Switch(
         override val id: String,
         @param:StringRes override val titleRes: Int,
+        override val title: String? = null,
         @param:StringRes override val summaryRes: Int? = null,
         override val summary: String? = null,
         override val icon: ImageVector? = null,
@@ -42,6 +45,7 @@ sealed interface SettingsEntry {
     data class Dropdown(
         override val id: String,
         @param:StringRes override val titleRes: Int,
+        override val title: String? = null,
         @param:StringRes override val summaryRes: Int? = null,
         override val summary: String? = null,
         override val icon: ImageVector? = null,

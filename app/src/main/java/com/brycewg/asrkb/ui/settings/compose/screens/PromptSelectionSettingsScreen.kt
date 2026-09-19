@@ -22,7 +22,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmVendor
-import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectorModelRef
 import com.brycewg.asrkb.ui.settings.ai.PromptSelectionSettingsViewModel
@@ -31,13 +30,18 @@ import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceItem
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheet
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsDetailScaffold
+import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialog
+import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsLazyColumn
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsMultiChoiceSheet
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsMultiChoiceSheetState
+import com.brycewg.asrkb.ui.settings.compose.components.SettingsPreference
+import com.brycewg.asrkb.ui.settings.compose.components.rememberSettingsChoiceSheetNavigator
+import com.brycewg.asrkb.ui.settings.compose.components.settingsChoiceSheetState
+import com.brycewg.asrkb.ui.settings.compose.components.settingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
+import com.brycewg.asrkb.ui.settings.compose.model.SettingsEntry
 
 @Composable
 fun PromptSelectionSettingsScreen(
@@ -49,9 +53,9 @@ fun PromptSelectionSettingsScreen(
     val viewModel: PromptSelectionSettingsViewModel = viewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var choiceSheet by remember { mutableStateOf<SettingsChoiceSheetState?>(null) }
-    var multiChoiceSheet by remember { mutableStateOf<SettingsMultiChoiceSheetState?>(null) }
+    val modelPickerSheets = rememberSettingsChoiceSheetNavigator()
     var messageDialog by remember { mutableStateOf<SettingsMessageDialogState?>(null) }
+    var featureDialog by remember { mutableStateOf<SettingsFeatureExplainerDialogState?>(null) }
 
     LaunchedEffect(prefs) {
         viewModel.load(prefs)
@@ -63,19 +67,19 @@ fun PromptSelectionSettingsScreen(
         onBack = onBack
     ) { innerPadding, scrollModifier ->
         SettingsChoiceSheet(
-            state = choiceSheet,
+            state = modelPickerSheets.current,
             uiMode = uiMode,
-            onDismiss = { choiceSheet = null }
-        )
-        SettingsMultiChoiceSheet(
-            state = multiChoiceSheet,
-            uiMode = uiMode,
-            onDismiss = { multiChoiceSheet = null }
+            onDismiss = modelPickerSheets::onDismiss
         )
         SettingsMessageDialog(
             state = messageDialog,
             uiMode = uiMode,
             onDismiss = { messageDialog = null }
+        )
+        SettingsFeatureExplainerDialog(
+            state = featureDialog,
+            uiMode = uiMode,
+            onDismiss = { featureDialog = null }
         )
 
         SettingsLazyColumn(
@@ -94,50 +98,30 @@ fun PromptSelectionSettingsScreen(
                         index = 0,
                         count = 1,
                         onCheckedChange = { checked ->
-                            if (!viewModel.setEnabled(prefs, checked) && checked) {
+                            if (checked && !state.canEnable) {
                                 messageDialog = SettingsMessageDialogState(
                                     title = context.getString(R.string.title_prompt_selection),
                                     message = context.getString(R.string.prompt_selection_enable_blocked),
                                     confirmText = context.getString(android.R.string.ok)
                                 )
+                            } else {
+                                featureDialog = settingsFeatureExplainerDialogState(
+                                    context = context,
+                                    titleRes = R.string.title_prompt_selection,
+                                    offDescRes = R.string.feature_prompt_auto_select_off_desc,
+                                    onDescRes = R.string.helper_prompt_auto_select_enabled,
+                                    currentState = state.enabled,
+                                    preferenceKey = "prompt_auto_select_explained",
+                                    onConfirm = { viewModel.setEnabled(prefs, checked) }
+                                )
                             }
                         }
                     )
-                    AiBodyText(uiMode = uiMode, textRes = R.string.helper_prompt_auto_select_enabled)
                     if (state.showInvalidWarning) {
                         AiBodyText(
                             uiMode = uiMode,
                             textRes = R.string.prompt_selection_warning_invalid
                         )
-                    }
-                }
-            }
-
-            item("prompt_selection_candidates") {
-                AiSection(uiMode = uiMode, titleRes = R.string.section_prompt_selection_candidates) {
-                    AiValuePreference(
-                        titleRes = R.string.label_prompt_selection_candidates,
-                        value = stringResource(
-                            R.string.prompt_selection_candidates_count,
-                            state.resolvedCount
-                        ),
-                        uiMode = uiMode,
-                        index = 0,
-                        count = 1,
-                        onClick = {
-                            multiChoiceSheet = candidateMultiChoiceSheet(
-                                context = context,
-                                viewModel = viewModel,
-                                state = state,
-                                prefs = prefs
-                            )
-                        }
-                    )
-                    candidateSummaryLines(
-                        state = state,
-                        minCount = viewModel.minimumCandidateCount()
-                    ).forEach { line ->
-                        AiBodyText(uiMode = uiMode, text = line)
                     }
                 }
             }
@@ -151,41 +135,51 @@ fun PromptSelectionSettingsScreen(
                         index = 0,
                         count = 1,
                         onClick = {
-                            choiceSheet = modelRefChoiceSheet(
-                                context = context,
-                                prefs = prefs,
-                                viewModel = viewModel,
-                                onPick = { ref ->
-                                    choiceSheet = null
-                                    if (ref is PromptSelectorModelRef.FollowDefault) {
-                                        viewModel.setModelRef(prefs, ref)
-                                        return@modelRefChoiceSheet
-                                    }
-                                    val currentModel = when (ref) {
-                                        is PromptSelectorModelRef.Builtin -> ref.model
-                                        is PromptSelectorModelRef.Custom -> ref.model
-                                        is PromptSelectorModelRef.Jev -> ref.model
-                                        PromptSelectorModelRef.FollowDefault -> ""
-                                    }
-                                    val models = viewModel.savedModels(prefs, ref)
-                                    if (models.isEmpty()) {
-                                        messageDialog = SettingsMessageDialogState(
-                                            title = context.getString(R.string.title_prompt_selection),
-                                            message = context.getString(R.string.prompt_selection_no_models),
-                                            confirmText = context.getString(android.R.string.ok)
-                                        )
-                                        return@modelRefChoiceSheet
-                                    }
-                                    choiceSheet = modelChoiceSheet(
-                                        context = context,
-                                        models = models,
-                                        currentModel = currentModel,
-                                        onPick = { model ->
-                                            choiceSheet = null
-                                            viewModel.setModelRef(prefs, withModel(ref, model))
+                            modelPickerSheets.show(
+                                modelRefChoiceSheet(
+                                    context = context,
+                                    prefs = prefs,
+                                    viewModel = viewModel,
+                                    onPick = { ref ->
+                                        if (ref is PromptSelectorModelRef.FollowDefault) {
+                                            modelPickerSheets.finishAfterDismiss()
+                                            viewModel.setModelRef(prefs, ref)
+                                            return@modelRefChoiceSheet
                                         }
-                                    )
-                                }
+                                        val currentModel = when (ref) {
+                                            is PromptSelectorModelRef.Builtin -> ref.model
+                                            is PromptSelectorModelRef.Custom -> ref.model
+                                            PromptSelectorModelRef.FollowDefault -> ""
+                                        }
+                                        val models = viewModel.savedModels(prefs, ref)
+                                        if (models.isEmpty()) {
+                                            messageDialog = SettingsMessageDialogState(
+                                                title = context.getString(R.string.title_prompt_selection),
+                                                message = context.getString(R.string.prompt_selection_no_models),
+                                                confirmText = context.getString(android.R.string.ok)
+                                            )
+                                            modelPickerSheets.finishAfterDismiss()
+                                            return@modelRefChoiceSheet
+                                        }
+                                        if (models.size == 1) {
+                                            modelPickerSheets.finishAfterDismiss()
+                                            viewModel.setModelRef(prefs, withModel(ref, models.single()))
+                                            return@modelRefChoiceSheet
+                                        }
+                                        modelPickerSheets.showAfterDismiss(
+                                            settingsChoiceSheetState(
+                                                title = context.getString(R.string.prompt_selection_model_choose_model_title),
+                                                items = models,
+                                                selectedIndex = models.indexOf(currentModel),
+                                                onSelected = { index ->
+                                                    val model = models.getOrNull(index) ?: return@settingsChoiceSheetState
+                                                    modelPickerSheets.finishAfterDismiss()
+                                                    viewModel.setModelRef(prefs, withModel(ref, model))
+                                                }
+                                            )
+                                        )
+                                    }
+                                )
                             )
                         }
                     )
@@ -200,75 +194,39 @@ fun PromptSelectionSettingsScreen(
                 }
             }
 
-            (state.modelSummary?.ref as? PromptSelectorModelRef.Jev)?.let { ref ->
-                val provider = JevClassifierProvider.fromId(ref.providerId)
-                if (provider != null) {
-                    item("prompt_selection_jev_credentials") {
-                        AiSection(
-                            uiMode = uiMode,
-                            titleRes = R.string.section_prompt_selection_jev_credentials
-                        ) {
-                            AiBodyText(
-                                uiMode = uiMode,
-                                textRes = R.string.helper_prompt_selection_jev_only
-                            )
-                            AiTextField(
-                                uiMode = uiMode,
-                                value = jevApiKey(prefs, provider),
-                                onValueChange = { value ->
-                                    viewModel.updateJevApiKey(prefs, provider, value)
-                                },
-                                label = stringResource(R.string.label_prompt_selection_jev_api_key),
-                                password = true,
-                                index = 0,
-                                count = if (provider == JevClassifierProvider.CLOUDFLARE) 2 else 1
-                            )
-                            if (provider == JevClassifierProvider.CLOUDFLARE) {
-                                AiTextField(
-                                    uiMode = uiMode,
-                                    value = prefs.jevCloudflareAccountId,
-                                    onValueChange = { value ->
-                                        viewModel.updateJevAccountId(prefs, value)
-                                    },
-                                    label = stringResource(R.string.label_prompt_selection_jev_account_id),
-                                    index = 1,
-                                    count = 2
-                                )
-                            }
-                        }
+            item("prompt_selection_candidates") {
+                AiSection(uiMode = uiMode, titleRes = R.string.section_prompt_selection_candidates) {
+                    state.candidates.forEachIndexed { index, row ->
+                        SettingsPreference(
+                            entry = SettingsEntry.Switch(
+                                id = "prompt_candidate_${row.candidate.id}",
+                                titleRes = android.R.string.untitled,
+                                title = row.candidate.displayTitle.ifBlank { context.getString(R.string.untitled_preset) },
+                                summary = row.candidate.skill.takeIf { it.isNotBlank() },
+                                checked = row.checked,
+                                onCheckedChange = { checked ->
+                                    val selectedIds = state.candidates
+                                        .filter { it.checked }
+                                        .map { it.candidate.id }
+                                        .toMutableSet()
+                                    if (checked) selectedIds += row.candidate.id else selectedIds -= row.candidate.id
+                                    viewModel.setCandidates(prefs, selectedIds)
+                                }
+                            ),
+                            index = index,
+                            count = state.candidates.size
+                        )
+                    }
+                    candidateSummaryLines(
+                        state = state,
+                        minCount = viewModel.minimumCandidateCount()
+                    ).forEach { line ->
+                        AiBodyText(uiMode = uiMode, text = line)
                     }
                 }
             }
         }
     }
-}
-
-private fun candidateMultiChoiceSheet(
-    context: android.content.Context,
-    viewModel: PromptSelectionSettingsViewModel,
-    state: PromptSelectionSettingsViewModel.UiState,
-    prefs: Prefs
-): SettingsMultiChoiceSheetState {
-    val rows = state.candidates
-    val checkedIndices = rows
-        .withIndex()
-        .filter { it.value.checked }
-        .map { it.index }
-        .toSet()
-    return SettingsMultiChoiceSheetState(
-        title = context.getString(R.string.label_prompt_selection_candidates),
-        items = rows.map { row ->
-            row.candidate.displayTitle.ifBlank { context.getString(R.string.untitled_preset) }
-        },
-        checkedIndices = checkedIndices,
-        confirmText = context.getString(android.R.string.ok),
-        cancelText = context.getString(android.R.string.cancel),
-        onConfirm = { indices ->
-            val selectedIds = indices.mapNotNull { rows.getOrNull(it)?.candidate?.id }.toSet()
-            viewModel.setCandidates(prefs, selectedIds)
-            true
-        }
-    )
 }
 
 /** 紧凑摘要：缺 skill、已删除、数量不足、已就绪。 */
@@ -292,8 +250,6 @@ private fun candidateSummaryLines(
     }
     if (state.resolvedCount < minCount) {
         lines += stringResource(R.string.prompt_selection_summary_min_count, minCount)
-    } else if (lines.isEmpty()) {
-        lines += stringResource(R.string.prompt_selection_summary_ready)
     }
     return lines
 }
@@ -310,7 +266,6 @@ private fun modelSummaryLabel(
         summary.vendorNameResId != null -> context.getString(summary.vendorNameResId)
         summary.customProviderName != null ->
             summary.customProviderName.ifBlank { context.getString(R.string.untitled_profile) }
-        summary.jevProviderName != null -> summary.jevProviderName
         else -> context.getString(R.string.prompt_selection_model_follow_default)
     }
     val model = summary.model.ifBlank { context.getString(R.string.prompt_selection_model_unconfigured) }
@@ -354,11 +309,6 @@ private fun modelRefChoiceSheet(
                 val option = state.customOptions.firstOrNull { it.providerId == ref.providerId }
                 title = option?.name?.ifBlank { untitledProfile } ?: untitledProfile
                 configured = option?.configured == true
-            }
-            is PromptSelectorModelRef.Jev -> {
-                val provider = JevClassifierProvider.fromId(ref.providerId)
-                title = provider?.displayName() ?: ref.providerId
-                configured = provider?.let { isJevConfigured(prefs, it) } == true
             }
         }
         Option(
@@ -405,25 +355,6 @@ private fun modelRefChoiceSheet(
 }
 
 /** 第二层：已保存模型（含当前模型），不支持自由输入。 */
-private fun modelChoiceSheet(
-    context: android.content.Context,
-    models: List<String>,
-    currentModel: String,
-    onPick: (String) -> Unit
-): SettingsChoiceSheetState = SettingsChoiceSheetState(
-    title = context.getString(R.string.prompt_selection_model_choose_model_title),
-    groups = listOf(
-        SettingsChoiceGroup(
-            label = "",
-            items = models.mapIndexed { index, model ->
-                SettingsChoiceItem(title = model, originalIndex = index)
-            }
-        )
-    ),
-    selectedIndex = models.indexOf(currentModel),
-    onSelected = { index -> models.getOrNull(index)?.let(onPick) }
-)
-
 private fun withModel(
     ref: PromptSelectorModelRef,
     model: String
@@ -431,18 +362,4 @@ private fun withModel(
     PromptSelectorModelRef.FollowDefault -> PromptSelectorModelRef.FollowDefault
     is PromptSelectorModelRef.Builtin -> ref.copy(model = model)
     is PromptSelectorModelRef.Custom -> ref.copy(model = model)
-    is PromptSelectorModelRef.Jev -> ref.copy(model = model)
-}
-
-private fun isJevConfigured(prefs: Prefs, provider: JevClassifierProvider): Boolean = when (provider) {
-    JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
-    JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
-    JevClassifierProvider.CLOUDFLARE ->
-        prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
-}
-
-private fun jevApiKey(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {
-    JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey
-    JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey
-    JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey
 }
