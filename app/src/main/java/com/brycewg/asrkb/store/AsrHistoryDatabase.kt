@@ -63,11 +63,8 @@ internal class AsrHistoryDatabase private constructor(
 
         private fun addColumnIfMissing(db: SQLiteDatabase, column: String, type: String) {
             if (hasColumn(db, column)) return
-            try {
-                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $column $type")
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to add column $column to $TABLE", e)
-            }
+            db.execSQL("ALTER TABLE $TABLE ADD COLUMN $column $type")
+            check(hasColumn(db, column)) { "Column $column was not created during database upgrade" }
         }
 
         private fun hasColumn(db: SQLiteDatabase, column: String): Boolean = try {
@@ -131,6 +128,8 @@ internal class AsrHistoryDatabase private constructor(
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = applyUpgrade(db, oldVersion, newVersion)
+
+    override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int): Unit = throw SQLException("ASR history database downgrade is not supported: $oldVersion -> $newVersion")
 
     fun writableOrNull(): SQLiteDatabase? = openOrNull(writable = true)
 

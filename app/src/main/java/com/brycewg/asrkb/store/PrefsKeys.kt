@@ -256,6 +256,9 @@ internal const val KEY_HEADSET_MIC_PRIORITY_ENABLED = "headset_mic_priority_enab
 internal const val KEY_USAGE_STATS_JSON = "usage_stats"
 internal const val KEY_ASR_RUNTIME_STATS_JSON = "asr_runtime_stats_v1"
 internal const val KEY_ASR_HISTORY_JSON = "asr_history"
+
+/** Import-only key from an earlier unreleased V2 backup implementation. */
+internal const val KEY_ASR_HISTORY_V2_JSON = "asr_history_v2"
 internal const val KEY_CLIP_HISTORY_JSON = "clip_history"
 internal const val KEY_CLIP_PINNED_JSON = "clip_pinned"
 internal const val KEY_FIRST_USE_DATE = "first_use_date"

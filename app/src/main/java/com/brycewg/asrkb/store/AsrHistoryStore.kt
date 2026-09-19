@@ -11,6 +11,11 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
  * ASR 历史记录存储
@@ -196,6 +201,11 @@ class AsrHistoryStore(context: Context) {
         }
     }
 
+    internal fun validateJson(raw: String) {
+        require(raw.isNotBlank()) { "ASR history backup is empty" }
+        parseLegacyJson(raw)
+    }
+
     private fun <T> withReadableDb(fallback: T, block: (SQLiteDatabase) -> T): T {
         synchronized(HISTORY_LOCK) {
             migrateFromPrefsIfNeeded()
@@ -267,7 +277,55 @@ class AsrHistoryStore(context: Context) {
 
     private fun parseLegacyJson(raw: String): List<AsrHistoryRecord> {
         if (raw.isBlank()) return emptyList()
-        return json.decodeFromString<List<AsrHistoryRecord>>(raw)
+        val root = json.parseToJsonElement(raw)
+        require(root is JsonArray) { "ASR history backup must be a JSON array" }
+        val knownStages = AsrHistoryTimingStage.entries.mapTo(mutableSetOf()) { it.name }
+        val knownOrigins = AsrHistoryTimingOrigin.entries.mapTo(mutableSetOf()) { it.name }
+        val knownStatuses = AsrHistoryStatus.entries.mapTo(mutableSetOf()) { it.name }
+        val knownAiStatuses = AiPostStatus.entries.mapTo(mutableSetOf()) { it.name }
+        val knownFailStages = AsrHistoryFailStage.entries.mapTo(mutableSetOf()) { it.name }
+        val sanitized = JsonArray(
+            root.map { element ->
+                if (element !is JsonObject) return@map element
+                buildJsonObject {
+                    element.forEach { (key, value) ->
+                        when (key) {
+                            "status" -> if ((value as? JsonPrimitive)?.content?.let { it in knownStatuses } == true) put(key, value)
+                            "aiPostStatus" -> if ((value as? JsonPrimitive)?.content?.let { it in knownAiStatuses } == true) put(key, value)
+                            "failStage" -> if ((value as? JsonPrimitive)?.content?.let { it in knownFailStages } == true) put(key, value)
+                            "timingTrace" -> {
+                                val trace = value as? JsonObject
+                                val origin = (trace?.get("origin") as? JsonPrimitive)?.content
+                                if (trace != null && origin?.let { it in knownOrigins } == true) {
+                                    put(
+                                        key,
+                                        buildJsonObject {
+                                            trace.forEach { (traceKey, traceValue) ->
+                                                if (traceKey != "intervals") {
+                                                    put(traceKey, traceValue)
+                                                } else {
+                                                    put(
+                                                        traceKey,
+                                                        JsonArray(
+                                                            (traceValue as? JsonArray).orEmpty().filter { interval ->
+                                                                val stage = (interval as? JsonObject)?.get("stage") as? JsonPrimitive
+                                                                stage?.content?.let { it in knownStages } == true
+                                                            }
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                            else -> put(key, value)
+                        }
+                    }
+                }
+            }
+        )
+        return json.decodeFromString(sanitized.toString())
     }
 
     private fun <T> unavailable(fallback: T): T {
