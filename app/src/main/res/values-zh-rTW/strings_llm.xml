@@ -6,6 +6,7 @@
     <string name="label_llm_api_key">API Key</string>
     <string name="label_llm_model">模型名稱（可選）</string>
     <string name="label_llm_temperature">溫度</string>
+    <string name="label_llm_more_params">更多參數</string>
     <string name="label_llm_prompt">後處理提示詞內容（僅輸出處理後的文字）</string>
     <string name="label_llm_prompt_title">提示詞預設標題</string>
     <string name="label_llm_prompt_presets">潤飾提示詞預設</string>

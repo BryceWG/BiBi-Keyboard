@@ -8,6 +8,10 @@
 package com.brycewg.asrkb.ui.settings.compose.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.Prefs
@@ -68,6 +72,8 @@ internal fun AiPostProcessModelSection(
     onOpenBuiltinRegister: () -> Unit,
     onTestCall: () -> Unit
 ) {
+    var showAdvancedParams by remember(selectedVendor) { mutableStateOf(false) }
+
     AiSection(uiMode = uiMode, titleRes = R.string.section_post_process_model) {
         val primaryConfigItemCount = when (selectedVendor) {
             LlmVendor.SF_FREE -> sfFreeLlmPrimaryItemCount(
@@ -104,16 +110,12 @@ internal fun AiPostProcessModelSection(
                 sfUseFreeService = sfUseFreeService,
                 sfApiKey = sfApiKey,
                 sfModel = sfModel,
-                sfReasoningCharThreshold = sfReasoningCharThreshold,
-                sfReasoningOnJson = sfReasoningOnJson,
-                sfReasoningOffJson = sfReasoningOffJson,
-                customReasoningParamsEnabled = sfCustomReasoningParamsEnabled,
-                sfTemperature = sfTemperature,
                 customModelInputVisible = sfCustomModelInputVisible,
                 testEnabled = !llmTestRunning,
                 primaryIndexOffset = 1,
                 primaryGroupCount = primaryGroupCount,
-                actions = sfActions
+                actions = sfActions,
+                onShowAdvancedParams = { showAdvancedParams = true }
             )
 
             LlmVendor.CUSTOM -> CustomLlmSection(
@@ -130,16 +132,12 @@ internal fun AiPostProcessModelSection(
                 onChooseModel = onChooseCustomModel,
                 onModelChange = onCustomModelChange,
                 onFetchModels = onFetchCustomModels,
-                onReasoningChange = onCustomReasoningChange,
-                onCustomReasoningParamsEnabledChange = onCustomReasoningParamsEnabledChange,
-                onReasoningOnJsonChange = onCustomReasoningOnJsonChange,
-                onReasoningOffJsonChange = onCustomReasoningOffJsonChange,
-                onTemperatureChange = onCustomTemperatureChange,
                 onAddProfile = onAddProfile,
                 onDeleteProfile = onDeleteProfile,
                 onTestCall = onTestCall,
                 primaryIndexOffset = 1,
-                primaryGroupCount = primaryGroupCount
+                primaryGroupCount = primaryGroupCount,
+                onShowAdvancedParams = { showAdvancedParams = true }
             )
 
             else -> BuiltinLlmSection(
@@ -149,21 +147,97 @@ internal fun AiPostProcessModelSection(
                 presetModels = builtinPresetModels,
                 customModelInputVisible = builtinCustomModelInputVisible,
                 testEnabled = !llmTestRunning,
-                reasoningOnJson = builtinReasoningOnJson,
-                reasoningOffJson = builtinReasoningOffJson,
                 onApiKeyChange = onBuiltinApiKeyChange,
                 onChooseModel = onChooseBuiltinModel,
                 onCustomModelChange = onBuiltinCustomModelChange,
                 onFetchModels = onFetchBuiltinModels,
-                onReasoningChange = onBuiltinReasoningChange,
-                onCustomReasoningParamsEnabledChange = onBuiltinCustomReasoningParamsEnabledChange,
-                onReasoningOnJsonChange = onBuiltinReasoningOnJsonChange,
-                onReasoningOffJsonChange = onBuiltinReasoningOffJsonChange,
-                onTemperatureChange = onBuiltinTemperatureChange,
                 onOpenRegister = onOpenBuiltinRegister,
                 onTestCall = onTestCall,
                 primaryIndexOffset = 1,
-                primaryGroupCount = primaryGroupCount
+                primaryGroupCount = primaryGroupCount,
+                onShowAdvancedParams = { showAdvancedParams = true }
+            )
+        }
+    }
+
+    when (selectedVendor) {
+        LlmVendor.SF_FREE -> {
+            val showCustomReasoningParams =
+                sfModel.isNotBlank() && !sfStaticModels.contains(sfModel)
+            val showReasoning =
+                selectedVendor.supportsReasoningControl(sfModel) || showCustomReasoningParams
+            AiModelAdvancedParamsDialog(
+                visible = showAdvancedParams,
+                uiMode = uiMode,
+                showTemperature = !sfUseFreeService,
+                temperature = sfTemperature,
+                temperatureRange = 0f..2f,
+                temperatureSteps = 19,
+                onTemperatureChange = sfActions.onTemperatureChange,
+                onTemperatureChangeFinished = { sfActions.onTestHaptic() },
+                showReasoning = showReasoning,
+                reasoningThreshold = sfReasoningCharThreshold,
+                showCustomReasoningParams = showCustomReasoningParams,
+                customReasoningParamsEnabled = sfCustomReasoningParamsEnabled,
+                reasoningOnJson = sfReasoningOnJson,
+                reasoningOffJson = sfReasoningOffJson,
+                onReasoningChange = sfActions.onReasoningChange,
+                onCustomReasoningParamsEnabledChange =
+                sfActions.onCustomReasoningParamsEnabledChange,
+                onReasoningOnJsonChange = sfActions.onReasoningOnJsonChange,
+                onReasoningOffJsonChange = sfActions.onReasoningOffJsonChange,
+                onDismiss = { showAdvancedParams = false }
+            )
+        }
+
+        LlmVendor.CUSTOM -> AiModelAdvancedParamsDialog(
+            visible = showAdvancedParams,
+            uiMode = uiMode,
+            showTemperature = true,
+            temperature = activeProfile?.temperature ?: Prefs.DEFAULT_LLM_TEMPERATURE,
+            temperatureRange = 0f..2f,
+            temperatureSteps = 19,
+            onTemperatureChange = onCustomTemperatureChange,
+            showReasoning = true,
+            reasoningThreshold = activeProfile?.resolvedReasoningCharThreshold()
+                ?: com.brycewg.asrkb.asr.LlmReasoningThreshold.NEVER,
+            showCustomReasoningParams = true,
+            customReasoningParamsEnabled = activeProfile?.useCustomReasoningParams ?: false,
+            reasoningOnJson = activeProfile?.reasoningParamsOnJson.orEmpty(),
+            reasoningOffJson = activeProfile?.reasoningParamsOffJson.orEmpty(),
+            onReasoningChange = onCustomReasoningChange,
+            onCustomReasoningParamsEnabledChange = onCustomReasoningParamsEnabledChange,
+            onReasoningOnJsonChange = onCustomReasoningOnJsonChange,
+            onReasoningOffJsonChange = onCustomReasoningOffJsonChange,
+            onDismiss = { showAdvancedParams = false }
+        )
+
+        else -> {
+            val model = builtinConfig.model.ifBlank { selectedVendor.defaultModel }
+            val showCustomReasoningParams =
+                model.isNotBlank() && !selectedVendor.models.contains(model)
+            val showReasoning =
+                selectedVendor.supportsReasoningControl(model) || showCustomReasoningParams
+            AiModelAdvancedParamsDialog(
+                visible = showAdvancedParams,
+                uiMode = uiMode,
+                showTemperature = true,
+                temperature = builtinConfig.temperature,
+                temperatureRange = selectedVendor.temperatureMin..selectedVendor.temperatureMax,
+                temperatureSteps = temperatureSteps(selectedVendor),
+                onTemperatureChange = onBuiltinTemperatureChange,
+                showReasoning = showReasoning,
+                reasoningThreshold = builtinConfig.reasoningCharThreshold,
+                showCustomReasoningParams = showCustomReasoningParams,
+                customReasoningParamsEnabled = builtinConfig.customReasoningParamsEnabled,
+                reasoningOnJson = builtinReasoningOnJson,
+                reasoningOffJson = builtinReasoningOffJson,
+                onReasoningChange = onBuiltinReasoningChange,
+                onCustomReasoningParamsEnabledChange =
+                onBuiltinCustomReasoningParamsEnabledChange,
+                onReasoningOnJsonChange = onBuiltinReasoningOnJsonChange,
+                onReasoningOffJsonChange = onBuiltinReasoningOffJsonChange,
+                onDismiss = { showAdvancedParams = false }
             )
         }
     }

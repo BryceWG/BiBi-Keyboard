@@ -6,6 +6,7 @@
     <string name="label_llm_api_key">API Key</string>
     <string name="label_llm_model">Model Name (optional)</string>
     <string name="label_llm_temperature">Temperature</string>
+    <string name="label_llm_more_params">More parameters</string>
     <string name="label_llm_prompt">Post-processing prompt (output only the processed text)</string>
     <string name="label_llm_prompt_title">Prompt Preset Title</string>
     <string name="label_llm_prompt_presets">Polish Prompt Preset</string>

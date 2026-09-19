@@ -31,16 +31,12 @@ internal fun SfFreeLlmSection(
     sfUseFreeService: Boolean,
     sfApiKey: String,
     sfModel: String,
-    sfReasoningCharThreshold: Int,
-    sfReasoningOnJson: String,
-    sfReasoningOffJson: String,
-    customReasoningParamsEnabled: Boolean,
-    sfTemperature: Float,
     customModelInputVisible: Boolean,
     testEnabled: Boolean,
     primaryIndexOffset: Int = 0,
     primaryGroupCount: Int? = null,
-    actions: AiVendorActions
+    actions: AiVendorActions,
+    onShowAdvancedParams: () -> Unit
 ) {
     val showCustomModel =
         customModelInputVisible || (sfModel.isNotBlank() && !presetModels.contains(sfModel))
@@ -97,33 +93,20 @@ internal fun SfFreeLlmSection(
         )
     }
     if (!sfUseFreeService) {
-        AiSliderPreference(
-            titleRes = R.string.label_llm_temperature,
-            valueLabel = { formatTemperature(it) },
-            value = sfTemperature,
-            valueRange = 0f..2f,
-            steps = 19,
-            uiMode = uiMode,
-            index = if (showReasoning) itemIndex++ else itemIndex,
-            count = itemCount,
-            onValueChange = actions.onTemperatureChange,
-            onValueChangeFinished = { actions.onTestHaptic() }
-        )
-    }
-    if (showReasoning) {
-        ReasoningSection(
-            uiMode = uiMode,
-            threshold = sfReasoningCharThreshold,
-            showParams = showCustomReasoningParams,
-            customParamsEnabled = customReasoningParamsEnabled,
-            onThresholdChange = actions.onReasoningChange,
-            onCustomParamsEnabledChange = actions.onCustomReasoningParamsEnabledChange,
-            onJson = sfReasoningOnJson,
-            offJson = sfReasoningOffJson,
-            onOnJsonChange = actions.onReasoningOnJsonChange,
-            onOffJsonChange = actions.onReasoningOffJsonChange,
+        AiActionPreference(
+            id = "more_params",
+            titleRes = R.string.label_llm_more_params,
             index = itemIndex,
-            count = itemCount
+            count = itemCount,
+            onClick = onShowAdvancedParams
+        )
+    } else if (showReasoning) {
+        AiActionPreference(
+            id = "more_params",
+            titleRes = R.string.label_llm_more_params,
+            index = itemIndex,
+            count = itemCount,
+            onClick = onShowAdvancedParams
         )
     }
     AiBodyText(uiMode = uiMode, textRes = R.string.sf_free_register_hint)
@@ -150,29 +133,20 @@ internal fun BuiltinLlmSection(
     presetModels: List<String>,
     customModelInputVisible: Boolean,
     testEnabled: Boolean,
-    reasoningOnJson: String,
-    reasoningOffJson: String,
     onApiKeyChange: (String) -> Unit,
     onChooseModel: () -> Unit,
     onCustomModelChange: (String) -> Unit,
     onFetchModels: () -> Unit,
-    onReasoningChange: (Int) -> Unit,
-    onCustomReasoningParamsEnabledChange: (Boolean) -> Unit,
-    onReasoningOnJsonChange: (String) -> Unit,
-    onReasoningOffJsonChange: (String) -> Unit,
-    onTemperatureChange: (Float) -> Unit,
     onOpenRegister: () -> Unit,
     onTestCall: () -> Unit,
     primaryIndexOffset: Int = 0,
-    primaryGroupCount: Int? = null
+    primaryGroupCount: Int? = null,
+    onShowAdvancedParams: () -> Unit
 ) {
     val displayModel = config.model.ifBlank { vendor.defaultModel }
     val isPresetModel = displayModel.isNotBlank() && presetModels.contains(displayModel)
-    val isBuiltinModel = displayModel.isNotBlank() && vendor.models.contains(displayModel)
     val showCustomModel =
         customModelInputVisible || (displayModel.isNotBlank() && !isPresetModel)
-    val showCustomReasoningParams = displayModel.isNotBlank() && !isBuiltinModel
-    val showReasoning = vendor.supportsReasoningControl(displayModel) || showCustomReasoningParams
 
     var itemIndex = primaryIndexOffset
     val itemCount = primaryGroupCount ?: builtinLlmPrimaryItemCount(
@@ -211,33 +185,13 @@ internal fun BuiltinLlmSection(
             count = itemCount
         )
     }
-    AiSliderPreference(
-        titleRes = R.string.label_llm_temperature,
-        valueLabel = { formatTemperature(it.coerceIn(vendor.temperatureMin, vendor.temperatureMax)) },
-        value = config.temperature.coerceIn(vendor.temperatureMin, vendor.temperatureMax),
-        valueRange = vendor.temperatureMin..vendor.temperatureMax,
-        steps = temperatureSteps(vendor),
-        uiMode = uiMode,
-        index = if (showReasoning) itemIndex++ else itemIndex,
+    AiActionPreference(
+        id = "more_params",
+        titleRes = R.string.label_llm_more_params,
+        index = itemIndex,
         count = itemCount,
-        onValueChange = onTemperatureChange
+        onClick = onShowAdvancedParams
     )
-    if (showReasoning) {
-        ReasoningSection(
-            uiMode = uiMode,
-            threshold = config.reasoningCharThreshold,
-            showParams = showCustomReasoningParams,
-            customParamsEnabled = config.customReasoningParamsEnabled,
-            onThresholdChange = onReasoningChange,
-            onCustomParamsEnabledChange = onCustomReasoningParamsEnabledChange,
-            onJson = reasoningOnJson,
-            offJson = reasoningOffJson,
-            onOnJsonChange = onReasoningOnJsonChange,
-            onOffJsonChange = onReasoningOffJsonChange,
-            index = itemIndex,
-            count = itemCount
-        )
-    }
     AiButtonRow(uiMode = uiMode) {
         if (vendor.registerUrl.isNotBlank()) {
             AiButton(uiMode = uiMode, textRes = R.string.btn_llm_register, onClick = onOpenRegister)
@@ -266,16 +220,12 @@ internal fun CustomLlmSection(
     onChooseModel: () -> Unit,
     onModelChange: (String) -> Unit,
     onFetchModels: () -> Unit,
-    onReasoningChange: (Int) -> Unit,
-    onCustomReasoningParamsEnabledChange: (Boolean) -> Unit,
-    onReasoningOnJsonChange: (String) -> Unit,
-    onReasoningOffJsonChange: (String) -> Unit,
-    onTemperatureChange: (Float) -> Unit,
     onAddProfile: () -> Unit,
     onDeleteProfile: () -> Unit,
     onTestCall: () -> Unit,
     primaryIndexOffset: Int = 0,
-    primaryGroupCount: Int? = null
+    primaryGroupCount: Int? = null,
+    onShowAdvancedParams: () -> Unit
 ) {
     val profileName = provider?.name.orEmpty()
     val displayName = profileName.ifBlank { stringResource(R.string.untitled_profile) }
@@ -349,30 +299,12 @@ internal fun CustomLlmSection(
             count = itemCount
         )
     }
-    AiSliderPreference(
-        titleRes = R.string.label_llm_temperature,
-        valueLabel = { formatTemperature(it.coerceIn(0f, 2f)) },
-        value = (provider?.temperature ?: Prefs.DEFAULT_LLM_TEMPERATURE).coerceIn(0f, 2f),
-        valueRange = 0f..2f,
-        steps = 19,
-        uiMode = uiMode,
-        index = itemIndex++,
-        count = itemCount,
-        onValueChange = onTemperatureChange
-    )
-    ReasoningSection(
-        uiMode = uiMode,
-        threshold = provider?.resolvedReasoningCharThreshold() ?: LlmReasoningThreshold.NEVER,
-        showParams = true,
-        customParamsEnabled = provider?.useCustomReasoningParams ?: false,
-        onThresholdChange = onReasoningChange,
-        onCustomParamsEnabledChange = onCustomReasoningParamsEnabledChange,
-        onJson = provider?.reasoningParamsOnJson.orEmpty(),
-        offJson = provider?.reasoningParamsOffJson.orEmpty(),
-        onOnJsonChange = onReasoningOnJsonChange,
-        onOffJsonChange = onReasoningOffJsonChange,
+    AiActionPreference(
+        id = "more_params",
+        titleRes = R.string.label_llm_more_params,
         index = itemIndex,
-        count = itemCount
+        count = itemCount,
+        onClick = onShowAdvancedParams
     )
     AiButtonRow(uiMode = uiMode) {
         AiButton(uiMode = uiMode, textRes = R.string.btn_llm_add_profile, onClick = onAddProfile)
@@ -387,7 +319,7 @@ internal fun CustomLlmSection(
 }
 
 @Composable
-private fun ReasoningSection(
+internal fun ReasoningSection(
     uiMode: BibiUiMode,
     threshold: Int,
     showParams: Boolean,
@@ -487,12 +419,15 @@ internal fun sfFreeLlmPrimaryItemCount(
     val showCustomReasoningParams = sfModel.isNotBlank() && !staticModels.contains(sfModel)
     val showReasoning =
         LlmVendor.SF_FREE.supportsReasoningControl(sfModel) || showCustomReasoningParams
+    val showAdvancedParams = llmAdvancedParamsVisible(
+        hasTemperature = !sfUseFreeService,
+        hasReasoning = showReasoning
+    )
     return 1 +
         (if (!sfUseFreeService) 1 else 0) +
         1 +
         (if (showCustomModel) 1 else 0) +
-        (if (!sfUseFreeService) 1 else 0) +
-        (if (showReasoning) 1 else 0)
+        (if (showAdvancedParams) 1 else 0)
 }
 
 internal fun builtinLlmPrimaryItemCount(
@@ -505,10 +440,9 @@ internal fun builtinLlmPrimaryItemCount(
     val isPresetModel = displayModel.isNotBlank() && presetModels.contains(displayModel)
     val showCustomModel =
         customModelInputVisible || (displayModel.isNotBlank() && !isPresetModel)
-    val isBuiltinModel = displayModel.isNotBlank() && vendor.models.contains(displayModel)
-    val showCustomReasoningParams = displayModel.isNotBlank() && !isBuiltinModel
-    val showReasoning = vendor.supportsReasoningControl(displayModel) || showCustomReasoningParams
-    return 3 + (if (showCustomModel) 1 else 0) + (if (showReasoning) 1 else 0)
+    return 3 + (if (showCustomModel) 1 else 0)
 }
 
-internal fun customLlmPrimaryItemCount(customModelInputVisible: Boolean): Int = 7 + (if (customModelInputVisible) 1 else 0)
+internal fun customLlmPrimaryItemCount(customModelInputVisible: Boolean): Int = 6 + (if (customModelInputVisible) 1 else 0)
+
+internal fun llmAdvancedParamsVisible(hasTemperature: Boolean, hasReasoning: Boolean): Boolean = hasTemperature || hasReasoning
