@@ -11,6 +11,9 @@
     <string name="label_llm_prompt_presets">潤飾提示詞預設</string>
     <string name="btn_add_preset">新增預設</string>
     <string name="btn_delete_preset">刪除預設</string>
+    <string name="btn_llm_edit_prompt_fullscreen">全螢幕編輯</string>
+    <string name="title_llm_prompt_editor">編輯潤飾提示詞</string>
+    <string name="btn_llm_prompt_editor_done">完成</string>
     <string name="label_llm_choose_profile">選擇自訂供應商</string>
     <string name="label_llm_profile_name">設定檔名稱</string>
     <string name="btn_llm_add_profile">新增設定檔</string>

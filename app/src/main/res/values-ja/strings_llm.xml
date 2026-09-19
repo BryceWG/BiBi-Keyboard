@@ -12,6 +12,9 @@
     <string name="label_llm_prompt_presets">校正プロンプトプリセット</string>
     <string name="btn_add_preset">プリセットとして追加</string>
     <string name="btn_delete_preset">プリセットを削除</string>
+    <string name="btn_llm_edit_prompt_fullscreen">全画面で編集</string>
+    <string name="title_llm_prompt_editor">校正プロンプトを編集</string>
+    <string name="btn_llm_prompt_editor_done">完了</string>
     <string name="label_llm_choose_profile">カスタムベンダーを選択</string>
     <string name="label_llm_profile_name">プロファイル名</string>
     <string name="btn_llm_add_profile">プロファイルを追加</string>

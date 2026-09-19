@@ -67,9 +67,11 @@ internal fun AiTextField(
     onValueChange: (String) -> Unit,
     label: String,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     password: Boolean = false,
     singleLine: Boolean = true,
     minLines: Int = 1,
+    maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     keyboardType: KeyboardType = KeyboardType.Text,
     index: Int = 0,
     count: Int = 1
@@ -80,9 +82,11 @@ internal fun AiTextField(
         onValueChange = onValueChange,
         label = label,
         modifier = modifier,
+        enabled = enabled,
         password = password,
         singleLine = singleLine,
         minLines = minLines,
+        maxLines = maxLines,
         keyboardType = keyboardType,
         index = index,
         count = count

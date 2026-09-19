@@ -11,6 +11,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +31,7 @@ import com.brycewg.asrkb.asr.LlmPostProcessor
 import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.settings.ai.AiPostSettingsViewModel
+import com.brycewg.asrkb.ui.settings.asr.LargePromptEditorActivity
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
@@ -59,6 +62,15 @@ fun AiSettingsScreen(
     val activeProfile by viewModel.activeLlmProvider.collectAsStateWithLifecycle()
     val promptPresets by viewModel.promptPresets.collectAsStateWithLifecycle()
     val activePromptPreset by viewModel.activePromptPreset.collectAsStateWithLifecycle()
+    val promptEditorLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            result.data?.getStringExtra(LargePromptEditorActivity.EXTRA_RESULT_TEXT)?.let { text ->
+                viewModel.updateActivePromptPreset(prefs) { it.copy(content = text) }
+            }
+        }
+    }
     val localState = rememberAiSettingsLocalState(prefs, selectedVendor, builtinConfig)
 
     var llmTestJob by remember { mutableStateOf<Job?>(null) }
@@ -321,6 +333,12 @@ fun AiSettingsScreen(
                 onShowProfileDialog = pickerActions::showProfileDialog,
                 onShowCustomModelDialog = pickerActions::showCustomModelDialog,
                 onShowPromptPresetDialog = pickerActions::showPromptPresetDialog,
+                onOpenPromptContentEditor = { content ->
+                    promptEditorLauncher.launch(
+                        Intent(context, LargePromptEditorActivity::class.java)
+                            .putExtra(LargePromptEditorActivity.EXTRA_TEXT, content)
+                    )
+                },
                 onShowBuiltinModelsPicker = pickerActions::showBuiltinModelsPicker,
                 onShowCustomModelsPicker = pickerActions::showCustomModelsPicker,
                 onFetchModels = ::fetchModels,

@@ -336,6 +336,7 @@ internal fun AiSettingsRouteContent(
                         onContentChange = { value ->
                             viewModel.updateActivePromptPreset(prefs) { it.copy(content = value) }
                         },
+                        onOpenContentEditor = { onOpenPromptContentEditor(activePromptPreset?.content.orEmpty()) },
                         onAddPreset = {
                             if (viewModel.addPromptPreset(prefs, untitledPreset, "")) {
                                 onFocusPromptTitleAfterAddChange(true)

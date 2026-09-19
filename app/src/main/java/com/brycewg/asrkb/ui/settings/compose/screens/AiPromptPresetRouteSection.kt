@@ -28,6 +28,7 @@ internal fun AiPromptPresetRouteSection(
     onTitleChange: (String) -> Unit,
     onSkillChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
+    onOpenContentEditor: () -> Unit,
     onAddPreset: () -> Unit,
     onDeletePreset: () -> Unit
 ) {
@@ -41,6 +42,7 @@ internal fun AiPromptPresetRouteSection(
             onTitleChange = onTitleChange,
             onSkillChange = onSkillChange,
             onContentChange = onContentChange,
+            onOpenContentEditor = onOpenContentEditor,
             onAddPreset = onAddPreset,
             onDeletePreset = onDeletePreset
         )
@@ -57,6 +59,7 @@ internal fun PromptPresetSection(
     onTitleChange: (String) -> Unit,
     onSkillChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
+    onOpenContentEditor: () -> Unit,
     onAddPreset: () -> Unit,
     onDeletePreset: () -> Unit
 ) {
@@ -99,11 +102,22 @@ internal fun PromptPresetSection(
         value = preset?.content.orEmpty(),
         onValueChange = onContentChange,
         label = stringResource(R.string.label_llm_prompt),
+        enabled = preset?.content.orEmpty().lineCount() < 15,
         singleLine = false,
         minLines = 5,
+        maxLines = 15,
         index = itemIndex,
         count = itemCount
     )
+    if (preset?.content.orEmpty().lineCount() >= 15) {
+        AiButtonRow(uiMode = uiMode) {
+            AiButton(
+                uiMode = uiMode,
+                textRes = R.string.btn_llm_edit_prompt_fullscreen,
+                onClick = onOpenContentEditor
+            )
+        }
+    }
     AiButtonRow(uiMode = uiMode) {
         AiButton(
             uiMode = uiMode,
@@ -117,3 +131,5 @@ internal fun PromptPresetSection(
         )
     }
 }
+
+private fun String.lineCount(): Int = count { it == '\n' } + 1

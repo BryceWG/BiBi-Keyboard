@@ -11,6 +11,9 @@
     <string name="label_llm_prompt_presets">Polish Prompt Preset</string>
     <string name="btn_add_preset">Add Preset</string>
     <string name="btn_delete_preset">Delete Preset</string>
+    <string name="btn_llm_edit_prompt_fullscreen">Edit full screen</string>
+    <string name="title_llm_prompt_editor">Edit Polish Prompt</string>
+    <string name="btn_llm_prompt_editor_done">Done</string>
     <string name="label_llm_choose_profile">Select Custom Vendor</string>
     <string name="label_llm_profile_name">Profile name</string>
     <string name="btn_llm_add_profile">Add profile</string>

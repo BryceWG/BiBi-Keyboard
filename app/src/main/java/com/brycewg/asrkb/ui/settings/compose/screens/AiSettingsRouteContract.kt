@@ -84,6 +84,7 @@ internal data class AiSettingsRouteActions(
     val onShowProfileDialog: () -> Unit,
     val onShowCustomModelDialog: () -> Unit,
     val onShowPromptPresetDialog: () -> Unit,
+    val onOpenPromptContentEditor: (String) -> Unit,
     val onShowBuiltinModelsPicker: (LlmVendor, List<String>) -> Unit,
     val onShowCustomModelsPicker: (List<String>) -> Unit,
     val onFetchModels: (String, String, (List<String>) -> Unit) -> Unit,

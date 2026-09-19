@@ -11,6 +11,9 @@
     <string name="label_llm_prompt_presets">润色 Prompt 预设</string>
     <string name="btn_add_preset">新增预设</string>
     <string name="btn_delete_preset">删除预设</string>
+    <string name="btn_llm_edit_prompt_fullscreen">全屏编辑</string>
+    <string name="title_llm_prompt_editor">编辑润色 Prompt</string>
+    <string name="btn_llm_prompt_editor_done">完成</string>
     <string name="label_llm_choose_profile">选择自定义供应商</string>
     <string name="label_llm_profile_name">配置名称</string>
     <string name="btn_llm_add_profile">新增配置</string>
