@@ -7,6 +7,7 @@
     <string name="label_llm_api_key">APIキー</string>
     <string name="label_llm_model">モデル名（任意）</string>
     <string name="label_llm_temperature">温度</string>
+    <string name="label_llm_more_params">その他のパラメータ</string>
     <string name="label_llm_prompt">後処理プロンプト（処理されたテキストのみ出力）</string>
     <string name="label_llm_prompt_title">プロンプトプリセットタイトル</string>
     <string name="label_llm_prompt_presets">校正プロンプトプリセット</string>

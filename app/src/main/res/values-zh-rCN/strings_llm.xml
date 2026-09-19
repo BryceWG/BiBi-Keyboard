@@ -6,6 +6,7 @@
     <string name="label_llm_api_key">API Key</string>
     <string name="label_llm_model">模型名称（可选）</string>
     <string name="label_llm_temperature">温度</string>
+    <string name="label_llm_more_params">更多参数</string>
     <string name="label_llm_prompt">后处理 Prompt 内容（仅输出处理后的文本）</string>
     <string name="label_llm_prompt_title">Prompt 预设标题</string>
     <string name="label_llm_prompt_presets">润色 Prompt 预设</string>

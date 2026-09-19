@@ -6,6 +6,7 @@
     <string name="label_llm_api_key">مفتاح API</string>
     <string name="label_llm_model">اسم النموذج (اختياري)</string>
     <string name="label_llm_temperature">درجة الحرارة</string>
+    <string name="label_llm_more_params">مزيد من المعلمات</string>
     <string name="label_llm_prompt">موجّه المعالجة اللاحقة (أخرج النص المعالَج فقط)</string>
     <string name="label_llm_prompt_title">عنوان موجّه مُعدّ مسبقاً</string>
     <string name="label_llm_prompt_presets">موجّه التلميع المُعد مسبقاً</string>
