@@ -196,7 +196,7 @@ internal object PromptSelector {
                 classifier.cancel()
                 throw t
             }
-            val matchedIndex = result.choice?.let { candidatePromptIds(candidates).indexOf(it.trim()) }
+            val matchedIndex = result.choice?.let { candidatePromptIds(candidates.size).indexOf(it.trim()) }
             val matched = matchedIndex?.takeIf { it >= 0 }?.let(candidates::get)
             if (matched == null) {
                 return PromptSelectionOutcome(
