@@ -21,10 +21,11 @@ internal fun AiPostProcessSection(
     onPostProcessChange: (Boolean) -> Unit,
     onTypewriterChange: (Boolean) -> Unit,
     onSkipUnderCharsChange: (Int) -> Unit,
-    onSkipUnderCharsFinished: () -> Unit
+    onSkipUnderCharsFinished: () -> Unit,
+    onOpenPromptSelection: () -> Unit
 ) {
     AiSection(uiMode = uiMode, titleRes = R.string.section_post_process_scope) {
-        val itemCount = if (postProcessEnabled) 3 else 1
+        val itemCount = if (postProcessEnabled) 4 else 1
         AiSwitchPreference(
             id = "post_process_enabled",
             titleRes = R.string.label_ai_post_process_enabled,
@@ -34,11 +35,18 @@ internal fun AiPostProcessSection(
             onCheckedChange = onPostProcessChange
         )
         if (postProcessEnabled) {
+            AiActionPreference(
+                id = "prompt_selection_entry",
+                titleRes = R.string.title_prompt_selection,
+                index = 1,
+                count = itemCount,
+                onClick = onOpenPromptSelection
+            )
             AiSwitchPreference(
                 id = "postproc_typewriter",
                 titleRes = R.string.label_postproc_typewriter_enabled,
                 checked = typewriterEnabled,
-                index = 1,
+                index = 2,
                 count = itemCount,
                 onCheckedChange = onTypewriterChange
             )
@@ -49,7 +57,7 @@ internal fun AiPostProcessSection(
                 valueRange = 0f..100f,
                 steps = 19,
                 uiMode = uiMode,
-                index = 2,
+                index = 3,
                 count = itemCount,
                 onValueChange = { value ->
                     onSkipUnderCharsChange(value.toInt().coerceIn(0, 100))

@@ -46,6 +46,7 @@ private const val AI_TAG = "AiSettingsScreen"
 fun AiSettingsScreen(
     uiMode: BibiUiMode,
     onBack: () -> Unit,
+    onOpenPromptSelection: () -> Unit,
     actions: SettingsActionController
 ) {
     val context = LocalContext.current
@@ -299,6 +300,7 @@ fun AiSettingsScreen(
                 onFocusProfileNameAfterAddChange = { localState.focusProfileNameAfterAdd = it },
                 onFocusPromptTitleAfterAddChange = { localState.focusPromptTitleAfterAdd = it },
                 onMessage = ::showAiMessage,
+                onOpenPromptSelection = onOpenPromptSelection,
                 onRefreshSfState = localState::refreshSfState,
                 onSendRefreshBroadcast = ::sendRefreshBroadcast,
                 onShowExplainedSwitch = { current, target, titleRes, offDescRes, onDescRes, preferenceKey, write, afterWrite ->

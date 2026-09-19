@@ -351,6 +351,19 @@ enum class LlmVendor(
         )
     ),
 
+    /** TypeSafe Jev decision model; available only to automatic prompt selection. */
+    TYPESAFE(
+        id = "typesafe",
+        displayNameResId = R.string.llm_vendor_typesafe,
+        endpoint = "",
+        defaultModel = "jev-latest",
+        models = listOf("jev-latest"),
+        registerUrl = "https://typesafe.ai/",
+        guideUrl = "https://typesafe.ai/",
+        temperatureMin = 0f,
+        temperatureMax = 0f
+    ),
+
     /** Custom - user-defined OpenAI-compatible API */
     CUSTOM(
         id = "custom",
@@ -369,6 +382,9 @@ enum class LlmVendor(
     /** Whether this vendor uses built-in endpoint (not user-configurable) */
     val hasBuiltinEndpoint: Boolean
         get() = this != CUSTOM && endpoint.isNotBlank()
+
+    val classifierOnly: Boolean
+        get() = this == TYPESAFE
 
     /** Check if the current model supports reasoning control */
     fun supportsReasoningControl(model: String): Boolean = when (reasoningMode) {
@@ -391,6 +407,7 @@ enum class LlmVendor(
             OHMYGPT.id -> OHMYGPT
             FIREWORKS.id -> FIREWORKS
             DASHSCOPE.id -> DASHSCOPE
+            TYPESAFE.id -> TYPESAFE
             CUSTOM.id -> CUSTOM
             else -> SF_FREE
         }
@@ -412,6 +429,7 @@ enum class LlmVendor(
             CEREBRAS, // 10. International - free tier
             FIREWORKS, // 11. International - fast inference
             OHMYGPT, // 12. Relay platform
+            TYPESAFE, // 13. Decision-only classifier
             CUSTOM // 13. Custom
         )
 

@@ -26,7 +26,7 @@ internal object PrefsBackup {
 
     fun exportJsonString(prefs: Prefs): String = prefs.run {
         val o = org.json.JSONObject()
-        o.put("_version", 1)
+        o.put("_version", 2)
         o.put(KEY_APP_KEY, appKey)
         o.put(KEY_ACCESS_KEY, accessKey)
         o.put(KEY_TRIM_FINAL_TRAILING_PUNCT, trimFinalTrailingPunct)
@@ -126,6 +126,19 @@ internal object PrefsBackup {
         o.put(KEY_LLM_PROMPT, llmPrompt)
         o.put(KEY_LLM_PROMPT_PRESETS, promptPresetsJson)
         o.put(KEY_LLM_PROMPT_ACTIVE_ID, activePromptId)
+        // 自动选择提示词（润色模式）
+        o.put(KEY_PROMPT_AUTO_SELECT_ENABLED, promptAutoSelectEnabled)
+        try {
+            o.put(KEY_PROMPT_SELECT_CANDIDATE_IDS, getPromptSelectionCandidateIds())
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to export prompt selection candidates", t)
+        }
+        o.put(KEY_PROMPT_SELECTOR_MODEL, getPrefString(KEY_PROMPT_SELECTOR_MODEL, ""))
+        o.put(KEY_JEV_TYPESAFE_API_KEY, jevTypesafeApiKey)
+        o.put(KEY_JEV_PROVIDER, jevClassifierProvider.id)
+        o.put(KEY_JEV_OPENROUTER_API_KEY, jevOpenRouterApiKey)
+        o.put(KEY_JEV_CLOUDFLARE_API_KEY, jevCloudflareApiKey)
+        o.put(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, jevCloudflareAccountId)
         // 语音预设
         o.put(KEY_SPEECH_PRESETS, speechPresetsJson)
         o.put(KEY_SPEECH_PRESET_ACTIVE_ID, activeSpeechPresetId)
@@ -157,6 +170,7 @@ internal object PrefsBackup {
             Log.w(TAG, "Failed to export usage stats", t)
         }
         // 历史记录纳入备份范围
+        // V2 起统一写入完整历史；导入端仍兼容旧版备份格式。
         o.put(KEY_ASR_HISTORY_JSON, AsrHistoryStore(appContext).exportJson())
         try {
             o.put(KEY_FIRST_USE_DATE, firstUseDate)
@@ -287,6 +301,17 @@ internal object PrefsBackup {
             fun optString(key: String, default: String? = null): String? = if (o.has(key)) o.optString(key) else default
             fun optFloat(key: String, default: Float? = null): Float? = if (o.has(key)) o.optDouble(key).toFloat() else default
             fun optInt(key: String, default: Int? = null): Int? = if (o.has(key)) o.optInt(key) else default
+
+            val historyCandidates = listOfNotNull(
+                optString(KEY_ASR_HISTORY_V2_JSON),
+                optString(KEY_ASR_HISTORY_JSON)
+            )
+            val importedHistory = historyCandidates.firstOrNull { candidate ->
+                runCatching { AsrHistoryStore(appContext).validateJson(candidate) }.isSuccess
+            }
+            if (historyCandidates.isNotEmpty() && importedHistory == null) {
+                throw IllegalArgumentException("Invalid ASR history backup")
+            }
 
             optString(KEY_APP_KEY)?.let { appKey = it }
             optString(KEY_ACCESS_KEY)?.let { accessKey = it }
@@ -446,6 +471,23 @@ internal object PrefsBackup {
             if (importedPresets.isNullOrBlank()) {
                 optString(KEY_LLM_PROMPT)?.let { llmPrompt = it }
             }
+            // 自动选择提示词（润色模式）
+            optBool(KEY_PROMPT_AUTO_SELECT_ENABLED)?.let { promptAutoSelectEnabled = it }
+            PromptSelectionStore.importCandidateIdsIfPresent(
+                this,
+                optString(KEY_PROMPT_SELECT_CANDIDATE_IDS)
+            )
+            PromptSelectionStore.importModelRefIfPresent(
+                this,
+                optString(KEY_PROMPT_SELECTOR_MODEL)
+            )
+            optString(KEY_JEV_TYPESAFE_API_KEY)?.let { jevTypesafeApiKey = it }
+            optString(KEY_JEV_PROVIDER)?.let { providerId ->
+                JevClassifierProvider.fromId(providerId)?.let { jevClassifierProvider = it }
+            }
+            optString(KEY_JEV_OPENROUTER_API_KEY)?.let { jevOpenRouterApiKey = it }
+            optString(KEY_JEV_CLOUDFLARE_API_KEY)?.let { jevCloudflareApiKey = it }
+            optString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID)?.let { jevCloudflareAccountId = it }
             // 语音预设
             optString(KEY_SPEECH_PRESETS)?.let { speechPresetsJson = it }
             optString(KEY_SPEECH_PRESET_ACTIVE_ID)?.let { activeSpeechPresetId = it }
@@ -522,7 +564,7 @@ internal object PrefsBackup {
             // 使用统计（可选）
             optString(KEY_USAGE_STATS_JSON)?.let { setPrefString(KEY_USAGE_STATS_JSON, it) }
             // 历史记录纳入恢复范围
-            optString(KEY_ASR_HISTORY_JSON)?.let { AsrHistoryStore(appContext).replaceAllFromJson(it) }
+            importedHistory?.let { AsrHistoryStore(appContext).replaceAllFromJson(it) }
             optString(KEY_FIRST_USE_DATE)?.let { firstUseDate = it }
             optBool(KEY_SHOWN_ONBOARDING_GUIDE_V2_ONCE)?.let { hasShownOnboardingGuideV2Once = it }
             // FireRedASR（本地 ASR）

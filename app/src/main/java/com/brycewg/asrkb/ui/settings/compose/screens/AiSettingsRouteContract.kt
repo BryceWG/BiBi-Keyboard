@@ -74,6 +74,7 @@ internal data class AiSettingsRouteActions(
     val onFocusProfileNameAfterAddChange: (Boolean) -> Unit,
     val onFocusPromptTitleAfterAddChange: (Boolean) -> Unit,
     val onMessage: (Int) -> Unit,
+    val onOpenPromptSelection: () -> Unit,
     val onRefreshSfState: () -> Unit,
     val onSendRefreshBroadcast: () -> Unit,
     val onShowExplainedSwitch: AiExplainedSwitchHandler,

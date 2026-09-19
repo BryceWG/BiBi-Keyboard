@@ -483,6 +483,11 @@ internal class FloatingAsrInteractionController(
             } catch (_: Throwable) {
                 null
             }
+            val promptSelection = try {
+                asrSessionManager.getLastPromptSelection()
+            } catch (_: Throwable) {
+                null
+            }
             val vendorForRecord = try {
                 asrSessionManager.peekLastFinalVendorForStats()
             } catch (t: Throwable) {
@@ -536,7 +541,8 @@ internal class FloatingAsrInteractionController(
                                 aiPostStatus = aiPostStatus,
                                 llmVendorId = llmVendorId,
                                 charCount = chars,
-                                timingTrace = timingTrace
+                                timingTrace = timingTrace,
+                                promptSelection = promptSelection
                             )
                         )
                         timingTrace?.let { trace ->

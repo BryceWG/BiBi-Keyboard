@@ -40,6 +40,11 @@ sealed interface BibiSettingsRoute {
         override val id: String = "ai"
     }
 
+    /** AI 设置下的“润色模式（自动选择提示词）”独立页面。 */
+    data object PromptSelection : BibiSettingsRoute {
+        override val id: String = "prompt_selection"
+    }
+
     data object Backup : BibiSettingsRoute {
         override val id: String = "backup"
     }
@@ -82,6 +87,7 @@ sealed interface BibiSettingsRoute {
             Floating.id -> Floating
             Asr.id -> Asr
             Ai.id -> Ai
+            PromptSelection.id -> PromptSelection
             Backup.id -> Backup
             Other.id -> Other
             About.id -> About

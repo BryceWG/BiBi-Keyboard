@@ -83,7 +83,8 @@ internal fun AiSettingsRouteContent(
                             onSkipUnderCharsChange(next)
                             prefs.postprocSkipUnderChars = next
                         },
-                        onSkipUnderCharsFinished = {}
+                        onSkipUnderCharsFinished = {},
+                        onOpenPromptSelection = onOpenPromptSelection
                     )
                 }
 
@@ -125,6 +126,7 @@ internal fun AiSettingsRouteContent(
                 item("post_process_model") {
                     AiPostProcessModelSection(
                         uiMode = uiMode,
+                        prefs = prefs,
                         selectedVendor = selectedVendor,
                         selectedVendorName = stringResource(selectedVendor.displayNameResId),
                         builtinConfig = builtinConfig,
@@ -327,6 +329,9 @@ internal fun AiSettingsRouteContent(
                         },
                         onTitleChange = { value ->
                             viewModel.updateActivePromptPreset(prefs) { it.copy(title = value) }
+                        },
+                        onSkillChange = { value ->
+                            viewModel.updateActivePromptPreset(prefs) { it.copy(skill = value) }
                         },
                         onContentChange = { value ->
                             viewModel.updateActivePromptPreset(prefs) { it.copy(content = value) }

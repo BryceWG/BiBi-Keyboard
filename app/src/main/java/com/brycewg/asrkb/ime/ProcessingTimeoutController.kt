@@ -7,6 +7,7 @@ import com.brycewg.asrkb.asr.LOCAL_MODEL_READY_WAIT_MAX_MS
 import com.brycewg.asrkb.asr.ProgressiveRetryStatusOwner
 import com.brycewg.asrkb.asr.awaitLocalAsrReady
 import com.brycewg.asrkb.asr.isLocalAsrVendor
+import com.brycewg.asrkb.asr.promptSelectionSessionSlackMs
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
@@ -56,7 +57,8 @@ internal class ProcessingTimeoutController(
             backupStatsSnapshot = backupSnapshot,
             sensitivityTier = safeBackupSensitivityTier(),
             primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
-            pendingRetryCount = safePendingRetryCount()
+            pendingRetryCount = safePendingRetryCount(),
+            extraAiBudgetMs = promptSelectionSessionSlackMs(prefs)
         )
 
         val shouldDeferForLocalModel = shouldDeferForLocalModel(backupEngine != null)

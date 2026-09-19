@@ -203,7 +203,13 @@ private fun SettingsRouteContent(
         BibiSettingsRoute.Ai -> AiSettingsScreen(
             uiMode = uiState.uiMode,
             onBack = { onPopRoute() },
+            onOpenPromptSelection = { onPushRoute(BibiSettingsRoute.PromptSelection) },
             actions = actions
+        )
+
+        BibiSettingsRoute.PromptSelection -> PromptSelectionSettingsScreen(
+            uiMode = uiState.uiMode,
+            onBack = { onPopRoute() }
         )
 
         BibiSettingsRoute.Asr -> AsrSettingsScreen(

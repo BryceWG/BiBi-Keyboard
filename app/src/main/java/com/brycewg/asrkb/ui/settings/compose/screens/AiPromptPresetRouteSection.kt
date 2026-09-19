@@ -26,6 +26,7 @@ internal fun AiPromptPresetRouteSection(
     onFocusedTitle: () -> Unit,
     onChoosePreset: () -> Unit,
     onTitleChange: (String) -> Unit,
+    onSkillChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
     onAddPreset: () -> Unit,
     onDeletePreset: () -> Unit
@@ -38,6 +39,7 @@ internal fun AiPromptPresetRouteSection(
             onFocusedTitle = onFocusedTitle,
             onChoosePreset = onChoosePreset,
             onTitleChange = onTitleChange,
+            onSkillChange = onSkillChange,
             onContentChange = onContentChange,
             onAddPreset = onAddPreset,
             onDeletePreset = onDeletePreset
@@ -53,6 +55,7 @@ internal fun PromptPresetSection(
     onFocusedTitle: () -> Unit,
     onChoosePreset: () -> Unit,
     onTitleChange: (String) -> Unit,
+    onSkillChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
     onAddPreset: () -> Unit,
     onDeletePreset: () -> Unit
@@ -65,7 +68,7 @@ internal fun PromptPresetSection(
         }
     }
     var itemIndex = 0
-    val itemCount = 3
+    val itemCount = 4
     AiValuePreference(
         titleRes = R.string.label_llm_prompt_presets,
         value = preset?.title.orEmpty().ifBlank { stringResource(R.string.untitled_preset) },
@@ -80,6 +83,14 @@ internal fun PromptPresetSection(
         onValueChange = onTitleChange,
         label = stringResource(R.string.label_llm_prompt_title),
         modifier = Modifier.focusRequester(focusRequester),
+        index = itemIndex++,
+        count = itemCount
+    )
+    AiTextField(
+        uiMode = uiMode,
+        value = preset?.skill.orEmpty(),
+        onValueChange = onSkillChange,
+        label = stringResource(R.string.label_llm_prompt_skill),
         index = itemIndex++,
         count = itemCount
     )

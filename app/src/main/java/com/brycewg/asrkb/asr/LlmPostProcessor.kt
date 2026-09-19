@@ -9,6 +9,8 @@ import android.util.Log
 import com.brycewg.asrkb.BuildConfig
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
+import com.brycewg.asrkb.store.ResolvedLlmModelConfig
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 import com.brycewg.asrkb.util.TextSanitizer
@@ -180,7 +182,9 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         // LLM 请求耗时（毫秒）；未尝试时为 0
         val llmMs: Long = 0,
         // 实际请求使用的 LLM 渠道；未尝试时为 null。
-        val llmVendorId: String? = null
+        val llmVendorId: String? = null,
+        // 自动选择提示词的结果快照；未启用自动选择时为 null。
+        val promptSelectionStatus: PromptSelectionStatus? = null
     )
 
     /**
@@ -283,31 +287,26 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
      */
     private fun getActiveConfig(prefs: Prefs, inputText: String = ""): LlmRequestConfig {
         val vendor = prefs.llmVendor
-
-        // SiliconFlow 免费服务特殊处理
         if (vendor == LlmVendor.SF_FREE && !prefs.sfFreeLlmUsePaidKey) {
-            val model = prefs.sfFreeLlmModel
             val effective = prefs.getEffectiveLlmConfig()
             return buildRequestConfig(
                 apiKey = BuildConfig.SF_FREE_API_KEY,
                 endpoint = Prefs.SF_CHAT_COMPLETIONS_ENDPOINT,
-                model = model,
+                model = prefs.sfFreeLlmModel,
                 temperature = Prefs.DEFAULT_LLM_TEMPERATURE.toDouble(),
                 vendor = vendor,
                 reasoningCharThreshold = prefs.getLlmVendorReasoningCharThreshold(vendor),
                 inputText = inputText,
                 useCustomReasoningParams = effective?.useCustomReasoningParams ?: false,
-                reasoningParamsOnJson =
-                effective?.reasoningParamsOnJson ?: Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_ON_JSON,
-                reasoningParamsOffJson =
-                effective?.reasoningParamsOffJson ?: Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_OFF_JSON,
+                reasoningParamsOnJson = effective?.reasoningParamsOnJson
+                    ?: Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_ON_JSON,
+                reasoningParamsOffJson = effective?.reasoningParamsOffJson
+                    ?: Prefs.DEFAULT_CUSTOM_REASONING_PARAMS_OFF_JSON,
                 capabilityIdentity = vendor.id
             )
         }
 
-        // 使用统一的 getEffectiveLlmConfig
-        val config = prefs.getEffectiveLlmConfig()
-        if (config != null) {
+        prefs.getEffectiveLlmConfig()?.let { config ->
             val customProviderId = if (config.vendor == LlmVendor.CUSTOM) {
                 prefs.getActiveLlmProvider()?.id ?: prefs.activeLlmId.ifBlank { "default" }
             } else {
@@ -328,19 +327,10 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             )
         }
 
-        // 回退到旧的逻辑（兼容性）
         val active = prefs.getActiveLlmProvider()
-        val fallbackEndpoint = if (vendor.hasBuiltinEndpoint) {
-            vendor.endpoint
-        } else {
-            (
-                active?.endpoint
-                    ?: prefs.llmEndpoint
-                )
-        }
         return buildRequestConfig(
             apiKey = active?.apiKey ?: prefs.llmApiKey,
-            endpoint = fallbackEndpoint,
+            endpoint = if (vendor.hasBuiltinEndpoint) vendor.endpoint else active?.endpoint ?: prefs.llmEndpoint,
             model = active?.model ?: prefs.llmModel,
             temperature = (active?.temperature ?: prefs.llmTemperature).toDouble(),
             vendor = vendor,
@@ -360,6 +350,25 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             }
         )
     }
+
+    /** 由已解析的模型配置构造请求配置；推理开关按输入长度实时求值。 */
+    private fun toRequestConfig(
+        prefs: Prefs,
+        resolved: ResolvedLlmModelConfig,
+        inputText: String
+    ): LlmRequestConfig = buildRequestConfig(
+        apiKey = resolved.apiKey,
+        endpoint = resolved.endpoint,
+        model = resolved.model,
+        temperature = resolved.temperature,
+        vendor = resolved.vendor,
+        reasoningCharThreshold = resolved.reasoningCharThreshold,
+        inputText = inputText,
+        useCustomReasoningParams = resolved.useCustomReasoningParams,
+        reasoningParamsOnJson = resolved.reasoningParamsOnJson,
+        reasoningParamsOffJson = resolved.reasoningParamsOffJson,
+        capabilityIdentity = resolved.capabilityIdentity
+    )
 
     /**
      * 解析 URL，自动添加 /chat/completions 后缀
@@ -753,9 +762,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             if (visible.isEmpty()) return
             waitingFirstContent = false
             if (timeoutBudget == null) return
-            val outputDeadlineNs = System.nanoTime() +
-                TimeUnit.MILLISECONDS.toNanos(timeoutBudget.outputMs)
-            applyAbsoluteDeadline(timeout, outputDeadlineNs)
+            val nowNs = System.nanoTime()
+            applyAbsoluteDeadline(timeout, timeoutBudget.callDeadlineNs(nowNs, timeoutBudget.outputMs))
         }
 
         fun flushEvent() {
@@ -1200,12 +1208,13 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         val t0 = elapsedRealtimeMs()
         val startedAtNs = System.nanoTime()
         val firstTokenDeadlineNs = timeoutBudget?.let {
-            startedAtNs + TimeUnit.MILLISECONDS.toNanos(it.firstTokenMs)
+            it.callDeadlineNs(startedAtNs, it.firstTokenMs)
         }
         if (timeoutBudget != null) {
-            val callDeadlineNs = startedAtNs +
-                TimeUnit.MILLISECONDS.toNanos(timeoutBudget.combinedMs)
-            applyAbsoluteDeadline(call.timeout(), callDeadlineNs)
+            applyAbsoluteDeadline(
+                call.timeout(),
+                timeoutBudget.callDeadlineNs(startedAtNs, timeoutBudget.combinedMs)
+            )
         }
         val resp = try {
             call.execute()
@@ -1306,9 +1315,10 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
                 stream.text
             } else {
                 if (timeoutBudget != null) {
-                    val combinedDeadlineNs = startedAtNs +
-                        TimeUnit.MILLISECONDS.toNanos(timeoutBudget.combinedMs)
-                    applyAbsoluteDeadline(source.timeout(), combinedDeadlineNs)
+                    applyAbsoluteDeadline(
+                        source.timeout(),
+                        timeoutBudget.callDeadlineNs(startedAtNs, timeoutBudget.combinedMs)
+                    )
                 }
                 val respText = body.string()
                 responseBodyMs =
@@ -1442,15 +1452,111 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
      * 已探测过则直接返回 false，不产生任何网络请求。
      */
     internal suspend fun prewarmRequestMode(prefs: Prefs): Boolean = withContext(Dispatchers.IO) {
-        val config = getActiveConfig(prefs)
-        if (config.endpoint.isBlank()) return@withContext false
-        if (config.vendor != LlmVendor.CUSTOM && config.model.isBlank()) return@withContext false
-        if (prefs.getLlmRequestMode(config.requestModeCapabilityKey) != null) return@withContext false
+        prewarmRequestModeInternal(prefs, getActiveConfig(prefs))
+    }
+
+    /**
+     * 用指定（已解析）模型配置预热请求模式。
+     *
+     * 自动选择的分类模型可能与润色模型不同，需要各自探测一次，避免停录后的分类窗口里
+     * 额外插入一次探测往返。
+     */
+    internal suspend fun prewarmRequestMode(
+        prefs: Prefs,
+        resolved: ResolvedLlmModelConfig
+    ): Boolean = withContext(Dispatchers.IO) {
+        prewarmRequestModeInternal(prefs, toRequestConfig(prefs, resolved, ""))
+    }
+
+    private suspend fun prewarmRequestModeInternal(
+        prefs: Prefs,
+        config: LlmRequestConfig
+    ): Boolean {
+        if (config.endpoint.isBlank()) return false
+        if (config.vendor != LlmVendor.CUSTOM && config.model.isBlank()) return false
+        if (prefs.getLlmRequestMode(config.requestModeCapabilityKey) != null) return false
         val budget = LlmPostprocessTimeouts.budget(
             reasoningEnabled = false,
             inputCharCount = 0
         )
-        ensureRequestMode(prefs, config, budget).mode != null
+        return ensureRequestMode(prefs, config, budget).mode != null
+    }
+
+    /**
+     * 用指定模型配置发起一次完整的 Chat Completions 调用。
+     *
+     * 供自动选择（PromptSelector）复用：与常规润色共享同一套温度/推理/自定义参数/已探测请求模式。
+     *
+     * @param totalTimeoutMs 整个逻辑请求（含请求模式探测与重试）的硬超时；null 时按输入长度推导两档预算。
+     */
+    internal suspend fun processWithResolvedConfig(
+        prefs: Prefs,
+        resolved: ResolvedLlmModelConfig,
+        systemPrompt: String,
+        userContent: String,
+        totalTimeoutMs: Long? = null
+    ): LlmProcessResult = withContext(Dispatchers.IO) {
+        cancelRequested = false
+        val config = toRequestConfig(prefs, resolved, userContent)
+        val messages = JSONArray().apply {
+            put(
+                JSONObject().apply {
+                    put("role", "system")
+                    put("content", systemPrompt)
+                }
+            )
+            put(
+                JSONObject().apply {
+                    put("role", "user")
+                    put("content", userContent)
+                }
+            )
+        }
+        val t0 = System.nanoTime()
+        val budget = if (totalTimeoutMs != null) {
+            LlmPostprocessTimeouts.totalBudget(
+                totalMs = totalTimeoutMs,
+                reasoningEnabled = config.enableReasoning,
+                inputCharCount = userContent.length,
+                nowNs = t0
+            )
+        } else {
+            LlmPostprocessTimeouts.budget(
+                reasoningEnabled = config.enableReasoning,
+                inputCharCount = userContent.length
+            )
+        }
+        val result = performChatWithRetry(
+            prefs,
+            config,
+            messages,
+            onStreamingUpdate = null,
+            timeoutBudget = budget
+        )
+        val dt = TimeUnit.NANOSECONDS
+            .toMillis((System.nanoTime() - t0).coerceAtLeast(0L))
+            .coerceAtLeast(0L)
+        logLlmCallComplete(result, config, dt)
+        if (!result.ok) {
+            return@withContext LlmProcessResult(
+                false,
+                text = "",
+                errorMessage = result.error,
+                httpCode = result.httpCode,
+                usedAi = false,
+                attempted = true,
+                llmMs = dt,
+                llmVendorId = config.vendor.id
+            )
+        }
+        LlmProcessResult(
+            true,
+            text = result.text.orEmpty(),
+            usedAi = true,
+            attempted = true,
+            llmMs = dt,
+            llmVendorId = config.vendor.id
+        )
     }
 
     /**

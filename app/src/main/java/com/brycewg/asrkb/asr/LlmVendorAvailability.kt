@@ -50,6 +50,13 @@ internal fun isLlmVendorConfigured(prefs: Prefs, vendor: LlmVendor): Boolean = t
                 provider.model.isNotBlank()
         }
 
+        LlmVendor.TYPESAFE -> when (prefs.jevClassifierProvider) {
+            com.brycewg.asrkb.store.JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()
+            com.brycewg.asrkb.store.JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
+            com.brycewg.asrkb.store.JevClassifierProvider.CLOUDFLARE ->
+                prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
+        }
+
         else -> prefs.getLlmVendorApiKey(vendor).isNotBlank()
     }
 } catch (t: Throwable) {

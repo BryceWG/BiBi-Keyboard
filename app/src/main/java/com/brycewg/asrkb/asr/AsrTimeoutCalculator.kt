@@ -79,7 +79,13 @@ object AsrTimeoutCalculator {
         backupStatsSnapshot: AsrRuntimeVendorSnapshot? = null,
         sensitivityTier: Int = 1,
         primaryStreaming: Boolean = true,
-        pendingRetryCount: Int = 0
+        pendingRetryCount: Int = 0,
+        /**
+         * AI 阶段额外的固定预算（例如自动选择提示词的分类窗口）。
+         *
+         * 该会话级熔断同时覆盖识别与 AI 后处理；不追加这段预算会直接挤占润色时间。
+         */
+        extraAiBudgetMs: Long = 0L
     ): Long {
         val primaryTimeoutMs = calculateProcessingTimeoutMs(
             audioMs = audioMs,
@@ -92,7 +98,7 @@ object AsrTimeoutCalculator {
             primaryStatsSnapshot = primaryStatsSnapshot
         )
         val primaryTimeoutWithRetriesMs = saturatedAdd(primaryTimeoutMs, retryAllowanceMs)
-        return when (backupStrategy) {
+        val baseTimeoutMs = when (backupStrategy) {
             AsrParallelEngineDecision.UseParallel -> {
                 val backupProcessingTimeoutMs = calculateProcessingTimeoutMs(
                     audioMs = audioMs,
@@ -137,6 +143,7 @@ object AsrTimeoutCalculator {
             AsrParallelEngineDecision.UsePrimaryOnly,
             null -> primaryTimeoutWithRetriesMs
         }
+        return baseTimeoutMs + extraAiBudgetMs.coerceAtLeast(0L)
     }
 
     internal fun calculateBackupSwitchPlan(

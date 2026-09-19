@@ -91,16 +91,21 @@ internal fun AiTextField(
 
 @Composable
 internal fun AiBodyText(uiMode: BibiUiMode, textRes: Int) {
+    AiBodyText(uiMode = uiMode, text = stringResource(textRes))
+}
+
+@Composable
+internal fun AiBodyText(uiMode: BibiUiMode, text: String) {
     when (uiMode) {
         BibiUiMode.Material -> Text(
-            text = stringResource(textRes),
+            text = text,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)
         )
 
         BibiUiMode.Miuix -> MiuixText(
-            text = stringResource(textRes),
+            text = text,
             color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
             style = MiuixTheme.textStyles.body2,
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp)

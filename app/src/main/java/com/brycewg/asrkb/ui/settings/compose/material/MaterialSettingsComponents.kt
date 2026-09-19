@@ -192,7 +192,7 @@ private fun MaterialEntryHeadline(entry: SettingsEntry) {
         MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_CONTENT_ALPHA)
     }
     Text(
-        text = stringResource(entry.titleRes),
+        text = entry.title ?: stringResource(entry.titleRes),
         color = color,
         style = MaterialTheme.typography.bodyLarge
     )

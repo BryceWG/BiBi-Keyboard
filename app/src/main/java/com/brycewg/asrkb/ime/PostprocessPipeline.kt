@@ -6,6 +6,7 @@ import android.view.inputmethod.InputConnection
 import com.brycewg.asrkb.asr.LlmPostProcessor
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 import com.brycewg.asrkb.util.AsrFinalFilters
@@ -28,7 +29,8 @@ internal class PostprocessPipeline(
         val aiUsed: Boolean,
         val aiPostMs: Long,
         val aiPostStatus: AsrHistoryStore.AiPostStatus,
-        val llmVendorId: String?
+        val llmVendorId: String?,
+        val promptSelection: PromptSelectionStatus?
     )
 
     suspend fun process(
@@ -37,7 +39,9 @@ internal class PostprocessPipeline(
         isCancelled: () -> Boolean,
         onFinalReady: () -> Unit,
         onPostprocFailed: () -> Unit,
-        aiTimingObserver: AsrFinalFilters.AiPostprocessTimingObserver? = null
+        aiTimingObserver: AsrFinalFilters.AiPostprocessTimingObserver? = null,
+        promptSelectionMode: AsrFinalFilters.PromptSelectionMode =
+            AsrFinalFilters.PromptSelectionMode.DISABLED
     ): Result? {
         val rawText = try {
             if (AsrFinalFilters.shouldTrimTrailingPunctAndEmoji(prefs, text)) {
@@ -96,7 +100,9 @@ internal class PostprocessPipeline(
                 text,
                 llmPostProcessor,
                 onStreamingUpdate = onStreamingUpdate,
-                aiTimingObserver = aiTimingObserver
+                aiTimingObserver = aiTimingObserver,
+                promptSelectionMode = promptSelectionMode,
+                isCancelled = isCancelled
             )
         } catch (t: Throwable) {
             Log.e(logTag, "applyWithAi failed", t)
@@ -199,7 +205,8 @@ internal class PostprocessPipeline(
             aiUsed = aiUsed,
             aiPostMs = aiPostMs,
             aiPostStatus = aiPostStatus,
-            llmVendorId = res.llmVendorId
+            llmVendorId = res.llmVendorId,
+            promptSelection = res.promptSelectionStatus
         )
     }
 

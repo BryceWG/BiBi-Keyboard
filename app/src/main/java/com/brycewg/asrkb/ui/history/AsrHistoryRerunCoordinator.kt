@@ -22,6 +22,7 @@ import com.brycewg.asrkb.store.AsrHistoryTimingOrigin
 import com.brycewg.asrkb.store.AsrHistoryTimingRecorder
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.PromptSelectionStatus
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.getAsrRuntimeStatsSnapshotOrNull
 import com.brycewg.asrkb.util.AsrFinalFilters
@@ -157,6 +158,7 @@ internal class AsrHistoryRerunCoordinator(
                 aiPostMs = processed.aiMs,
                 aiPostStatus = processed.status,
                 llmVendorId = processed.llmVendorId,
+                promptSelection = processed.promptSelection,
                 charCount = TextSanitizer.countEffectiveChars(processed.text),
                 status = AsrHistoryStore.AsrHistoryStatus.SUCCESS,
                 failStage = AsrHistoryStore.AsrHistoryFailStage.NONE,
@@ -219,7 +221,9 @@ internal class AsrHistoryRerunCoordinator(
             prefs,
             input,
             forceAi = true,
-            aiTimingObserver = timingRecorder.asAiTimingObserver()
+            aiTimingObserver = timingRecorder.asAiTimingObserver(),
+            // 历史重新润色属于自动流程。
+            promptSelectionMode = AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED
         )
         if (!result.ok || result.text.isBlank()) error(result.errorMessage ?: "postprocess_failed")
         timingRecorder.end(AsrHistoryTimingStage.POSTPROCESS)
@@ -234,6 +238,7 @@ internal class AsrHistoryRerunCoordinator(
                 else -> AsrHistoryStore.AiPostStatus.NONE
             },
             llmVendorId = result.llmVendorId,
+            promptSelection = result.promptSelectionStatus,
             charCount = TextSanitizer.countEffectiveChars(result.text)
         )
         withContext(Dispatchers.IO) {
@@ -262,7 +267,9 @@ internal class AsrHistoryRerunCoordinator(
             localizedContext,
             prefs,
             raw,
-            aiTimingObserver = timingRecorder?.asAiTimingObserver()
+            aiTimingObserver = timingRecorder?.asAiTimingObserver(),
+            // 历史重新识别属于自动流程。
+            promptSelectionMode = AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED
         )
         val text = result.text.ifBlank { AsrFinalFilters.applySimple(localizedContext, prefs, raw) }
         val aiUsed = result.ok && result.usedAi
@@ -275,7 +282,8 @@ internal class AsrHistoryRerunCoordinator(
                 result.attempted -> AsrHistoryStore.AiPostStatus.FAILED
                 else -> AsrHistoryStore.AiPostStatus.NONE
             },
-            llmVendorId = result.llmVendorId
+            llmVendorId = result.llmVendorId,
+            promptSelection = result.promptSelectionStatus
         )
     }
 
@@ -284,7 +292,8 @@ internal class AsrHistoryRerunCoordinator(
         val aiUsed: Boolean,
         val aiMs: Long,
         val status: AsrHistoryStore.AiPostStatus,
-        val llmVendorId: String?
+        val llmVendorId: String?,
+        val promptSelection: PromptSelectionStatus?
     )
 
     private fun AsrHistoryTimingRecorder.asAiTimingObserver(): AsrFinalFilters.AiPostprocessTimingObserver = object : AsrFinalFilters.AiPostprocessTimingObserver {
@@ -295,6 +304,16 @@ internal class AsrHistoryRerunCoordinator(
 
         override fun onAiPostprocessFinished() {
             end(AsrHistoryTimingStage.AI_POSTPROCESS)
+            begin(AsrHistoryTimingStage.POSTPROCESS)
+        }
+
+        override fun onPromptSelectionStarted() {
+            end(AsrHistoryTimingStage.POSTPROCESS)
+            begin(AsrHistoryTimingStage.PROMPT_SELECTION)
+        }
+
+        override fun onPromptSelectionFinished() {
+            end(AsrHistoryTimingStage.PROMPT_SELECTION)
             begin(AsrHistoryTimingStage.POSTPROCESS)
         }
     }

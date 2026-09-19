@@ -694,24 +694,13 @@ private fun buildMeta(
         vendor,
         source,
         aiStatus,
+        promptSelectionPart(record).takeIf { it.isNotBlank() },
         "${record.charCount}${stringResource(R.string.unit_chars)}"
     )
     if (record.totalElapsedMs > 0) {
         parts.add(stringResource(R.string.meta_total_elapsed_seconds, record.totalElapsedMs / 1000.0))
     }
-    parts.add(stringResource(R.string.meta_total_seconds, record.audioMs / 1000.0))
-    val recognitionMs = record.timingTrace?.let { trace ->
-        trace.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
-    }?.takeIf { it > 0L }
-        ?: record.procMs.takeIf { it > 0L }
-        ?: 0L
-    if (recognitionMs > 0) {
-        parts.add(stringResource(R.string.meta_proc_seconds, recognitionMs / 1000.0))
-    }
-    if (record.aiPostStatus != AsrHistoryStore.AiPostStatus.NONE || record.aiPostMs > 0) {
-        parts.add(stringResource(R.string.meta_ai_postproc_seconds, record.aiPostMs / 1000.0))
-    }
-    return parts.joinToString("·")
+    return parts.filterNotNull().joinToString("·")
 }
 
 @Composable
@@ -930,6 +919,24 @@ private fun HistoryDetailsSections(
     }
 }
 
+/** 卡片与详情共用的选择结果短句。 */
+@Composable
+private fun promptSelectionPart(record: AsrHistoryStore.AsrHistoryRecord): String {
+    val selection = record.promptSelection ?: return ""
+    return when {
+        selection.skippedPolish -> stringResource(
+            R.string.history_prompt_selection_skipped
+        )
+
+        selection.ok -> stringResource(
+            R.string.history_prompt_selection_auto,
+            selection.usedPresetTitle.orEmpty()
+        )
+
+        else -> stringResource(R.string.history_prompt_selection_failed)
+    }
+}
+
 @Composable
 private fun HistoryTimingTraceSection(
     record: AsrHistoryStore.AsrHistoryRecord,
@@ -1046,6 +1053,11 @@ private fun historyTimingStageStyles(source: String): List<HistoryTimingStageSty
         stage = AsrHistoryTimingStage.POSTPROCESS,
         label = stringResource(R.string.history_timing_postprocess),
         color = colorResource(R.color.history_timing_postprocess)
+    ),
+    HistoryTimingStageStyle(
+        stage = AsrHistoryTimingStage.PROMPT_SELECTION,
+        label = stringResource(R.string.history_timing_prompt_selection),
+        color = colorResource(R.color.history_timing_prompt_selection)
     ),
     HistoryTimingStageStyle(
         stage = AsrHistoryTimingStage.AI_POSTPROCESS,

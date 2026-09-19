@@ -59,7 +59,7 @@ class Prefs(context: Context) {
     }
 
     // --- JSON 配置：宽松模式（容忍未知键，优雅处理格式错误）---
-    private val json = Json {
+    internal val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
         encodeDefaults = true
@@ -167,7 +167,7 @@ class Prefs(context: Context) {
         val tags = listOf("en", "zh-CN", "zh-TW", "ja", "ar")
         return tags
             .map { buildDefaultPromptPresets(createContextForLanguageTag(it)) }
-            .distinctBy { list -> list.map { it.title to it.content } }
+            .distinctBy { list -> list.map { Triple(it.title, it.content, it.skill) } }
     }
 
     // 火山引擎凭证
@@ -884,6 +884,51 @@ class Prefs(context: Context) {
                 ?: ""
         }
 
+    // ========== 自动选择提示词（润色模式） ==========
+
+    /** 自动选择开关。默认关闭。 */
+    var promptAutoSelectEnabled: Boolean
+        get() = sp.getBoolean(KEY_PROMPT_AUTO_SELECT_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_PROMPT_AUTO_SELECT_ENABLED, value) }
+
+    /**
+     * 候选 ID 集合。首次读取时初始化为“基础文本润色 + 跳过润色”并落盘。
+     */
+    fun getPromptSelectionCandidateIds(): List<String> = PromptSelectionStore.candidateIds(this, getPromptPresets())
+
+    fun setPromptSelectionCandidateIds(ids: List<String>) {
+        PromptSelectionStore.writeStoredIds(this, ids)
+    }
+
+    /** 候选集合在当前预设列表中的解析结果（现存/已删除/缺 skill）。 */
+    internal fun getPromptSelectionCandidateState(): PromptSelectionStore.CandidateState = PromptSelectionStore.candidateState(this, getPromptPresets())
+
+    /** 分类模型引用。默认跟随默认润色模型。 */
+    var promptSelectorModelRef: PromptSelectorModelRef
+        get() = PromptSelectionStore.readModelRef(this)
+        set(value) = PromptSelectionStore.writeModelRef(this, value)
+
+    var jevTypesafeApiKey: String
+        get() = sp.getString(KEY_JEV_TYPESAFE_API_KEY, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_TYPESAFE_API_KEY, value.trim()) }
+
+    var jevClassifierProvider: JevClassifierProvider
+        get() = JevClassifierProvider.fromId(sp.getString(KEY_JEV_PROVIDER, "").orEmpty())
+            ?: JevClassifierProvider.TYPESAFE
+        set(value) = sp.edit { putString(KEY_JEV_PROVIDER, value.id) }
+
+    var jevOpenRouterApiKey: String
+        get() = sp.getString(KEY_JEV_OPENROUTER_API_KEY, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_OPENROUTER_API_KEY, value.trim()) }
+
+    var jevCloudflareApiKey: String
+        get() = sp.getString(KEY_JEV_CLOUDFLARE_API_KEY, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_API_KEY, value.trim()) }
+
+    var jevCloudflareAccountId: String
+        get() = sp.getString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, value.trim()) }
+
     // 语音预置信息（触发短语 -> 替换内容）
     var speechPresetsJson: String
         get() = sp.getString(KEY_SPEECH_PRESETS, "") ?: ""
@@ -1009,6 +1054,17 @@ class Prefs(context: Context) {
      * @return EffectiveLlmConfig 或 null（如果配置无效）
      */
     fun getEffectiveLlmConfig(): EffectiveLlmConfig? = PrefsLlmVendorStore.getEffectiveLlmConfig(this, sp)
+
+    /** 解析任意内置供应商的有效配置（不依赖当前激活供应商）。 */
+    internal fun effectiveLlmConfigForVendor(
+        vendor: LlmVendor,
+        modelOverride: String?
+    ): EffectiveLlmConfig? = PrefsLlmVendorStore.getEffectiveLlmConfigForVendor(
+        this,
+        sp,
+        vendor,
+        modelOverride
+    )
 
     /** 有效的 LLM 配置数据类 */
     data class EffectiveLlmConfig(

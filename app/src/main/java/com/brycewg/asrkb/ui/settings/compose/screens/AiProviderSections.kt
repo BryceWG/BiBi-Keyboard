@@ -11,7 +11,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CloudDownload
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -19,9 +22,88 @@ import androidx.compose.ui.res.stringResource
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.settings.ai.AiPostSettingsViewModel
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
+import com.brycewg.asrkb.ui.settings.compose.model.DropdownOption
+
+@Composable
+internal fun TypeSafeLlmSection(
+    uiMode: BibiUiMode,
+    prefs: Prefs,
+    onChooseModel: () -> Unit,
+    primaryIndexOffset: Int,
+    primaryGroupCount: Int
+) {
+    var channel by remember { mutableStateOf(prefs.jevClassifierProvider) }
+    var apiKey by remember(channel) { mutableStateOf(jevApiKey(prefs, channel)) }
+    var accountId by remember { mutableStateOf(prefs.jevCloudflareAccountId) }
+    var index = primaryIndexOffset
+
+    AsrDropdownPreference(
+        id = "typesafe_channel",
+        titleRes = R.string.label_prompt_selection_jev_channel,
+        options = JevClassifierProvider.entries.map { DropdownOption(it.id, it.displayName()) },
+        selectedOptionId = channel.id,
+        index = index++,
+        count = primaryGroupCount,
+        onSelectedOptionChange = { id ->
+            JevClassifierProvider.fromId(id)?.let {
+                channel = it
+                prefs.jevClassifierProvider = it
+            }
+        }
+    )
+    AiTextField(
+        uiMode = uiMode,
+        value = apiKey,
+        onValueChange = {
+            apiKey = it
+            setJevApiKey(prefs, channel, it)
+        },
+        label = stringResource(R.string.label_llm_api_key),
+        password = true,
+        index = index++,
+        count = primaryGroupCount
+    )
+    if (channel == JevClassifierProvider.CLOUDFLARE) {
+        AiTextField(
+            uiMode = uiMode,
+            value = accountId,
+            onValueChange = {
+                accountId = it
+                prefs.jevCloudflareAccountId = it
+            },
+            label = stringResource(R.string.label_prompt_selection_jev_account_id),
+            index = index++,
+            count = primaryGroupCount
+        )
+    }
+    AiValuePreference(
+        titleRes = R.string.label_llm_model_select,
+        value = LlmVendor.TYPESAFE.defaultModel,
+        uiMode = uiMode,
+        index = index,
+        count = primaryGroupCount,
+        onClick = onChooseModel
+    )
+    AiBodyText(uiMode = uiMode, textRes = R.string.helper_prompt_selection_jev_only)
+}
+
+private fun jevApiKey(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {
+    JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey
+    JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey
+    JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey
+}
+
+private fun setJevApiKey(prefs: Prefs, provider: JevClassifierProvider, value: String) {
+    when (provider) {
+        JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey = value
+        JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey = value
+        JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey = value
+    }
+}
 
 @Composable
 internal fun SfFreeLlmSection(

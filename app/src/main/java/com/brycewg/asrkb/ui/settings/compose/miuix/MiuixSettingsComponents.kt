@@ -25,7 +25,7 @@ fun MiuixSettingsEntry(entry: SettingsEntry) {
     val hapticTap = LocalSettingsHapticTap.current
     when (entry) {
         is SettingsEntry.Action -> ArrowPreference(
-            title = stringResource(entry.titleRes),
+            title = entry.title ?: stringResource(entry.titleRes),
             summary = settingsEntrySummary(entry),
             enabled = entry.enabled,
             startAction = entry.icon?.let { icon -> { SettingsEntryIcon(icon) } },
@@ -36,7 +36,7 @@ fun MiuixSettingsEntry(entry: SettingsEntry) {
         )
 
         is SettingsEntry.Switch -> SwitchPreference(
-            title = stringResource(entry.titleRes),
+            title = entry.title ?: stringResource(entry.titleRes),
             summary = settingsEntrySummary(entry),
             enabled = entry.enabled,
             checked = entry.checked,
@@ -52,7 +52,7 @@ fun MiuixSettingsEntry(entry: SettingsEntry) {
                 .takeIf { it >= 0 }
                 ?: 0
             OverlayDropdownPreference(
-                title = stringResource(entry.titleRes),
+                title = entry.title ?: stringResource(entry.titleRes),
                 summary = settingsEntrySummary(entry),
                 enabled = entry.enabled,
                 items = entry.options.map { it.label },

@@ -455,7 +455,9 @@ class AsrRecognitionService : RecognitionService() {
                             this@AsrRecognitionService,
                             prefs,
                             text,
-                            onStreamingUpdate = onStreamingUpdate
+                            onStreamingUpdate = onStreamingUpdate,
+                            promptSelectionMode = com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
+                            isCancelled = { canceled }
                         )
                         val aiUsed = (res.usedAi && res.ok)
                         val finalOut = res.text.ifBlank {
@@ -708,7 +710,8 @@ class AsrRecognitionService : RecognitionService() {
                 sensitivityTier = safeBackupSensitivityTier(),
                 primaryStreaming = backupEngine?.primaryStreamingForSwitchPlan ?: true,
                 pendingRetryCount = (engine as? ProgressiveRetryStatusOwner)
-                    ?.peekPendingRetryCount() ?: 0
+                    ?.peekPendingRetryCount() ?: 0,
+                extraAiBudgetMs = promptSelectionSessionSlackMs(prefs)
             )
             processingTimeoutJob = serviceScope.launch {
                 val shouldDeferForLocalModel =
