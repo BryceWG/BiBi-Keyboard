@@ -8,10 +8,11 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import android.view.WindowInsets
 import android.view.WindowManager
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.util.HapticFeedbackHelper
+import com.brycewg.asrkb.util.currentUsableWindowSize
+import com.brycewg.asrkb.util.legacyUsableWindowSize
 
 /**
  * 悬浮球触摸处理器
@@ -395,17 +396,11 @@ class FloatingBallTouchHandler(
      */
     private fun getUsableScreenSize(): Pair<Int, Int> = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val metrics = windowManager.currentWindowMetrics
-            val bounds = metrics.bounds
-            val insets = metrics.windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            )
-            val w = (bounds.width() - insets.left - insets.right).coerceAtLeast(0)
-            val h = (bounds.height() - insets.top - insets.bottom).coerceAtLeast(0)
-            w to h
+            val size = windowManager.currentUsableWindowSize()
+            size.width to size.height
         } else {
-            val dm = context.resources.displayMetrics
-            dm.widthPixels to dm.heightPixels
+            val size = windowManager.legacyUsableWindowSize()
+            size.width to size.height
         }
     } catch (e: Throwable) {
         android.util.Log.w(

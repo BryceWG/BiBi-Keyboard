@@ -15,7 +15,6 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.View
-import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
@@ -24,6 +23,8 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.BibiViewThemes
 import com.brycewg.asrkb.ui.widgets.ProcessingSpinnerView
+import com.brycewg.asrkb.util.currentUsableWindowSize
+import com.brycewg.asrkb.util.legacyUsableWindowSize
 import com.google.android.material.color.DynamicColors
 
 /**
@@ -1554,17 +1555,11 @@ class FloatingBallViewManager(
      */
     private fun getUsableScreenSize(): Pair<Int, Int> = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val metrics = windowManager.currentWindowMetrics
-            val bounds = metrics.bounds
-            val insets = metrics.windowInsets.getInsetsIgnoringVisibility(
-                WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout()
-            )
-            val w = (bounds.width() - insets.left - insets.right).coerceAtLeast(0)
-            val h = (bounds.height() - insets.top - insets.bottom).coerceAtLeast(0)
-            w to h
+            val size = windowManager.currentUsableWindowSize()
+            size.width to size.height
         } else {
-            val dm = context.resources.displayMetrics
-            dm.widthPixels to dm.heightPixels
+            val size = windowManager.legacyUsableWindowSize()
+            size.width to size.height
         }
     } catch (e: Throwable) {
         Log.w(TAG, "Failed to get usable screen size, fallback to displayMetrics", e)
