@@ -9,11 +9,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.content.res.Configuration
+import android.hardware.display.DisplayManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import android.view.Display
 import android.view.View
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
@@ -69,6 +71,8 @@ class FloatingAsrService : Service() {
     }
 
     private lateinit var windowManager: WindowManager
+    private lateinit var overlayWindowContext: Context
+    private lateinit var displayManager: DisplayManager
     private lateinit var prefs: Prefs
     private lateinit var viewManager: FloatingBallViewManager
     private lateinit var asrSessionManager: AsrSessionManager
@@ -88,6 +92,16 @@ class FloatingAsrService : Service() {
     private var localPreloadTriggered: Boolean = false
     private var recordingForegroundActive: Boolean = false
     private var continuousCaptureForegroundActive: Boolean = false
+    private var displayListener: DisplayManager.DisplayListener? = null
+    private var pendingDisplayRemapReason: String = "display_changed"
+    private val displayRemapRunnable = Runnable {
+        if (!::viewManager.isInitialized) return@Runnable
+        try {
+            viewManager.remapPositionForCurrentDisplay(pendingDisplayRemapReason)
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to remap floating ball position on display change", e)
+        }
+    }
     private val imeBridgeClient by lazy { ImeBridgeClient(applicationContext) }
 
     private val hintReceiver = object : android.content.BroadcastReceiver() {
@@ -120,16 +134,18 @@ class FloatingAsrService : Service() {
         super.onCreate()
         Log.d(TAG, "onCreate")
 
-        windowManager = getSystemService(WindowManager::class.java)
+        displayManager = getSystemService(DisplayManager::class.java)
+        overlayWindowContext = createOverlayWindowContext()
+        windowManager = overlayWindowContext.getSystemService(WindowManager::class.java)
         notificationManager = getSystemService(NotificationManager::class.java)
         prefs = Prefs(this)
         notifier = UserNotifier(this, handler, TAG)
         overlayPermissionGate = OverlayPermissionGate(this, notifier, TAG)
         ensureRecordingChannel()
 
-        viewManager = FloatingBallViewManager(this, prefs, windowManager)
+        viewManager = FloatingBallViewManager(overlayWindowContext, prefs, windowManager)
 
-        val menuHelper = FloatingMenuHelper(this, windowManager)
+        val menuHelper = FloatingMenuHelper(overlayWindowContext, windowManager)
         val menuController = FloatingMenuController(menuHelper)
         interactionController = FloatingAsrInteractionController(
             context = this,
@@ -154,7 +170,15 @@ class FloatingAsrService : Service() {
         }
         interactionController.asrSessionManager = asrSessionManager
         touchHandler =
-            FloatingBallTouchHandler(this, prefs, viewManager, windowManager, interactionController)
+            FloatingBallTouchHandler(
+                overlayWindowContext,
+                prefs,
+                viewManager,
+                windowManager,
+                interactionController
+            )
+
+        registerDisplayListener()
 
         visibilityCoordinator = FloatingVisibilityCoordinator(
             prefs = prefs,
@@ -209,14 +233,7 @@ class FloatingAsrService : Service() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         refreshRecordingNotification()
-        if (!::viewManager.isInitialized) return
-        try {
-            viewManager.remapPositionForCurrentDisplay(
-                "service_onConfigurationChanged:${newConfig.orientation}"
-            )
-        } catch (e: Throwable) {
-            Log.w(TAG, "Failed to remap floating ball position on configuration change", e)
-        }
+        scheduleDisplayRemap("service_onConfigurationChanged:${newConfig.orientation}")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -264,6 +281,10 @@ class FloatingAsrService : Service() {
         super.onDestroy()
         Log.d(TAG, "onDestroy")
 
+        handler.removeCallbacks(displayRemapRunnable)
+        displayListener?.let(displayManager::unregisterDisplayListener)
+        displayListener = null
+
         try {
             if (::interactionController.isInitialized) interactionController.cleanup()
         } catch (e: Throwable) {
@@ -296,6 +317,39 @@ class FloatingAsrService : Service() {
         } catch (e: Throwable) {
             Log.e(TAG, "Failed to unregister bridge hint receiver", e)
         }
+    }
+
+    private fun createOverlayWindowContext(): Context {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return this
+        val defaultDisplay = requireNotNull(displayManager.getDisplay(Display.DEFAULT_DISPLAY)) {
+            "Default display is unavailable for the floating overlay"
+        }
+        return createDisplayContext(defaultDisplay).createWindowContext(
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            null
+        )
+    }
+
+    private fun registerDisplayListener() {
+        val listener = object : DisplayManager.DisplayListener {
+            override fun onDisplayAdded(displayId: Int) = Unit
+
+            override fun onDisplayRemoved(displayId: Int) = Unit
+
+            override fun onDisplayChanged(displayId: Int) {
+                if (displayId == Display.DEFAULT_DISPLAY) {
+                    scheduleDisplayRemap("display_onDisplayChanged:$displayId")
+                }
+            }
+        }
+        displayManager.registerDisplayListener(listener, handler)
+        displayListener = listener
+    }
+
+    private fun scheduleDisplayRemap(reason: String) {
+        pendingDisplayRemapReason = reason
+        handler.removeCallbacks(displayRemapRunnable)
+        handler.post(displayRemapRunnable)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

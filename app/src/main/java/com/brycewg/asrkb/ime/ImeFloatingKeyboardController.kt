@@ -6,6 +6,7 @@
 package com.brycewg.asrkb.ime
 
 import android.inputmethodservice.InputMethodService
+import android.os.Build
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
@@ -18,6 +19,9 @@ import android.widget.FrameLayout
 import androidx.core.view.ViewCompat
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.util.WindowSizePx
+import com.brycewg.asrkb.util.legacyUsableWindowSize
+import com.brycewg.asrkb.util.maximumUsableWindowSize
 
 internal class ImeFloatingKeyboardController(
     private val prefs: Prefs,
@@ -103,7 +107,7 @@ internal class ImeFloatingKeyboardController(
 
         val panel = keyboardPanel(root)
         val handle = root.findViewById<View>(R.id.keyboardDragHandle)
-        val availableWidth = root.resources.displayMetrics.widthPixels
+        val availableWidth = screenSize(root).width
         val shouldFloat = shouldUseFloatingKeyboard(root, availableWidth) && panel !== root
         isActive = shouldFloat
         ImeKeyboardViewFactory.applyKeyboardPanelBackground(root, prefs, shouldFloat)
@@ -939,9 +943,19 @@ internal class ImeFloatingKeyboardController(
             .coerceAtLeast(1)
     }
 
-    private fun screenWidth(root: View): Int = root.resources.displayMetrics.widthPixels
+    private fun screenWidth(root: View): Int = screenSize(root).width
 
-    private fun screenHeight(root: View): Int = root.resources.displayMetrics.heightPixels
+    private fun screenHeight(root: View): Int = screenSize(root).height
+
+    private fun screenSize(root: View): WindowSizePx {
+        val windowManager = windowProvider()?.windowManager
+            ?: root.context.getSystemService(WindowManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // The IME moves within its display, not within the already-shrunk floating window.
+            return windowManager.maximumUsableWindowSize()
+        }
+        return windowManager.legacyUsableWindowSize()
+    }
 
     private fun dp(view: View, value: Float): Int = (value * view.resources.displayMetrics.density + 0.5f).toInt()
 
