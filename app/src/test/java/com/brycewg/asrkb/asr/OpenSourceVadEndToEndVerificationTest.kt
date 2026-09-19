@@ -100,8 +100,9 @@ class OpenSourceVadEndToEndVerificationTest {
         val voiceFilter = mainSource("asr/RecordedAudioVoiceFilter.kt")
 
         assertFalse(audioCaptureManager.contains("VadInputLeveler"))
-        assertTrue(audioCaptureManager.contains("frame1IsNearZero = (st1.maxAbs < 12 && rms1sq < 16.0"))
-        assertTrue(audioCaptureManager.contains("frame2IsNearZero = (st2.maxAbs < 12 && rms2sq < 16.0"))
+        assertTrue(audioCaptureManager.contains("reads < WARMUP_MAX_READS"))
+        assertTrue(audioCaptureManager.contains("if (stats.countAboveThreshold > 0)"))
+        assertTrue(audioCaptureManager.contains("probedBytes.takeIf { it.isNotEmpty() }"))
         assertTrue(voiceFilter.contains("val rawEnergy = measureEnergy(chunk, chunk.size)"))
         assertTrue(voiceFilter.contains("marks.all { it.isRawBadSourceLevel() }"))
         assertTrue(voiceFilter.contains("filterLongNonContentRuns(pcm, marks)"))

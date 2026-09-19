@@ -246,6 +246,7 @@ internal const val KEY_AI_EDIT_CUSTOM_SYSTEM_PROMPT_ENABLED = "ai_edit_custom_sy
 internal const val KEY_AI_EDIT_SYSTEM_PROMPT = "ai_edit_system_prompt"
 internal const val KEY_POSTPROC_SKIP_UNDER_CHARS = "postproc_skip_under_chars"
 internal const val KEY_HEADSET_MIC_PRIORITY_ENABLED = "headset_mic_priority_enabled"
+internal const val KEY_AUDIO_SOURCE_CACHE_JSON = "audio_source_cache_json"
 internal const val KEY_USAGE_STATS_JSON = "usage_stats"
 internal const val KEY_ASR_RUNTIME_STATS_JSON = "asr_runtime_stats_v1"
 internal const val KEY_ASR_HISTORY_JSON = "asr_history"
