@@ -101,7 +101,8 @@ class SettingsHostViewModel(application: Application) : AndroidViewModel(applica
 
         BibiSettingsRoute.Asr,
         BibiSettingsRoute.Ai,
-        BibiSettingsRoute.PromptSelection -> 1
+        BibiSettingsRoute.PromptSelection,
+        BibiSettingsRoute.PromptSelectionPreview -> 1
 
         BibiSettingsRoute.Backup,
         BibiSettingsRoute.Other,

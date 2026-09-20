@@ -18,6 +18,7 @@ import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.InetSocketAddress
 import java.net.Proxy
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,9 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
 
     @Volatile
     private var cancelRequested: Boolean = false
+
+    /** Request modes discovered by an ephemeral caller (for example, a settings preview). */
+    private val transientRequestModes = ConcurrentHashMap<String, Prefs.LlmRequestMode>()
 
     /**
      * LLM 测试结果。responseHeadersMs 覆盖最终 attempt 发起到响应头到达；
@@ -986,7 +990,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         messages: JSONArray,
         requestMode: Prefs.LlmRequestMode,
         onStreamingUpdate: ((String) -> Unit)? = null,
-        timeoutBudget: LlmPostprocessTimeouts.Budget? = null
+        timeoutBudget: LlmPostprocessTimeouts.Budget? = null,
+        persistRequestMode: Boolean = true
     ): RawCallResult {
         val logicalStartedAt = elapsedRealtimeMs()
         if (requestMode == Prefs.LlmRequestMode.NON_STREAMING) {
@@ -1007,7 +1012,12 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         )
         if (streamingResult.ok) {
             if (streamingResult.responseMode == LlmResponseMode.NON_SSE) {
-                saveRequestMode(prefs, config, Prefs.LlmRequestMode.NON_STREAMING)
+                cacheRequestMode(
+                    prefs,
+                    config,
+                    Prefs.LlmRequestMode.NON_STREAMING,
+                    persistRequestMode
+                )
             }
             return streamingResult.copy(
                 totalMs =
@@ -1042,7 +1052,12 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         val logicalTotalMs =
             (elapsedRealtimeMs() - logicalStartedAt).coerceAtLeast(0L)
         if (fallback.ok) {
-            saveRequestMode(prefs, config, Prefs.LlmRequestMode.NON_STREAMING)
+            cacheRequestMode(
+                prefs,
+                config,
+                Prefs.LlmRequestMode.NON_STREAMING,
+                persistRequestMode
+            )
             return fallback.copy(totalMs = logicalTotalMs, fallbackUsed = true)
         }
 
@@ -1056,14 +1071,15 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     private suspend fun ensureRequestMode(
         prefs: Prefs,
         config: LlmRequestConfig,
-        timeoutBudget: LlmPostprocessTimeouts.Budget?
+        timeoutBudget: LlmPostprocessTimeouts.Budget?,
+        persistRequestMode: Boolean = true
     ): RequestModeProbeResult {
-        prefs.getLlmRequestMode(config.requestModeCapabilityKey)?.let {
+        getCachedRequestMode(prefs, config.requestModeCapabilityKey)?.let {
             return RequestModeProbeResult(mode = it)
         }
 
         return requestModeProbeMutex.withLock {
-            prefs.getLlmRequestMode(config.requestModeCapabilityKey)?.let {
+            getCachedRequestMode(prefs, config.requestModeCapabilityKey)?.let {
                 return@withLock RequestModeProbeResult(mode = it)
             }
             DebugLogManager.logBase(
@@ -1072,7 +1088,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
                 data = mapOf("vendor" to config.vendor.id)
             )
             val probeStartedAt = elapsedRealtimeMs()
-            val result = probeRequestMode(prefs, config, timeoutBudget)
+            val result = probeRequestMode(prefs, config, timeoutBudget, persistRequestMode)
             DebugLogManager.logBase(
                 category = "asr",
                 event = "llm_request_mode_probe_done",
@@ -1093,7 +1109,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     private suspend fun probeRequestMode(
         prefs: Prefs,
         config: LlmRequestConfig,
-        timeoutBudget: LlmPostprocessTimeouts.Budget?
+        timeoutBudget: LlmPostprocessTimeouts.Budget?,
+        persistRequestMode: Boolean = true
     ): RequestModeProbeResult {
         val probeMessages = JSONArray().put(
             JSONObject()
@@ -1113,7 +1130,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             } else {
                 Prefs.LlmRequestMode.NON_STREAMING
             }
-            saveRequestMode(prefs, config, mode)
+            cacheRequestMode(prefs, config, mode, persistRequestMode)
             return RequestModeProbeResult(mode = mode)
         }
         if (!shouldRetryWithoutStream(streamingProbe)) {
@@ -1131,8 +1148,23 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             logRequestModeProbeFailed(config, "non_streaming", nonStreamingProbe)
             return RequestModeProbeResult(failure = nonStreamingProbe)
         }
-        saveRequestMode(prefs, config, Prefs.LlmRequestMode.NON_STREAMING)
+        cacheRequestMode(prefs, config, Prefs.LlmRequestMode.NON_STREAMING, persistRequestMode)
         return RequestModeProbeResult(mode = Prefs.LlmRequestMode.NON_STREAMING)
+    }
+
+    private fun getCachedRequestMode(prefs: Prefs, capabilityKey: String): Prefs.LlmRequestMode? = prefs.getLlmRequestMode(capabilityKey) ?: transientRequestModes[capabilityKey]
+
+    private fun cacheRequestMode(
+        prefs: Prefs,
+        config: LlmRequestConfig,
+        mode: Prefs.LlmRequestMode,
+        persist: Boolean
+    ) {
+        if (persist) {
+            saveRequestMode(prefs, config, mode)
+        } else {
+            transientRequestModes[config.requestModeCapabilityKey] = mode
+        }
     }
 
     private fun saveRequestMode(
@@ -1398,9 +1430,10 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         messages: JSONArray,
         maxRetry: Int = 1,
         onStreamingUpdate: ((String) -> Unit)? = null,
-        timeoutBudget: LlmPostprocessTimeouts.Budget? = null
+        timeoutBudget: LlmPostprocessTimeouts.Budget? = null,
+        persistRequestMode: Boolean = true
     ): RawCallResult {
-        val probe = ensureRequestMode(prefs, config, timeoutBudget)
+        val probe = ensureRequestMode(prefs, config, timeoutBudget, persistRequestMode)
         if (probe.mode == null) {
             return probe.failure ?: RawCallResult(false, error = "Request mode probe failed")
         }
@@ -1413,7 +1446,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             }
             attempt++
             val requestMode = retryModeOverride
-                ?: prefs.getLlmRequestMode(config.requestModeCapabilityKey)
+                ?: getCachedRequestMode(prefs, config.requestModeCapabilityKey)
                 ?: probe.mode
             last = performChat(
                 prefs,
@@ -1421,7 +1454,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
                 messages,
                 requestMode = requestMode,
                 onStreamingUpdate = onStreamingUpdate,
-                timeoutBudget = timeoutBudget
+                timeoutBudget = timeoutBudget,
+                persistRequestMode = persistRequestMode
             )
             if (last.ok) return last
             if (cancelRequested) return last.copy(error = last.error ?: "Request canceled")
@@ -1494,7 +1528,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
         resolved: ResolvedLlmModelConfig,
         systemPrompt: String,
         userContent: String,
-        totalTimeoutMs: Long? = null
+        totalTimeoutMs: Long? = null,
+        persistRequestMode: Boolean = true
     ): LlmProcessResult = withContext(Dispatchers.IO) {
         cancelRequested = false
         val config = toRequestConfig(prefs, resolved, userContent)
@@ -1531,7 +1566,8 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
             config,
             messages,
             onStreamingUpdate = null,
-            timeoutBudget = budget
+            timeoutBudget = budget,
+            persistRequestMode = persistRequestMode
         )
         val dt = TimeUnit.NANOSECONDS
             .toMillis((System.nanoTime() - t0).coerceAtLeast(0L))

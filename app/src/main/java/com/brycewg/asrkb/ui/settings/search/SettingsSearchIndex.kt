@@ -270,6 +270,15 @@ object SettingsSearchIndex {
             add(DeclarativeEntry(title, screen, route, section, keywords.toList()))
         }
         item(R.string.title_prompt_selection, R.string.section_prompt_selection_switch)
+        add(
+            DeclarativeEntry(
+                R.string.title_prompt_selection_preview,
+                R.string.title_prompt_selection,
+                BibiSettingsRoute.PromptSelectionPreview,
+                R.string.section_prompt_selection_preview,
+                listOf("preview", "效果预览", "分类效果")
+            )
+        )
         item(
             R.string.label_prompt_auto_select_enabled,
             R.string.section_prompt_selection_switch,

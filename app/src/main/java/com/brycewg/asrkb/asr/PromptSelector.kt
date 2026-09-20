@@ -133,7 +133,8 @@ internal object PromptSelector {
         candidates: List<PromptSelectionCandidate>,
         modelRef: PromptSelectorModelRef,
         onRequestStarted: (() -> Unit)? = null,
-        onRequestFinished: (() -> Unit)? = null
+        onRequestFinished: (() -> Unit)? = null,
+        persistRequestMode: Boolean = true
     ): PromptSelectionOutcome {
         val startedAtNs = System.nanoTime()
         fun elapsedMs(): Long = TimeUnit.NANOSECONDS.toMillis((System.nanoTime() - startedAtNs).coerceAtLeast(0L))
@@ -252,7 +253,8 @@ internal object PromptSelector {
                         resolved = resolved,
                         systemPrompt = systemPrompt,
                         userContent = userContent,
-                        totalTimeoutMs = TOTAL_TIMEOUT_MS
+                        totalTimeoutMs = TOTAL_TIMEOUT_MS,
+                        persistRequestMode = persistRequestMode
                     )
                 }
             } finally {
