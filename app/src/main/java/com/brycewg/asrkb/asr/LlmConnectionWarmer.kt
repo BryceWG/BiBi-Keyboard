@@ -12,7 +12,7 @@ import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmModelResolution
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.store.PromptSelectorModelRef
+import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.ResolvedLlmModelConfig
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import java.io.IOException
@@ -108,7 +108,7 @@ internal object LlmConnectionWarmer {
 
     private fun buildJevWarmEndpoint(prefs: Prefs): String? {
         if (!prefs.promptAutoSelectEnabled) return null
-        val ref = prefs.promptSelectorModelRef as? PromptSelectorModelRef.Builtin ?: return null
+        val ref = prefs.promptSelectorModelRef as? LlmFeatureModelRef.Builtin ?: return null
         if (ref.vendorId != LlmVendor.TYPESAFE.id) return null
         return when (prefs.jevClassifierProvider) {
             JevClassifierProvider.TYPESAFE -> "https://api.typesafe.ai/v1/systemone"

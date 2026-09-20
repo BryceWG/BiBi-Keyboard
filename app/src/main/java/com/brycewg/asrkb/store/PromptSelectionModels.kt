@@ -49,20 +49,20 @@ sealed interface PromptSelectionCandidate {
     }
 }
 
-/** Persisted identity of the model used for prompt selection. Provider settings stay live. */
+/** Persisted identity of the model used by an LLM feature. Provider settings stay live. */
 @Serializable
-sealed interface PromptSelectorModelRef {
+sealed interface LlmFeatureModelRef {
     @Serializable
     @SerialName("follow_default")
-    data object FollowDefault : PromptSelectorModelRef
+    data object FollowDefault : LlmFeatureModelRef
 
     @Serializable
     @SerialName("builtin")
-    data class Builtin(val vendorId: String, val model: String) : PromptSelectorModelRef
+    data class Builtin(val vendorId: String, val model: String) : LlmFeatureModelRef
 
     @Serializable
     @SerialName("custom")
-    data class Custom(val providerId: String, val model: String) : PromptSelectorModelRef
+    data class Custom(val providerId: String, val model: String) : LlmFeatureModelRef
 }
 
 @Serializable

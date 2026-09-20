@@ -62,7 +62,7 @@ sealed interface LlmModelResolution {
 
 /** 供设置页展示的模型引用摘要。 */
 data class PromptSelectorModelSummary(
-    val ref: PromptSelectorModelRef,
+    val ref: LlmFeatureModelRef,
     val model: String,
     /** 内置供应商的本地化名称资源；自定义配置为 null。 */
     val vendorNameResId: Int?,
@@ -169,15 +169,15 @@ object LlmModelConfigResolver {
     }
 
     /** 解析任意模型引用。 */
-    fun resolve(prefs: Prefs, ref: PromptSelectorModelRef): LlmModelResolution {
+    fun resolve(prefs: Prefs, ref: LlmFeatureModelRef): LlmModelResolution {
         when (ref) {
-            PromptSelectorModelRef.FollowDefault -> {
+            LlmFeatureModelRef.FollowDefault -> {
                 val config = resolveActiveConfig(prefs)
                 return validate(config)?.let { LlmModelResolution.Unavailable(it) }
                     ?: LlmModelResolution.Resolved(config)
             }
 
-            is PromptSelectorModelRef.Builtin -> {
+            is LlmFeatureModelRef.Builtin -> {
                 val vendor = LlmVendor.builtinVendors().firstOrNull { it.id == ref.vendorId }
                 if (vendor == null) {
                     return LlmModelResolution.Unavailable(LlmModelUnavailableReason.PROVIDER_MISSING)
@@ -220,7 +220,7 @@ object LlmModelConfigResolver {
                 }
             }
 
-            is PromptSelectorModelRef.Custom -> {
+            is LlmFeatureModelRef.Custom -> {
                 val provider = prefs.getLlmProviders().firstOrNull { it.id == ref.providerId }
                     ?: return LlmModelResolution.Unavailable(LlmModelUnavailableReason.PROVIDER_MISSING)
                 if (provider.endpoint.isBlank()) {
@@ -280,27 +280,27 @@ object LlmModelConfigResolver {
      *
      * 不提供自由输入：候选来源只有供应商配置里已保存的模型集合。
      */
-    fun savedModels(prefs: Prefs, ref: PromptSelectorModelRef): List<String> {
+    fun savedModels(prefs: Prefs, ref: LlmFeatureModelRef): List<String> {
         val currentModel = when (ref) {
-            PromptSelectorModelRef.FollowDefault -> resolveActiveConfig(prefs).model
-            is PromptSelectorModelRef.Builtin -> ref.model
-            is PromptSelectorModelRef.Custom -> ref.model
+            LlmFeatureModelRef.FollowDefault -> resolveActiveConfig(prefs).model
+            is LlmFeatureModelRef.Builtin -> ref.model
+            is LlmFeatureModelRef.Custom -> ref.model
         }.trim()
         val stored = when (ref) {
-            PromptSelectorModelRef.FollowDefault -> {
+            LlmFeatureModelRef.FollowDefault -> {
                 val active = resolveActiveConfig(prefs)
                 active.customProviderId?.let { id ->
                     prefs.getLlmProviders().firstOrNull { it.id == id }?.models.orEmpty()
                 } ?: prefs.getLlmVendorModels(active.vendor)
             }
 
-            is PromptSelectorModelRef.Builtin -> {
+            is LlmFeatureModelRef.Builtin -> {
                 val vendor = LlmVendor.builtinVendors().firstOrNull { it.id == ref.vendorId }
                     ?: return emptyList()
                 if (vendor.id == LlmVendor.CUSTOM.id) emptyList() else prefs.getLlmVendorModels(vendor)
             }
 
-            is PromptSelectorModelRef.Custom -> prefs.getLlmProviders()
+            is LlmFeatureModelRef.Custom -> prefs.getLlmProviders()
                 .firstOrNull { it.id == ref.providerId }
                 ?.models
                 .orEmpty()
@@ -312,10 +312,10 @@ object LlmModelConfigResolver {
     }
 
     /** 设置页摘要：模型名 + 供应商展示信息 + 可用性。 */
-    fun summarize(prefs: Prefs, ref: PromptSelectorModelRef): PromptSelectorModelSummary {
+    fun summarize(prefs: Prefs, ref: LlmFeatureModelRef): PromptSelectorModelSummary {
         val resolution = resolve(prefs, ref)
         return when (ref) {
-            PromptSelectorModelRef.FollowDefault -> PromptSelectorModelSummary(
+            LlmFeatureModelRef.FollowDefault -> PromptSelectorModelSummary(
                 ref = ref,
                 model = (resolution as? LlmModelResolution.Resolved)?.config?.model
                     ?: resolveActiveConfig(prefs).model,
@@ -326,7 +326,7 @@ object LlmModelConfigResolver {
                 unavailableReason = (resolution as? LlmModelResolution.Unavailable)?.reason
             )
 
-            is PromptSelectorModelRef.Builtin -> {
+            is LlmFeatureModelRef.Builtin -> {
                 val vendor = LlmVendor.builtinVendors().firstOrNull { it.id == ref.vendorId }
                 PromptSelectorModelSummary(
                     ref = ref,
@@ -339,7 +339,7 @@ object LlmModelConfigResolver {
                 )
             }
 
-            is PromptSelectorModelRef.Custom -> {
+            is LlmFeatureModelRef.Custom -> {
                 val provider = prefs.getLlmProviders().firstOrNull { it.id == ref.providerId }
                 PromptSelectorModelSummary(
                     ref = ref,

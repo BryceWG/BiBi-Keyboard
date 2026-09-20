@@ -904,7 +904,7 @@ class Prefs(context: Context) {
     internal fun getPromptSelectionCandidateState(): PromptSelectionStore.CandidateState = PromptSelectionStore.candidateState(this, getPromptPresets())
 
     /** 分类模型引用。默认跟随默认润色模型。 */
-    var promptSelectorModelRef: PromptSelectorModelRef
+    var promptSelectorModelRef: LlmFeatureModelRef
         get() = PromptSelectionStore.readModelRef(this)
         set(value) = PromptSelectionStore.writeModelRef(this, value)
 

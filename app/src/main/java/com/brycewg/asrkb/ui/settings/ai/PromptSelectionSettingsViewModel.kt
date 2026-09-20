@@ -2,7 +2,6 @@ package com.brycewg.asrkb.ui.settings.ai
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.LlmCustomProviderOption
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmVendorOption
@@ -10,7 +9,7 @@ import com.brycewg.asrkb.store.PROMPT_SELECTION_SKIP_POLISH_ID
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectionCandidate
 import com.brycewg.asrkb.store.PromptSelectionStore
-import com.brycewg.asrkb.store.PromptSelectorModelRef
+import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.PromptSelectorModelSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -145,67 +144,13 @@ class PromptSelectionSettingsViewModel : ViewModel() {
         }
     }
 
-    fun setModelRef(prefs: Prefs, ref: PromptSelectorModelRef) {
+    fun setModelRef(prefs: Prefs, ref: LlmFeatureModelRef) {
         try {
             prefs.promptSelectorModelRef = ref
             refresh(prefs)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update prompt selector model", e)
         }
-    }
-
-    /** 第二层模型列表：已保存模型 + 当前模型，顺序稳定且不提供自由输入。 */
-    fun savedModels(prefs: Prefs, ref: PromptSelectorModelRef): List<String> = try {
-        LlmModelConfigResolver.savedModels(prefs, ref)
-    } catch (e: Exception) {
-        Log.e(TAG, "Failed to read saved models", e)
-        emptyList()
-    }
-
-    /** 第一层选项的扁平引用列表，索引与弹层 item 的 originalIndex 对齐。 */
-    fun modelRefOptions(prefs: Prefs): List<PromptSelectorModelRef> {
-        val state = _uiState.value
-        return buildList {
-            add(PromptSelectorModelRef.FollowDefault)
-            state.vendorOptions
-                .filter { it.vendor != LlmVendor.CUSTOM }
-                .distinctBy { it.vendor.id }
-                .forEach { option ->
-                    add(
-                        PromptSelectorModelRef.Builtin(
-                            vendorId = option.vendor.id,
-                            model = currentModelFor(prefs, option.vendor)
-                        )
-                    )
-                }
-            state.customOptions.forEach { option ->
-                add(PromptSelectorModelRef.Custom(providerId = option.providerId, model = ""))
-            }
-        }
-    }
-
-    /** 当前引用在 [modelRefOptions] 中的索引（无匹配时 -1）。 */
-    fun currentModelRefIndex(prefs: Prefs): Int {
-        val current = prefs.promptSelectorModelRef
-        val options = modelRefOptions(prefs)
-        val exact = options.indexOfFirst { sameTarget(it, current) }
-        return exact
-    }
-
-    private fun currentModelFor(prefs: Prefs, vendor: LlmVendor): String = try {
-        prefs.effectiveLlmConfigForVendor(vendor, null)?.model.orEmpty()
-    } catch (_: Exception) {
-        ""
-    }
-
-    /** 第一层比较只看“指向哪个供应商/配置”，模型名在同一供应商内可随时切换。 */
-    private fun sameTarget(a: PromptSelectorModelRef, b: PromptSelectorModelRef): Boolean = when {
-        a is PromptSelectorModelRef.FollowDefault && b is PromptSelectorModelRef.FollowDefault -> true
-        a is PromptSelectorModelRef.Builtin && b is PromptSelectorModelRef.Builtin ->
-            a.vendorId == b.vendorId
-        a is PromptSelectorModelRef.Custom && b is PromptSelectorModelRef.Custom ->
-            a.providerId == b.providerId
-        else -> false
     }
 
     /** 候选数量的下限（与运行时校验共用同一常量）。 */

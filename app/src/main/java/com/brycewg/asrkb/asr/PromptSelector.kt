@@ -15,7 +15,7 @@ import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectionCandidate
 import com.brycewg.asrkb.store.PromptSelectionFailReason
 import com.brycewg.asrkb.store.PromptSelectionStatus
-import com.brycewg.asrkb.store.PromptSelectorModelRef
+import com.brycewg.asrkb.store.LlmFeatureModelRef
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
@@ -131,7 +131,7 @@ internal object PromptSelector {
         processor: LlmPostProcessor,
         asrText: String,
         candidates: List<PromptSelectionCandidate>,
-        modelRef: PromptSelectorModelRef,
+        modelRef: LlmFeatureModelRef,
         onRequestStarted: (() -> Unit)? = null,
         onRequestFinished: (() -> Unit)? = null
     ): PromptSelectionOutcome {
@@ -151,7 +151,7 @@ internal object PromptSelector {
             )
         }
 
-        if (modelRef is PromptSelectorModelRef.Builtin && modelRef.vendorId == LlmVendor.TYPESAFE.id) {
+        if (modelRef is LlmFeatureModelRef.Builtin && modelRef.vendorId == LlmVendor.TYPESAFE.id) {
             val provider = prefs.jevClassifierProvider
             val credentialsReady = when (provider) {
                 JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey.isNotBlank()

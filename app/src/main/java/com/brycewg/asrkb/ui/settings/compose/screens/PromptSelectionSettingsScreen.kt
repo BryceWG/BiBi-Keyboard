@@ -21,14 +21,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
-import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.store.PromptSelectorModelRef
 import com.brycewg.asrkb.ui.settings.ai.PromptSelectionSettingsViewModel
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceGroup
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceItem
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheet
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsDetailScaffold
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
@@ -37,7 +32,6 @@ import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsPreference
 import com.brycewg.asrkb.ui.settings.compose.components.rememberSettingsChoiceSheetNavigator
-import com.brycewg.asrkb.ui.settings.compose.components.settingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.settingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
@@ -130,55 +124,26 @@ fun PromptSelectionSettingsScreen(
                 AiSection(uiMode = uiMode, titleRes = R.string.section_prompt_selection_model) {
                     AiValuePreference(
                         titleRes = R.string.label_prompt_selection_model,
-                        value = modelSummaryLabel(context, state),
+                        value = llmFeatureModelSummary(context, prefs, prefs.promptSelectorModelRef),
                         uiMode = uiMode,
                         index = 0,
                         count = 1,
                         onClick = {
                             modelPickerSheets.show(
-                                modelRefChoiceSheet(
+                                llmFeatureModelPicker(
                                     context = context,
                                     prefs = prefs,
-                                    viewModel = viewModel,
-                                    onPick = { ref ->
-                                        if (ref is PromptSelectorModelRef.FollowDefault) {
-                                            modelPickerSheets.finishAfterDismiss()
-                                            viewModel.setModelRef(prefs, ref)
-                                            return@modelRefChoiceSheet
-                                        }
-                                        val currentModel = when (ref) {
-                                            is PromptSelectorModelRef.Builtin -> ref.model
-                                            is PromptSelectorModelRef.Custom -> ref.model
-                                            PromptSelectorModelRef.FollowDefault -> ""
-                                        }
-                                        val models = viewModel.savedModels(prefs, ref)
-                                        if (models.isEmpty()) {
-                                            messageDialog = SettingsMessageDialogState(
-                                                title = context.getString(R.string.title_prompt_selection),
-                                                message = context.getString(R.string.prompt_selection_no_models),
-                                                confirmText = context.getString(android.R.string.ok)
-                                            )
-                                            modelPickerSheets.finishAfterDismiss()
-                                            return@modelRefChoiceSheet
-                                        }
-                                        if (models.size == 1) {
-                                            modelPickerSheets.finishAfterDismiss()
-                                            viewModel.setModelRef(prefs, withModel(ref, models.single()))
-                                            return@modelRefChoiceSheet
-                                        }
-                                        modelPickerSheets.showAfterDismiss(
-                                            settingsChoiceSheetState(
-                                                title = context.getString(R.string.prompt_selection_model_choose_model_title),
-                                                items = models,
-                                                selectedIndex = models.indexOf(currentModel),
-                                                onSelected = { index ->
-                                                    val model = models.getOrNull(index) ?: return@settingsChoiceSheetState
-                                                    modelPickerSheets.finishAfterDismiss()
-                                                    viewModel.setModelRef(prefs, withModel(ref, model))
-                                                }
-                                            )
+                                    current = prefs.promptSelectorModelRef,
+                                    titleRes = R.string.prompt_selection_model_choose_vendor_title,
+                                    navigator = modelPickerSheets,
+                                    onNoModels = {
+                                        messageDialog = SettingsMessageDialogState(
+                                            title = context.getString(R.string.title_prompt_selection),
+                                            message = context.getString(R.string.prompt_selection_no_models),
+                                            confirmText = context.getString(android.R.string.ok)
                                         )
-                                    }
+                                    },
+                                    onSelected = { ref -> viewModel.setModelRef(prefs, ref) }
                                 )
                             )
                         }
@@ -252,114 +217,4 @@ private fun candidateSummaryLines(
         lines += stringResource(R.string.prompt_selection_summary_min_count, minCount)
     }
     return lines
-}
-
-@Composable
-private fun modelSummaryLabel(
-    context: android.content.Context,
-    state: PromptSelectionSettingsViewModel.UiState
-): String {
-    val summary = state.modelSummary ?: return stringResource(
-        R.string.prompt_selection_model_follow_default
-    )
-    val targetName = when {
-        summary.vendorNameResId != null -> context.getString(summary.vendorNameResId)
-        summary.customProviderName != null ->
-            summary.customProviderName.ifBlank { context.getString(R.string.untitled_profile) }
-        else -> context.getString(R.string.prompt_selection_model_follow_default)
-    }
-    val model = summary.model.ifBlank { context.getString(R.string.prompt_selection_model_unconfigured) }
-    return "$targetName · $model"
-}
-
-/**
- * 第一层：跟随默认 + 所有内置供应商 + 各自定义配置（未配置状态直接标注）。
- */
-private fun modelRefChoiceSheet(
-    context: android.content.Context,
-    prefs: Prefs,
-    viewModel: PromptSelectionSettingsViewModel,
-    onPick: (PromptSelectorModelRef) -> Unit
-): SettingsChoiceSheetState? {
-    val state = viewModel.uiState.value
-    val options = viewModel.modelRefOptions(prefs)
-    val unconfiguredLabel = context.getString(R.string.prompt_selection_model_unconfigured)
-    val untitledProfile = context.getString(R.string.untitled_profile)
-
-    data class Option(val index: Int, val item: SettingsChoiceItem, val configured: Boolean)
-
-    val built = options.mapIndexed { index, ref ->
-        val title: String
-        val configured: Boolean
-        when (ref) {
-            PromptSelectorModelRef.FollowDefault -> {
-                title = context.getString(R.string.prompt_selection_model_follow_default)
-                configured = state.modelSummary?.available == true
-            }
-
-            is PromptSelectorModelRef.Builtin -> {
-                val vendor = LlmVendor.fromId(ref.vendorId)
-                title = context.getString(vendor.displayNameResId)
-                configured = state.vendorOptions
-                    .firstOrNull { it.vendor.id == ref.vendorId }
-                    ?.configured == true
-            }
-
-            is PromptSelectorModelRef.Custom -> {
-                val option = state.customOptions.firstOrNull { it.providerId == ref.providerId }
-                title = option?.name?.ifBlank { untitledProfile } ?: untitledProfile
-                configured = option?.configured == true
-            }
-        }
-        Option(
-            index = index,
-            item = SettingsChoiceItem(
-                title = if (configured) title else "$title（$unconfiguredLabel）",
-                originalIndex = index
-            ),
-            configured = configured
-        )
-    }
-
-    val followDefault = built.firstOrNull { options.getOrNull(it.index) is PromptSelectorModelRef.FollowDefault }
-    val targets = built.filter { it !== followDefault }
-    val configuredItems = targets.filter { it.configured }.map { it.item }
-    val unconfiguredItems = targets.filter { !it.configured }.map { it.item }
-
-    val groups = buildList {
-        followDefault?.let { add(SettingsChoiceGroup(label = "", items = listOf(it.item))) }
-        if (configuredItems.isNotEmpty()) {
-            add(
-                SettingsChoiceGroup(
-                    label = context.getString(R.string.llm_vendor_group_configured),
-                    items = configuredItems
-                )
-            )
-        }
-        if (unconfiguredItems.isNotEmpty()) {
-            add(
-                SettingsChoiceGroup(
-                    label = context.getString(R.string.llm_vendor_group_unconfigured),
-                    items = unconfiguredItems
-                )
-            )
-        }
-    }
-    if (groups.isEmpty()) return null
-    return SettingsChoiceSheetState(
-        title = context.getString(R.string.prompt_selection_model_choose_vendor_title),
-        groups = groups,
-        selectedIndex = viewModel.currentModelRefIndex(prefs),
-        onSelected = { index -> options.getOrNull(index)?.let(onPick) }
-    )
-}
-
-/** 第二层：已保存模型（含当前模型），不支持自由输入。 */
-private fun withModel(
-    ref: PromptSelectorModelRef,
-    model: String
-): PromptSelectorModelRef = when (ref) {
-    PromptSelectorModelRef.FollowDefault -> PromptSelectorModelRef.FollowDefault
-    is PromptSelectorModelRef.Builtin -> ref.copy(model = model)
-    is PromptSelectorModelRef.Custom -> ref.copy(model = model)
 }

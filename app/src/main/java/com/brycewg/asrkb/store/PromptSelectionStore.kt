@@ -110,28 +110,21 @@ internal object PromptSelectionStore {
         )
     }
 
-    fun readModelRef(prefs: Prefs): PromptSelectorModelRef {
-        val raw = prefs.getPrefString(KEY_PROMPT_SELECTOR_MODEL, "")
-        if (raw.isBlank()) return PromptSelectorModelRef.FollowDefault
-        return decodeModelRef(prefs, raw) ?: PromptSelectorModelRef.FollowDefault
-    }
+    fun readModelRef(prefs: Prefs): LlmFeatureModelRef = LlmFeatureModelRefStore.read(
+        prefs.getPrefString(KEY_PROMPT_SELECTOR_MODEL, ""),
+        prefs.json
+    )
 
-    fun writeModelRef(prefs: Prefs, ref: PromptSelectorModelRef) {
-        try {
-            prefs.setPrefString(
-                KEY_PROMPT_SELECTOR_MODEL,
-                prefs.json.encodeToString(PromptSelectorModelRef.serializer(), ref)
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to serialize prompt selector model ref", e)
-        }
+    fun writeModelRef(prefs: Prefs, ref: LlmFeatureModelRef) {
+        val encoded = LlmFeatureModelRefStore.encode(ref, prefs.json)
+        if (encoded.isNotBlank()) prefs.setPrefString(KEY_PROMPT_SELECTOR_MODEL, encoded)
     }
 
     /** 供备份导入使用：未提供键或内容非法时不覆盖本地状态。 */
     fun importModelRefIfPresent(prefs: Prefs, raw: String?) {
         if (raw.isNullOrBlank()) return
-        val decoded = decodeModelRef(prefs, raw) ?: return
-        writeModelRef(prefs, decoded)
+        val validated = LlmFeatureModelRefStore.validatedRawOrNull(raw, prefs.json) ?: return
+        prefs.setPrefString(KEY_PROMPT_SELECTOR_MODEL, validated)
     }
 
     fun importCandidateIdsIfPresent(prefs: Prefs, raw: String?) {
@@ -147,13 +140,6 @@ internal object PromptSelectionStore {
             .distinct()
     } catch (e: Exception) {
         Log.e(TAG, "Failed to parse prompt selection candidate ids", e)
-        null
-    }
-
-    private fun decodeModelRef(prefs: Prefs, raw: String): PromptSelectorModelRef? = try {
-        prefs.json.decodeFromString(PromptSelectorModelRef.serializer(), raw)
-    } catch (e: Exception) {
-        Log.e(TAG, "Failed to parse prompt selector model ref", e)
         null
     }
 }
