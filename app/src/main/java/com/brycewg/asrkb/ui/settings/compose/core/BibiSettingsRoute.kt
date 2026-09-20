@@ -45,6 +45,10 @@ sealed interface BibiSettingsRoute {
         override val id: String = "prompt_selection"
     }
 
+    data object PromptSelectionPreview : BibiSettingsRoute {
+        override val id: String = "prompt_selection_preview"
+    }
+
     data object Backup : BibiSettingsRoute {
         override val id: String = "backup"
     }
@@ -88,6 +92,7 @@ sealed interface BibiSettingsRoute {
             Asr.id -> Asr
             Ai.id -> Ai
             PromptSelection.id -> PromptSelection
+            PromptSelectionPreview.id -> PromptSelectionPreview
             Backup.id -> Backup
             Other.id -> Other
             About.id -> About

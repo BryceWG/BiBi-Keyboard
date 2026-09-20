@@ -40,7 +40,8 @@ import com.brycewg.asrkb.ui.settings.compose.model.SettingsEntry
 @Composable
 fun PromptSelectionSettingsScreen(
     uiMode: BibiUiMode,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenPreview: () -> Unit
 ) {
     val context = LocalContext.current
     val prefs = remember(context) { Prefs(context) }
@@ -127,7 +128,7 @@ fun PromptSelectionSettingsScreen(
                         value = llmFeatureModelSummary(context, prefs, prefs.promptSelectorModelRef),
                         uiMode = uiMode,
                         index = 0,
-                        count = 1,
+                        count = 2,
                         onClick = {
                             modelPickerSheets.show(
                                 llmFeatureModelPicker(
@@ -156,6 +157,16 @@ fun PromptSelectionSettingsScreen(
                             )
                         }
                     }
+                    SettingsPreference(
+                        entry = SettingsEntry.Action(
+                            id = "prompt_selection_preview_entry",
+                            titleRes = R.string.title_prompt_selection_preview,
+                            summaryRes = R.string.summary_prompt_selection_preview,
+                            onClick = onOpenPreview
+                        ),
+                        index = 1,
+                        count = 2
+                    )
                 }
             }
 

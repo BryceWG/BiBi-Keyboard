@@ -209,6 +209,12 @@ private fun SettingsRouteContent(
 
         BibiSettingsRoute.PromptSelection -> PromptSelectionSettingsScreen(
             uiMode = uiState.uiMode,
+            onBack = { onPopRoute() },
+            onOpenPreview = { onPushRoute(BibiSettingsRoute.PromptSelectionPreview) }
+        )
+
+        BibiSettingsRoute.PromptSelectionPreview -> PromptSelectionPreviewScreen(
+            uiMode = uiState.uiMode,
             onBack = { onPopRoute() }
         )
 
