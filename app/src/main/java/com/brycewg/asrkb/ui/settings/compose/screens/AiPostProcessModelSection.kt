@@ -77,7 +77,11 @@ internal fun AiPostProcessModelSection(
 
     AiSection(uiMode = uiMode, titleRes = R.string.section_post_process_model) {
         val primaryConfigItemCount = when (selectedVendor) {
-            LlmVendor.TYPESAFE -> if (prefs.jevClassifierProvider == com.brycewg.asrkb.store.JevClassifierProvider.CLOUDFLARE) 4 else 3
+            LlmVendor.TYPESAFE -> when (prefs.jevClassifierProvider) {
+                com.brycewg.asrkb.store.JevClassifierProvider.CLOUDFLARE -> 4
+                com.brycewg.asrkb.store.JevClassifierProvider.CUSTOM -> 4
+                else -> 3
+            }
             LlmVendor.SF_FREE -> sfFreeLlmPrimaryItemCount(
                 presetModels = sfPresetModels,
                 staticModels = sfStaticModels,

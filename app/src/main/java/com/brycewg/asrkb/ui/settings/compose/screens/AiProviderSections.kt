@@ -39,6 +39,8 @@ internal fun TypeSafeLlmSection(
     var channel by remember { mutableStateOf(prefs.jevClassifierProvider) }
     var apiKey by remember(channel) { mutableStateOf(jevApiKey(prefs, channel)) }
     var accountId by remember { mutableStateOf(prefs.jevCloudflareAccountId) }
+    var endpoint by remember(channel) { mutableStateOf(prefs.jevCustomEndpoint) }
+    var model by remember(channel) { mutableStateOf(prefs.jevCustomModel) }
     var index = primaryIndexOffset
 
     AsrDropdownPreference(
@@ -80,14 +82,39 @@ internal fun TypeSafeLlmSection(
             count = primaryGroupCount
         )
     }
-    AiValuePreference(
-        titleRes = R.string.label_llm_model_select,
-        value = LlmVendor.TYPESAFE.defaultModel,
-        uiMode = uiMode,
-        index = index,
-        count = primaryGroupCount,
-        onClick = onChooseModel
-    )
+    if (channel == JevClassifierProvider.CUSTOM) {
+        AiTextField(
+            uiMode = uiMode,
+            value = endpoint,
+            onValueChange = {
+                endpoint = it
+                prefs.jevCustomEndpoint = it
+            },
+            label = stringResource(R.string.label_prompt_selection_jev_endpoint),
+            index = index++,
+            count = primaryGroupCount
+        )
+        AiTextField(
+            uiMode = uiMode,
+            value = model,
+            onValueChange = {
+                model = it
+                prefs.jevCustomModel = it
+            },
+            label = stringResource(R.string.label_prompt_selection_jev_model),
+            index = index++,
+            count = primaryGroupCount
+        )
+    } else {
+        AiValuePreference(
+            titleRes = R.string.label_llm_model_select,
+            value = LlmVendor.TYPESAFE.defaultModel,
+            uiMode = uiMode,
+            index = index,
+            count = primaryGroupCount,
+            onClick = onChooseModel
+        )
+    }
     AiBodyText(uiMode = uiMode, textRes = R.string.helper_prompt_selection_jev_only)
 }
 
@@ -95,6 +122,7 @@ private fun jevApiKey(prefs: Prefs, provider: JevClassifierProvider): String = w
     JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey
     JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey
     JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey
+    JevClassifierProvider.CUSTOM -> prefs.jevCustomApiKey
 }
 
 private fun setJevApiKey(prefs: Prefs, provider: JevClassifierProvider, value: String) {
@@ -102,6 +130,7 @@ private fun setJevApiKey(prefs: Prefs, provider: JevClassifierProvider, value: S
         JevClassifierProvider.TYPESAFE -> prefs.jevTypesafeApiKey = value
         JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey = value
         JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey = value
+        JevClassifierProvider.CUSTOM -> prefs.jevCustomApiKey = value
     }
 }
 

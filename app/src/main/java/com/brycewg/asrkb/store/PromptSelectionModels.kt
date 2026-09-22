@@ -10,7 +10,8 @@ const val JEV_MODEL_ID = "jev-latest"
 enum class JevClassifierProvider(val id: String) {
     TYPESAFE("typesafe"),
     OPENROUTER("openrouter"),
-    CLOUDFLARE("cloudflare");
+    CLOUDFLARE("cloudflare"),
+    CUSTOM("custom");
 
     companion object {
         fun fromId(id: String): JevClassifierProvider? = entries.firstOrNull { it.id == id }
@@ -20,6 +21,7 @@ enum class JevClassifierProvider(val id: String) {
         TYPESAFE -> "TypeSafe"
         OPENROUTER -> "OpenRouter"
         CLOUDFLARE -> "Cloudflare"
+        CUSTOM -> "Custom (TypeSafe-compatible)"
     }
 }
 

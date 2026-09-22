@@ -327,6 +327,8 @@ grape
     <string name="label_prompt_selection_jev_channel">قناة الطلب</string>
     <string name="llm_vendor_typesafe">TypeSafe</string>
     <string name="label_prompt_selection_jev_account_id">معرّف حساب Cloudflare</string>
+    <string name="label_prompt_selection_jev_endpoint">نقطة نهاية متوافقة مع TypeSafe</string>
+    <string name="label_prompt_selection_jev_model">معرّف نموذج متوافق مع TypeSafe</string>
     <string name="prompt_selection_no_models">لا توجد نماذج محفوظة لهذا المزوّد. هيّئ واحداً في إعدادات AI أولاً.</string>
     <string name="prompt_selection_enable_blocked">تعذّر التمكين: الموجّهات المرشّحة أو نموذج الاختيار غير صالح.</string>
     <string name="prompt_selection_warning_invalid">الإعداد الحالي غير صالح. سيفشل الاختيار التلقائي عند التشغيل وسيعود إلى الموجّه المفعّل.</string>

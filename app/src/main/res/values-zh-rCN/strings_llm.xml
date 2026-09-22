@@ -331,6 +331,8 @@
     <string name="label_prompt_selection_jev_channel">请求渠道</string>
     <string name="llm_vendor_typesafe">TypeSafe</string>
     <string name="label_prompt_selection_jev_account_id">Cloudflare Account ID</string>
+    <string name="label_prompt_selection_jev_endpoint">兼容 TypeSafe 的 Endpoint</string>
+    <string name="label_prompt_selection_jev_model">兼容 TypeSafe 的模型 ID</string>
     <string name="prompt_selection_no_models">该供应商没有已保存的模型，请先在 AI 设置中配置。</string>
     <string name="prompt_selection_enable_blocked">无法启用：候选提示词或选择模型配置无效。</string>
     <string name="prompt_selection_warning_invalid">当前配置无效。自动选择会在运行时失败，并回退到当前激活预设。</string>

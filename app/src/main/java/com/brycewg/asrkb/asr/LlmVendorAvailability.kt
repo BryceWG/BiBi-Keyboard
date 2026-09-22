@@ -55,6 +55,10 @@ internal fun isLlmVendorConfigured(prefs: Prefs, vendor: LlmVendor): Boolean = t
             com.brycewg.asrkb.store.JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
             com.brycewg.asrkb.store.JevClassifierProvider.CLOUDFLARE ->
                 prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
+            com.brycewg.asrkb.store.JevClassifierProvider.CUSTOM ->
+                prefs.jevCustomEndpoint.isNotBlank() &&
+                    prefs.jevCustomApiKey.isNotBlank() &&
+                    prefs.jevCustomModel.isNotBlank()
         }
 
         else -> prefs.getLlmVendorApiKey(vendor).isNotBlank()

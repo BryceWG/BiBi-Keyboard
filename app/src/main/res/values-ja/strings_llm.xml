@@ -327,6 +327,8 @@ ASR由来の生テキストを校正・整文してください。
     <string name="label_prompt_selection_jev_channel">リクエスト経路</string>
     <string name="llm_vendor_typesafe">TypeSafe</string>
     <string name="label_prompt_selection_jev_account_id">Cloudflare Account ID</string>
+    <string name="label_prompt_selection_jev_endpoint">TypeSafe 互換エンドポイント</string>
+    <string name="label_prompt_selection_jev_model">TypeSafe 互換モデル ID</string>
     <string name="prompt_selection_no_models">このプロバイダーの保存済みモデルがありません。先に AI 設定で設定してください。</string>
     <string name="prompt_selection_enable_blocked">有効にできません：候補プロンプトまたは選択モデルの設定が無効です。</string>
     <string name="prompt_selection_warning_invalid">現在の設定は無効です。自動選択は実行時に失敗し、有効なプリセットへフォールバックします。</string>

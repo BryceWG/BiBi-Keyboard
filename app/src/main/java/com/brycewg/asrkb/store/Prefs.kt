@@ -962,6 +962,12 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, "") ?: ""
         set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, value.trim()) }
 
+    var jevCustomEndpoint: String by stringPref(KEY_JEV_CUSTOM_ENDPOINT)
+
+    var jevCustomApiKey: String by stringPref(KEY_JEV_CUSTOM_API_KEY)
+
+    var jevCustomModel: String by stringPref(KEY_JEV_CUSTOM_MODEL)
+
     // 语音预置信息（触发短语 -> 替换内容）
     var speechPresetsJson: String
         get() = sp.getString(KEY_SPEECH_PRESETS, "") ?: ""

@@ -182,6 +182,9 @@ internal object PrefsLlmVendorStore {
                 JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
                 JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareApiKey.isNotBlank() &&
                     prefs.jevCloudflareAccountId.isNotBlank()
+                JevClassifierProvider.CUSTOM -> prefs.jevCustomEndpoint.isNotBlank() &&
+                    prefs.jevCustomApiKey.isNotBlank() &&
+                    prefs.jevCustomModel.isNotBlank()
             }
             if (!configured) {
                 null

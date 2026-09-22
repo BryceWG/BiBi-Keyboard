@@ -8,6 +8,7 @@ package com.brycewg.asrkb.asr
 import android.util.Log
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.JevClassifierProvider
+import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmModelResolution
 import com.brycewg.asrkb.store.LlmModelUnavailableReason
@@ -15,7 +16,6 @@ import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectionCandidate
 import com.brycewg.asrkb.store.PromptSelectionFailReason
 import com.brycewg.asrkb.store.PromptSelectionStatus
-import com.brycewg.asrkb.store.LlmFeatureModelRef
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
@@ -159,8 +159,16 @@ internal object PromptSelector {
                 JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterApiKey.isNotBlank()
                 JevClassifierProvider.CLOUDFLARE ->
                     prefs.jevCloudflareApiKey.isNotBlank() && prefs.jevCloudflareAccountId.isNotBlank()
+                JevClassifierProvider.CUSTOM ->
+                    prefs.jevCustomEndpoint.isNotBlank() &&
+                        prefs.jevCustomApiKey.isNotBlank() &&
+                        prefs.jevCustomModel.isNotBlank()
             }
-            if (!credentialsReady || modelRef.model != com.brycewg.asrkb.store.JEV_MODEL_ID) {
+            val modelReady = when (provider) {
+                JevClassifierProvider.CUSTOM -> prefs.jevCustomModel.isNotBlank()
+                else -> modelRef.model == com.brycewg.asrkb.store.JEV_MODEL_ID
+            }
+            if (!credentialsReady || !modelReady) {
                 return PromptSelectionOutcome(
                     status = PromptSelectionStatus.failure(
                         reason = PromptSelectionFailReason.INVALID_CONFIG,

@@ -327,6 +327,8 @@ grape
     <string name="label_prompt_selection_jev_channel">TypeSafe channel</string>
     <string name="llm_vendor_typesafe">TypeSafe</string>
     <string name="label_prompt_selection_jev_account_id">Cloudflare account ID</string>
+    <string name="label_prompt_selection_jev_endpoint">TypeSafe-compatible endpoint</string>
+    <string name="label_prompt_selection_jev_model">TypeSafe-compatible model ID</string>
     <string name="prompt_selection_no_models">No saved models for this provider. Configure one in AI settings first.</string>
     <string name="prompt_selection_enable_blocked">Cannot enable: the candidate prompts or the selection model are not valid.</string>
     <string name="prompt_selection_warning_invalid">The current configuration is invalid. Automatic selection will fail at runtime and fall back to the active prompt.</string>

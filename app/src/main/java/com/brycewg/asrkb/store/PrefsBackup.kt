@@ -142,6 +142,9 @@ internal object PrefsBackup {
         o.put(KEY_JEV_OPENROUTER_API_KEY, jevOpenRouterApiKey)
         o.put(KEY_JEV_CLOUDFLARE_API_KEY, jevCloudflareApiKey)
         o.put(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, jevCloudflareAccountId)
+        o.put(KEY_JEV_CUSTOM_ENDPOINT, jevCustomEndpoint)
+        o.put(KEY_JEV_CUSTOM_API_KEY, jevCustomApiKey)
+        o.put(KEY_JEV_CUSTOM_MODEL, jevCustomModel)
         // 语音预设
         o.put(KEY_SPEECH_PRESETS, speechPresetsJson)
         o.put(KEY_SPEECH_PRESET_ACTIVE_ID, activeSpeechPresetId)
@@ -494,6 +497,9 @@ internal object PrefsBackup {
             optString(KEY_JEV_OPENROUTER_API_KEY)?.let { jevOpenRouterApiKey = it }
             optString(KEY_JEV_CLOUDFLARE_API_KEY)?.let { jevCloudflareApiKey = it }
             optString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID)?.let { jevCloudflareAccountId = it }
+            optString(KEY_JEV_CUSTOM_ENDPOINT)?.let { jevCustomEndpoint = it }
+            optString(KEY_JEV_CUSTOM_API_KEY)?.let { jevCustomApiKey = it }
+            optString(KEY_JEV_CUSTOM_MODEL)?.let { jevCustomModel = it }
             // 语音预设
             optString(KEY_SPEECH_PRESETS)?.let { speechPresetsJson = it }
             optString(KEY_SPEECH_PRESET_ACTIVE_ID)?.let { activeSpeechPresetId = it }

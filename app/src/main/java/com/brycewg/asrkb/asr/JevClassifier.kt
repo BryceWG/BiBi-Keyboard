@@ -71,7 +71,7 @@ internal class JevClassifier(
                             JevSelectionResult(
                                 choice = null,
                                 vendorId = provider.id,
-                                model = JEV_MODEL_ID,
+                                model = modelFor(prefs, provider),
                                 elapsedMs = elapsedMs(startedAt),
                                 requestSent = true,
                                 failureReason = reason
@@ -111,7 +111,7 @@ internal class JevClassifier(
                                     vendorId = provider.id,
                                     model = responseJson?.optString("model")
                                         ?.takeIf(String::isNotBlank)
-                                        ?: JEV_MODEL_ID,
+                                        ?: modelFor(prefs, provider),
                                     elapsedMs = elapsedMs(startedAt),
                                     requestSent = true,
                                     failureReason = when {
@@ -153,8 +153,9 @@ internal class JevClassifier(
         val state = asrText
         val payload = when (provider) {
             JevClassifierProvider.TYPESAFE,
-            JevClassifierProvider.OPENROUTER -> JSONObject()
-                .put("model", if (provider == JevClassifierProvider.OPENROUTER) "~typesafe/jev-latest" else JEV_MODEL_ID)
+            JevClassifierProvider.OPENROUTER,
+            JevClassifierProvider.CUSTOM -> JSONObject()
+                .put("model", modelFor(prefs, provider))
                 .put("state", state)
                 .put("questions", questions)
 
@@ -175,17 +176,15 @@ internal class JevClassifier(
             JevClassifierProvider.CLOUDFLARE ->
                 "https://api.cloudflare.com/client/v4/accounts/${prefs.jevCloudflareAccountId}/ai/run/typesafe/jev" to
                     prefs.jevCloudflareApiKey
+            JevClassifierProvider.CUSTOM -> prefs.jevCustomEndpoint.trim() to prefs.jevCustomApiKey
         }
-        val payloadModel = when (provider) {
-            JevClassifierProvider.TYPESAFE -> JEV_MODEL_ID
-            JevClassifierProvider.OPENROUTER -> "~typesafe/jev-latest"
-            JevClassifierProvider.CLOUDFLARE -> "typesafe/jev"
-        }
+        val payloadModel = modelFor(prefs, provider)
         val requestStructure = when (provider) {
             JevClassifierProvider.CLOUDFLARE ->
                 "json object keys=model,input; input keys=state,questions"
             JevClassifierProvider.TYPESAFE,
-            JevClassifierProvider.OPENROUTER ->
+            JevClassifierProvider.OPENROUTER,
+            JevClassifierProvider.CUSTOM ->
                 "json object keys=model, state, questions"
         }
         return Request.Builder()
@@ -203,6 +202,13 @@ internal class JevClassifier(
             )
             .post(payload.toString().toRequestBody(JSON_MEDIA))
             .build()
+    }
+
+    private fun modelFor(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {
+        JevClassifierProvider.TYPESAFE -> JEV_MODEL_ID
+        JevClassifierProvider.OPENROUTER -> "~typesafe/jev-latest"
+        JevClassifierProvider.CLOUDFLARE -> "typesafe/jev"
+        JevClassifierProvider.CUSTOM -> prefs.jevCustomModel.trim()
     }
 
     private fun elapsedMs(startedAt: Long): Long = TimeUnit.NANOSECONDS.toMillis((System.nanoTime() - startedAt).coerceAtLeast(0L))

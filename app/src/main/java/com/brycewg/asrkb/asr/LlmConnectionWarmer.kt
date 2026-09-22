@@ -9,10 +9,10 @@ package com.brycewg.asrkb.asr
 import android.os.SystemClock
 import android.util.Log
 import com.brycewg.asrkb.store.JevClassifierProvider
+import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmModelResolution
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.ResolvedLlmModelConfig
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import java.io.IOException
@@ -114,6 +114,7 @@ internal object LlmConnectionWarmer {
             JevClassifierProvider.TYPESAFE -> "https://api.typesafe.ai/v1/systemone"
             JevClassifierProvider.OPENROUTER -> "https://openrouter.ai/api/alpha/decisions"
             JevClassifierProvider.CLOUDFLARE -> "https://api.cloudflare.com/client/v4"
+            JevClassifierProvider.CUSTOM -> prefs.jevCustomEndpoint.trim()
         }
     }
 
