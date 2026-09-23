@@ -902,9 +902,9 @@ class AsrSessionManager(
         activeHistoryTiming?.end(AsrHistoryTimingStage.RECOGNITION)
         snapshotAudioDurationIfPossible()
         lastRecognitionStageMs = activeHistoryTiming
-                ?.snapshot()
-                ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
-                ?.takeIf { it > 0L }
+            ?.snapshot()
+            ?.stageDurationMs(AsrHistoryTimingStage.RECOGNITION)
+            ?.takeIf { it > 0L }
             ?: lastRequestDurationMs?.takeIf { it > 0L }
         lastFinalVendorForStats = when (val e = asrEngine) {
             is BackupAwareAsrEngine -> if (e.wasLastResultFromBackup()) e.backupVendor else e.primaryVendor

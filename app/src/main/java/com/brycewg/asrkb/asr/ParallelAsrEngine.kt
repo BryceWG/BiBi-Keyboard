@@ -96,6 +96,7 @@ class ParallelAsrEngine(
 
     private var primaryEngine: StreamingAsrEngine? = null
     private var backupEngine: StreamingAsrEngine? = null
+
     @Volatile private var backupRequestDurationMs: Long? = null
     private var primaryConsumer: ExternalPcmConsumer? = null
     private var backupConsumer: ExternalPcmConsumer? = null

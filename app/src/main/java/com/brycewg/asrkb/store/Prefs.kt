@@ -50,8 +50,7 @@ class Prefs(context: Context) {
         VERY_CONSERVATIVE("very_conservative", 3.3f);
 
         companion object {
-            fun fromId(id: String?): ShakeRecordingSensitivity =
-                entries.firstOrNull { it.id == id } ?: DEFAULT
+            fun fromId(id: String?): ShakeRecordingSensitivity = entries.firstOrNull { it.id == id } ?: DEFAULT
         }
     }
 

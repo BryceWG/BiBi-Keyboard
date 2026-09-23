@@ -31,9 +31,11 @@ class FloatingImeBridgeHintReceiver : BroadcastReceiver() {
 
         val shouldForwardFloating = try {
             prefs.floatingImeBridgeEnabled &&
-                (prefs.floatingAsrEnabled ||
-                    prefs.volumeKeyRecordingEnabled ||
-                    prefs.shakeRecordingEnabled)
+                (
+                    prefs.floatingAsrEnabled ||
+                        prefs.volumeKeyRecordingEnabled ||
+                        prefs.shakeRecordingEnabled
+                    )
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to check bridge IME hint prefs", t)
             false

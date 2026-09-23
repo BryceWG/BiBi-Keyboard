@@ -1173,8 +1173,7 @@ private fun mimoPrimaryItemCount(
     promptVisible: Boolean
 ): Int = 5 + (if (customEndpointVisible) 1 else 0) + (if (promptVisible) 2 else 0)
 
-private fun stepAudioPrimaryItemCount(customEndpointVisible: Boolean, customModelVisible: Boolean): Int =
-    6 + (if (customEndpointVisible) 1 else 0) + (if (customModelVisible) 1 else 0)
+private fun stepAudioPrimaryItemCount(customEndpointVisible: Boolean, customModelVisible: Boolean): Int = 6 + (if (customEndpointVisible) 1 else 0) + (if (customModelVisible) 1 else 0)
 
 private fun mimoGuideUrl(endpointPreset: String): String = if (
     endpointPreset == Prefs.MIMO_ENDPOINT_PRESET_PAYGO ||
@@ -1222,14 +1221,16 @@ internal fun stepAudioLanguageOptions(context: Context): List<OnlineVendorChoice
 
 internal const val STEPAUDIO_CUSTOM_MODEL_OPTION_ID = "__custom__"
 
-internal fun stepAudioModelOptions(context: Context): List<OnlineVendorChoice> =
-    Prefs.STEPAUDIO_ASR_MODELS.map { model ->
-        OnlineVendorChoice(model, when (model) {
+internal fun stepAudioModelOptions(context: Context): List<OnlineVendorChoice> = Prefs.STEPAUDIO_ASR_MODELS.map { model ->
+    OnlineVendorChoice(
+        model,
+        when (model) {
             Prefs.DEFAULT_STEPAUDIO_ASR_MODEL -> context.getString(R.string.stepaudio_model_25_asr)
             Prefs.STEPAUDIO_ASR_MODEL_MAX -> context.getString(R.string.stepaudio_model_3_asr_max)
             else -> model
-        })
-    } + OnlineVendorChoice(STEPAUDIO_CUSTOM_MODEL_OPTION_ID, context.getString(R.string.stepaudio_model_custom))
+        }
+    )
+} + OnlineVendorChoice(STEPAUDIO_CUSTOM_MODEL_OPTION_ID, context.getString(R.string.stepaudio_model_custom))
 
 internal fun stepAudioLanguageLabel(context: Context, language: String): String {
     val normalized = language.trim()
@@ -1286,8 +1287,7 @@ internal fun isSfOmniModel(model: String): Boolean = model.startsWith("Qwen/Qwen
 internal fun displayStepAudioModel(prefs: Prefs): String = prefs.stepAudioModel.trim()
     .ifBlank { Prefs.DEFAULT_STEPAUDIO_ASR_MODEL }
 
-internal fun isCustomStepAudioModel(model: String): Boolean =
-    model.trim().isNotBlank() && model.trim() !in Prefs.STEPAUDIO_ASR_MODELS
+internal fun isCustomStepAudioModel(model: String): Boolean = model.trim().isNotBlank() && model.trim() !in Prefs.STEPAUDIO_ASR_MODELS
 
 private fun formatAsrFloat(value: Float): String = String.format(Locale.US, "%.2f", value)
 

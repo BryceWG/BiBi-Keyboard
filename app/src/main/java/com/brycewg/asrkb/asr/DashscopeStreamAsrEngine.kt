@@ -73,6 +73,7 @@ class DashscopeStreamAsrEngine(
     private var useRecognitionProtocol: Boolean = false
     private var selectedModel: String = Prefs.DEFAULT_DASH_MODEL
     private var recognitionReuseKey: DashscopeRecognitionReuseKey? = null
+
     /** 仅在 Recognition onComplete 后为 true，允许把连接归还到复用缓存。 */
     private val recognitionTaskSucceeded = AtomicBoolean(false)
 

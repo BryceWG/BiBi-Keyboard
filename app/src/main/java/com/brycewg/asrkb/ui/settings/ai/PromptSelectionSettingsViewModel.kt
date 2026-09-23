@@ -3,13 +3,13 @@ package com.brycewg.asrkb.ui.settings.ai
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.brycewg.asrkb.store.LlmCustomProviderOption
+import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.LlmModelConfigResolver
 import com.brycewg.asrkb.store.LlmVendorOption
 import com.brycewg.asrkb.store.PROMPT_SELECTION_SKIP_POLISH_ID
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectionCandidate
 import com.brycewg.asrkb.store.PromptSelectionStore
-import com.brycewg.asrkb.store.LlmFeatureModelRef
 import com.brycewg.asrkb.store.PromptSelectorModelSummary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
