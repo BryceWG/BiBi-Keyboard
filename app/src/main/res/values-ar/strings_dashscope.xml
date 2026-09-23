@@ -1,7 +1,7 @@
 <resources>
-    <!-- DashScope (Alibaba Cloud DashScope) ASR configuration strings -->
-    <string name="dash_section_title">معلمات Alibaba Cloud DashScope ASR</string>
-    <string name="vendor_dashscope">Alibaba Cloud DashScope</string>
+    <!-- DashScope (Alibaba Qianwen) ASR configuration strings -->
+    <string name="dash_section_title">معلمات Alibaba Qianwen ASR</string>
+    <string name="vendor_dashscope">Alibaba Qianwen</string>
 
     <!-- DashScope configuration -->
     <string name="label_dash_api_key">مفتاح DashScope API (Bearer)</string>
@@ -23,8 +23,8 @@
     <string name="label_dash_semantic_punct">استخدام التقسيم الدلالي</string>
     <string name="dash_lang_auto">اكتشاف تلقائي</string>
     <string name="label_dash_region">نقطة النهاية</string>
-    <string name="dash_region_cn">الصين القارية (aliyuncs.com)</string>
-    <string name="dash_region_intl">سنغافورة/دولي (dashscope-intl.aliyuncs.com)</string>
+    <string name="dash_region_cn">الصين القارية (maas.qianwenaiapi.com)</string>
+    <string name="dash_region_intl">دولي (maas.qwencloudapi.com)</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">الصينية (zh)</string>

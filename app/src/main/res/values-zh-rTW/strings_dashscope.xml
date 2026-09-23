@@ -1,7 +1,7 @@
 <resources>
-    <!-- DashScope (阿里雲百煉) ASR 配置字串 -->
-    <string name="dash_section_title">阿里雲百煉 ASR 參數</string>
-    <string name="vendor_dashscope">阿里雲百煉</string>
+    <!-- DashScope (阿里千問) ASR 配置字串 -->
+    <string name="dash_section_title">阿里千問 ASR 參數</string>
+    <string name="vendor_dashscope">阿里千問</string>
 
     <!-- DashScope configuration -->
     <string name="label_dash_api_key">DashScope API Key（Bearer）</string>
@@ -23,8 +23,8 @@
     <string name="label_dash_semantic_punct">使用語義斷句</string>
     <string name="dash_lang_auto">自動識別</string>
     <string name="label_dash_region">請求端點</string>
-    <string name="dash_region_cn">中國大陸（aliyuncs.com）</string>
-    <string name="dash_region_intl">新加坡/國際（dashscope-intl.aliyuncs.com）</string>
+    <string name="dash_region_cn">中國大陸（maas.qianwenaiapi.com）</string>
+    <string name="dash_region_intl">國際（maas.qwencloudapi.com）</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中文 (zh)</string>

@@ -1,7 +1,7 @@
 <resources>
-    <!-- DashScope (Alibaba Cloud DashScope) ASR configuration strings -->
-    <string name="dash_section_title">Alibaba Cloud DashScope ASR Parameters</string>
-    <string name="vendor_dashscope">Alibaba Cloud DashScope</string>
+    <!-- DashScope (Alibaba Qianwen) ASR configuration strings -->
+    <string name="dash_section_title">Alibaba Qianwen ASR Parameters</string>
+    <string name="vendor_dashscope">Alibaba Qianwen</string>
 
     <!-- DashScope configuration -->
     <string name="label_dash_api_key">DashScope API Key (Bearer)</string>
@@ -23,8 +23,8 @@
     <string name="label_dash_semantic_punct">Use semantic segmentation</string>
     <string name="dash_lang_auto">Auto detect</string>
     <string name="label_dash_region">Request endpoint</string>
-    <string name="dash_region_cn">Mainland China (aliyuncs.com)</string>
-    <string name="dash_region_intl">Singapore/International (dashscope-intl.aliyuncs.com)</string>
+    <string name="dash_region_cn">Mainland China (maas.qianwenaiapi.com)</string>
+    <string name="dash_region_intl">International (maas.qwencloudapi.com)</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">Chinese (zh)</string>

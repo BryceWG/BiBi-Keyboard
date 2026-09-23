@@ -35,11 +35,11 @@ class DashScopePrefsCompatTest {
     @Test
     fun multimodalGenerationEndpointUsesDashScopeRegionBaseUrl() {
         assertEquals(
-            "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
+            "https://maas.qianwenaiapi.com/api/v1/services/aigc/multimodal-generation/generation",
             DashScopePrefsCompat.getDashMultimodalGenerationEndpoint("cn")
         )
         assertEquals(
-            "https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
+            "https://maas.qwencloudapi.com/api/v1/services/aigc/multimodal-generation/generation",
             DashScopePrefsCompat.getDashMultimodalGenerationEndpoint("intl")
         )
     }

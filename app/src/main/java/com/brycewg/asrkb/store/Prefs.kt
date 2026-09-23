@@ -1118,7 +1118,7 @@ class Prefs(context: Context) {
         val reasoningParamsOffJson: String
     )
 
-    // 阿里云百炼（DashScope）凭证
+    // 阿里千问（DashScope 协议）凭证
     var dashApiKey: String by stringPref(KEY_DASH_API_KEY, "")
 
     // DashScope：自定义识别上下文（提示词）
@@ -1137,7 +1137,7 @@ class Prefs(context: Context) {
         dashLanguage = languages.joinToString(",")
     }
 
-    // DashScope：地域（cn=中国大陆，intl=新加坡/国际）。默认 cn
+    // DashScope：地域（cn=中国大陆，intl=国际）。默认 cn
     var dashRegion: String by stringPref(KEY_DASH_REGION, "cn")
 
     fun getDashHttpBaseUrl(): String = DashScopePrefsCompat.getDashHttpBaseUrl(dashRegion)

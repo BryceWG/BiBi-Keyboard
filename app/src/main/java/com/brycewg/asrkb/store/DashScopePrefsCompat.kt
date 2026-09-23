@@ -22,17 +22,18 @@ internal object DashScopePrefsCompat {
     )
 
     fun getDashHttpBaseUrl(dashRegion: String): String = if (dashRegion.equals("intl", ignoreCase = true)) {
-        "https://dashscope-intl.aliyuncs.com/api/v1"
+        "https://maas.qwencloudapi.com/api/v1"
     } else {
-        "https://dashscope.aliyuncs.com/api/v1"
+        // 中国大陆：阿里千问 MaaS（原 DashScope / 百炼 host 迁移）
+        "https://maas.qianwenaiapi.com/api/v1"
     }
 
     fun getDashCompatibleModeChatEndpoint(dashRegion: String): String = if (
         dashRegion.equals("intl", ignoreCase = true)
     ) {
-        "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "https://maas.qwencloudapi.com/compatible-mode/v1/chat/completions"
     } else {
-        "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+        "https://maas.qianwenaiapi.com/compatible-mode/v1/chat/completions"
     }
 
     fun getDashMultimodalGenerationEndpoint(dashRegion: String): String = getDashHttpBaseUrl(dashRegion).trimEnd('/') + "/services/aigc/multimodal-generation/generation"

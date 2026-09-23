@@ -1,7 +1,7 @@
 <resources>
-    <!-- DashScope (阿里云百炼) ASR 設定文字列 -->
-    <string name="dash_section_title">Alibaba Cloud DashScope ASRパラメータ</string>
-    <string name="vendor_dashscope">Alibaba Cloud DashScope</string>
+    <!-- DashScope (阿里千问) ASR 設定文字列 -->
+    <string name="dash_section_title">Alibaba Qianwen ASRパラメータ</string>
+    <string name="vendor_dashscope">Alibaba Qianwen</string>
 
     <!-- DashScope configuration -->
     <string name="label_dash_api_key">DashScope APIキー（Bearer）</string>
@@ -23,8 +23,8 @@
     <string name="label_dash_semantic_punct">セマンティック区切りを使用</string>
     <string name="dash_lang_auto">自動識別）</string>
     <string name="label_dash_region">エンドポイント</string>
-    <string name="dash_region_cn">中国本土（aliyuncs.com）</string>
-    <string name="dash_region_intl">シンガポール/国際（dashscope-intl.aliyuncs.com）</string>
+    <string name="dash_region_cn">中国本土（maas.qianwenaiapi.com）</string>
+    <string name="dash_region_intl">国際（maas.qwencloudapi.com）</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中国語（zh）</string>

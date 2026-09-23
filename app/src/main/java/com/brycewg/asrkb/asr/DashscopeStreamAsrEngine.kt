@@ -52,10 +52,10 @@ class DashscopeStreamAsrEngine(
 
     companion object {
         private const val TAG = "DashscopeStreamAsrEngine"
-        private const val WS_URL_CN = "wss://dashscope.aliyuncs.com/api-ws/v1/realtime"
-        private const val WS_URL_INTL = "wss://dashscope-intl.aliyuncs.com/api-ws/v1/realtime"
-        private const val WS_URL_INFER_CN = "wss://dashscope.aliyuncs.com/api-ws/v1/inference"
-        private const val WS_URL_INFER_INTL = "wss://dashscope-intl.aliyuncs.com/api-ws/v1/inference"
+        private const val WS_URL_CN = "wss://maas.qianwenaiapi.com/api-ws/v1/realtime"
+        private const val WS_URL_INTL = "wss://maas.qwencloudapi.com/api-ws/v1/realtime"
+        private const val WS_URL_INFER_CN = "wss://maas.qianwenaiapi.com/api-ws/v1/inference"
+        private const val WS_URL_INFER_INTL = "wss://maas.qwencloudapi.com/api-ws/v1/inference"
         private const val FINAL_RESULT_TIMEOUT_MS = 6000L
     }
 

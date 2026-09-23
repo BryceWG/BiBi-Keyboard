@@ -296,7 +296,7 @@
   <string name="model_guide_option_online">☁️ نموذج سحابي (مخصص)</string>
   <string name="model_guide_option_online_desc">دقة أفضل، يدعم مزودين متعددين (Volcengine و OpenAI و Gemini وغيرها)، يتطلّب ضبط مفتاح API</string>
   <string name="model_guide_option_online_action">سيفتح دليل الإعداد لمساعدتك على ضبط مفاتيح API</string>
-  <string name="model_guide_online_dialog_message">يدعم التعرّف السحابي مزودين متعددين (Volcengine و SiliconFlow و OpenAI و Gemini و DashScope و Soniox و ElevenLabs وغيرها). راجع دليل الإعداد للتفاصيل.</string>
+  <string name="model_guide_online_dialog_message">يدعم التعرّف السحابي مزودين متعددين (Volcengine و SiliconFlow و OpenAI و Gemini و Alibaba Qianwen و Soniox و ElevenLabs وغيرها). راجع دليل الإعداد للتفاصيل.</string>
   <string name="model_guide_select_prompt">يرجى اختيار نوع النموذج</string>
   <string name="model_guide_downloading">جارٍ تنزيل النموذج، انتظر…</string>
   <string name="model_guide_download_complete">اكتمل تنزيل النموذج</string>

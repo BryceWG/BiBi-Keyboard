@@ -21,8 +21,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * 使用阿里云百炼（DashScope）的非流式 ASR 引擎。
- * - Fun-ASR-Flash 与 Qwen-Audio 3.0 走 DashScope REST multimodal-generation + Base64 音频。
+ * 使用阿里千问（原 DashScope / 百炼协议）的非流式 ASR 引擎。
+ * - Fun-ASR-Flash 与 Qwen-Audio 3.0 走 REST multimodal-generation + Base64 音频。
  * - Qwen3-ASR-Flash 走同一 REST 入口，使用 asr_options / system prompt。
  * - Qwen3.5 / Qwen3.8 Omni 非实时模型走 OpenAI 兼容 chat/completions + Base64 音频输入。
  */
