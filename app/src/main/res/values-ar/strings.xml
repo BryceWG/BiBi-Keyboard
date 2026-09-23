@@ -77,6 +77,7 @@
   <string name="home_summary_more_input_volume_key_enabled">إدخال مفاتيح الصوت مفعّل</string>
   <string name="home_summary_more_input_floating_enabled">إدخال الكرة العائمة مفعّل</string>
   <string name="home_summary_more_input_both_enabled">مفاتيح الصوت والكرة العائمة مفعّلة</string>
+  <string name="home_summary_more_input_shake_enabled">التسجيل بالهز مفعّل</string>
   <string name="home_summary_more_input_accessibility_missing">إمكانية الوصول غير مفعّلة</string>
   <string name="home_summary_setup_done">اكتمل الإعداد الأساسي</string>
   <string name="home_summary_setup_progress">الإعداد الأساسي %1$d/%2$d</string>

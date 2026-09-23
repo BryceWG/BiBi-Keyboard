@@ -509,11 +509,13 @@ private data class SettingsHomeSnapshot(
         fun fromPrefs(context: Context, prefs: Prefs): SettingsHomeSnapshot {
             val floatingEnabled = prefs.floatingAsrEnabled
             val volumeKeyEnabled = prefs.volumeKeyRecordingEnabled
+            val shakeRecordingEnabled = prefs.shakeRecordingEnabled
             val imeBridgeEnabled = prefs.floatingImeBridgeEnabled
             val accessibilityMissing = floatingInputNeedsAccessibility(
                 floatingEnabled = floatingEnabled,
                 volumeKeyEnabled = volumeKeyEnabled,
-                imeBridgeEnabled = imeBridgeEnabled
+                imeBridgeEnabled = imeBridgeEnabled,
+                shakeRecordingEnabled = shakeRecordingEnabled
             ) &&
                 !isAccessibilityServiceEnabled(context)
             return SettingsHomeSnapshot(
@@ -523,6 +525,7 @@ private data class SettingsHomeSnapshot(
                     context = context,
                     floatingEnabled = floatingEnabled,
                     volumeKeyEnabled = volumeKeyEnabled,
+                    shakeRecordingEnabled = shakeRecordingEnabled,
                     accessibilityMissing = accessibilityMissing
                 ),
                 asrSummary = asrSummary(context, prefs),
@@ -544,11 +547,13 @@ private fun moreInputSummary(
     context: Context,
     floatingEnabled: Boolean,
     volumeKeyEnabled: Boolean,
+    shakeRecordingEnabled: Boolean,
     accessibilityMissing: Boolean
 ): String = context.getString(
     when {
         accessibilityMissing -> R.string.home_summary_more_input_accessibility_missing
-        floatingEnabled && volumeKeyEnabled -> R.string.home_summary_more_input_both_enabled
+        floatingEnabled && (volumeKeyEnabled || shakeRecordingEnabled) -> R.string.home_summary_more_input_both_enabled
+        shakeRecordingEnabled -> R.string.home_summary_more_input_shake_enabled
         volumeKeyEnabled -> R.string.home_summary_more_input_volume_key_enabled
         floatingEnabled -> R.string.home_summary_more_input_floating_enabled
         else -> R.string.home_summary_more_input_disabled
@@ -597,6 +602,7 @@ private fun activePromptPresetTitle(prefs: Prefs): String {
 private fun oneClickSetupSummary(context: Context, prefs: Prefs): String {
     val floatingEnabled = prefs.floatingAsrEnabled
     val volumeKeyEnabled = prefs.volumeKeyRecordingEnabled
+    val shakeRecordingEnabled = prefs.shakeRecordingEnabled
     val imeBridgeEnabled = prefs.floatingImeBridgeEnabled
     val checks = buildList {
         add(isOurImeEnabled(context))
@@ -611,7 +617,8 @@ private fun oneClickSetupSummary(context: Context, prefs: Prefs): String {
         if (floatingInputNeedsAccessibility(
                 floatingEnabled = floatingEnabled,
                 volumeKeyEnabled = volumeKeyEnabled,
-                imeBridgeEnabled = imeBridgeEnabled
+                imeBridgeEnabled = imeBridgeEnabled,
+                shakeRecordingEnabled = shakeRecordingEnabled
             )
         ) {
             add(isAccessibilityServiceEnabled(context))

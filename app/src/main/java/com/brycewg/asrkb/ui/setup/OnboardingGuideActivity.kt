@@ -156,7 +156,8 @@ class OnboardingGuideActivity : BaseActivity() {
         val a11yRequired = floatingInputNeedsAccessibility(
             floatingEnabled = floatingEnabled,
             volumeKeyEnabled = prefs.volumeKeyRecordingEnabled,
-            imeBridgeEnabled = prefs.floatingImeBridgeEnabled
+            imeBridgeEnabled = prefs.floatingImeBridgeEnabled,
+            shakeRecordingEnabled = prefs.shakeRecordingEnabled
         )
         val overlayGranted = hasOverlayPermission()
         val a11yGranted = hasAccessibilityPermission()

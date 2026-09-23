@@ -68,6 +68,7 @@ class FloatingAsrService : Service() {
         const val ACTION_VOLUME_KEY_START = "com.brycewg.asrkb.action.VOLUME_KEY_RECORDING_START"
         const val ACTION_VOLUME_KEY_STOP = "com.brycewg.asrkb.action.VOLUME_KEY_RECORDING_STOP"
         const val ACTION_VOLUME_KEY_TOGGLE = "com.brycewg.asrkb.action.VOLUME_KEY_RECORDING_TOGGLE"
+        const val ACTION_SHAKE_RECORDING_TOGGLE = "com.brycewg.asrkb.action.SHAKE_RECORDING_TOGGLE"
     }
 
     private lateinit var windowManager: WindowManager
@@ -263,6 +264,7 @@ class FloatingAsrService : Service() {
             ACTION_VOLUME_KEY_START -> interactionController.onVolumeKeyStart()
             ACTION_VOLUME_KEY_STOP -> interactionController.onVolumeKeyStop()
             ACTION_VOLUME_KEY_TOGGLE -> interactionController.onVolumeKeyToggle()
+            ACTION_SHAKE_RECORDING_TOGGLE -> interactionController.onShakeRecordingToggle()
             FloatingImeHints.ACTION_HINT_IME_VISIBLE -> {
                 handleAccessibilityImeVisibilityHint(true, "start_hint_visible")
             }

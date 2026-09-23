@@ -5,6 +5,10 @@
     <string name="title_floating_settings">その他の入力方法</string>
     <string name="section_floating_basic">フローティングボール設定</string>
     <string name="section_volume_key_recording">音量キー録音モード</string>
+    <string name="section_shake_recording">振って録音</string>
+    <string name="label_shake_recording">振って録音を開始／停止</string>
+    <string name="label_shake_recording_sensitivity">振る感度</string>
+    <string name="label_shake_recording_sound">録音の開始／停止時に音を再生</string>
     <string name="section_floating_compat">高度な機能</string>
     <string name="section_floating_keep_alive">バックグラウンド保活</string>
     <string name="label_floating_only_when_ime_visible">キーボード表示時のみフローティングボールを表示する</string>
@@ -64,6 +68,11 @@
     <string name="option_volume_key_down_toggle">音量-で録音開始/停止</string>
     <string name="option_volume_key_up_start_down_stop">音量+で開始、音量-で停止</string>
     <string name="option_volume_key_down_start_up_stop">音量-で開始、音量+で停止</string>
+    <string name="option_shake_sensitivity_very_sensitive">非常に敏感</string>
+    <string name="option_shake_sensitivity_sensitive">敏感</string>
+    <string name="option_shake_sensitivity_default">標準</string>
+    <string name="option_shake_sensitivity_conservative">控えめ</string>
+    <string name="option_shake_sensitivity_very_conservative">非常に控えめ</string>
     <string name="label_volume_key_status_toast">録音状態の通知</string>
     <string name="label_volume_key_stop_on_ime_hidden">キーボード非表示時に録音を停止</string>
     <string name="toast_volume_key_recording_started">録音を開始しました</string>
@@ -83,7 +92,7 @@
     <!-- Floating ASR status messages -->
     <string name="floating_asr_error">認識失敗：%1$s</string>
     <string name="floating_asr_copied">クリップボードにコピーしました</string>
-    <string name="accessibility_service_description">フローティングボールと音量キー録音がASR結果を現在の入力フィールドに挿入できるようにします。データは収集またはアップロードされません。</string>
+    <string name="accessibility_service_description">フローティングボール、音量キー、振って録音のASR結果を現在の入力フィールドに挿入できるようにします。データは収集またはアップロードされません。</string>
 
     <!-- Floating radial menu -->
     <string name="label_radial_switch_asr">ASRプロバイダーを切り替え</string>
@@ -139,6 +148,10 @@
     <string name="feature_volume_key_status_toast_on_desc">音量キーで録音の開始または停止に成功したとき、短い Toast を表示します。</string>
     <string name="feature_volume_key_stop_on_ime_hidden_off_desc">音量キー録音中にキーボードが消えても、手動で停止するまで録音を続けます。</string>
     <string name="feature_volume_key_stop_on_ime_hidden_on_desc">音量キー録音中にキーボードが消えると、自動的に録音を停止します。</string>
+    <string name="feature_shake_recording_off_desc">スマートフォンを振っても録音を操作しません。</string>
+    <string name="feature_shake_recording_on_desc">キーボード表示中にスマートフォンを振ると録音を開始し、もう一度振ると停止します。アクセシビリティサービスを使用し、キーボード非表示時は反応しません。</string>
+    <string name="feature_shake_recording_sound_off_desc">振って録音を開始または停止するとき、システム音を再生しません。</string>
+    <string name="feature_shake_recording_sound_on_desc">振って録音を開始または停止するとき、固定の通知音を再生します。</string>
 
     <!-- フローティング書き込み互換モード -->
     <string name="feature_floating_ime_bridge_off_desc">すべての Hook 連携リクエストの受付を停止します。メインキーボードとフローティングボールの非 Hook 機能には影響しません。</string>

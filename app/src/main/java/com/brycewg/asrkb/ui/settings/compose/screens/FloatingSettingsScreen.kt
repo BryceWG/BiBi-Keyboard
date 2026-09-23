@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.imebridge.ImeBridgeClient
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.ui.AsrAccessibilityService
 import com.brycewg.asrkb.ui.floating.FloatingServiceManager
 import com.brycewg.asrkb.ui.floating.floatingAsrNeedsAccessibility as policyFloatingAsrNeedsAccessibility
 import com.brycewg.asrkb.ui.floating.floatingInputNeedsAccessibility as policyFloatingInputNeedsAccessibility
@@ -87,6 +88,7 @@ fun FloatingSettingsScreen(
     var pendingAsrEnable by remember { mutableStateOf(false) }
     var pendingAsrPermission by remember { mutableStateOf<FloatingPermissionRequest?>(null) }
     var pendingVolumeKeyEnable by remember { mutableStateOf(false) }
+    var pendingShakeEnable by remember { mutableStateOf(false) }
     var autoAccessibilityRequested by remember { mutableStateOf(false) }
     var choiceSheet by remember { mutableStateOf<SettingsChoiceSheetState?>(null) }
     var featureExplainerDialog by remember { mutableStateOf<SettingsFeatureExplainerDialogState?>(null) }
@@ -192,7 +194,8 @@ fun FloatingSettingsScreen(
     fun floatingInputNeedsAccessibility(): Boolean = policyFloatingInputNeedsAccessibility(
         floatingEnabled = uiState.asrEnabled,
         volumeKeyEnabled = uiState.volumeKeyRecordingEnabled,
-        imeBridgeEnabled = uiState.imeBridgeEnabled
+        imeBridgeEnabled = uiState.imeBridgeEnabled,
+        shakeRecordingEnabled = uiState.shakeRecordingEnabled
     )
 
     fun refreshImeBridgeStatus() {
@@ -212,6 +215,7 @@ fun FloatingSettingsScreen(
         settingsLoaded,
         uiState.asrEnabled,
         uiState.volumeKeyRecordingEnabled,
+        uiState.shakeRecordingEnabled,
         uiState.imeBridgeEnabled,
         uiState.onlyWhenImeVisible
     ) {
@@ -274,9 +278,28 @@ fun FloatingSettingsScreen(
         refreshState()
     }
 
+    fun setShakeRecordingEnabled(enabled: Boolean) {
+        if (enabled && !isAccessibilityServiceEnabled(context)) {
+            pendingShakeEnable = true
+            showAccessibilityPermissionMessage()
+            requestAccessibilityPermission()
+            refreshState()
+            return
+        }
+        pendingShakeEnable = false
+        prefs.shakeRecordingEnabled = enabled
+        AsrAccessibilityService.refreshShakeSensor()
+        refreshState()
+    }
+
     fun syncAsrToggleAfterPermissions() {
         if (pendingVolumeKeyEnable && isAccessibilityServiceEnabled(context)) {
             setVolumeKeyRecordingEnabled(true)
+            return
+        }
+
+        if (pendingShakeEnable && isAccessibilityServiceEnabled(context)) {
+            setShakeRecordingEnabled(true)
             return
         }
 
@@ -400,6 +423,36 @@ fun FloatingSettingsScreen(
             selectedIndex = selectedIndex
         ) { index ->
             prefs.volumeKeyRecordingMode = modes.getOrElse(index) { Prefs.VOLUME_KEY_MODE_UP_TOGGLE }
+            refreshState()
+        }
+    }
+
+    fun shakeSensitivityLabel(id: String): String = context.getString(
+        when (Prefs.ShakeRecordingSensitivity.fromId(id)) {
+            Prefs.ShakeRecordingSensitivity.VERY_SENSITIVE ->
+                R.string.option_shake_sensitivity_very_sensitive
+            Prefs.ShakeRecordingSensitivity.SENSITIVE -> R.string.option_shake_sensitivity_sensitive
+            Prefs.ShakeRecordingSensitivity.DEFAULT -> R.string.option_shake_sensitivity_default
+            Prefs.ShakeRecordingSensitivity.CONSERVATIVE ->
+                R.string.option_shake_sensitivity_conservative
+            Prefs.ShakeRecordingSensitivity.VERY_CONSERVATIVE ->
+                R.string.option_shake_sensitivity_very_conservative
+        }
+    )
+
+    fun showShakeSensitivitySheet() {
+        val sensitivities = Prefs.ShakeRecordingSensitivity.entries
+        val selectedIndex = sensitivities.indexOfFirst {
+            it.id == uiState.shakeRecordingSensitivity
+        }.takeIf { it >= 0 } ?: sensitivities.indexOf(Prefs.ShakeRecordingSensitivity.DEFAULT)
+        choiceSheet = settingsChoiceSheetState(
+            title = context.getString(R.string.label_shake_recording_sensitivity),
+            items = sensitivities.map { shakeSensitivityLabel(it.id) },
+            selectedIndex = selectedIndex
+        ) { index ->
+            prefs.shakeRecordingSensitivity = sensitivities.getOrElse(index) {
+                Prefs.ShakeRecordingSensitivity.DEFAULT
+            }.id
             refreshState()
         }
     }
@@ -635,6 +688,56 @@ fun FloatingSettingsScreen(
                             },
                             index = 3,
                             count = volumeItemCount
+                        )
+                    }
+                }
+            }
+
+            item("shake_recording") {
+                FloatingSection(uiMode = uiMode, titleRes = R.string.section_shake_recording) {
+                    val shakeItemCount = if (uiState.shakeRecordingEnabled) 3 else 1
+                    FloatingExplainedSwitch(
+                        id = "shake_recording",
+                        titleRes = R.string.label_shake_recording,
+                        checked = uiState.shakeRecordingEnabled,
+                        onToggle = { target ->
+                            applyExplainedSwitch(
+                                current = uiState.shakeRecordingEnabled,
+                                target = target,
+                                titleRes = R.string.label_shake_recording,
+                                offDescRes = R.string.feature_shake_recording_off_desc,
+                                onDescRes = R.string.feature_shake_recording_on_desc,
+                                preferenceKey = "shake_recording_explained"
+                            ) { setShakeRecordingEnabled(it) }
+                        },
+                        index = 0,
+                        count = shakeItemCount
+                    )
+                    if (uiState.shakeRecordingEnabled) {
+                        FloatingValuePreference(
+                            titleRes = R.string.label_shake_recording_sensitivity,
+                            value = shakeSensitivityLabel(uiState.shakeRecordingSensitivity),
+                            uiMode = uiMode,
+                            index = 1,
+                            count = shakeItemCount,
+                            onClick = { showShakeSensitivitySheet() }
+                        )
+                        FloatingExplainedSwitch(
+                            id = "shake_recording_sound",
+                            titleRes = R.string.label_shake_recording_sound,
+                            checked = uiState.shakeRecordingSoundEnabled,
+                            onToggle = { target ->
+                                applyExplainedSwitch(
+                                    current = uiState.shakeRecordingSoundEnabled,
+                                    target = target,
+                                    titleRes = R.string.label_shake_recording_sound,
+                                    offDescRes = R.string.feature_shake_recording_sound_off_desc,
+                                    onDescRes = R.string.feature_shake_recording_sound_on_desc,
+                                    preferenceKey = "shake_recording_sound_explained"
+                                ) { prefs.shakeRecordingSoundEnabled = it }
+                            },
+                            index = 2,
+                            count = shakeItemCount
                         )
                     }
                 }

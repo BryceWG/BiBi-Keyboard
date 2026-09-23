@@ -10,12 +10,18 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.Toast
+import kotlin.math.sqrt
 import com.brycewg.asrkb.LocaleHelper
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
@@ -25,7 +31,7 @@ import com.brycewg.asrkb.ui.floating.FloatingImeHints
 /**
  * 无障碍服务,用于悬浮球语音识别后将文本插入到当前焦点的输入框中
  */
-class AsrAccessibilityService : AccessibilityService() {
+class AsrAccessibilityService : AccessibilityService(), SensorEventListener {
 
     override fun attachBaseContext(newBase: Context?) {
         val wrapped = newBase?.let { LocaleHelper.wrap(it) }
@@ -55,6 +61,10 @@ class AsrAccessibilityService : AccessibilityService() {
         const val EXTRA_TEXT = "text"
 
         private var instance: AsrAccessibilityService? = null
+
+        fun refreshShakeSensor() {
+            instance?.updateShakeSensorRegistration()
+        }
 
         fun isEnabled(): Boolean = instance != null
 
@@ -248,6 +258,7 @@ class AsrAccessibilityService : AccessibilityService() {
         instance = this
         Log.d(TAG, "Accessibility service connected")
         DebugLogManager.log("a11y", "service_connected")
+        updateShakeSensorRegistration()
         // 刚连接时推送一次当前输入场景状态
         try {
             handler.post { tryDispatchImeVisibilityHint() }
@@ -257,6 +268,7 @@ class AsrAccessibilityService : AccessibilityService() {
     }
 
     override fun onDestroy() {
+        unregisterShakeSensor()
         super.onDestroy()
         instance = null
         Log.d(TAG, "Accessibility service destroyed")
@@ -264,6 +276,18 @@ class AsrAccessibilityService : AccessibilityService() {
     }
 
     private val handler = Handler(Looper.getMainLooper())
+    private val sensorManager: SensorManager by lazy(LazyThreadSafetyMode.NONE) {
+        getSystemService(SENSOR_SERVICE) as SensorManager
+    }
+    private val accelerometer: Sensor? by lazy(LazyThreadSafetyMode.NONE) {
+        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    }
+    private var shakeSensorRegistered = false
+    private var gravityX = 0f
+    private var gravityY = 0f
+    private var gravityZ = 0f
+    private var lastShakeAt = 0L
+    private val shakeCooldownMs = 1100L
     private var pendingClipboardRestore: Runnable? = null
     private val prefsOrNull: Prefs? by lazy(LazyThreadSafetyMode.NONE) {
         try {
@@ -331,10 +355,67 @@ class AsrAccessibilityService : AccessibilityService() {
         val prefs = prefsOrNull ?: return false
         if (!prefs.volumeKeyRecordingEnabled) return false
         val action = volumeKeyActionFor(prefs.volumeKeyRecordingMode, event.keyCode) ?: return false
-        if (!isImeSceneActiveForVolumeKey()) return false
+        if (!isImeSceneActiveForRecordingTrigger()) return false
 
-        dispatchVolumeKeyRecordingAction(action)
+        dispatchRecordingAction(action)
         return true
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event?.sensor?.type != Sensor.TYPE_ACCELEROMETER) return
+        val prefs = prefsOrNull ?: return
+        if (!prefs.shakeRecordingEnabled) return
+
+        val values = event.values
+        if (values.size < 3) return
+        val filter = 0.8f
+        gravityX = filter * gravityX + (1f - filter) * values[0]
+        gravityY = filter * gravityY + (1f - filter) * values[1]
+        gravityZ = filter * gravityZ + (1f - filter) * values[2]
+        val linearX = values[0] - gravityX
+        val linearY = values[1] - gravityY
+        val linearZ = values[2] - gravityZ
+        val acceleration = sqrt(
+            linearX * linearX + linearY * linearY + linearZ * linearZ
+        ) / SensorManager.GRAVITY_EARTH
+        val now = SystemClock.elapsedRealtime()
+        val threshold = Prefs.ShakeRecordingSensitivity.fromId(prefs.shakeRecordingSensitivity).threshold
+        if (acceleration < threshold || now - lastShakeAt < shakeCooldownMs) return
+        if (!isImeSceneActiveForRecordingTrigger()) return
+        lastShakeAt = now
+
+        dispatchRecordingAction(FloatingAsrService.ACTION_SHAKE_RECORDING_TOGGLE)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    private fun updateShakeSensorRegistration() {
+        val shouldRegister = prefsOrNull?.shakeRecordingEnabled == true
+        if (shouldRegister && !shakeSensorRegistered) {
+            val sensor = accelerometer ?: run {
+                Log.w(TAG, "Accelerometer unavailable; shake recording disabled at runtime")
+                return
+            }
+            shakeSensorRegistered = sensorManager.registerListener(
+                this,
+                sensor,
+                SensorManager.SENSOR_DELAY_UI
+            )
+            if (shakeSensorRegistered) {
+                gravityX = 0f
+                gravityY = 0f
+                gravityZ = 0f
+                lastShakeAt = 0L
+            }
+        } else if (!shouldRegister) {
+            unregisterShakeSensor()
+        }
+    }
+
+    private fun unregisterShakeSensor() {
+        if (!shakeSensorRegistered) return
+        sensorManager.unregisterListener(this)
+        shakeSensorRegistered = false
     }
 
     /**
@@ -396,11 +477,11 @@ class AsrAccessibilityService : AccessibilityService() {
      * 判断是否需要检测输入法可见性。
      */
     private fun shouldCheckImeVisibility(prefs: Prefs): Boolean {
-        // 启用悬浮球或音量键录音时均进行检测：
+        // 启用悬浮球、音量键或摇一摇录音时均进行检测：
         // - 开启“仅在键盘显示时显示悬浮球”用于显隐控制（已有逻辑）
         // - 关闭该开关时用于半隐联动（键盘/焦点出现浮现，收起回半隐）
-        // - 音量键录音严格依赖同一份 IME 场景状态，避免键盘隐藏时拦截音量键
-        return prefs.floatingAsrEnabled || prefs.volumeKeyRecordingEnabled
+        // - 音量键和摇一摇录音严格依赖同一份 IME 场景状态
+        return prefs.floatingAsrEnabled || prefs.volumeKeyRecordingEnabled || prefs.shakeRecordingEnabled
     }
 
     /**
@@ -481,7 +562,7 @@ class AsrAccessibilityService : AccessibilityService() {
         }
     }
 
-    private fun isImeSceneActiveForVolumeKey(): Boolean {
+    private fun isImeSceneActiveForRecordingTrigger(): Boolean {
         val now = System.currentTimeMillis()
         val active = determineImeSceneActive(now)
         updateImeVisibilityState(active)
@@ -506,12 +587,12 @@ class AsrAccessibilityService : AccessibilityService() {
         else -> null
     }
 
-    private fun dispatchVolumeKeyRecordingAction(action: String) {
+    private fun dispatchRecordingAction(action: String) {
         try {
             val i = Intent(this, FloatingAsrService::class.java).apply { this.action = action }
             startService(i)
         } catch (e: Throwable) {
-            Log.e(TAG, "Error dispatching volume-key recording action", e)
+            Log.e(TAG, "Error dispatching recording action", e)
         }
     }
 

@@ -166,6 +166,9 @@ object SettingsSearchIndex {
         item(R.string.label_volume_key_recording_mode, R.string.section_volume_key_recording, "volume+", "volume-", "音量+", "音量-")
         item(R.string.label_volume_key_status_toast, R.string.section_volume_key_recording, "toast", "音量")
         item(R.string.label_volume_key_stop_on_ime_hidden, R.string.section_volume_key_recording, "volume", "音量")
+        item(R.string.label_shake_recording, R.string.section_shake_recording, "shake", "摇一摇", "振って")
+        item(R.string.label_shake_recording_sensitivity, R.string.section_shake_recording, "shake", "灵敏度", "感度")
+        item(R.string.label_shake_recording_sound, R.string.section_shake_recording, "sound", "提示音", "音")
         item(
             R.string.label_floating_a11y_android13_api,
             R.string.section_floating_compat,

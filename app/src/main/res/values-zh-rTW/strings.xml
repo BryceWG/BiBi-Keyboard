@@ -75,6 +75,7 @@
   <string name="home_summary_more_input_volume_key_enabled">已啟用音量鍵輸入</string>
   <string name="home_summary_more_input_floating_enabled">已啟用懸浮球輸入</string>
   <string name="home_summary_more_input_both_enabled">已啟用音量鍵、懸浮球</string>
+  <string name="home_summary_more_input_shake_enabled">已啟用搖一搖錄音</string>
   <string name="home_summary_more_input_accessibility_missing">無障礙未開啟</string>
   <string name="home_summary_setup_done">基礎設定已完成</string>
   <string name="home_summary_setup_progress">基礎設定進度 %1$d/%2$d</string>

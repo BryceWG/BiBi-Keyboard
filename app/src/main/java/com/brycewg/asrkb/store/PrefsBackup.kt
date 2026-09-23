@@ -82,6 +82,9 @@ internal object PrefsBackup {
         o.put(KEY_VOLUME_KEY_RECORDING_MODE, volumeKeyRecordingMode)
         o.put(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED, volumeKeyStatusToastEnabled)
         o.put(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, volumeKeyStopOnImeHidden)
+        o.put(KEY_SHAKE_RECORDING_ENABLED, shakeRecordingEnabled)
+        o.put(KEY_SHAKE_RECORDING_SENSITIVITY, shakeRecordingSensitivity)
+        o.put(KEY_SHAKE_RECORDING_SOUND_ENABLED, shakeRecordingSoundEnabled)
         o.put(KEY_FLOATING_KEEP_ALIVE_ENABLED, floatingKeepAliveEnabled)
         o.put(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED, floatingKeepAlivePrivilegedEnabled)
 
@@ -394,6 +397,9 @@ internal object PrefsBackup {
             optString(KEY_VOLUME_KEY_RECORDING_MODE)?.let { volumeKeyRecordingMode = it }
             optBool(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED)?.let { volumeKeyStatusToastEnabled = it }
             optBool(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN)?.let { volumeKeyStopOnImeHidden = it }
+            optBool(KEY_SHAKE_RECORDING_ENABLED)?.let { shakeRecordingEnabled = it }
+            optString(KEY_SHAKE_RECORDING_SENSITIVITY)?.let { shakeRecordingSensitivity = it }
+            optBool(KEY_SHAKE_RECORDING_SOUND_ENABLED)?.let { shakeRecordingSoundEnabled = it }
             optBool(KEY_FLOATING_KEEP_ALIVE_ENABLED)?.let { floatingKeepAliveEnabled = it }
             optBool(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED)?.let {
                 floatingKeepAlivePrivilegedEnabled =

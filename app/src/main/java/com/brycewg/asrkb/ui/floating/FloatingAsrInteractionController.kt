@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
@@ -126,6 +128,16 @@ internal class FloatingAsrInteractionController(
         if (startRecording(fromVolumeKey = true)) showVolumeKeyStatusToast(R.string.toast_volume_key_recording_started)
     }
 
+    fun onShakeRecordingToggle() {
+        if (stateMachine.isRecording) {
+            stopRecording()
+            playShakeRecordingPrompt()
+            return
+        }
+        if (stateMachine.isProcessing) return
+        if (startRecording()) playShakeRecordingPrompt()
+    }
+
     fun stopVolumeKeyRecordingOnImeHidden() {
         if (!volumeKeySessionActive) return
         if (!prefs.volumeKeyStopOnImeHidden) return
@@ -229,6 +241,21 @@ internal class FloatingAsrInteractionController(
         asrSessionManager.stopRecording()
         stopRecordingForeground()
         updateVisibilityByPref("stop_recording")
+    }
+
+    private fun playShakeRecordingPrompt() {
+        if (!prefs.shakeRecordingSoundEnabled) return
+        try {
+            // 使用固定系统提示音，不依赖无障碍服务的系统音效开关或本地化文本。
+            val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)
+            try {
+                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 120)
+            } finally {
+                toneGenerator.release()
+            }
+        } catch (t: Throwable) {
+            Log.w(tag, "Failed to play shake recording prompt", t)
+        }
     }
 
     private fun cancelCurrentSession() {

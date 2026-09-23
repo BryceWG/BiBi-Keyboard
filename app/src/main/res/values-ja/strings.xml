@@ -76,6 +76,7 @@
   <string name="home_summary_more_input_volume_key_enabled">音量キー入力が有効</string>
   <string name="home_summary_more_input_floating_enabled">フローティングボール入力が有効</string>
   <string name="home_summary_more_input_both_enabled">音量キーとフローティングボールが有効</string>
+  <string name="home_summary_more_input_shake_enabled">振って録音が有効</string>
   <string name="home_summary_more_input_accessibility_missing">アクセシビリティ未有効</string>
   <string name="home_summary_setup_done">基本設定は完了</string>
   <string name="home_summary_setup_progress">基本設定 %1$d/%2$d</string>

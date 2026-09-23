@@ -249,7 +249,8 @@ class SetupStateMachine(
         val needA11y = floatingInputNeedsAccessibility(
             floatingEnabled = prefs.floatingAsrEnabled,
             volumeKeyEnabled = prefs.volumeKeyRecordingEnabled,
-            imeBridgeEnabled = prefs.floatingImeBridgeEnabled
+            imeBridgeEnabled = prefs.floatingImeBridgeEnabled,
+            shakeRecordingEnabled = prefs.shakeRecordingEnabled
         )
         if (!state.askedA11y && needA11y && !hasAccessibilityPermission()) {
             Log.d(TAG, "Requesting accessibility permission")
@@ -292,7 +293,8 @@ class SetupStateMachine(
         val needA11y = floatingInputNeedsAccessibility(
             floatingEnabled = prefs.floatingAsrEnabled,
             volumeKeyEnabled = prefs.volumeKeyRecordingEnabled,
-            imeBridgeEnabled = prefs.floatingImeBridgeEnabled
+            imeBridgeEnabled = prefs.floatingImeBridgeEnabled,
+            shakeRecordingEnabled = prefs.shakeRecordingEnabled
         )
         val a11yGranted = !needA11y || hasAccessibilityPermission()
 

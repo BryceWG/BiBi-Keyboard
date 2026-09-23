@@ -77,6 +77,7 @@
   <string name="home_summary_more_input_volume_key_enabled">Volume key input enabled</string>
   <string name="home_summary_more_input_floating_enabled">Floating ball input enabled</string>
   <string name="home_summary_more_input_both_enabled">Volume key and floating ball enabled</string>
+  <string name="home_summary_more_input_shake_enabled">Shake recording enabled</string>
   <string name="home_summary_more_input_accessibility_missing">Accessibility not enabled</string>
   <string name="home_summary_setup_done">Basic setup complete</string>
   <string name="home_summary_setup_progress">Basic setup %1$d/%2$d</string>

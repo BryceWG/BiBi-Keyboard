@@ -42,6 +42,19 @@ internal fun resolveRecordingAutoStopMode(
 }
 
 class Prefs(context: Context) {
+    enum class ShakeRecordingSensitivity(val id: String, val threshold: Float) {
+        VERY_SENSITIVE("very_sensitive", 1.5f),
+        SENSITIVE("sensitive", 1.9f),
+        DEFAULT("default", 2.35f),
+        CONSERVATIVE("conservative", 2.8f),
+        VERY_CONSERVATIVE("very_conservative", 3.3f);
+
+        companion object {
+            fun fromId(id: String?): ShakeRecordingSensitivity =
+                entries.firstOrNull { it.id == id } ?: DEFAULT
+        }
+    }
+
     enum class RecordingAutoStopMode(val id: String) {
         MANUAL("manual"),
         SILENCE("silence"),
@@ -589,6 +602,26 @@ class Prefs(context: Context) {
     var volumeKeyStopOnImeHidden: Boolean
         get() = sp.getBoolean(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, true)
         set(value) = sp.edit { putBoolean(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, value) }
+
+    // 无障碍摇一摇录音：仅在输入法场景活跃时响应，并复用悬浮录音 toggle。
+    var shakeRecordingEnabled: Boolean
+        get() = sp.getBoolean(KEY_SHAKE_RECORDING_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_SHAKE_RECORDING_ENABLED, value) }
+
+    var shakeRecordingSensitivity: String
+        get() = ShakeRecordingSensitivity.fromId(
+            sp.getString(KEY_SHAKE_RECORDING_SENSITIVITY, ShakeRecordingSensitivity.DEFAULT.id)
+        ).id
+        set(value) = sp.edit {
+            putString(
+                KEY_SHAKE_RECORDING_SENSITIVITY,
+                ShakeRecordingSensitivity.fromId(value).id
+            )
+        }
+
+    var shakeRecordingSoundEnabled: Boolean
+        get() = sp.getBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, false)
+        set(value) = sp.edit { putBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, value) }
 
     // 悬浮球：前台保活开关
     var floatingKeepAliveEnabled: Boolean

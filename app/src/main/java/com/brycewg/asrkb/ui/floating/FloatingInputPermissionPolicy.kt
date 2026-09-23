@@ -13,8 +13,9 @@ internal fun floatingAsrNeedsAccessibility(
 internal fun floatingInputNeedsAccessibility(
     floatingEnabled: Boolean,
     volumeKeyEnabled: Boolean,
-    imeBridgeEnabled: Boolean
-): Boolean = volumeKeyEnabled ||
+    imeBridgeEnabled: Boolean,
+    shakeRecordingEnabled: Boolean = false
+): Boolean = volumeKeyEnabled || shakeRecordingEnabled ||
     floatingAsrNeedsAccessibility(
         floatingEnabled = floatingEnabled,
         imeBridgeEnabled = imeBridgeEnabled
