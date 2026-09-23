@@ -67,6 +67,7 @@ class LlmPostProcessorTest {
 
     @Test
     fun delayedHeaders_areNotCountedAsConnectionSetup() = runBlocking {
+        rememberRequestMode(Prefs.LlmRequestMode.STREAMING)
         server.enqueue(
             sseResponse(sseEvent("hi") + doneEvent())
                 .setHeadersDelay(180, TimeUnit.MILLISECONDS)
@@ -84,6 +85,7 @@ class LlmPostProcessorTest {
 
     @Test
     fun completedSse_reusesPooledConnectionOnNextRequest() = runBlocking {
+        rememberRequestMode(Prefs.LlmRequestMode.STREAMING)
         server.enqueue(sseResponse(sseEvent("first") + doneEvent()))
         server.enqueue(sseResponse(sseEvent("second") + doneEvent()))
 
@@ -99,6 +101,7 @@ class LlmPostProcessorTest {
 
     @Test
     fun sseTiming_usesHeadersFirstVisibleAndProtocolCompletion() = runBlocking {
+        rememberRequestMode(Prefs.LlmRequestMode.STREAMING)
         val firstEvent = sseEvent("hello")
         server.enqueue(
             sseResponse(firstEvent + sseEvent(" world") + doneEvent())
@@ -142,6 +145,7 @@ class LlmPostProcessorTest {
                     .build()
             )
             prefs.llmEndpoint = slowServer.url("/v1").toString().trimEnd('/')
+            rememberRequestMode(Prefs.LlmRequestMode.STREAMING)
 
             val resultDeferred = async(Dispatchers.IO) { processor.testConnectivity(prefs) }
             val didWriteProtocol = withContext(Dispatchers.IO) {
@@ -160,6 +164,7 @@ class LlmPostProcessorTest {
 
     @Test
     fun nonSseResponse_usesBodyTimingWithoutSseSegments() = runBlocking {
+        rememberRequestMode(Prefs.LlmRequestMode.NON_STREAMING)
         server.enqueue(
             jsonResponse("hi")
                 .setBodyDelay(120, TimeUnit.MILLISECONDS)
@@ -176,6 +181,7 @@ class LlmPostProcessorTest {
 
     @Test
     fun streamingFailureAndNonStreamingSuccess_accumulateLogicalTotal() = runBlocking {
+        rememberRequestMode(Prefs.LlmRequestMode.STREAMING)
         server.enqueue(
             MockResponse()
                 .setResponseCode(400)
@@ -239,6 +245,15 @@ class LlmPostProcessorTest {
 
         assertFalse(result.ok)
         assertTrue("cancel waited for drain: ${elapsedMs}ms", elapsedMs < 700L)
+    }
+
+    /**
+     * testConnectivity 在没有记录过请求模式时会先发一次探测。
+     * 这些用例测的是探测之后的正式请求，所以先写入与当前自定义供应商对应的模式。
+     */
+    private fun rememberRequestMode(mode: Prefs.LlmRequestMode) {
+        val endpoint = prefs.llmEndpoint.trim().trimEnd('/')
+        prefs.setLlmRequestMode("custom:default|$endpoint", mode)
     }
 
     private fun awaitIdleConnection() {
