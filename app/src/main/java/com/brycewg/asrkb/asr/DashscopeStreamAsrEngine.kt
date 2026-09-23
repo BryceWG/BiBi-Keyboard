@@ -21,6 +21,7 @@ import com.alibaba.dashscope.utils.Constants
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.DashScopePrefsCompat
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.google.gson.JsonObject
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
@@ -34,8 +35,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * DashScope 实时流式 ASR 引擎（SDK）。
  *
- * - Fun-ASR / Qwen-Audio 3.x 走 Recognition + inference WebSocket。
- * - Qwen3-ASR-Flash-Realtime 走 OmniRealtimeConversation + realtime WebSocket。
+ * - Fun-ASR / Qwen-Audio 3.x 走 Recognition + inference WebSocket（支持连接复用）。
+ * - Qwen3-ASR-Flash-Realtime 走 OmniRealtimeConversation + realtime WebSocket（不支持复用）。
  * - 每 ~100ms 发送一帧 PCM（16kHz/16bit/mono）。
  */
 class DashscopeStreamAsrEngine(
@@ -71,6 +72,9 @@ class DashscopeStreamAsrEngine(
     private var recognizer: Recognition? = null
     private var useRecognitionProtocol: Boolean = false
     private var selectedModel: String = Prefs.DEFAULT_DASH_MODEL
+    private var recognitionReuseKey: DashscopeRecognitionReuseKey? = null
+    /** 仅在 Recognition onComplete 后为 true，允许把连接归还到复用缓存。 */
+    private val recognitionTaskSucceeded = AtomicBoolean(false)
 
     // 用于识别结果
     // currentTurnText: 当前已确定的文本（来自 text 事件的 text 字段，用于实时预览）
@@ -119,6 +123,8 @@ class DashscopeStreamAsrEngine(
         finalTranscript = null
         finalResultDeferred = null
         finalDelivered.set(false)
+        recognitionTaskSucceeded.set(false)
+        recognitionReuseKey = null
         apiLogSession = null
 
         // 在 IO 线程启动 SDK 识别并随后启动采集
@@ -144,7 +150,7 @@ class DashscopeStreamAsrEngine(
                     Log.e(TAG, "notify error failed", notifyError)
                 }
                 running.set(false)
-                safeClose()
+                safeClose(disposeRecognition = true, reason = "start_failed")
             }
         }
     }
@@ -279,7 +285,7 @@ class DashscopeStreamAsrEngine(
                     Log.w(TAG, "cancel audio job after failure failed", t)
                 }
                 audioJob = null
-                safeClose()
+                safeClose(disposeRecognition = true, reason = "realtime_transcript_failed")
             }
             "error" -> {
                 val errorMsg = message.getAsJsonObject("error")?.get("message")?.asString
@@ -303,7 +309,7 @@ class DashscopeStreamAsrEngine(
                 }
                 audioJob = null
                 finalResultDeferred?.complete(null)
-                safeClose()
+                safeClose(disposeRecognition = true, reason = "realtime_server_error")
             }
             else -> Log.d(TAG, "Realtime event: $eventType")
         }
@@ -323,7 +329,7 @@ class DashscopeStreamAsrEngine(
         prepareApiLog(
             wsUrl = wsUrl,
             model = model,
-            requestStructure = "SDK WebSocket recognition; format=pcm, sample_rate=16000, language_hints?, semantic_punctuation_enabled?, heartbeat?, vad_model?"
+            requestStructure = "SDK WebSocket recognition; format=pcm, sample_rate=16000, language_hints?, semantic_punctuation_enabled?, heartbeat?, vad_model?; connection_reuse"
         )
         try {
             Constants.baseWebsocketApiUrl = wsUrl
@@ -337,10 +343,30 @@ class DashscopeStreamAsrEngine(
             sampleRate = sampleRate,
             languages = prefs.getDashLanguages()
         )
-        val rec = Recognition()
+        val reuseKey = DashscopeRecognitionReuseKey(
+            wsUrl = wsUrl,
+            apiKey = prefs.dashApiKey,
+            model = model,
+            sampleRate = sampleRate
+        )
+        recognitionReuseKey = reuseKey
+        recognitionTaskSucceeded.set(false)
+        recognizer?.let { leftover ->
+            DashscopeRecognitionConnectionCache.invalidate(
+                null,
+                leftover,
+                "replaced_before_borrow"
+            )
+        }
+        val borrowed = DashscopeRecognitionConnectionCache.borrow(reuseKey)
+        val rec = borrowed.recognition
         recognizer = rec
         conversation = null
         recognizerReady = false
+        logDiag(
+            if (borrowed.reused) "dash_ws_session_reuse" else "dash_ws_session_new",
+            mapOf("model" to model, "reused" to borrowed.reused)
+        )
         val callback = object : ResultCallback<RecognitionResult>() {
             override fun onEvent(result: RecognitionResult) {
                 handleRecognitionEvent(result)
@@ -355,7 +381,25 @@ class DashscopeStreamAsrEngine(
             }
         }
 
-        rec.call(param, callback)
+        try {
+            rec.call(param, callback)
+        } catch (t: Throwable) {
+            // 借出的脏连接：废弃后新建一次（不递归）
+            if (borrowed.reused) {
+                Log.w(TAG, "reuse call failed, recreating Recognition", t)
+                logDiag(
+                    "dash_ws_reuse_fail_reconnect",
+                    mapOf("model" to model, "error" to (t.message ?: t.javaClass.simpleName))
+                )
+                DashscopeRecognitionConnectionCache.invalidate(reuseKey, rec, "reuse_call_failed")
+                val fresh = Recognition()
+                recognizer = fresh
+                recognitionTaskSucceeded.set(false)
+                fresh.call(param, callback)
+            } else {
+                throw t
+            }
+        }
 
         recognizerReady = true
         flushPrebuffer()
@@ -388,6 +432,7 @@ class DashscopeStreamAsrEngine(
     }
 
     private fun handleRecognitionComplete() {
+        recognitionTaskSucceeded.set(true)
         val finalText = (currentTurnText + currentTurnStash).trim()
         finalTranscript = finalText
         finalResultDeferred?.complete(finalText)
@@ -405,6 +450,7 @@ class DashscopeStreamAsrEngine(
     private fun handleRecognitionError(e: Exception) {
         val msg = e.message ?: "Recognition error"
         Log.e(TAG, "DashScope Recognition streaming error: $msg", e)
+        recognitionTaskSucceeded.set(false)
         recordApiLogOnce(success = false, error = msg)
         if (running.get()) {
             running.set(false)
@@ -425,7 +471,7 @@ class DashscopeStreamAsrEngine(
             Log.w(TAG, "cancel audio job after failure failed", t)
         }
         audioJob = null
-        safeClose()
+        safeClose(disposeRecognition = true, reason = "recognition_error")
     }
 
     private fun appendSentence(existing: String, sentence: String): String {
@@ -542,6 +588,8 @@ class DashscopeStreamAsrEngine(
                 // 等待 completed 事件返回或超时
                 val awaited = withTimeoutOrNull(FINAL_RESULT_TIMEOUT_MS) { resultDeferred.await() }
                 if (awaited == null && finalDelivered.compareAndSet(false, true)) {
+                    // 超时未收到 onComplete：连接状态未知，不可归还复用
+                    recognitionTaskSucceeded.set(false)
                     recordApiLogOnce(success = false, error = "final result timeout")
                     // 超时后使用当前文本作为兜底结果
                     val fallbackText = (finalTranscript ?: (currentTurnText + currentTurnStash)).trim()
@@ -558,7 +606,11 @@ class DashscopeStreamAsrEngine(
                     resultDeferred.complete(finalTranscript)
                 }
                 finalResultDeferred = null
-                safeClose()
+                val canReuse = useRecognitionProtocol && recognitionTaskSucceeded.get()
+                safeClose(
+                    disposeRecognition = !canReuse,
+                    reason = if (canReuse) "task_finished" else "stop_no_complete"
+                )
             }
         }
     }
@@ -567,6 +619,7 @@ class DashscopeStreamAsrEngine(
         resultDeferred: CompletableDeferred<String?>,
         error: String
     ) {
+        recognitionTaskSucceeded.set(false)
         val fallbackText = (currentTurnText + currentTurnStash).trim()
         if (finalDelivered.compareAndSet(false, true)) {
             recordApiLogOnce(success = false, error = error)
@@ -680,7 +733,11 @@ class DashscopeStreamAsrEngine(
         }
     }
 
-    private fun safeClose() {
+    /**
+     * @param disposeRecognition true 时关闭并废弃 Recognition（错误/超时/取消）；
+     *   false 且任务已 onComplete 时归还到进程内缓存以复用 WebSocket。
+     */
+    private fun safeClose(disposeRecognition: Boolean, reason: String) {
         recognizerReady = false
         try {
             conversation?.close()
@@ -690,13 +747,33 @@ class DashscopeStreamAsrEngine(
             conversation = null
         }
 
-        try {
-            recognizer?.stop()
-        } catch (t: Throwable) {
-            Log.w(TAG, "recognizer stop failed", t)
-        } finally {
-            recognizer = null
+        val rec = recognizer
+        val key = recognitionReuseKey
+        recognizer = null
+        recognitionReuseKey = null
+        if (rec == null) return
+
+        if (!useRecognitionProtocol) {
+            // realtime 路径不应持有 Recognition；防御性关闭
+            try {
+                rec.getDuplexApi()?.close(1000, reason)
+            } catch (t: Throwable) {
+                Log.w(TAG, "unexpected recognition close failed", t)
+            }
+            return
         }
+
+        if (disposeRecognition || !recognitionTaskSucceeded.get()) {
+            DashscopeRecognitionConnectionCache.invalidate(key, rec, reason)
+        } else if (key != null) {
+            DashscopeRecognitionConnectionCache.returnSuccess(key, rec)
+        } else {
+            DashscopeRecognitionConnectionCache.invalidate(null, rec, "missing_reuse_key")
+        }
+    }
+
+    private fun logDiag(event: String, data: Map<String, Any?> = emptyMap()) {
+        DebugLogManager.logBase(category = "asr", event = event, data = data)
     }
 
     private fun prepareApiLog(
