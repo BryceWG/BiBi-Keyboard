@@ -117,6 +117,21 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            // JDK 17+ 封装了 java.base 内部包。Robolectric 4.17 初始化沙箱时要改 FileDescriptor，
+            // 缺这些 --add-opens 会在进测试方法前抛 IllegalAccessException。
+            all {
+                it.jvmArgs(
+                    "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                    "--add-opens=java.base/java.util=ALL-UNNAMED",
+                    "--add-opens=java.base/java.io=ALL-UNNAMED",
+                    "--add-opens=java.base/java.net=ALL-UNNAMED",
+                    "--add-opens=java.base/java.security=ALL-UNNAMED",
+                    "--add-opens=java.base/java.text=ALL-UNNAMED",
+                    "--add-opens=java.base/jdk.internal.access=ALL-UNNAMED",
+                    "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
+                    "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED"
+                )
+            }
         }
     }
 }
