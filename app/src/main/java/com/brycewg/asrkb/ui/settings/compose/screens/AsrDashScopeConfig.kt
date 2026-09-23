@@ -35,9 +35,6 @@ internal fun DashScopeConfig(
     onChooseLanguages: () -> Unit,
     selectedRegion: String,
     onRegionSelected: (String) -> Unit,
-    semanticPunct: Boolean,
-    semanticPunctVisible: Boolean,
-    onSemanticPunctChange: (Boolean) -> Unit,
     onOpenGuide: () -> Unit,
     primaryIndexOffset: Int = 0,
     primaryGroupCount: Int? = null
@@ -45,7 +42,6 @@ internal fun DashScopeConfig(
     val context = LocalContext.current
     val itemCount = primaryGroupCount ?: dashScopePrimaryItemCount(
         languageVisible = languageVisible,
-        semanticPunctVisible = semanticPunctVisible,
         promptVisible = promptVisible
     )
     var itemIndex = primaryIndexOffset
@@ -100,16 +96,6 @@ internal fun DashScopeConfig(
         count = itemCount,
         onSelectedOptionChange = onRegionSelected
     )
-    if (semanticPunctVisible) {
-        AsrSwitchPreference(
-            id = "dash_semantic_punct",
-            titleRes = R.string.label_dash_semantic_punct,
-            checked = semanticPunct,
-            index = itemIndex++,
-            count = itemCount,
-            onCheckedChange = onSemanticPunctChange
-        )
-    }
     if (promptVisible) {
         AsrTextField(
             uiMode = uiMode,
@@ -133,14 +119,20 @@ internal fun DashScopeConfig(
 
 internal fun dashScopePrimaryItemCount(
     languageVisible: Boolean,
-    semanticPunctVisible: Boolean,
     promptVisible: Boolean
 ): Int = 4 +
     (if (languageVisible) 1 else 0) +
-    (if (semanticPunctVisible) 1 else 0) +
     (if (promptVisible) 1 else 0)
 
 internal fun dashModelOptions(context: Context): List<DashChoice> = listOf(
+    DashChoice(
+        Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME,
+        context.getString(R.string.dash_model_qwen_audio_31_realtime)
+    ),
+    DashChoice(
+        Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH,
+        context.getString(R.string.dash_model_qwen_audio_31_flash)
+    ),
     DashChoice(
         Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME,
         context.getString(R.string.dash_model_qwen_audio_realtime)
@@ -228,8 +220,6 @@ internal fun normalizeDashRegion(region: String): String = if (region.equals("in
 } else {
     "cn"
 }
-
-internal fun isDashSemanticPunctuationSupported(model: String): Boolean = DashScopePrefsCompat.isSemanticPunctuationSupported(model)
 
 internal fun isDashPromptSupported(model: String): Boolean = DashScopePrefsCompat.isPromptSupported(model)
 

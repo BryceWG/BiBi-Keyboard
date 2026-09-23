@@ -7,12 +7,14 @@
     <string name="label_dash_api_key">DashScope APIキー（Bearer）</string>
     <string name="label_dash_model">認識モデル</string>
     <string name="dash_model_fun_flash">Fun-ASR-Flash（非ストリーミング）</string>
+    <string name="dash_model_qwen_audio_31_flash">Qwen-Audio-3.1-ASR-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen_audio_flash">Qwen-Audio-3.0-ASR-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen3_flash">Qwen3-ASR-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen35_omni_flash">Qwen3.5-Omni-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非ストリーミング）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（ストリーミング）</string>
+    <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming（ストリーミング）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（ストリーミング）</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime（ストリーミング）</string>
     <string name="label_dash_prompt">カスタムプロンプト/コンテキスト（オプション）</string>
@@ -20,7 +22,6 @@
     <string name="dash_language_max_4">最大4言語まで選択できます</string>
     <string name="label_dash_streaming">ストリーミング認識</string>
     <string name="label_dash_fun_asr">Fun-ASR モデルを使用（fun-asr-realtime）</string>
-    <string name="label_dash_semantic_punct">セマンティック区切りを使用</string>
     <string name="dash_lang_auto">自動識別）</string>
     <string name="label_dash_region">エンドポイント</string>
     <string name="dash_region_cn">中国本土（maas.qianwenaiapi.com）</string>
@@ -50,8 +51,4 @@
     <!-- Fun-ASR モデル（ストリーミングのみ） -->
     <string name="feature_dash_fun_asr_off_desc">ストリーミングは Qwen-Audio-3.0-ASR-Flash-Streaming（既定）を使用します。</string>
     <string name="feature_dash_fun_asr_on_desc">ストリーミングは Fun-ASR-Realtime を使用します。</string>
-
-    <!-- DashScope セマンティック区切り -->
-    <string name="feature_dash_semantic_punct_off_desc">主に発話の間で区切るため、通常は結果が速く返ります。</string>
-    <string name="feature_dash_semantic_punct_on_desc">文の意味も考慮して区切ります。句読点が自然になる場合がありますが、返答が少し遅くなることがあります。</string>
 </resources>

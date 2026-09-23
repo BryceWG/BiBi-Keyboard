@@ -22,7 +22,7 @@ import org.json.JSONObject
 
 /**
  * 使用阿里千问（原 DashScope / 百炼协议）的非流式 ASR 引擎。
- * - Fun-ASR-Flash 与 Qwen-Audio 3.0 走 REST multimodal-generation + Base64 音频。
+ * - Fun-ASR-Flash 与 Qwen-Audio 3.x 走 REST multimodal-generation + Base64 音频。
  * - Qwen3-ASR-Flash 走同一 REST 入口，使用 asr_options / system prompt。
  * - Qwen3.5 / Qwen3.8 Omni 非实时模型走 OpenAI 兼容 chat/completions + Base64 音频输入。
  */
@@ -118,7 +118,7 @@ class DashscopeFileAsrEngine(
     }
 
     /**
-     * Fun-ASR-Flash / Qwen-Audio 3.0 / Qwen3-ASR-Flash 非流式 REST 路径。
+     * Fun-ASR-Flash / Qwen-Audio 3.x / Qwen3-ASR-Flash 非流式 REST 路径。
      */
     private fun recognizeWithGenerationApi(audio: UploadAudioData, model: String) {
         try {

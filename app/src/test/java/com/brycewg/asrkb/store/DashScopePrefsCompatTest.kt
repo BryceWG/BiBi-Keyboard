@@ -47,17 +47,37 @@ class DashScopePrefsCompatTest {
     @Test
     fun qwenAudioModelsReuseGenerationAndRecognitionProtocols() {
         assertEquals(true, DashScopePrefsCompat.isGenerationAsrModel(Prefs.DASH_MODEL_QWEN_AUDIO_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isGenerationAsrModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH))
         assertEquals(
             true,
             DashScopePrefsCompat.isRecognitionStreamingModel(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME)
         )
+        assertEquals(
+            true,
+            DashScopePrefsCompat.isRecognitionStreamingModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME)
+        )
         assertEquals(true, DashScopePrefsCompat.isStreamingModel(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME))
+        assertEquals(true, DashScopePrefsCompat.isStreamingModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME))
         assertEquals(
             true,
             DashScopePrefsCompat.isSemanticPunctuationSupported(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME)
         )
+        assertEquals(
+            true,
+            DashScopePrefsCompat.isSemanticPunctuationSupported(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME)
+        )
         assertEquals(false, DashScopePrefsCompat.isPromptSupported(Prefs.DASH_MODEL_QWEN_AUDIO_FLASH))
+        assertEquals(false, DashScopePrefsCompat.isPromptSupported(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH))
         assertEquals(true, DashScopePrefsCompat.isLanguageSupported(Prefs.DASH_MODEL_QWEN_AUDIO_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isLanguageSupported(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH))
+        assertEquals(
+            Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH,
+            DashScopePrefsCompat.fileFallbackModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME)
+        )
+        assertEquals(true, DashScopePrefsCompat.isQwenAudioModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isQwenAudioModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME))
+        assertEquals(true, DashScopePrefsCompat.isKnownAsrModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH))
+        assertEquals(true, DashScopePrefsCompat.isKnownAsrModel(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME))
     }
 
     @Test

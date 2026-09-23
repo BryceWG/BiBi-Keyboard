@@ -157,8 +157,6 @@ internal const val KEY_DASH_STREAMING_ENABLED = "dash_streaming_enabled"
 internal const val KEY_DASH_FUNASR_ENABLED = "dash_funasr_enabled"
 internal const val KEY_DASH_ASR_MODEL = "dash_asr_model"
 
-// Keep the persisted value compatible with older releases.
-internal const val KEY_DASH_SEMANTIC_PUNCT_ENABLED = "dash_funasr_semantic_punct_enabled"
 internal const val KEY_VOLC_DDC_ENABLED = "volc_ddc_enabled"
 internal const val KEY_VOLC_VAD_ENABLED = "volc_vad_enabled"
 internal const val KEY_VOLC_NONSTREAM_ENABLED = "volc_nonstream_enabled"

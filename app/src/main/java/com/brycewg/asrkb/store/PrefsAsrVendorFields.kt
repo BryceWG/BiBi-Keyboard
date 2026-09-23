@@ -71,8 +71,7 @@ internal object PrefsAsrVendorFields {
             VendorField.model(KEY_DASH_ASR_MODEL, default = Prefs.DEFAULT_DASH_MODEL),
             VendorField.prompt(KEY_DASH_PROMPT),
             VendorField.language(KEY_DASH_LANGUAGE),
-            VendorField(KEY_DASH_REGION, default = "cn"),
-            VendorField.boolean(KEY_DASH_SEMANTIC_PUNCT_ENABLED, default = true)
+            VendorField(KEY_DASH_REGION, default = "cn")
         ),
         AsrVendor.Gemini to listOf(
             VendorField.endpoint(KEY_GEM_ENDPOINT, required = true, default = Prefs.DEFAULT_GEM_ENDPOINT),

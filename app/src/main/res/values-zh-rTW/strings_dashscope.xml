@@ -7,12 +7,14 @@
     <string name="label_dash_api_key">DashScope API Key（Bearer）</string>
     <string name="label_dash_model">辨識模型</string>
     <string name="dash_model_fun_flash">Fun-ASR-Flash（非串流）</string>
+    <string name="dash_model_qwen_audio_31_flash">Qwen-Audio-3.1-ASR-Flash（非串流）</string>
     <string name="dash_model_qwen_audio_flash">Qwen-Audio-3.0-ASR-Flash（非串流）</string>
     <string name="dash_model_qwen3_flash">Qwen3-ASR-Flash（非串流）</string>
     <string name="dash_model_qwen35_omni_flash">Qwen3.5-Omni-Flash（非串流）</string>
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非串流）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非串流）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（串流）</string>
+    <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming（串流）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（串流）</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime（串流）</string>
     <string name="label_dash_prompt">自定義提示詞/識別上下文（可選）</string>
@@ -20,7 +22,6 @@
     <string name="dash_language_max_4">最多選擇 4 種語言</string>
     <string name="label_dash_streaming">串流識別</string>
     <string name="label_dash_fun_asr">使用 Fun-ASR 模型進行識別（fun-asr-realtime）</string>
-    <string name="label_dash_semantic_punct">使用語義斷句</string>
     <string name="dash_lang_auto">自動識別</string>
     <string name="label_dash_region">請求端點</string>
     <string name="dash_region_cn">中國大陸（maas.qianwenaiapi.com）</string>
@@ -50,8 +51,4 @@
     <!-- Fun-ASR 模型（僅串流） -->
     <string name="feature_dash_fun_asr_off_desc">串流識別使用 Qwen-Audio-3.0-ASR-Flash-Streaming（預設）。</string>
     <string name="feature_dash_fun_asr_on_desc">串流識別使用 Fun-ASR-Realtime。</string>
-
-    <!-- DashScope 語義斷句 -->
-    <string name="feature_dash_semantic_punct_off_desc">主要根據說話停頓斷句，通常回傳更快。</string>
-    <string name="feature_dash_semantic_punct_on_desc">結合語句含義判斷斷句，標點可能更自然，但回傳可能稍慢。</string>
 </resources>

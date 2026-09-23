@@ -34,7 +34,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * DashScope 实时流式 ASR 引擎（SDK）。
  *
- * - Fun-ASR / Qwen-Audio 3.0 走 Recognition + inference WebSocket。
+ * - Fun-ASR / Qwen-Audio 3.x 走 Recognition + inference WebSocket。
  * - Qwen3-ASR-Flash-Realtime 走 OmniRealtimeConversation + realtime WebSocket。
  * - 每 ~100ms 发送一帧 PCM（16kHz/16bit/mono）。
  */
@@ -310,7 +310,7 @@ class DashscopeStreamAsrEngine(
     }
 
     private fun startRecognitionStreaming(model: String) {
-        // Fun-ASR 与 Qwen-Audio 3.0 使用 Recognition SDK 和 inference endpoint。
+        // Fun-ASR 与 Qwen-Audio 3.x 使用 Recognition SDK 和 inference endpoint。
         val wsUrl = if (prefs.dashRegion.equals(
                 "intl",
                 ignoreCase = true
@@ -323,7 +323,7 @@ class DashscopeStreamAsrEngine(
         prepareApiLog(
             wsUrl = wsUrl,
             model = model,
-            requestStructure = "SDK WebSocket recognition; format=pcm, sample_rate=16000, language_hints?, semantic_punctuation_enabled?"
+            requestStructure = "SDK WebSocket recognition; format=pcm, sample_rate=16000, language_hints?, semantic_punctuation_enabled?, heartbeat?, vad_model?"
         )
         try {
             Constants.baseWebsocketApiUrl = wsUrl
@@ -335,8 +335,7 @@ class DashscopeStreamAsrEngine(
             model = model,
             apiKey = prefs.dashApiKey,
             sampleRate = sampleRate,
-            languages = prefs.getDashLanguages(),
-            semanticPunctuationEnabled = prefs.dashSemanticPunctEnabled
+            languages = prefs.getDashLanguages()
         )
         val rec = Recognition()
         recognizer = rec
@@ -727,8 +726,7 @@ internal fun buildDashRecognitionParam(
     model: String,
     apiKey: String,
     sampleRate: Int,
-    languages: List<String>,
-    semanticPunctuationEnabled: Boolean
+    languages: List<String>
 ): RecognitionParam {
     val builder = RecognitionParam.builder()
         .model(model)
@@ -744,8 +742,16 @@ internal fun buildDashRecognitionParam(
     if (languageHints.isNotEmpty()) {
         builder.parameter("language_hints", languageHints.toTypedArray())
     }
+    // Fun-ASR / Qwen-Audio 3.x Recognition 流式均支持；固定开启语义断句与保活
     if (DashScopePrefsCompat.isSemanticPunctuationSupported(model)) {
-        builder.parameter("semantic_punctuation_enabled", semanticPunctuationEnabled)
+        builder.parameter("semantic_punctuation_enabled", true)
+        builder.parameter("heartbeat", true)
+    }
+    // Qwen-Audio 3.1 流式独有：显式近场 VAD（服务端默认 far_field_meeting_16k）
+    if (DashScopePrefsCompat.normalizeDashAsrModel(model)
+            .equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true)
+    ) {
+        builder.parameter("vad_model", "near_meeting_16k")
     }
     return builder.build()
 }

@@ -90,13 +90,13 @@ class DashscopeRequestBuildersTest {
             model = Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME,
             apiKey = "test-key",
             sampleRate = 16_000,
-            languages = listOf("zh", "en", "ja", "de", "fr"),
-            semanticPunctuationEnabled = true
+            languages = listOf("zh", "en", "ja", "de", "fr")
         )
 
         val hints = param.parameters["language_hints"] as Array<*>
         assertEquals(listOf("zh", "en", "ja", "de"), hints.toList())
         assertEquals(true, param.parameters["semantic_punctuation_enabled"])
+        assertEquals(true, param.parameters["heartbeat"])
     }
 
     @Test

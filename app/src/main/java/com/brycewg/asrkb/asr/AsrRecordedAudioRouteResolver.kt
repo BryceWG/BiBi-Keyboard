@@ -348,6 +348,8 @@ internal object AsrRecordedAudioRouteResolver {
         val resId = when {
             model.equals(Prefs.DASH_MODEL_FUN_ASR_FLASH, ignoreCase = true) ->
                 R.string.dash_model_fun_flash
+            model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH, ignoreCase = true) ->
+                R.string.dash_model_qwen_audio_31_flash
             model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_FLASH, ignoreCase = true) ->
                 R.string.dash_model_qwen_audio_flash
             model.equals(Prefs.DASH_MODEL_QWEN3_FLASH, ignoreCase = true) ->
@@ -360,6 +362,8 @@ internal object AsrRecordedAudioRouteResolver {
                 R.string.dash_model_qwen35_omni_plus
             model.equals(Prefs.DASH_MODEL_FUN_ASR_REALTIME, ignoreCase = true) ->
                 R.string.dash_model_fun_realtime
+            model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ->
+                R.string.dash_model_qwen_audio_31_realtime
             model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME, ignoreCase = true) ->
                 R.string.dash_model_qwen_audio_realtime
             model.equals(Prefs.DASH_MODEL_QWEN3_REALTIME, ignoreCase = true) ->

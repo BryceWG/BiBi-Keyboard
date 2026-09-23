@@ -142,11 +142,6 @@ internal fun AsrSettingsRouteContent(
                             onRegionSelected = { region ->
                                 onlineState.onDashRegionChange(region)
                             },
-                            semanticPunct = onlineState.dashSemanticPunct,
-                            semanticPunctVisible = isDashSemanticPunctuationSupported(onlineState.dashModel),
-                            onSemanticPunctChange = { checked ->
-                                onlineState.onDashSemanticPunctChange(checked)
-                            },
                             onOpenGuide = {
                                 onOpenUrl(DASH_SCOPE_ASR_GUIDE_URL)
                             },
@@ -345,7 +340,6 @@ private fun currentAsrVendorPrimaryItemCount(
 
     AsrVendor.DashScope -> dashScopePrimaryItemCount(
         languageVisible = isDashLanguageSupported(onlineState.dashModel),
-        semanticPunctVisible = isDashSemanticPunctuationSupported(onlineState.dashModel),
         promptVisible = isDashPromptSupported(onlineState.dashModel)
     )
 

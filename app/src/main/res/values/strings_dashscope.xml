@@ -7,12 +7,14 @@
     <string name="label_dash_api_key">DashScope API Key (Bearer)</string>
     <string name="label_dash_model">Recognition model</string>
     <string name="dash_model_fun_flash">Fun-ASR-Flash (non-streaming)</string>
+    <string name="dash_model_qwen_audio_31_flash">Qwen-Audio-3.1-ASR-Flash (non-streaming)</string>
     <string name="dash_model_qwen_audio_flash">Qwen-Audio-3.0-ASR-Flash (non-streaming)</string>
     <string name="dash_model_qwen3_flash">Qwen3-ASR-Flash (non-streaming)</string>
     <string name="dash_model_qwen35_omni_flash">Qwen3.5-Omni-Flash (non-streaming)</string>
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash (non-streaming)</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus (non-streaming)</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime (streaming)</string>
+    <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime</string>
     <string name="label_dash_prompt">Custom prompt / context (optional)</string>
@@ -20,7 +22,6 @@
     <string name="dash_language_max_4">Select up to 4 languages</string>
     <string name="label_dash_streaming">Streaming recognition</string>
     <string name="label_dash_fun_asr">Use Fun-ASR model (fun-asr-realtime)</string>
-    <string name="label_dash_semantic_punct">Use semantic segmentation</string>
     <string name="dash_lang_auto">Auto detect</string>
     <string name="label_dash_region">Request endpoint</string>
     <string name="dash_region_cn">Mainland China (maas.qianwenaiapi.com)</string>
@@ -50,8 +51,4 @@
     <!-- DashScope - Fun-ASR model (streaming) -->
     <string name="feature_dash_fun_asr_off_desc">Uses Qwen-Audio-3.0-ASR-Flash-Streaming for streaming (default).</string>
     <string name="feature_dash_fun_asr_on_desc">Uses Fun-ASR-Realtime for streaming.</string>
-
-    <!-- DashScope - Semantic Segmentation -->
-    <string name="feature_dash_semantic_punct_off_desc">Segments mainly by pauses, which usually returns faster.</string>
-    <string name="feature_dash_semantic_punct_on_desc">Uses sentence meaning to choose breaks. Punctuation may feel more natural, but results may return more slowly.</string>
 </resources>

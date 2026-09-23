@@ -42,8 +42,6 @@ internal data class AsrOnlineSettingsRouteState(
     val onDashLanguageChange: (String) -> Unit,
     val dashRegion: String,
     val onDashRegionChange: (String) -> Unit,
-    val dashSemanticPunct: Boolean,
-    val onDashSemanticPunctChange: (Boolean) -> Unit,
     val sfFreeAsrEnabled: Boolean,
     val onSfFreeAsrEnabledChange: (Boolean) -> Unit,
     val sfFreeAsrModel: String,
