@@ -1,5 +1,30 @@
 # Changelog
 
+## v4.5.0 (2026-09-20)
+
+### New Features
+
+- **AI Auto Prompt Selection**: Before polishing, automatically pick the best Prompt preset for the transcript. Presets can include a Skill description; you can choose a separate classifier model and preview with history. High-quality transcripts can skip polishing
+- **Keep Screen On While Recording**: Keeps the screen on during keyboard or floating-ball recording so it will not sleep mid-session; also available as a keyboard extension toggle
+- **DashScope Qwen3.8-Omni-Flash**: DashScope adds the Qwen3.8-Omni-Flash non-streaming model
+- **StepAudio Models**: StepAudio adds stepaudio-3-asr-max and custom recognition models
+- **[Pro] Separate Assistant and Hotword Models**: AI assistant and hotword-correction analysis can each use their own model instead of the default polish model
+
+### Improvements
+
+- **Online Non-Streaming Chunking**: Online file recognition now chunks on silence for faster first results on long recordings; failed segments are retried automatically
+- **Full-Screen Prompt Editor**: Polish prompts can be edited full screen
+- **AI Extra Parameters**: Temperature and other advanced parameters move into a dedicated sheet
+- **[Pro] Input Field Context**: When enabled, automatic prompt selection also uses text around the cursor
+
+### Bug Fixes
+
+- **Fold and Rotation**: Fix floating ball and floating keyboard position and usable area after rotation or folding
+- **Recording Source**: Cache the validated capture source to reduce recording failures or repeated source probing on some devices
+- **Backup Import**: More compatible recognition-history backup import when newer enum fields are missing
+
+---
+
 ## v4.4.5 (2026-09-11)
 
 ### New Features
