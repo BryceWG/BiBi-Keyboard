@@ -25,6 +25,9 @@
     <string name="label_dash_region">Request endpoint</string>
     <string name="dash_region_cn">Mainland China (aliyuncs.com)</string>
     <string name="dash_region_intl">Singapore/International (dashscope-intl.aliyuncs.com)</string>
+    <string name="dash_region_token_plan_cn">Alibaba Token Plan (China/Beijing, non-streaming)</string>
+    <string name="dash_region_token_plan_intl">Alibaba Token Plan (International/Singapore, non-streaming)</string>
+    <string name="error_dash_token_plan_streaming_unsupported">Token Plan streaming ASR is not supported. Select Qwen-Audio-3.0-ASR-Flash (non-streaming).</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">Chinese (zh)</string>

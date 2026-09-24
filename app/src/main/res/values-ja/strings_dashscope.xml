@@ -25,6 +25,9 @@
     <string name="label_dash_region">エンドポイント</string>
     <string name="dash_region_cn">中国本土（aliyuncs.com）</string>
     <string name="dash_region_intl">シンガポール/国際（dashscope-intl.aliyuncs.com）</string>
+    <string name="dash_region_token_plan_cn">Alibaba Token Plan（中国本土/北京、非ストリーミング）</string>
+    <string name="dash_region_token_plan_intl">Alibaba Token Plan（国際/シンガポール、非ストリーミング）</string>
+    <string name="error_dash_token_plan_streaming_unsupported">Token Plan のストリーミング音声認識には対応していません。Qwen-Audio-3.0-ASR-Flash（非ストリーミング）を選択してください。</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中国語（zh）</string>

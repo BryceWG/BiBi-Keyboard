@@ -25,6 +25,9 @@
     <string name="label_dash_region">نقطة النهاية</string>
     <string name="dash_region_cn">الصين القارية (aliyuncs.com)</string>
     <string name="dash_region_intl">سنغافورة/دولي (dashscope-intl.aliyuncs.com)</string>
+    <string name="dash_region_token_plan_cn">Alibaba Token Plan (الصين/بكين، غير متدفق)</string>
+    <string name="dash_region_token_plan_intl">Alibaba Token Plan (دولي/سنغافورة، غير متدفق)</string>
+    <string name="error_dash_token_plan_streaming_unsupported">التعرف المتدفق على الكلام غير مدعوم في Token Plan. اختر Qwen-Audio-3.0-ASR-Flash (غير متدفق).</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">الصينية (zh)</string>

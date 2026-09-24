@@ -212,7 +212,15 @@ internal fun dashLanguageSummary(context: Context, languages: String): String {
 
 internal fun dashRegionOptions(context: Context): List<DashChoice> = listOf(
     DashChoice("cn", context.getString(R.string.dash_region_cn)),
-    DashChoice("intl", context.getString(R.string.dash_region_intl))
+    DashChoice("intl", context.getString(R.string.dash_region_intl)),
+    DashChoice(
+        DashScopePrefsCompat.REGION_TOKEN_PLAN_CN,
+        context.getString(R.string.dash_region_token_plan_cn)
+    ),
+    DashChoice(
+        DashScopePrefsCompat.REGION_TOKEN_PLAN_INTL,
+        context.getString(R.string.dash_region_token_plan_intl)
+    )
 )
 
 internal fun dashRegionLabel(context: Context, region: String): String {
@@ -223,11 +231,7 @@ internal fun dashRegionLabel(context: Context, region: String): String {
 
 internal fun normalizeDashModel(model: String): String = DashScopePrefsCompat.normalizeDashAsrModel(model)
 
-internal fun normalizeDashRegion(region: String): String = if (region.equals("intl", ignoreCase = true)) {
-    "intl"
-} else {
-    "cn"
-}
+internal fun normalizeDashRegion(region: String): String = DashScopePrefsCompat.normalizeDashRegion(region)
 
 internal fun isDashSemanticPunctuationSupported(model: String): Boolean = DashScopePrefsCompat.isSemanticPunctuationSupported(model)
 

@@ -25,6 +25,9 @@
     <string name="label_dash_region">请求端点</string>
     <string name="dash_region_cn">中国大陆（aliyuncs.com）</string>
     <string name="dash_region_intl">新加坡/国际（dashscope-intl.aliyuncs.com）</string>
+    <string name="dash_region_token_plan_cn">阿里云 Token Plan（中国大陆/北京，非流式）</string>
+    <string name="dash_region_token_plan_intl">阿里云 Token Plan（国际/新加坡，非流式）</string>
+    <string name="error_dash_token_plan_streaming_unsupported">暂不支持 Token Plan 流式语音识别，请选择 Qwen-Audio-3.0-ASR-Flash（非流式）。</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中文 (zh)</string>
