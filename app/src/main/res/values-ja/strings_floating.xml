@@ -8,7 +8,8 @@
     <string name="section_shake_recording">振って録音</string>
     <string name="label_shake_recording">振って録音を開始／停止</string>
     <string name="label_shake_recording_sensitivity">振る感度</string>
-    <string name="label_shake_recording_sound">録音の開始／停止時に音を再生</string>
+    <string name="label_shake_recording_sound">録音の開始／停止時にフィードバック</string>
+    <string name="label_shake_recording_stop_on_ime_hidden">キーボード非表示時に録音を停止</string>
     <string name="section_floating_compat">高度な機能</string>
     <string name="section_floating_keep_alive">バックグラウンド保活</string>
     <string name="label_floating_only_when_ime_visible">キーボード表示時のみフローティングボールを表示する</string>
@@ -150,8 +151,10 @@
     <string name="feature_volume_key_stop_on_ime_hidden_on_desc">音量キー録音中にキーボードが消えると、自動的に録音を停止します。</string>
     <string name="feature_shake_recording_off_desc">スマートフォンを振っても録音を操作しません。</string>
     <string name="feature_shake_recording_on_desc">キーボード表示中にスマートフォンを振ると録音を開始し、もう一度振ると停止します。アクセシビリティサービスを使用し、キーボード非表示時は反応しません。</string>
-    <string name="feature_shake_recording_sound_off_desc">振って録音を開始または停止するとき、システム音を再生しません。</string>
-    <string name="feature_shake_recording_sound_on_desc">振って録音を開始または停止するとき、固定の通知音を再生します。</string>
+    <string name="feature_shake_recording_sound_off_desc">振って録音を開始または停止するとき、音もバイブレーションも出しません。</string>
+    <string name="feature_shake_recording_sound_on_desc">振って録音を開始または停止するとき、異なる通知音を再生し、バイブレーションします（開始は軽い1回、停止は強い2回）。</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">振って録音中にキーボードが消えても、手動で停止するまで録音を続けます。</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">振って録音中にキーボードが消えると、自動的に録音を停止します。</string>
 
     <!-- フローティング書き込み互換モード -->
     <string name="feature_floating_ime_bridge_off_desc">すべての Hook 連携リクエストの受付を停止します。メインキーボードとフローティングボールの非 Hook 機能には影響しません。</string>

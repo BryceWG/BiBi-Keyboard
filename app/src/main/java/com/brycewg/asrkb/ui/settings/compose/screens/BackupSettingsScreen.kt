@@ -31,6 +31,7 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.clipboard.ClipboardSyncRuntimeService
 import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.ui.AsrAccessibilityService
 import com.brycewg.asrkb.ui.settings.backup.WebDavBackupHelper
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsLazyColumn
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
@@ -393,6 +394,8 @@ private fun Context.refreshImeUi() {
     } catch (e: Exception) {
         Log.e(TAG, "Failed to send refresh broadcast", e)
     }
+    // 备份可能改动摇一摇开关；偏好已写入后按当前值同步加速度计注册。
+    AsrAccessibilityService.refreshShakeSensor()
 }
 
 private fun buildWebdavErrorReason(

@@ -14,7 +14,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
@@ -26,7 +25,6 @@ import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.ui.floating.FloatingAsrService
 import com.brycewg.asrkb.ui.floating.FloatingImeHints
-import kotlin.math.sqrt
 
 /**
  * 无障碍服务,用于悬浮球语音识别后将文本插入到当前焦点的输入框中
@@ -285,11 +283,7 @@ class AsrAccessibilityService :
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
     }
     private var shakeSensorRegistered = false
-    private var gravityX = 0f
-    private var gravityY = 0f
-    private var gravityZ = 0f
-    private var lastShakeAt = 0L
-    private val shakeCooldownMs = 1100L
+    private val shakeDetector = ShakeRecordingDetector()
     private var pendingClipboardRestore: Runnable? = null
     private val prefsOrNull: Prefs? by lazy(LazyThreadSafetyMode.NONE) {
         try {
@@ -301,6 +295,7 @@ class AsrAccessibilityService :
     }
     private var pendingCheck = false
     private var lastImeSceneActive: Boolean? = null
+    private var lastImeWindowVisible: Boolean? = null
     private var lastEditableFocusAt: Long = 0L
     private val holdAfterFocusMs: Long = 600L
     private var lastA11yAggEmitAt: Long = 0L
@@ -370,22 +365,30 @@ class AsrAccessibilityService :
 
         val values = event.values
         if (values.size < 3) return
-        val filter = 0.8f
-        gravityX = filter * gravityX + (1f - filter) * values[0]
-        gravityY = filter * gravityY + (1f - filter) * values[1]
-        gravityZ = filter * gravityZ + (1f - filter) * values[2]
-        val linearX = values[0] - gravityX
-        val linearY = values[1] - gravityY
-        val linearZ = values[2] - gravityZ
-        val acceleration = sqrt(
-            linearX * linearX + linearY * linearY + linearZ * linearZ
-        ) / SensorManager.GRAVITY_EARTH
-        val now = SystemClock.elapsedRealtime()
-        val threshold = Prefs.ShakeRecordingSensitivity.fromId(prefs.shakeRecordingSensitivity).threshold
-        if (acceleration < threshold || now - lastShakeAt < shakeCooldownMs) return
+        val sensitivity = Prefs.ShakeRecordingSensitivity.fromId(prefs.shakeRecordingSensitivity)
+        val trigger = shakeDetector.onAccelerometerSample(
+            ax = values[0],
+            ay = values[1],
+            az = values[2],
+            sensitivity = sensitivity
+        ) ?: return
         if (!isImeSceneActiveForRecordingTrigger()) return
-        lastShakeAt = now
 
+        shakeDetector.markTriggered()
+        if (DebugLogManager.isRecording()) {
+            DebugLogManager.log(
+                category = "a11y",
+                event = "shake_trigger",
+                data = mapOf(
+                    "sensitivity" to trigger.sensitivityId,
+                    "peakG" to trigger.peakG,
+                    "reversals" to trigger.reversals,
+                    "windowMs" to trigger.windowMs,
+                    "peakThresholdG" to sensitivity.peakThresholdG,
+                    "minReversals" to sensitivity.minReversals
+                )
+            )
+        }
         dispatchRecordingAction(FloatingAsrService.ACTION_SHAKE_RECORDING_TOGGLE)
     }
 
@@ -404,10 +407,7 @@ class AsrAccessibilityService :
                 SensorManager.SENSOR_DELAY_UI
             )
             if (shakeSensorRegistered) {
-                gravityX = 0f
-                gravityY = 0f
-                gravityZ = 0f
-                lastShakeAt = 0L
+                shakeDetector.reset()
             }
         } else if (!shouldRegister) {
             unregisterShakeSensor()
@@ -418,6 +418,7 @@ class AsrAccessibilityService :
         if (!shakeSensorRegistered) return
         sensorManager.unregisterListener(this)
         shakeSensorRegistered = false
+        shakeDetector.reset()
     }
 
     /**
@@ -443,8 +444,31 @@ class AsrAccessibilityService :
         val hasFocus = hasEditableFocusNow()
         if (hasFocus) lastEditableFocusAt = now
 
+        val winVisible = isImeWindowVisible()
+        maybeDispatchImeWindowHiddenStop(winVisible)
+
         val active = determineImeSceneActive(now)
         updateImeVisibilityState(active)
+    }
+
+    /**
+     * 键盘窗口可见性边沿（与 holdByFocus 解耦）。
+     * 场景活跃会因焦点 hold 在窗口消失后仍保持 true；
+     * 音量键/摇一摇「键盘消失停录」以 TYPE_INPUT_METHOD 窗口消失为边沿。
+     */
+    private fun maybeDispatchImeWindowHiddenStop(winVisible: Boolean) {
+        val prev = lastImeWindowVisible
+        lastImeWindowVisible = winVisible
+        if (prev != true || winVisible) return
+        DebugLogManager.logBase(
+            category = "a11y",
+            event = "ime_window_hidden",
+            data = mapOf(
+                "prevWinVisible" to true,
+                "winVisible" to false
+            )
+        )
+        dispatchRecordingAction(FloatingAsrService.ACTION_IME_WINDOW_HIDDEN_STOP_RECORDING)
     }
 
     private fun maybeEmitA11yAgg() {
@@ -566,6 +590,8 @@ class AsrAccessibilityService :
 
     private fun isImeSceneActiveForRecordingTrigger(): Boolean {
         val now = System.currentTimeMillis()
+        // 同步窗口边沿状态，避免摇一摇/音量键触发时尚未记下「窗口曾可见」。
+        maybeDispatchImeWindowHiddenStop(isImeWindowVisible())
         val active = determineImeSceneActive(now)
         updateImeVisibilityState(active)
         return active

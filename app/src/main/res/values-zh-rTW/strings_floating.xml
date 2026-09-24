@@ -7,7 +7,8 @@
     <string name="section_shake_recording">搖一搖錄音</string>
     <string name="label_shake_recording">搖一搖開始或停止錄音</string>
     <string name="label_shake_recording_sensitivity">搖一搖靈敏度</string>
-    <string name="label_shake_recording_sound">開始或停止錄音時播放提示音</string>
+    <string name="label_shake_recording_sound">開始或停止錄音時回饋</string>
+    <string name="label_shake_recording_stop_on_ime_hidden">鍵盤消失時停止錄音</string>
     <string name="section_floating_compat">進階功能</string>
     <string name="section_floating_keep_alive">背景保活</string>
     <string name="label_floating_only_when_ime_visible">僅在鍵盤顯示時顯示懸浮球</string>
@@ -149,8 +150,10 @@
     <string name="feature_volume_key_stop_on_ime_hidden_on_desc">音量鍵錄音期間如果鍵盤消失，會自動停止錄音。</string>
     <string name="feature_shake_recording_off_desc">搖動手機不會控制錄音。</string>
     <string name="feature_shake_recording_on_desc">鍵盤顯示時，搖動一次手機開始錄音，再搖一次停止錄音。功能透過無障礙服務運作，鍵盤隱藏時不會觸發。</string>
-    <string name="feature_shake_recording_sound_off_desc">搖一搖錄音開始或停止時不播放系統提示音。</string>
-    <string name="feature_shake_recording_sound_on_desc">搖一搖錄音開始或停止時播放固定提示音。</string>
+    <string name="feature_shake_recording_sound_off_desc">搖一搖錄音開始或停止時不播放提示音，也不震動。</string>
+    <string name="feature_shake_recording_sound_on_desc">搖一搖錄音開始或停止時播放不同提示音，並震動（開始輕震 1 次，停止重震 2 次）。</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">搖一搖錄音期間如果鍵盤消失，錄音會繼續，直到你手動停止。</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">搖一搖錄音期間如果鍵盤消失，會自動停止錄音。</string>
 
     <!-- 懸浮球寫入文字相容性模式 -->
     <string name="feature_floating_ime_bridge_off_desc">停止接受所有 Hook 聯動請求；主鍵盤與懸浮球的非 Hook 功能不受影響。</string>

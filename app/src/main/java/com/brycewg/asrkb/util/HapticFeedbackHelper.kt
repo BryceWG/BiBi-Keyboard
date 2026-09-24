@@ -11,6 +11,8 @@ import com.brycewg.asrkb.store.Prefs
 object HapticFeedbackHelper {
     private const val TAG = "HapticFeedbackHelper"
     private const val DEFAULT_DURATION_MS = 20L
+    private const val PULSE_DURATION_MS = 40L
+    private const val PULSE_GAP_MS = 70L
 
     fun performTap(context: Context, prefs: Prefs, view: View? = null) {
         when (prefs.hapticFeedbackLevel) {
@@ -30,6 +32,48 @@ object HapticFeedbackHelper {
                 val amplitude = amplitudeForLevel(prefs.hapticFeedbackLevel) ?: return
                 vibrate(context, amplitude)
             }
+        }
+    }
+
+    /**
+     * 无障碍向短脉冲震动，不受按键触觉强度开关影响。
+     * 用于摇一摇录音开始/停止反馈。
+     */
+    fun vibratePulses(
+        context: Context,
+        count: Int,
+        pulseMs: Long = PULSE_DURATION_MS,
+        gapMs: Long = PULSE_GAP_MS,
+        amplitude: Int = VibrationEffect.DEFAULT_AMPLITUDE
+    ) {
+        if (count <= 0) return
+        val vibrator = context.getSystemService(Vibrator::class.java)
+        if (vibrator == null || !vibrator.hasVibrator()) return
+        val pulseCount = count.coerceAtMost(6)
+        val safePulseMs = pulseMs.coerceIn(10L, 200L)
+        val safeGapMs = gapMs.coerceIn(20L, 400L)
+        // timings: [delay0, on0, delay1, on1, ...]
+        val timings = LongArray(pulseCount * 2)
+        val amplitudes = IntArray(pulseCount * 2)
+        val safeAmplitude = if (amplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+            amplitude
+        } else {
+            amplitude.coerceIn(1, 255)
+        }
+        for (i in 0 until pulseCount) {
+            timings[i * 2] = if (i == 0) 0L else safeGapMs
+            timings[i * 2 + 1] = safePulseMs
+            amplitudes[i * 2] = 0
+            amplitudes[i * 2 + 1] = if (safeAmplitude == VibrationEffect.DEFAULT_AMPLITUDE) {
+                160
+            } else {
+                safeAmplitude
+            }
+        }
+        try {
+            vibrator.vibrate(VibrationEffect.createWaveform(timings, amplitudes, -1))
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to vibrate pulses", e)
         }
     }
 

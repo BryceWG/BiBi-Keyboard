@@ -7,7 +7,8 @@
     <string name="section_shake_recording">摇一摇录音</string>
     <string name="label_shake_recording">摇一摇开始或停止录音</string>
     <string name="label_shake_recording_sensitivity">摇一摇灵敏度</string>
-    <string name="label_shake_recording_sound">开始或停止录音时播放提示音</string>
+    <string name="label_shake_recording_sound">开始或停止录音时反馈</string>
+    <string name="label_shake_recording_stop_on_ime_hidden">键盘消失时停止录音</string>
     <string name="section_floating_compat">高级功能</string>
     <string name="section_floating_keep_alive">后台保活</string>
     <string name="label_floating_only_when_ime_visible">仅在键盘显示时显示悬浮球</string>
@@ -149,8 +150,10 @@
     <string name="feature_volume_key_stop_on_ime_hidden_on_desc">音量键录音期间如果键盘消失，会自动停止录音。</string>
     <string name="feature_shake_recording_off_desc">摇动手机不会控制录音。</string>
     <string name="feature_shake_recording_on_desc">键盘显示时，摇动一次手机开始录音，再摇一次停止录音。功能通过无障碍服务工作，键盘隐藏时不会触发。</string>
-    <string name="feature_shake_recording_sound_off_desc">摇一摇录音开始或停止时不播放系统提示音。</string>
-    <string name="feature_shake_recording_sound_on_desc">摇一摇录音开始或停止时播放固定提示音。</string>
+    <string name="feature_shake_recording_sound_off_desc">摇一摇录音开始或停止时不播放提示音，也不震动。</string>
+    <string name="feature_shake_recording_sound_on_desc">摇一摇录音开始或停止时播放不同提示音，并震动（开始轻震 1 次，停止重震 2 次）。</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">摇一摇录音期间如果键盘消失，录音会继续，直到你手动停止。</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">摇一摇录音期间如果键盘消失，会自动停止录音。</string>
 
     <!-- 悬浮球写入文字兼容性模式 -->
     <string name="feature_floating_ime_bridge_off_desc">停止接受所有 Hook 联动请求；主键盘与悬浮球的非 Hook 功能不受影响。</string>

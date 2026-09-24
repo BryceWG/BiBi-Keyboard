@@ -69,6 +69,8 @@ class FloatingAsrService : Service() {
         const val ACTION_VOLUME_KEY_STOP = "com.brycewg.asrkb.action.VOLUME_KEY_RECORDING_STOP"
         const val ACTION_VOLUME_KEY_TOGGLE = "com.brycewg.asrkb.action.VOLUME_KEY_RECORDING_TOGGLE"
         const val ACTION_SHAKE_RECORDING_TOGGLE = "com.brycewg.asrkb.action.SHAKE_RECORDING_TOGGLE"
+        const val ACTION_IME_WINDOW_HIDDEN_STOP_RECORDING =
+            "com.brycewg.asrkb.action.IME_WINDOW_HIDDEN_STOP_RECORDING"
     }
 
     private lateinit var windowManager: WindowManager
@@ -265,6 +267,8 @@ class FloatingAsrService : Service() {
             ACTION_VOLUME_KEY_STOP -> interactionController.onVolumeKeyStop()
             ACTION_VOLUME_KEY_TOGGLE -> interactionController.onVolumeKeyToggle()
             ACTION_SHAKE_RECORDING_TOGGLE -> interactionController.onShakeRecordingToggle()
+            ACTION_IME_WINDOW_HIDDEN_STOP_RECORDING ->
+                interactionController.stopRecordingOnImeWindowHidden()
             FloatingImeHints.ACTION_HINT_IME_VISIBLE -> {
                 handleAccessibilityImeVisibilityHint(true, "start_hint_visible")
             }
@@ -595,9 +599,8 @@ class FloatingAsrService : Service() {
                 )
             )
         }
-        if (!visible && ::interactionController.isInitialized) {
-            interactionController.stopVolumeKeyRecordingOnImeHidden()
-        }
+        // 停录主路径：a11y TYPE_INPUT_METHOD 窗口边沿 → ACTION_IME_WINDOW_HIDDEN_STOP_RECORDING。
+        // 此处不再备份停录，避免与窗口边沿重复触发。
         visibilityCoordinator.applyVisibility(src)
         try {
             BluetoothRouteManager.setImeActive(this, visible)

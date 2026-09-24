@@ -42,12 +42,27 @@ internal fun resolveRecordingAutoStopMode(
 }
 
 class Prefs(context: Context) {
-    enum class ShakeRecordingSensitivity(val id: String, val threshold: Float) {
-        VERY_SENSITIVE("very_sensitive", 1.5f),
-        SENSITIVE("sensitive", 1.9f),
-        DEFAULT("default", 2.35f),
-        CONSERVATIVE("conservative", 2.8f),
-        VERY_CONSERVATIVE("very_conservative", 3.3f);
+    /**
+     * 摇一摇灵敏度：检测器读取本枚举全部字段（峰值阈值 / 时间窗 / 所需反转次数 / 冷却）。
+     * 从灵敏到迟钝单调变难；勿只改文案不改参数。
+     *
+     * @param peakThresholdG 单轴线性加速度峰值（单位 g）达到才计为一次半程
+     * @param windowMs 反转计数滑动窗口
+     * @param minReversals 窗口内所需方向反转次数（来回摇，非单次冲击）
+     * @param cooldownMs 触发后冷却，避免一次摇动连开连关
+     */
+    enum class ShakeRecordingSensitivity(
+        val id: String,
+        val peakThresholdG: Float,
+        val windowMs: Long,
+        val minReversals: Int,
+        val cooldownMs: Long
+    ) {
+        VERY_SENSITIVE("very_sensitive", 0.55f, 1000L, 2, 900L),
+        SENSITIVE("sensitive", 0.85f, 900L, 2, 1000L),
+        DEFAULT("default", 1.20f, 850L, 2, 1100L),
+        CONSERVATIVE("conservative", 1.70f, 800L, 3, 1200L),
+        VERY_CONSERVATIVE("very_conservative", 2.30f, 750L, 3, 1300L);
 
         companion object {
             fun fromId(id: String?): ShakeRecordingSensitivity = entries.firstOrNull { it.id == id } ?: DEFAULT
@@ -621,6 +636,10 @@ class Prefs(context: Context) {
     var shakeRecordingSoundEnabled: Boolean
         get() = sp.getBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, value) }
+
+    var shakeRecordingStopOnImeHidden: Boolean
+        get() = sp.getBoolean(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, true)
+        set(value) = sp.edit { putBoolean(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, value) }
 
     // 悬浮球：前台保活开关
     var floatingKeepAliveEnabled: Boolean

@@ -7,7 +7,8 @@
     <string name="section_shake_recording">التسجيل بالهز</string>
     <string name="label_shake_recording">هز الهاتف لبدء التسجيل أو إيقافه</string>
     <string name="label_shake_recording_sensitivity">حساسية الهز</string>
-    <string name="label_shake_recording_sound">تشغيل صوت عند بدء التسجيل أو إيقافه</string>
+    <string name="label_shake_recording_sound">تنبيه عند بدء التسجيل أو إيقافه</string>
+    <string name="label_shake_recording_stop_on_ime_hidden">إيقاف التسجيل عند اختفاء لوحة المفاتيح</string>
     <string name="section_floating_compat">متقدم</string>
     <string name="section_floating_keep_alive">إبقاء التطبيق في الخلفية</string>
     <string name="label_floating_only_when_ime_visible">إظهار الكرة العائمة فقط عند ظهور لوحة المفاتيح</string>
@@ -149,8 +150,10 @@
     <string name="feature_volume_key_stop_on_ime_hidden_on_desc">إن اختفت اللوحة أثناء تسجيل مفاتيح الصوت، يتوقف التسجيل تلقائياً.</string>
     <string name="feature_shake_recording_off_desc">هز الهاتف لا يتحكم بالتسجيل.</string>
     <string name="feature_shake_recording_on_desc">عند ظهور لوحة المفاتيح، هز الهاتف مرة لبدء التسجيل ومرة أخرى لإيقافه. تستخدم الميزة خدمة إمكانية الوصول ولا تستجيب عند إخفاء لوحة المفاتيح.</string>
-    <string name="feature_shake_recording_sound_off_desc">لا تشغل صوت نظام عند بدء أو إيقاف التسجيل بالهز.</string>
-    <string name="feature_shake_recording_sound_on_desc">تشغل نغمة تنبيه ثابتة عند بدء أو إيقاف التسجيل بالهز.</string>
+    <string name="feature_shake_recording_sound_off_desc">لا تشغل صوتاً أو اهتزازاً عند بدء أو إيقاف التسجيل بالهز.</string>
+    <string name="feature_shake_recording_sound_on_desc">تشغل نغمات مختلفة واهتزازاً (مرة خفيفة عند البدء ومرتين أقوى عند الإيقاف) عند بدء أو إيقاف التسجيل بالهز.</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">إن اختفت اللوحة أثناء التسجيل بالهز، يستمر التسجيل حتى توقفه يدوياً.</string>
+    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">إن اختفت اللوحة أثناء التسجيل بالهز، يتوقف التسجيل تلقائياً.</string>
 
     <!-- Floating write compatibility mode -->
     <string name="feature_floating_ime_bridge_off_desc">يوقف قبول كل طلبات الربط عبر Hook. ميزات لوحة المفاتيح الرئيسية والكرة العائمة غير المعتمدة على Hook لا تتأثر.</string>

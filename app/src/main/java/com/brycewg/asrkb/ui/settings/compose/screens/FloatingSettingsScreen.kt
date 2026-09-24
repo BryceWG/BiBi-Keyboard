@@ -695,7 +695,7 @@ fun FloatingSettingsScreen(
 
             item("shake_recording") {
                 FloatingSection(uiMode = uiMode, titleRes = R.string.section_shake_recording) {
-                    val shakeItemCount = if (uiState.shakeRecordingEnabled) 3 else 1
+                    val shakeItemCount = if (uiState.shakeRecordingEnabled) 4 else 1
                     FloatingExplainedSwitch(
                         id = "shake_recording",
                         titleRes = R.string.label_shake_recording,
@@ -737,6 +737,23 @@ fun FloatingSettingsScreen(
                                 ) { prefs.shakeRecordingSoundEnabled = it }
                             },
                             index = 2,
+                            count = shakeItemCount
+                        )
+                        FloatingExplainedSwitch(
+                            id = "shake_recording_stop_on_ime_hidden",
+                            titleRes = R.string.label_shake_recording_stop_on_ime_hidden,
+                            checked = uiState.shakeRecordingStopOnImeHidden,
+                            onToggle = { target ->
+                                applyExplainedSwitch(
+                                    current = uiState.shakeRecordingStopOnImeHidden,
+                                    target = target,
+                                    titleRes = R.string.label_shake_recording_stop_on_ime_hidden,
+                                    offDescRes = R.string.feature_shake_recording_stop_on_ime_hidden_off_desc,
+                                    onDescRes = R.string.feature_shake_recording_stop_on_ime_hidden_on_desc,
+                                    preferenceKey = "shake_recording_stop_on_ime_hidden_explained"
+                                ) { prefs.shakeRecordingStopOnImeHidden = it }
+                            },
+                            index = 3,
                             count = shakeItemCount
                         )
                     }

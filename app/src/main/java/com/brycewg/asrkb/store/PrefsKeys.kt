@@ -70,6 +70,7 @@ internal const val KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN = "volume_key_stop_on_ime_h
 internal const val KEY_SHAKE_RECORDING_ENABLED = "shake_recording_enabled"
 internal const val KEY_SHAKE_RECORDING_SENSITIVITY = "shake_recording_sensitivity"
 internal const val KEY_SHAKE_RECORDING_SOUND_ENABLED = "shake_recording_sound_enabled"
+internal const val KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN = "shake_recording_stop_on_ime_hidden"
 internal const val KEY_FLOATING_KEEP_ALIVE_ENABLED = "floating_keep_alive_enabled"
 internal const val KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED = "floating_keep_alive_privileged_enabled"
 internal const val KEY_FLOATING_WRITE_COMPAT_PACKAGES = "floating_write_compat_packages"

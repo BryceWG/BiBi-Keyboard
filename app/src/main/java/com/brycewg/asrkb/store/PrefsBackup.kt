@@ -85,6 +85,7 @@ internal object PrefsBackup {
         o.put(KEY_SHAKE_RECORDING_ENABLED, shakeRecordingEnabled)
         o.put(KEY_SHAKE_RECORDING_SENSITIVITY, shakeRecordingSensitivity)
         o.put(KEY_SHAKE_RECORDING_SOUND_ENABLED, shakeRecordingSoundEnabled)
+        o.put(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, shakeRecordingStopOnImeHidden)
         o.put(KEY_FLOATING_KEEP_ALIVE_ENABLED, floatingKeepAliveEnabled)
         o.put(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED, floatingKeepAlivePrivilegedEnabled)
 
@@ -403,6 +404,7 @@ internal object PrefsBackup {
             optBool(KEY_SHAKE_RECORDING_ENABLED)?.let { shakeRecordingEnabled = it }
             optString(KEY_SHAKE_RECORDING_SENSITIVITY)?.let { shakeRecordingSensitivity = it }
             optBool(KEY_SHAKE_RECORDING_SOUND_ENABLED)?.let { shakeRecordingSoundEnabled = it }
+            optBool(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN)?.let { shakeRecordingStopOnImeHidden = it }
             optBool(KEY_FLOATING_KEEP_ALIVE_ENABLED)?.let { floatingKeepAliveEnabled = it }
             optBool(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED)?.let {
                 floatingKeepAlivePrivilegedEnabled =

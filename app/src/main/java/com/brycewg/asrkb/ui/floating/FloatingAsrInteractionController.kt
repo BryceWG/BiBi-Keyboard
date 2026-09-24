@@ -4,8 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.AudioManager
-import android.media.ToneGenerator
 import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
@@ -34,6 +32,7 @@ import com.brycewg.asrkb.ui.floatingball.FloatingMenuHelper
 import com.brycewg.asrkb.ui.floatingball.resolveFloatingBallHoldPressAction
 import com.brycewg.asrkb.ui.floatingball.resolveFloatingBallRecordingTapAction
 import com.brycewg.asrkb.util.HapticFeedbackHelper
+import kotlin.math.sin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -61,6 +60,8 @@ internal class FloatingAsrInteractionController(
     companion object {
         private const val EDGE_HANDLE_AUTO_HIDE_DELAY_MS = 2500L
         private const val AMPLITUDE_DISPATCH_INTERVAL_MS = 32L
+        private const val SHAKE_START_TONE_MS = 200
+        private const val SHAKE_STOP_TONE_MS = 260
     }
 
     lateinit var asrSessionManager: AsrSessionManager
@@ -74,6 +75,10 @@ internal class FloatingAsrInteractionController(
     private var postErrorPartialHideRunnable: Runnable? = null
     private var postErrorResetStateRunnable: Runnable? = null
     private var volumeKeySessionActive: Boolean = false
+    private var shakeSessionActive: Boolean = false
+    private var shakeFeedbackReleaseRunnable: Runnable? = null
+    private var shakeFeedbackStartRecordingRunnable: Runnable? = null
+    private var shakeFeedbackTrack: android.media.AudioTrack? = null
     private val holdRecordingTracker = FloatingBallHoldRecordingTracker()
     private val holdAccessibilityPromptTracker = FloatingBallHoldAccessibilityPromptTracker()
     private var pendingAmplitude: Float? = null
@@ -90,6 +95,8 @@ internal class FloatingAsrInteractionController(
         cancelPostErrorPartialHide()
         cancelPostErrorResetState()
         cancelAmplitudeDispatch()
+        cancelShakeFeedbackStartRecording()
+        cancelShakeFeedbackTone()
         holdRecordingTracker.clear()
         holdAccessibilityPromptTracker.clear()
         stopRecordingForeground()
@@ -131,21 +138,45 @@ internal class FloatingAsrInteractionController(
     fun onShakeRecordingToggle() {
         if (stateMachine.isRecording) {
             stopRecording()
-            playShakeRecordingPrompt()
+            // 先停麦再播停止音，避免录音释放与提示音抢焦点截断。
+            playShakeRecordingFeedback(starting = false)
             return
         }
         if (stateMachine.isProcessing) return
-        if (startRecording()) playShakeRecordingPrompt()
+        // 先播开始音，再开麦，避免 AudioRecord 抢焦点截断提示音。
+        playShakeRecordingFeedback(starting = true) {
+            if (!stateMachine.isRecording && !stateMachine.isProcessing) {
+                startRecording(fromShake = true)
+            }
+        }
     }
 
-    fun stopVolumeKeyRecordingOnImeHidden() {
-        if (!volumeKeySessionActive) return
-        if (!prefs.volumeKeyStopOnImeHidden) return
+    fun stopRecordingOnImeWindowHidden() {
         if (!stateMachine.isRecording) return
+        // 主路径：TYPE_INPUT_METHOD 窗口 true→false；两开关分开判断。
+        val stopVolume = volumeKeySessionActive && prefs.volumeKeyStopOnImeHidden
+        val stopShake = shakeSessionActive && prefs.shakeRecordingStopOnImeHidden
+        DebugLogManager.logBase(
+            category = "float",
+            event = "stop_on_ime_window_hidden",
+            data = mapOf(
+                "volumeSession" to volumeKeySessionActive,
+                "shakeSession" to shakeSessionActive,
+                "volumePref" to prefs.volumeKeyStopOnImeHidden,
+                "shakePref" to prefs.shakeRecordingStopOnImeHidden,
+                "willStop" to (stopVolume || stopShake)
+            )
+        )
+        if (!stopVolume && !stopShake) return
+        val playShakeFeedback = stopShake
         stopRecording()
+        if (playShakeFeedback) playShakeRecordingFeedback(starting = false)
     }
 
-    private fun startRecording(fromVolumeKey: Boolean = false): Boolean {
+    private fun startRecording(
+        fromVolumeKey: Boolean = false,
+        fromShake: Boolean = false
+    ): Boolean {
         Log.d(tag, "startRecording called")
         cancelEdgeHandleAutoHide()
 
@@ -156,6 +187,7 @@ internal class FloatingAsrInteractionController(
             logRecordingStartPath(
                 event = "microphone_fgs_start_failed",
                 fromVolumeKey = fromVolumeKey,
+                fromShake = fromShake,
                 success = false
             )
             showToast(context.getString(R.string.toast_floating_recording_foreground_failed))
@@ -165,10 +197,11 @@ internal class FloatingAsrInteractionController(
         logRecordingStartPath(
             event = "microphone_fgs_started",
             fromVolumeKey = fromVolumeKey,
+            fromShake = fromShake,
             success = true
         )
 
-        return startAsrRecording(fromVolumeKey)
+        return startAsrRecording(fromVolumeKey = fromVolumeKey, fromShake = fromShake)
     }
 
     private fun canStartRecording(): Boolean {
@@ -187,7 +220,7 @@ internal class FloatingAsrInteractionController(
         return true
     }
 
-    private fun startAsrRecording(fromVolumeKey: Boolean): Boolean {
+    private fun startAsrRecording(fromVolumeKey: Boolean, fromShake: Boolean): Boolean {
         // 开始录音前切换为激活态图标
         try {
             viewManager.getBallView()?.findViewById<android.widget.ImageView>(R.id.ballIcon)
@@ -197,9 +230,11 @@ internal class FloatingAsrInteractionController(
         }
 
         volumeKeySessionActive = fromVolumeKey
+        shakeSessionActive = fromShake
         logRecordingStartPath(
             event = "asr_start_requested",
             fromVolumeKey = fromVolumeKey,
+            fromShake = fromShake,
             success = true
         )
         try {
@@ -207,6 +242,7 @@ internal class FloatingAsrInteractionController(
         } catch (t: Throwable) {
             Log.e(tag, "Failed to start ASR recording", t)
             volumeKeySessionActive = false
+            shakeSessionActive = false
             stopRecordingForeground()
             showToast(
                 context.getString(
@@ -223,14 +259,20 @@ internal class FloatingAsrInteractionController(
     private fun logRecordingStartPath(
         event: String,
         fromVolumeKey: Boolean,
+        fromShake: Boolean,
         success: Boolean
     ) {
         val data = mapOf(
             "method" to "service_microphone_fgs",
             "fromVolumeKey" to fromVolumeKey,
+            "fromShake" to fromShake,
             "success" to success
         )
-        Log.i(tag, "recording_start_path event=$event method=service_microphone_fgs fromVolumeKey=$fromVolumeKey success=$success")
+        Log.i(
+            tag,
+            "recording_start_path event=$event method=service_microphone_fgs " +
+                "fromVolumeKey=$fromVolumeKey fromShake=$fromShake success=$success"
+        )
         DebugLogManager.logPersistent(context, "float", event, data)
     }
 
@@ -238,30 +280,213 @@ internal class FloatingAsrInteractionController(
         Log.d(tag, "stopRecording called")
         cancelEdgeHandleAutoHide()
         volumeKeySessionActive = false
+        shakeSessionActive = false
         asrSessionManager.stopRecording()
         stopRecordingForeground()
         updateVisibilityByPref("stop_recording")
     }
 
-    private fun playShakeRecordingPrompt() {
-        if (!prefs.shakeRecordingSoundEnabled) return
+    private fun playShakeRecordingFeedback(
+        starting: Boolean,
+        onToneFinished: (() -> Unit)? = null
+    ) {
+        if (!prefs.shakeRecordingSoundEnabled) {
+            onToneFinished?.invoke()
+            return
+        }
+        val durationMs = if (starting) SHAKE_START_TONE_MS else SHAKE_STOP_TONE_MS
+        // USAGE_MEDIA 已由系统按 STREAM_MUSIC 缩放；媒体为 0 时跳过播放。
+        // 不再在 PCM / setVolume 上二次乘媒体比例，避免低音量平方衰减到听不见。
+        val mediaAudible = isMediaStreamAudible()
+        if (mediaAudible) {
+            if (!starting) {
+                // 停麦后若仍残留通话模式，USAGE_MEDIA 会被压到接近无声。
+                ensureNormalAudioModeForMediaTone()
+            }
+            playShakeRecordingTone(starting = starting, durationMs = durationMs)
+        }
         try {
-            // 使用固定系统提示音，不依赖无障碍服务的系统音效开关或本地化文本。
-            val toneGenerator = ToneGenerator(AudioManager.STREAM_NOTIFICATION, 80)
-            try {
-                toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 120)
-            } finally {
-                toneGenerator.release()
+            if (starting) {
+                HapticFeedbackHelper.vibratePulses(
+                    context = context,
+                    count = 1,
+                    pulseMs = 30L,
+                    gapMs = 0L,
+                    amplitude = 55
+                )
+            } else {
+                HapticFeedbackHelper.vibratePulses(
+                    context = context,
+                    count = 2,
+                    pulseMs = 80L,
+                    gapMs = 140L,
+                    amplitude = 220
+                )
             }
         } catch (t: Throwable) {
-            Log.w(tag, "Failed to play shake recording prompt", t)
+            Log.w(tag, "Failed to vibrate shake recording feedback", t)
+        }
+        if (DebugLogManager.isRecording()) {
+            DebugLogManager.log(
+                "float",
+                "shake_feedback",
+                mapOf(
+                    "phase" to if (starting) "start" else "stop",
+                    "pulses" to if (starting) 1 else 2,
+                    "toneMs" to durationMs,
+                    "mediaAudible" to mediaAudible
+                )
+            )
+        }
+        if (onToneFinished != null) {
+            cancelShakeFeedbackStartRecording()
+            if (!mediaAudible) {
+                onToneFinished()
+            } else {
+                val r = Runnable {
+                    shakeFeedbackStartRecordingRunnable = null
+                    onToneFinished()
+                }
+                shakeFeedbackStartRecordingRunnable = r
+                handler.postDelayed(r, durationMs + 20L)
+            }
+        }
+    }
+
+    private fun isMediaStreamAudible(): Boolean {
+        return try {
+            val am = context.getSystemService(android.media.AudioManager::class.java) ?: return true
+            am.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) > 0
+        } catch (t: Throwable) {
+            Log.w(tag, "Failed to read media stream volume", t)
+            true
+        }
+    }
+
+    private fun ensureNormalAudioModeForMediaTone() {
+        try {
+            val am = context.getSystemService(android.media.AudioManager::class.java) ?: return
+            val mode = am.mode
+            if (mode == android.media.AudioManager.MODE_IN_COMMUNICATION ||
+                mode == android.media.AudioManager.MODE_IN_CALL
+            ) {
+                am.mode = android.media.AudioManager.MODE_NORMAL
+                if (DebugLogManager.isRecording()) {
+                    DebugLogManager.log(
+                        "float",
+                        "shake_tone_mode_reset",
+                        mapOf("fromMode" to mode)
+                    )
+                }
+            }
+        } catch (t: Throwable) {
+            Log.w(tag, "Failed to reset audio mode before stop tone", t)
+        }
+    }
+
+    private fun playShakeRecordingTone(starting: Boolean, durationMs: Int) {
+        cancelShakeFeedbackTone()
+        try {
+            // USAGE_MEDIA → 跟随 STREAM_MUSIC。PCM 用固定峰值，由系统音量缩放。
+            // 开始：单音 880Hz；停止：990Hz→660Hz 下降双音（听感与开始区分，手机喇叭更易放出来）。
+            val sampleRate = 16_000
+            val numSamples = (sampleRate * durationMs / 1000).coerceAtLeast(1)
+            val buffer = ShortArray(numSamples)
+            val fadeSamples = (sampleRate / 100).coerceAtLeast(1)
+            val peak = 0.35
+            val split = if (starting) numSamples else (numSamples * 1 / 2).coerceAtLeast(1)
+            for (i in 0 until numSamples) {
+                val frequencyHz = when {
+                    starting -> 880.0
+                    i < split -> 990.0
+                    else -> 660.0
+                }
+                val t = i.toDouble() / sampleRate
+                val env = when {
+                    i < fadeSamples -> i.toDouble() / fadeSamples
+                    i > numSamples - fadeSamples -> (numSamples - i).toDouble() / fadeSamples
+                    !starting && i >= split && i < split + fadeSamples ->
+                        (i - split).toDouble() / fadeSamples
+                    else -> 1.0
+                }
+                buffer[i] = (sin(2.0 * Math.PI * frequencyHz * t) * peak * env * Short.MAX_VALUE)
+                    .toInt()
+                    .toShort()
+            }
+            val attrs = android.media.AudioAttributes.Builder()
+                .setUsage(android.media.AudioAttributes.USAGE_MEDIA)
+                .setContentType(android.media.AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+            val format = android.media.AudioFormat.Builder()
+                .setSampleRate(sampleRate)
+                .setEncoding(android.media.AudioFormat.ENCODING_PCM_16BIT)
+                .setChannelMask(android.media.AudioFormat.CHANNEL_OUT_MONO)
+                .build()
+            val track = android.media.AudioTrack.Builder()
+                .setAudioAttributes(attrs)
+                .setAudioFormat(format)
+                .setBufferSizeInBytes(
+                    maxOf(
+                        buffer.size * 2,
+                        android.media.AudioTrack.getMinBufferSize(
+                            sampleRate,
+                            android.media.AudioFormat.CHANNEL_OUT_MONO,
+                            android.media.AudioFormat.ENCODING_PCM_16BIT
+                        )
+                    )
+                )
+                .setTransferMode(android.media.AudioTrack.MODE_STATIC)
+                .build()
+            val written = track.write(buffer, 0, buffer.size)
+            if (written < 0) {
+                track.release()
+                throw IllegalStateException("AudioTrack write failed: $written")
+            }
+            shakeFeedbackTrack = track
+            track.play()
+            val release = Runnable {
+                shakeFeedbackReleaseRunnable = null
+                releaseShakeFeedbackTrack()
+            }
+            shakeFeedbackReleaseRunnable = release
+            handler.postDelayed(release, durationMs + 40L)
+        } catch (t: Throwable) {
+            Log.w(tag, "Failed to play shake recording tone", t)
+            releaseShakeFeedbackTrack()
+        }
+    }
+
+    private fun cancelShakeFeedbackTone() {
+        shakeFeedbackReleaseRunnable?.let { handler.removeCallbacks(it) }
+        shakeFeedbackReleaseRunnable = null
+        releaseShakeFeedbackTrack()
+    }
+
+    private fun cancelShakeFeedbackStartRecording() {
+        shakeFeedbackStartRecordingRunnable?.let { handler.removeCallbacks(it) }
+        shakeFeedbackStartRecordingRunnable = null
+    }
+
+    private fun releaseShakeFeedbackTrack() {
+        val track = shakeFeedbackTrack ?: return
+        shakeFeedbackTrack = null
+        try {
+            track.stop()
+        } catch (_: Throwable) {
+        }
+        try {
+            track.release()
+        } catch (t: Throwable) {
+            Log.w(tag, "Failed to release shake recording tone", t)
         }
     }
 
     private fun cancelCurrentSession() {
         Log.d(tag, "cancelCurrentSession called")
         cancelEdgeHandleAutoHide()
+        cancelShakeFeedbackStartRecording()
         volumeKeySessionActive = false
+        shakeSessionActive = false
         asrSessionManager.cancelSession()
         stopRecordingForeground()
         updateVisibilityByPref("cancel_session")
@@ -463,6 +688,7 @@ internal class FloatingAsrInteractionController(
 
     override fun onResultCommitted(text: String, success: Boolean) {
         volumeKeySessionActive = false
+        shakeSessionActive = false
         if (!stateMachine.isRecording) {
             stopRecordingForeground()
         }
@@ -596,6 +822,7 @@ internal class FloatingAsrInteractionController(
 
     override fun onError(message: String) {
         volumeKeySessionActive = false
+        shakeSessionActive = false
         stopRecordingForeground()
         cancelAmplitudeDispatch()
         handler.post {
