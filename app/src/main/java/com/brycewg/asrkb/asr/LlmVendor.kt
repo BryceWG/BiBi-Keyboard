@@ -328,19 +328,19 @@ enum class LlmVendor(
         )
     ),
 
-    /** Alibaba DashScope - 阿里云百炼 */
+    /** 阿里千问（原 DashScope / 百炼 compatible-mode） */
     DASHSCOPE(
         id = "dashscope",
         displayNameResId = R.string.llm_vendor_dashscope,
-        endpoint = "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        endpoint = "https://maas.qianwenaiapi.com/compatible-mode/v1",
         defaultModel = "qwen3.5-plus",
         models = listOf(
             "qwen3.5-plus",
             "qwen3.5-397b-a17b",
             "qwen3-max"
         ),
-        registerUrl = "https://dashscope.aliyun.com/",
-        guideUrl = "https://help.aliyun.com/zh/dashscope/",
+        registerUrl = "https://platform.qianwenai.com",
+        guideUrl = "https://platform.qianwenai.com/docs/developer-guides/getting-started/first-api-call",
         temperatureMin = 0f,
         temperatureMax = 2f,
         reasoningMode = ReasoningMode.ENABLE_THINKING,

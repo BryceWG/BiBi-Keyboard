@@ -110,7 +110,7 @@
     <string name="llm_vendor_cerebras">Cerebras</string>
     <string name="llm_vendor_ohmygpt">OhMyGPT</string>
     <string name="llm_vendor_fireworks">Fireworks AI</string>
-    <string name="llm_vendor_dashscope">阿里云百炼</string>
+    <string name="llm_vendor_dashscope">阿里千问</string>
     <string name="llm_vendor_custom">自定义</string>
 
     <!-- 推理模式 -->

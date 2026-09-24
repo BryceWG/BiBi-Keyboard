@@ -110,7 +110,7 @@
     <string name="llm_vendor_cerebras">Cerebras</string>
     <string name="llm_vendor_ohmygpt">OhMyGPT</string>
     <string name="llm_vendor_fireworks">Fireworks AI</string>
-    <string name="llm_vendor_dashscope">Alibaba DashScope</string>
+    <string name="llm_vendor_dashscope">Alibaba Qianwen</string>
     <string name="llm_vendor_custom">カスタム</string>
 
     <!-- 推論モード -->
