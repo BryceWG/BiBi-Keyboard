@@ -25,7 +25,9 @@ internal data class JevSelectionResult(
     val model: String,
     val elapsedMs: Long,
     val requestSent: Boolean,
-    val failureReason: PromptSelectionFailReason? = null
+    val failureReason: PromptSelectionFailReason? = null,
+    /** Probability of the finally chosen key in `answers.selected_prompt.probabilities`, if present. */
+    val matchProbability: Double? = null
 )
 
 /** Native System One client for Jev's decision-only choice API. */
@@ -93,17 +95,16 @@ internal class JevClassifier(
                         } else {
                             null
                         }
-                        val choice = if (it.isSuccessful) {
-                            runCatching {
-                                responseJson!!
-                                    .getJSONObject("answers")
-                                    .getJSONObject(QUESTION_ID)
-                                    .getString("choice")
-                            }.getOrNull()
+                        val parsed = if (it.isSuccessful && responseJson != null) {
+                            parseChoiceAndProbability(responseJson)
                         } else {
-                            Log.w(TAG, "Jev request failed with HTTP ${it.code}")
+                            if (!it.isSuccessful) {
+                                Log.w(TAG, "Jev request failed with HTTP ${it.code}")
+                            }
                             null
                         }
+                        val choice = parsed?.first
+                        val matchProbability = parsed?.second
                         continuation.resumeWith(
                             Result.success(
                                 JevSelectionResult(
@@ -118,7 +119,8 @@ internal class JevClassifier(
                                         !it.isSuccessful -> PromptSelectionFailReason.REQUEST_FAILED
                                         choice == null -> PromptSelectionFailReason.INVALID_OUTPUT
                                         else -> null
-                                    }
+                                    },
+                                    matchProbability = matchProbability
                                 )
                             )
                         )
@@ -212,4 +214,23 @@ internal class JevClassifier(
     }
 
     private fun elapsedMs(startedAt: Long): Long = TimeUnit.NANOSECONDS.toMillis((System.nanoTime() - startedAt).coerceAtLeast(0L))
+
+    /**
+     * Reads `answers.selected_prompt.choice` and, when present, the probability for that same key.
+     * Does not alter request payload or selection decision.
+     */
+    private fun parseChoiceAndProbability(responseJson: JSONObject): Pair<String, Double?>? {
+        return runCatching {
+            val answer = responseJson
+                .getJSONObject("answers")
+                .getJSONObject(QUESTION_ID)
+            val choice = answer.getString("choice").trim()
+            if (choice.isEmpty()) return@runCatching null
+            val probability = answer.optJSONObject("probabilities")
+                ?.takeIf { it.has(choice) }
+                ?.optDouble(choice, Double.NaN)
+                ?.takeUnless { it.isNaN() }
+            choice to probability
+        }.getOrNull()
+    }
 }

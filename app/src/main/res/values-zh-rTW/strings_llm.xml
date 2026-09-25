@@ -298,8 +298,9 @@
     <string name="prompt_selection_preview_empty_history">沒有可用的歷史辨識記錄。</string>
     <string name="prompt_selection_preview_selection_failed">選擇失敗</string>
     <string name="prompt_selection_preview_skip_polish">跳過潤飾</string>
-    <string name="prompt_selection_preview_match">匹配：%1$s</string>
-    <string name="prompt_selection_preview_elapsed">分類耗時：%1$d 毫秒</string>
+    <string name="prompt_selection_preview_elapsed">%1$dms</string>
+    <string name="prompt_selection_preview_confidence">置信度 %1$d%%</string>
+    <string name="prompt_selection_preview_fallback">回退</string>
     <string name="prompt_selection_preview_original_text">原文</string>
     <string name="section_prompt_selection_switch">AI 自動選擇</string>
     <string name="label_prompt_auto_select_enabled">自動選擇潤飾預設</string>

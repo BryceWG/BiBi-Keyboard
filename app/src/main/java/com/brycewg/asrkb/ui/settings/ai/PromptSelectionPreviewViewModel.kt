@@ -42,7 +42,14 @@ class PromptSelectionPreviewViewModel : ViewModel() {
         val matchedTitle: String?,
         val skippedPolish: Boolean,
         val elapsedMs: Long,
-        val failureReason: PromptSelectionFailReason?
+        val failureReason: PromptSelectionFailReason?,
+        /** Probability of the finally adopted candidate key, only when Jev provided it. */
+        val matchProbability: Double? = null,
+        /**
+         * True when selection was attempted but failed and the active default preset would be used.
+         * False when no request was sent (e.g. candidates ≤ 1 / invalid config).
+         */
+        val usedFallback: Boolean = false
     ) {
         val succeeded: Boolean get() = failureReason == null
     }
@@ -134,7 +141,9 @@ class PromptSelectionPreviewViewModel : ViewModel() {
                             matchedTitle = outcome.candidate?.displayTitle,
                             skippedPolish = outcome.candidate?.skipsPolish == true,
                             elapsedMs = outcome.status.elapsedMs,
-                            failureReason = outcome.status.failReasonEnum
+                            failureReason = outcome.status.failReasonEnum,
+                            matchProbability = outcome.matchProbability,
+                            usedFallback = outcome.candidate == null && outcome.status.requestSent
                         )
                     } catch (t: Throwable) {
                         if (t is CancellationException) throw t
@@ -145,7 +154,8 @@ class PromptSelectionPreviewViewModel : ViewModel() {
                             matchedTitle = null,
                             skippedPolish = false,
                             elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt),
-                            failureReason = PromptSelectionFailReason.REQUEST_FAILED
+                            failureReason = PromptSelectionFailReason.REQUEST_FAILED,
+                            usedFallback = true
                         )
                     }
                     if (generation != runGeneration) return@launch

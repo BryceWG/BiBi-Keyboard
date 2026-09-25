@@ -299,8 +299,9 @@ grape
     <string name="prompt_selection_preview_empty_history">لا يوجد سجل تعرف متاح.</string>
     <string name="prompt_selection_preview_selection_failed">فشل الاختيار</string>
     <string name="prompt_selection_preview_skip_polish">تخطي التلميع</string>
-    <string name="prompt_selection_preview_match">مطابقة: %1$s</string>
-    <string name="prompt_selection_preview_elapsed">وقت التصنيف: %1$d مللي ثانية</string>
+    <string name="prompt_selection_preview_elapsed">%1$dms</string>
+    <string name="prompt_selection_preview_confidence">الثقة %1$d%%</string>
+    <string name="prompt_selection_preview_fallback">تراجع</string>
     <string name="prompt_selection_preview_original_text">النص الأصلي</string>
     <string name="section_prompt_selection_switch">الاختيار التلقائي بالذكاء الاصطناعي</string>
     <string name="label_prompt_auto_select_enabled">اختيار إعداد التلميع تلقائياً</string>

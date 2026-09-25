@@ -37,7 +37,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.store.PromptSelectionFailReason
 import com.brycewg.asrkb.ui.AsrVendorUi
 import com.brycewg.asrkb.ui.settings.ai.PromptSelectionPreviewViewModel
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsActionButton
@@ -296,30 +295,22 @@ private fun historyMetadata(timestamp: Long, vendorId: String, source: String): 
 
 @Composable
 private fun previewResultSummary(result: PromptSelectionPreviewViewModel.PreviewResult): String {
-    val match = when {
-        !result.succeeded -> stringResource(R.string.prompt_selection_preview_selection_failed)
-        result.skippedPolish -> stringResource(
-            R.string.prompt_selection_preview_match,
-            stringResource(R.string.prompt_selection_preview_skip_polish)
-        )
-        else -> stringResource(
-            R.string.prompt_selection_preview_match,
-            result.matchedTitle.orEmpty()
-        )
+    val name = when {
+        !result.succeeded ->
+            result.matchedTitle
+                ?.takeIf { it.isNotBlank() }
+                ?: stringResource(R.string.prompt_selection_preview_selection_failed)
+        result.skippedPolish -> stringResource(R.string.prompt_selection_preview_skip_polish)
+        else -> result.matchedTitle.orEmpty()
     }
     val elapsed = stringResource(R.string.prompt_selection_preview_elapsed, result.elapsedMs)
-    val reason = result.failureReason?.let { " · ${promptSelectionFailureText(it)}" }.orEmpty()
-    return "$match · $elapsed$reason"
-}
-
-@Composable
-private fun promptSelectionFailureText(reason: PromptSelectionFailReason): String = stringResource(
-    when (reason) {
-        PromptSelectionFailReason.INVALID_CONFIG -> R.string.prompt_selection_reason_invalid_config
-        PromptSelectionFailReason.MODEL_UNAVAILABLE -> R.string.prompt_selection_reason_model_unavailable
-        PromptSelectionFailReason.TIMEOUT -> R.string.prompt_selection_reason_timeout
-        PromptSelectionFailReason.REQUEST_FAILED -> R.string.prompt_selection_reason_request_failed
-        PromptSelectionFailReason.INVALID_OUTPUT -> R.string.prompt_selection_reason_invalid_output
-        PromptSelectionFailReason.CANCELLED -> R.string.prompt_selection_reason_cancelled
+    val suffix = when {
+        result.usedFallback -> " · ${stringResource(R.string.prompt_selection_preview_fallback)}"
+        result.succeeded && result.matchProbability != null -> {
+            val percent = kotlin.math.round(result.matchProbability * 100.0).toInt()
+            " · ${stringResource(R.string.prompt_selection_preview_confidence, percent)}"
+        }
+        else -> ""
     }
-)
+    return "$name · $elapsed$suffix"
+}

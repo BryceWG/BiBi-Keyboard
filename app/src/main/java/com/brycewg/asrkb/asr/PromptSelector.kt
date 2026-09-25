@@ -27,10 +27,12 @@ import org.json.JSONObject
  * 分类结果。
  *
  * [candidate] 仅在选择成功时非空；失败时调用方必须继续使用当前激活预设。
+ * [matchProbability] 仅 Jev 在响应里提供最终选中键概率时非空。
  */
 internal data class PromptSelectionOutcome(
     val status: PromptSelectionStatus,
-    val candidate: PromptSelectionCandidate?
+    val candidate: PromptSelectionCandidate?,
+    val matchProbability: Double? = null
 )
 
 /** Extra session timeout needed when automatic selection can run before polishing. */
@@ -225,7 +227,11 @@ internal object PromptSelector {
                     elapsedMs = result.elapsedMs
                 )
             }
-            return PromptSelectionOutcome(status = status, candidate = matched)
+            return PromptSelectionOutcome(
+                status = status,
+                candidate = matched,
+                matchProbability = result.matchProbability
+            )
         }
 
         val resolved = when (val r = LlmModelConfigResolver.resolve(prefs, modelRef)) {

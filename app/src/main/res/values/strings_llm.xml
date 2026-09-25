@@ -299,8 +299,9 @@ grape
     <string name="prompt_selection_preview_empty_history">No recognition history is available.</string>
     <string name="prompt_selection_preview_selection_failed">Selection failed</string>
     <string name="prompt_selection_preview_skip_polish">Skip polish</string>
-    <string name="prompt_selection_preview_match">Match: %1$s</string>
-    <string name="prompt_selection_preview_elapsed">Classification: %1$d ms</string>
+    <string name="prompt_selection_preview_elapsed">%1$dms</string>
+    <string name="prompt_selection_preview_confidence">Confidence %1$d%%</string>
+    <string name="prompt_selection_preview_fallback">Fallback</string>
     <string name="prompt_selection_preview_original_text">Original text</string>
     <string name="section_prompt_selection_switch">AI automatic selection</string>
     <string name="label_prompt_auto_select_enabled">Automatically select a polishing preset</string>
