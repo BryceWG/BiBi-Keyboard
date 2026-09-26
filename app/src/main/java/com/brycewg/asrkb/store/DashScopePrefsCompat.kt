@@ -8,6 +8,8 @@ import android.content.SharedPreferences
 internal object DashScopePrefsCompat {
     private const val DASH_LEGACY_QWEN3_REALTIME_VERSIONED_MODEL = "qwen3-asr-flash-realtime-2026-02-10"
     const val MAX_QWEN_AUDIO_LANGUAGE_HINTS = 4
+    const val REGION_TOKEN_PLAN_CN = "token-plan-cn"
+    const val REGION_TOKEN_PLAN_INTL = "token-plan-intl"
 
     private val KNOWN_ASR_MODELS = setOf(
         Prefs.DASH_MODEL_FUN_ASR_FLASH,
@@ -21,19 +23,28 @@ internal object DashScopePrefsCompat {
         Prefs.DASH_MODEL_QWEN3_REALTIME
     )
 
-    fun getDashHttpBaseUrl(dashRegion: String): String = if (dashRegion.equals("intl", ignoreCase = true)) {
-        "https://dashscope-intl.aliyuncs.com/api/v1"
-    } else {
-        "https://dashscope.aliyuncs.com/api/v1"
+    fun normalizeDashRegion(region: String): String = when {
+        region.equals("intl", ignoreCase = true) -> "intl"
+        region.equals(REGION_TOKEN_PLAN_CN, ignoreCase = true) -> REGION_TOKEN_PLAN_CN
+        region.equals(REGION_TOKEN_PLAN_INTL, ignoreCase = true) -> REGION_TOKEN_PLAN_INTL
+        else -> "cn"
     }
 
-    fun getDashCompatibleModeChatEndpoint(dashRegion: String): String = if (
-        dashRegion.equals("intl", ignoreCase = true)
-    ) {
-        "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions"
-    } else {
-        "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+    fun isTokenPlanRegion(region: String): Boolean = when (normalizeDashRegion(region)) {
+        REGION_TOKEN_PLAN_CN, REGION_TOKEN_PLAN_INTL -> true
+        else -> false
     }
+
+    private fun getDashBaseUrl(dashRegion: String): String = when (normalizeDashRegion(dashRegion)) {
+        "intl" -> "https://dashscope-intl.aliyuncs.com"
+        REGION_TOKEN_PLAN_CN -> "https://token-plan.cn-beijing.maas.aliyuncs.com"
+        REGION_TOKEN_PLAN_INTL -> "https://token-plan.ap-southeast-1.maas.aliyuncs.com"
+        else -> "https://dashscope.aliyuncs.com"
+    }
+
+    fun getDashHttpBaseUrl(dashRegion: String): String = getDashBaseUrl(dashRegion) + "/api/v1"
+
+    fun getDashCompatibleModeChatEndpoint(dashRegion: String): String = getDashBaseUrl(dashRegion) + "/compatible-mode/v1/chat/completions"
 
     fun getDashMultimodalGenerationEndpoint(dashRegion: String): String = getDashHttpBaseUrl(dashRegion).trimEnd('/') + "/services/aigc/multimodal-generation/generation"
 

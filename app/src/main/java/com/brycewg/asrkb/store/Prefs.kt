@@ -1098,7 +1098,7 @@ class Prefs(context: Context) {
         dashLanguage = languages.joinToString(",")
     }
 
-    // DashScope：地域（cn=中国大陆，intl=新加坡/国际）。默认 cn
+    // DashScope：端点（cn/intl=按量付费，token-plan-cn/token-plan-intl=Token Plan 北京/新加坡）。默认 cn
     var dashRegion: String by stringPref(KEY_DASH_REGION, "cn")
 
     fun getDashHttpBaseUrl(): String = DashScopePrefsCompat.getDashHttpBaseUrl(dashRegion)

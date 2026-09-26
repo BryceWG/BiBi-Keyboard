@@ -42,6 +42,45 @@ class DashScopePrefsCompatTest {
             "https://dashscope-intl.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
             DashScopePrefsCompat.getDashMultimodalGenerationEndpoint("intl")
         )
+        assertEquals(
+            "https://token-plan.ap-southeast-1.maas.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
+            DashScopePrefsCompat.getDashMultimodalGenerationEndpoint("token-plan-intl")
+        )
+    }
+
+    @Test
+    fun regionNormalizationPreservesTokenPlanAndLegacyFallback() {
+        assertEquals("token-plan-cn", DashScopePrefsCompat.normalizeDashRegion("TOKEN-PLAN-CN"))
+        assertEquals("token-plan-intl", DashScopePrefsCompat.normalizeDashRegion("TOKEN-PLAN-INTL"))
+        assertEquals("intl", DashScopePrefsCompat.normalizeDashRegion("INTL"))
+        assertEquals("cn", DashScopePrefsCompat.normalizeDashRegion("CN"))
+        assertEquals("cn", DashScopePrefsCompat.normalizeDashRegion("unknown"))
+        assertEquals("cn", DashScopePrefsCompat.normalizeDashRegion(""))
+        assertEquals(true, DashScopePrefsCompat.isTokenPlanRegion("TOKEN-PLAN-INTL"))
+        assertEquals(true, DashScopePrefsCompat.isTokenPlanRegion("TOKEN-PLAN-CN"))
+        assertEquals(false, DashScopePrefsCompat.isTokenPlanRegion("intl"))
+    }
+
+    @Test
+    fun allHttpEndpointsStayOnSelectedRegionHost() {
+        val hosts = mapOf(
+            "cn" to "https://dashscope.aliyuncs.com",
+            "INTL" to "https://dashscope-intl.aliyuncs.com",
+            "TOKEN-PLAN-CN" to "https://token-plan.cn-beijing.maas.aliyuncs.com",
+            "TOKEN-PLAN-INTL" to "https://token-plan.ap-southeast-1.maas.aliyuncs.com",
+            "unknown" to "https://dashscope.aliyuncs.com"
+        )
+        hosts.forEach { (region, host) ->
+            assertEquals("$host/api/v1", DashScopePrefsCompat.getDashHttpBaseUrl(region))
+            assertEquals(
+                "$host/api/v1/services/aigc/multimodal-generation/generation",
+                DashScopePrefsCompat.getDashMultimodalGenerationEndpoint(region)
+            )
+            assertEquals(
+                "$host/compatible-mode/v1/chat/completions",
+                DashScopePrefsCompat.getDashCompatibleModeChatEndpoint(region)
+            )
+        }
     }
 
     @Test

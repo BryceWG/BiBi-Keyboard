@@ -94,6 +94,10 @@ class DashscopeStreamAsrEngine(
 
     override fun start() {
         if (running.get()) return
+        if (DashScopePrefsCompat.isTokenPlanRegion(prefs.dashRegion)) {
+            listener.onError(context.getString(R.string.error_dash_token_plan_streaming_unsupported))
+            return
+        }
         if (!externalPcmMode) {
             val hasPermission = ContextCompat.checkSelfPermission(
                 context,
