@@ -55,6 +55,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -78,6 +79,7 @@ import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.settings.compose.model.SettingsEntry
 import com.brycewg.asrkb.ui.settings.compose.model.SettingsSection
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
 import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
@@ -112,15 +114,28 @@ fun SettingsHomeScreen(
     val homePagerState = rememberSettingsHomePagerState(pagerState)
 
     LaunchedEffect(selectedTab) {
-        if (homePagerState.selectedPage != selectedTab) {
-            homePagerState.animateToPage(selectedTab)
+        if (pagerState.currentPage == selectedTab) return@LaunchedEffect
+        // 点击 Tab 时 animateToPage 已经在跑，这里不要再抢一次滚动。
+        if (homePagerState.isNavigating && homePagerState.selectedPage == selectedTab) return@LaunchedEffect
+        // 布局完成前 pageSize 为 0，这时滚动不会改页，返回后会停在旧 Tab。
+        snapshotFlow { pagerState.layoutInfo.pageSize }.first { it > 0 }
+        if (pagerState.currentPage != selectedTab) {
+            pagerState.scrollToPage(selectedTab)
         }
+        homePagerState.syncPage()
     }
     LaunchedEffect(pagerState.settledPage) {
-        homePagerState.syncPage()
-        if (selectedTab != homePagerState.selectedPage) {
-            onSelectTab(homePagerState.selectedPage)
+        if (homePagerState.isNavigating) return@LaunchedEffect
+        val settled = pagerState.settledPage
+        if (settled != selectedTab) {
+            // 指示器还停在旧页、selectedTab 已经指向目标页时，是外部跳转还没跟上，不能写回。
+            // 用户滑动时指示器仍等于 selectedTab，pager 先离开，这时才跟随。
+            if (homePagerState.selectedPage != selectedTab) return@LaunchedEffect
+            homePagerState.syncPage()
+            onSelectTab(settled)
+            return@LaunchedEffect
         }
+        homePagerState.syncPage()
     }
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->

@@ -419,7 +419,7 @@ class FloatingAsrService : Service() {
         val openIntent = KeepAliveNotificationClick.openSettingsIntent(this)
         val pendingIntent = PendingIntent.getActivity(
             this,
-            0,
+            KeepAliveNotificationClick.SETTINGS_PENDING_INTENT_REQUEST_CODE,
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )

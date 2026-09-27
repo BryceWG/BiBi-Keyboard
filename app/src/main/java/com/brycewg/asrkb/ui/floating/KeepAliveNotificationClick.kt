@@ -17,6 +17,11 @@ import com.brycewg.asrkb.ui.settings.compose.core.BibiSettingsRoute
 internal object KeepAliveNotificationClick {
     private const val TAG = "KeepAliveNotifClick"
 
+    /**
+     * 通知 PendingIntent 的 requestCode。
+     */
+    const val SETTINGS_PENDING_INTENT_REQUEST_CODE = 1
+
     data class Destination(
         val route: BibiSettingsRoute,
         @param:StringRes val titleRes: Int
@@ -47,7 +52,8 @@ internal object KeepAliveNotificationClick {
             defaultRoute
         }
         return Intent(context, SettingsActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // singleTop 根 Activity 配 CLEAR_TOP：复用已有设置页，而不是再叠一个只有首页的新实例。
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra(SettingsActivity.EXTRA_INITIAL_ROUTE, route.id)
         }
     }

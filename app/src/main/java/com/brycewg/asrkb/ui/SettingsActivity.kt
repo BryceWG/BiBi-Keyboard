@@ -6,6 +6,7 @@
 package com.brycewg.asrkb.ui
 
 import android.Manifest
+import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -25,6 +26,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
@@ -117,15 +120,23 @@ class SettingsActivity : BaseActivity() {
         updateCoordinator = SettingsUpdateCoordinator(this)
 
         val actionController = SettingsActionController(this)
-        pendingInitialRoute.value = consumeInitialRouteExtra(intent)
+        val coldStartRoute = if (savedInstanceState == null) {
+            consumeInitialRouteExtra(intent)
+        } else {
+            null
+        }
         setContent {
-            val viewModel: SettingsHostViewModel = viewModel()
+            val viewModel: SettingsHostViewModel = viewModel(
+                factory = remember {
+                    settingsHostViewModelFactory(application, coldStartRoute)
+                }
+            )
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val routeToOpen = pendingInitialRoute.value
 
             LaunchedEffect(routeToOpen) {
                 routeToOpen?.let { route ->
-                    viewModel.openRoute(route)
+                    viewModel.openExternalRoute(route)
                     pendingInitialRoute.value = null
                 }
             }
@@ -187,6 +198,14 @@ class SettingsActivity : BaseActivity() {
         pendingInitialRoute.value = consumeInitialRouteExtra(intent)
         imePickerController.consumeShowImePickerExtraIfPresent(intent)
         imePickerController.handleShowImePickerFromTile(hasWindowFocus())
+    }
+
+    private fun settingsHostViewModelFactory(
+        application: Application,
+        initialRoute: BibiSettingsRoute?
+    ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T = SettingsHostViewModel(application, initialRoute) as T
     }
 
     private fun consumeInitialRouteExtra(intent: Intent?): BibiSettingsRoute? {

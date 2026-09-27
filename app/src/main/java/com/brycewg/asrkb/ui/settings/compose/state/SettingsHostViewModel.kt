@@ -26,13 +26,18 @@ data class SettingsHostUiState(
     val backStack: List<BibiSettingsRoute> = listOf(BibiSettingsRoute.Home)
 )
 
-class SettingsHostViewModel(application: Application) : AndroidViewModel(application) {
+class SettingsHostViewModel(
+    application: Application,
+    initialRoute: BibiSettingsRoute? = null
+) : AndroidViewModel(application) {
     private val prefs = Prefs(application)
     private val _uiState = MutableStateFlow(
         SettingsHostUiState(
             uiMode = BibiUiMode.fromId(prefs.settingsUiMode),
             themeMode = prefs.settingsThemeMode
-        )
+        ).let { state ->
+            if (initialRoute == null) state else state.openedFromOutside(initialRoute)
+        }
     )
     val uiState: StateFlow<SettingsHostUiState> = _uiState.asStateFlow()
 
@@ -85,6 +90,30 @@ class SettingsHostViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    /**
+     * 通知、系统入口等外部跳转。
+     *
+     * 丢掉当前所在页面，按目标页自己的上级重建返回栈。
+     * 例如后台停在 AI 设置时点进识别历史，返回落到「智能」而不是 AI 设置。
+     */
+    fun openExternalRoute(route: BibiSettingsRoute) {
+        _uiState.update { it.openedFromOutside(route) }
+    }
+
+    private fun SettingsHostUiState.openedFromOutside(route: BibiSettingsRoute): SettingsHostUiState {
+        if (route == BibiSettingsRoute.Home) {
+            return copy(
+                highlightTargetId = null,
+                backStack = listOf(BibiSettingsRoute.Home)
+            )
+        }
+        return copy(
+            selectedHomeTab = route.homeTabIndex(),
+            highlightTargetId = null,
+            backStack = listOf(BibiSettingsRoute.Home, route)
+        )
+    }
+
     fun pop(): Boolean {
         val state = _uiState.value
         if (state.backStack.size <= 1) return false
@@ -102,7 +131,9 @@ class SettingsHostViewModel(application: Application) : AndroidViewModel(applica
         BibiSettingsRoute.Asr,
         BibiSettingsRoute.Ai,
         BibiSettingsRoute.PromptSelection,
-        BibiSettingsRoute.PromptSelectionPreview -> 1
+        BibiSettingsRoute.PromptSelectionPreview,
+        BibiSettingsRoute.History,
+        BibiSettingsRoute.ApiLog -> 1
 
         BibiSettingsRoute.Backup,
         BibiSettingsRoute.Other,
@@ -110,8 +141,6 @@ class SettingsHostViewModel(application: Application) : AndroidViewModel(applica
         BibiSettingsRoute.Paywall,
         BibiSettingsRoute.UsageStats,
         BibiSettingsRoute.Search,
-        BibiSettingsRoute.History,
-        BibiSettingsRoute.ApiLog,
         BibiSettingsRoute.Home -> 2
     }
 
