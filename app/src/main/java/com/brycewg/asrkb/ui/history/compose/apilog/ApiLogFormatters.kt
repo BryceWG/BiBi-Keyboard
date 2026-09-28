@@ -125,6 +125,7 @@ internal fun formatApiLogVendorName(vendor: String): String = when (vendor.lower
     "groq" -> "Groq"
     "cerebras" -> "Cerebras"
     "ohmygpt" -> "OhMyGPT"
+    "requesty" -> "Requesty"
     "fireworks" -> "Fireworks"
     "custom" -> "Custom"
     else -> vendor
