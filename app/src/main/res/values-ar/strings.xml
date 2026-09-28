@@ -300,7 +300,7 @@
   <string name="model_guide_select_prompt">يرجى اختيار نوع النموذج</string>
   <string name="model_guide_downloading">جارٍ تنزيل النموذج، انتظر…</string>
   <string name="model_guide_download_complete">اكتمل تنزيل النموذج</string>
-  <string name="model_guide_config_doc_url">https://brycewg.notion.site/bibi-keyboard-providers-guide</string>
+  <string name="model_guide_config_doc_url">https://bibidocs.brycewg.com/getting-started/asr-providers.html</string>
   <string name="local_model_guide_config_doc_url">https://bibidocs.brycewg.com/getting-started/asr-providers.html#%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97</string>
   <string name="label_return_prev_ime_on_hide">التبديل إلى IME محدد عند الإخفاء</string>
   <string name="toast_bt_connect_permission_required">يلزم إذن اتصال Bluetooth لاستخدام ميكروفون السماعة</string>

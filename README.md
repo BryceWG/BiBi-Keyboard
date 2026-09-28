@@ -106,7 +106,7 @@ Pro 版提供更多高级功能和更优质的使用体验（热词、简繁转�
 
 ## 🚀 快速开始
 
-[供应商配置文档](https://brycewg.notion.site/bibi-keyboard-providers-guide)
+[供应商配置文档](https://bibidocs.brycewg.com/getting-started/asr-providers.html)
 
 ### 📋 系统要求
 

@@ -298,7 +298,7 @@
   <string name="model_guide_select_prompt">请选择一种模型类型</string>
   <string name="model_guide_downloading">正在下载模型，请稍候…</string>
   <string name="model_guide_download_complete">模型下载完成</string>
-  <string name="model_guide_config_doc_url">https://brycewg.notion.site/bibi-keyboard-providers-guide</string>
+  <string name="model_guide_config_doc_url">https://bibidocs.brycewg.com/getting-started/asr-providers.html</string>
   <string name="local_model_guide_config_doc_url">https://bibidocs.brycewg.com/getting-started/asr-providers.html#%E6%9C%AC%E5%9C%B0%E6%A8%A1%E5%9E%8B%E9%85%8D%E7%BD%AE%E6%8C%87%E5%8D%97</string>
   <string name="label_return_prev_ime_on_hide">键盘收起后切换到指定输入法</string>
   <string name="toast_bt_connect_permission_required">需要蓝牙连接权限以使用耳机麦克风</string>

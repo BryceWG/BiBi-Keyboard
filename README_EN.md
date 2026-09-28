@@ -106,7 +106,7 @@ If you are interested in BiBi Keyboard, join our [Telegram Group](https://t.me/+
 
 ## 🚀 Quick Start
 
-[Provider Configuration Guide](https://brycewg.notion.site/bibi-keyboard-providers-guide)
+[Provider Configuration Guide](https://bibidocs.brycewg.com/getting-started/asr-providers.html)
 
 ### 📋 System Requirements
 
