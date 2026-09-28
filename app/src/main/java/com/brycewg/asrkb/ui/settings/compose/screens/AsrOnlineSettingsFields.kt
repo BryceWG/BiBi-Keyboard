@@ -31,6 +31,8 @@ internal class AsrOnlineSettingsFields(
     var dashModel by mutableStateOf(normalizeDashModel(prefs.dashAsrModel))
     var dashPrompt by mutableStateOf(prefs.dashPrompt)
     var dashLanguage by mutableStateOf(prefs.dashLanguage)
+    var dashKeepDialect by mutableStateOf(prefs.dashKeepDialect)
+    var dashAutoPolish by mutableStateOf(prefs.dashAutoPolish)
     var dashRegion by mutableStateOf(normalizeDashRegion(prefs.dashRegion))
     var sfFreeAsrEnabled by mutableStateOf(prefs.sfFreeAsrEnabled)
     var sfFreeAsrModel by mutableStateOf(displaySfFreeAsrModel(prefs))
@@ -111,6 +113,8 @@ internal class AsrOnlineSettingsFields(
         dashModel = normalizeDashModel(prefs.dashAsrModel)
         dashPrompt = prefs.dashPrompt
         dashLanguage = prefs.dashLanguage
+        dashKeepDialect = prefs.dashKeepDialect
+        dashAutoPolish = prefs.dashAutoPolish
         dashRegion = normalizeDashRegion(prefs.dashRegion)
         sfFreeAsrEnabled = prefs.sfFreeAsrEnabled
         sfFreeAsrModel = displaySfFreeAsrModel(prefs)
@@ -217,6 +221,8 @@ internal class AsrOnlineSettingsFields(
         applyOpenAiUsePromptSwitch: (Boolean) -> Unit,
         applySonioxStreamingSwitch: (Boolean) -> Unit,
         applySonioxLanguageStrictSwitch: (Boolean) -> Unit,
+        applyDashKeepDialectSwitch: (Boolean) -> Unit,
+        applyDashAutoPolishSwitch: (Boolean) -> Unit,
         applyStepAudioUseItnSwitch: (Boolean) -> Unit,
         openAiDefaultProfileName: (Int) -> String
     ): AsrOnlineSettingsRouteState = AsrOnlineSettingsRouteState(
@@ -250,6 +256,14 @@ internal class AsrOnlineSettingsFields(
         onDashLanguageChange = { value ->
             dashLanguage = value
             prefs.dashLanguage = value
+        },
+        dashKeepDialect = dashKeepDialect,
+        onDashKeepDialectChange = { checked ->
+            applyDashKeepDialectSwitch(checked)
+        },
+        dashAutoPolish = dashAutoPolish,
+        onDashAutoPolishChange = { checked ->
+            applyDashAutoPolishSwitch(checked)
         },
         dashRegion = dashRegion,
         onDashRegionChange = { value ->

@@ -137,7 +137,9 @@ class DashscopeFileAsrEngine(
                     base64Audio = base64Audio,
                     audio = audio,
                     sampleRate = sampleRate,
-                    languages = prefs.getDashLanguages()
+                    languages = prefs.getDashLanguages(),
+                    keepDialect = prefs.dashKeepDialect,
+                    disfluencyRemoval = prefs.dashAutoPolish
                 )
             }
             val request = Request.Builder()
@@ -148,7 +150,7 @@ class DashscopeFileAsrEngine(
                         category = "ASR",
                         vendor = "dashscope",
                         model = model,
-                        requestStructure = "json object keys=model,input,parameters; messages=input_audio"
+                        requestStructure = "json object keys=model,input,parameters; messages=input_audio; parameters=format,sample_rate,language_hints?,keep_dialect?,disfluency_removal_enabled?"
                     )
                 )
                 .addHeader("Authorization", "Bearer ${prefs.dashApiKey}")
@@ -485,9 +487,13 @@ internal fun buildDashGenerationAsrRequestBody(
     base64Audio: String,
     audio: UploadAudioData,
     sampleRate: Int,
-    languages: List<String>
+    languages: List<String>,
+    keepDialect: Boolean = false,
+    disfluencyRemoval: Boolean = true
 ): String {
     val languageHints = DashScopePrefsCompat.parseDashLanguages(languages.joinToString(","))
+    val normalized = DashScopePrefsCompat.normalizeDashAsrModel(model)
+    val is31Flash = normalized.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH, ignoreCase = true)
     val userMessage = JSONObject().apply {
         put("role", "user")
         put(
@@ -515,6 +521,10 @@ internal fun buildDashGenerationAsrRequestBody(
                 put("sample_rate", sampleRate.toString())
                 if (DashScopePrefsCompat.isQwenAudioModel(model) && languageHints.isNotEmpty()) {
                     put("language_hints", JSONArray(languageHints))
+                }
+                if (is31Flash) {
+                    put("keep_dialect", keepDialect)
+                    put("disfluency_removal_enabled", disfluencyRemoval)
                 }
             }
         )

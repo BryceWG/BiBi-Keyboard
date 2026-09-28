@@ -138,6 +138,12 @@ internal fun AsrSettingsRouteContent(
                             languageVisible = isDashLanguageSupported(onlineState.dashModel),
                             languageMultiSelect = DashScopePrefsCompat.isQwenAudioModel(onlineState.dashModel),
                             onChooseLanguages = showDashLanguagePicker,
+                            keepDialect = onlineState.dashKeepDialect,
+                            onKeepDialectChange = onlineState.onDashKeepDialectChange,
+                            keepDialectVisible = isDashKeepDialectSupported(onlineState.dashModel),
+                            autoPolish = onlineState.dashAutoPolish,
+                            onAutoPolishChange = onlineState.onDashAutoPolishChange,
+                            autoPolishVisible = isDashAutoPolishSupported(onlineState.dashModel),
                             selectedRegion = onlineState.dashRegion,
                             onRegionSelected = { region ->
                                 onlineState.onDashRegionChange(region)
@@ -340,7 +346,9 @@ private fun currentAsrVendorPrimaryItemCount(
 
     AsrVendor.DashScope -> dashScopePrimaryItemCount(
         languageVisible = isDashLanguageSupported(onlineState.dashModel),
-        promptVisible = isDashPromptSupported(onlineState.dashModel)
+        promptVisible = isDashPromptSupported(onlineState.dashModel),
+        keepDialectVisible = isDashKeepDialectSupported(onlineState.dashModel),
+        autoPolishVisible = isDashAutoPolishSupported(onlineState.dashModel)
     )
 
     AsrVendor.SiliconFlow,

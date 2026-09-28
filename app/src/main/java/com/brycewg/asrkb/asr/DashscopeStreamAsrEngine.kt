@@ -330,7 +330,7 @@ class DashscopeStreamAsrEngine(
         prepareApiLog(
             wsUrl = wsUrl,
             model = model,
-            requestStructure = "SDK WebSocket recognition; format=pcm, sample_rate=16000, language_hints?, semantic_punctuation_enabled?, heartbeat?, vad_model?; connection_reuse"
+            requestStructure = "SDK WebSocket recognition; format=pcm, sample_rate=16000, language_hints?, semantic_punctuation_enabled?, heartbeat?, keep_dialect?, intermediate_result_enabled?, disfluency_removal_enabled?; connection_reuse"
         )
         try {
             Constants.baseWebsocketApiUrl = wsUrl
@@ -342,7 +342,9 @@ class DashscopeStreamAsrEngine(
             model = model,
             apiKey = prefs.dashApiKey,
             sampleRate = sampleRate,
-            languages = prefs.getDashLanguages()
+            languages = prefs.getDashLanguages(),
+            keepDialect = prefs.dashKeepDialect,
+            disfluencyRemoval = prefs.dashAutoPolish
         )
         val reuseKey = DashscopeRecognitionReuseKey(
             wsUrl = wsUrl,
@@ -804,32 +806,45 @@ internal fun buildDashRecognitionParam(
     model: String,
     apiKey: String,
     sampleRate: Int,
-    languages: List<String>
+    languages: List<String>,
+    keepDialect: Boolean = false,
+    disfluencyRemoval: Boolean = true
 ): RecognitionParam {
     val builder = RecognitionParam.builder()
         .model(model)
         .apiKey(apiKey)
         .format("pcm")
         .sampleRate(sampleRate)
-    val normalizedLanguages = DashScopePrefsCompat.parseDashLanguages(languages.joinToString(","))
-    val languageHints = if (DashScopePrefsCompat.isQwenAudioModel(model)) {
-        normalizedLanguages
-    } else {
-        normalizedLanguages.take(1)
+    val normalized = DashScopePrefsCompat.normalizeDashAsrModel(model)
+    // message 不支持 language_hints；其余 Recognition 流式按模型能力传。
+    if (!DashScopePrefsCompat.isQwenAudio31MessageModel(normalized)) {
+        val normalizedLanguages = DashScopePrefsCompat.parseDashLanguages(languages.joinToString(","))
+        val languageHints = if (DashScopePrefsCompat.isQwenAudioModel(normalized)) {
+            normalizedLanguages
+        } else {
+            normalizedLanguages.take(1)
+        }
+        if (languageHints.isNotEmpty()) {
+            builder.parameter("language_hints", languageHints.toTypedArray())
+        }
     }
-    if (languageHints.isNotEmpty()) {
-        builder.parameter("language_hints", languageHints.toTypedArray())
-    }
-    // Fun-ASR / Qwen-Audio 3.x Recognition 流式均支持；固定开启语义断句与保活
-    if (DashScopePrefsCompat.isSemanticPunctuationSupported(model)) {
+    // Fun-ASR / Qwen-Audio Recognition 流式（含 message）均支持；固定开启语义断句与保活
+    if (DashScopePrefsCompat.isSemanticPunctuationSupported(normalized)) {
         builder.parameter("semantic_punctuation_enabled", true)
         builder.parameter("heartbeat", true)
     }
-    // Qwen-Audio 3.1 流式独有：显式近场 VAD（服务端默认 far_field_meeting_16k）
-    if (DashScopePrefsCompat.normalizeDashAsrModel(model)
-            .equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true)
-    ) {
-        builder.parameter("vad_model", "near_meeting_16k")
+    // Qwen-Audio 3.1 streaming / message：方言开关。
+    // 语义断句开启时服务端忽略 VAD 参数，故不传 vad_model。
+    val isQwenAudio31Recognition =
+        normalized.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ||
+            DashScopePrefsCompat.isQwenAudio31MessageModel(normalized)
+    if (isQwenAudio31Recognition) {
+        builder.parameter("keep_dialect", keepDialect)
+    }
+    // message：中间结果默认关，必须显式开启；自动润色跟用户开关
+    if (DashScopePrefsCompat.isQwenAudio31MessageModel(normalized)) {
+        builder.parameter("intermediate_result_enabled", true)
+        builder.parameter("disfluency_removal_enabled", disfluencyRemoval)
     }
     return builder.build()
 }

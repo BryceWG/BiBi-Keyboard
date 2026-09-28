@@ -14,11 +14,14 @@
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash (non-streaming)</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus (non-streaming)</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime (streaming)</string>
+    <string name="dash_model_qwen_audio_31_message">Qwen-Audio-3.1-ASR-Flash-Message (streaming)</string>
     <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime</string>
     <string name="label_dash_prompt">Custom prompt / context (optional)</string>
     <string name="label_dash_language">Recognition language</string>
+    <string name="label_dash_keep_dialect">Keep dialect expressions</string>
+    <string name="label_dash_auto_polish">Auto polish</string>
     <string name="dash_language_max_4">Select up to 4 languages</string>
     <string name="label_dash_streaming">Streaming recognition</string>
     <string name="label_dash_fun_asr">Use Fun-ASR model (fun-asr-realtime)</string>
@@ -51,4 +54,12 @@
     <!-- DashScope - Fun-ASR model (streaming) -->
     <string name="feature_dash_fun_asr_off_desc">Uses Qwen-Audio-3.0-ASR-Flash-Streaming for streaming (default).</string>
     <string name="feature_dash_fun_asr_on_desc">Uses Fun-ASR-Realtime for streaming.</string>
+
+    <!-- Qwen-Audio 3.1 keep dialect -->
+    <string name="feature_dash_keep_dialect_off_desc">Transcribes dialect speech as standard Mandarin.</string>
+    <string name="feature_dash_keep_dialect_on_desc">Preserves dialect expressions in the transcript.</string>
+
+    <!-- Qwen-Audio 3.1 flash / message auto polish -->
+    <string name="feature_dash_auto_polish_off_desc">Keeps the raw spoken transcript, including filler words and disfluencies.</string>
+    <string name="feature_dash_auto_polish_on_desc">Filters filler words and stuttered repetitions, and polishes colloquial speech.</string>
 </resources>

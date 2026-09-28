@@ -33,6 +33,12 @@ internal fun DashScopeConfig(
     languageVisible: Boolean,
     languageMultiSelect: Boolean,
     onChooseLanguages: () -> Unit,
+    keepDialect: Boolean,
+    onKeepDialectChange: (Boolean) -> Unit,
+    keepDialectVisible: Boolean,
+    autoPolish: Boolean,
+    onAutoPolishChange: (Boolean) -> Unit,
+    autoPolishVisible: Boolean,
     selectedRegion: String,
     onRegionSelected: (String) -> Unit,
     onOpenGuide: () -> Unit,
@@ -42,7 +48,9 @@ internal fun DashScopeConfig(
     val context = LocalContext.current
     val itemCount = primaryGroupCount ?: dashScopePrimaryItemCount(
         languageVisible = languageVisible,
-        promptVisible = promptVisible
+        promptVisible = promptVisible,
+        keepDialectVisible = keepDialectVisible,
+        autoPolishVisible = autoPolishVisible
     )
     var itemIndex = primaryIndexOffset
     AsrTextField(
@@ -86,6 +94,26 @@ internal fun DashScopeConfig(
             )
         }
     }
+    if (keepDialectVisible) {
+        AsrSwitchPreference(
+            id = "dash_keep_dialect",
+            titleRes = R.string.label_dash_keep_dialect,
+            checked = keepDialect,
+            index = itemIndex++,
+            count = itemCount,
+            onCheckedChange = onKeepDialectChange
+        )
+    }
+    if (autoPolishVisible) {
+        AsrSwitchPreference(
+            id = "dash_auto_polish",
+            titleRes = R.string.label_dash_auto_polish,
+            checked = autoPolish,
+            index = itemIndex++,
+            count = itemCount,
+            onCheckedChange = onAutoPolishChange
+        )
+    }
     AsrDropdownPreference(
         titleRes = R.string.label_dash_region,
         options = dashRegionOptions(context).map { option ->
@@ -119,12 +147,20 @@ internal fun DashScopeConfig(
 
 internal fun dashScopePrimaryItemCount(
     languageVisible: Boolean,
-    promptVisible: Boolean
+    promptVisible: Boolean,
+    keepDialectVisible: Boolean = false,
+    autoPolishVisible: Boolean = false
 ): Int = 4 +
     (if (languageVisible) 1 else 0) +
+    (if (keepDialectVisible) 1 else 0) +
+    (if (autoPolishVisible) 1 else 0) +
     (if (promptVisible) 1 else 0)
 
 internal fun dashModelOptions(context: Context): List<DashChoice> = listOf(
+    DashChoice(
+        Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE,
+        context.getString(R.string.dash_model_qwen_audio_31_message)
+    ),
     DashChoice(
         Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME,
         context.getString(R.string.dash_model_qwen_audio_31_realtime)
@@ -224,6 +260,10 @@ internal fun normalizeDashRegion(region: String): String = if (region.equals("in
 internal fun isDashPromptSupported(model: String): Boolean = DashScopePrefsCompat.isPromptSupported(model)
 
 internal fun isDashLanguageSupported(model: String): Boolean = DashScopePrefsCompat.isLanguageSupported(model)
+
+internal fun isDashKeepDialectSupported(model: String): Boolean = DashScopePrefsCompat.isQwenAudio31Model(model)
+
+internal fun isDashAutoPolishSupported(model: String): Boolean = DashScopePrefsCompat.isDisfluencyRemovalSupported(model)
 
 internal const val DASH_SCOPE_ASR_GUIDE_URL: String =
     "https://bibidocs.brycewg.com/getting-started/asr-providers.html#%E9%98%BF%E9%87%8C%E4%BA%91%E7%99%BE%E7%82%BC-dashscope-qwen"

@@ -1155,6 +1155,16 @@ class Prefs(context: Context) {
         dashLanguage = languages.joinToString(",")
     }
 
+    // Qwen-Audio 3.1：保留方言表达（keep_dialect）。默认关闭，将方言转写为普通话。
+    var dashKeepDialect: Boolean
+        get() = sp.getBoolean(KEY_DASH_KEEP_DIALECT, false)
+        set(value) = sp.edit { putBoolean(KEY_DASH_KEEP_DIALECT, value) }
+
+    // Qwen-Audio 3.1 flash / message：自动润色（disfluency_removal_enabled）。默认开启。
+    var dashAutoPolish: Boolean
+        get() = sp.getBoolean(KEY_DASH_AUTO_POLISH, true)
+        set(value) = sp.edit { putBoolean(KEY_DASH_AUTO_POLISH, value) }
+
     // DashScope：地域（cn=中国大陆，intl=国际）。默认 cn
     var dashRegion: String by stringPref(KEY_DASH_REGION, "cn")
 
@@ -1180,6 +1190,7 @@ class Prefs(context: Context) {
     // - qwen3-asr-flash：非流式
     // - qwen3.8-omni-flash / qwen3.5-omni-flash / qwen3.5-omni-plus：非流式多模态转写
     // - fun-asr-realtime：流式（Fun-ASR）
+    // - qwen-audio-3.1-asr-flash-message：流式 Recognition
     // - qwen-audio-3.1-asr-flash-streaming / qwen-audio-3.0-asr-flash-streaming：流式（Qwen-Audio）
     // - qwen3-asr-flash-realtime：流式（Qwen3）
     val dashAsrModelStored: String
@@ -2350,6 +2361,7 @@ class Prefs(context: Context) {
         const val DASH_MODEL_QWEN_AUDIO_FLASH = "qwen-audio-3.0-asr-flash"
         const val DASH_MODEL_QWEN3_FLASH = "qwen3-asr-flash"
         const val DASH_MODEL_FUN_ASR_REALTIME = "fun-asr-realtime"
+        const val DASH_MODEL_QWEN_AUDIO_31_MESSAGE = "qwen-audio-3.1-asr-flash-message"
         const val DASH_MODEL_QWEN_AUDIO_31_REALTIME = "qwen-audio-3.1-asr-flash-streaming"
         const val DASH_MODEL_QWEN_AUDIO_REALTIME = "qwen-audio-3.0-asr-flash-streaming"
         const val DASH_MODEL_QWEN3_REALTIME = "qwen3-asr-flash-realtime"

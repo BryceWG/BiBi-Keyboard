@@ -14,11 +14,14 @@
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非流式）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非流式）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（流式）</string>
+    <string name="dash_model_qwen_audio_31_message">Qwen-Audio-3.1-ASR-Flash-Message（流式）</string>
     <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming（流式）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（流式）</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime（流式）</string>
     <string name="label_dash_prompt">自定义提示词/识别上下文（可选）</string>
     <string name="label_dash_language">识别语言</string>
+    <string name="label_dash_keep_dialect">保留方言表达</string>
+    <string name="label_dash_auto_polish">自动润色</string>
     <string name="dash_language_max_4">最多选择 4 种语言</string>
     <string name="label_dash_streaming">流式识别</string>
     <string name="label_dash_fun_asr">使用 Fun-ASR 模型进行识别（fun-asr-realtime）</string>
@@ -52,4 +55,12 @@
     <!-- Fun-ASR 模型（仅流式） -->
     <string name="feature_dash_fun_asr_off_desc">流式识别使用 Qwen-Audio-3.0-ASR-Flash-Streaming（默认）。</string>
     <string name="feature_dash_fun_asr_on_desc">流式识别使用 Fun-ASR-Realtime。</string>
+
+    <!-- Qwen-Audio 3.1 保留方言 -->
+    <string name="feature_dash_keep_dialect_off_desc">将方言转写为普通话。</string>
+    <string name="feature_dash_keep_dialect_on_desc">在转写结果中保留方言表达。</string>
+
+    <!-- Qwen-Audio 3.1 flash / message 自动润色 -->
+    <string name="feature_dash_auto_polish_off_desc">保留原始口语转写，包括语气词与口吃重复。</string>
+    <string name="feature_dash_auto_polish_on_desc">过滤语气词、口吃重复，并润色口语表达。</string>
 </resources>

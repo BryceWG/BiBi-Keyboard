@@ -475,6 +475,36 @@ fun AsrSettingsScreen(
         )
     }
 
+    fun applyDashKeepDialectSwitch(target: Boolean) {
+        featureExplainerDialog = settingsFeatureExplainerDialogState(
+            context = context,
+            titleRes = R.string.label_dash_keep_dialect,
+            offDescRes = R.string.feature_dash_keep_dialect_off_desc,
+            onDescRes = R.string.feature_dash_keep_dialect_on_desc,
+            currentState = onlineFields.dashKeepDialect,
+            preferenceKey = "dash_keep_dialect_explained",
+            onConfirm = {
+                onlineFields.dashKeepDialect = target
+                prefs.dashKeepDialect = target
+            }
+        )
+    }
+
+    fun applyDashAutoPolishSwitch(target: Boolean) {
+        featureExplainerDialog = settingsFeatureExplainerDialogState(
+            context = context,
+            titleRes = R.string.label_dash_auto_polish,
+            offDescRes = R.string.feature_dash_auto_polish_off_desc,
+            onDescRes = R.string.feature_dash_auto_polish_on_desc,
+            currentState = onlineFields.dashAutoPolish,
+            preferenceKey = "dash_auto_polish_explained",
+            onConfirm = {
+                onlineFields.dashAutoPolish = target
+                prefs.dashAutoPolish = target
+            }
+        )
+    }
+
     fun applySonioxLanguageStrictSwitch(target: Boolean) {
         featureExplainerDialog = settingsFeatureExplainerDialogState(
             context = context,
@@ -697,6 +727,8 @@ fun AsrSettingsScreen(
                 applyOpenAiUsePromptSwitch = ::applyOpenAiUsePromptSwitch,
                 applySonioxStreamingSwitch = ::applySonioxStreamingSwitch,
                 applySonioxLanguageStrictSwitch = ::applySonioxLanguageStrictSwitch,
+                applyDashKeepDialectSwitch = ::applyDashKeepDialectSwitch,
+                applyDashAutoPolishSwitch = ::applyDashAutoPolishSwitch,
                 applyStepAudioUseItnSwitch = ::applyStepAudioUseItnSwitch,
                 openAiDefaultProfileName = { index ->
                     context.getString(R.string.openai_profile_default_name, index)

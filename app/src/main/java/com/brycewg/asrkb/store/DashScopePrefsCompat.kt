@@ -18,6 +18,7 @@ internal object DashScopePrefsCompat {
         Prefs.DASH_MODEL_QWEN38_OMNI_FLASH,
         Prefs.DASH_MODEL_QWEN35_OMNI_PLUS,
         Prefs.DASH_MODEL_FUN_ASR_REALTIME,
+        Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE,
         Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME,
         Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME,
         Prefs.DASH_MODEL_QWEN3_REALTIME
@@ -62,8 +63,12 @@ internal object DashScopePrefsCompat {
     fun isQwen3RealtimeModel(model: String): Boolean = normalizeDashAsrModel(model)
         .equals(Prefs.DASH_MODEL_QWEN3_REALTIME, ignoreCase = true)
 
+    fun isQwenAudio31MessageModel(model: String): Boolean = normalizeDashAsrModel(model)
+        .equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE, ignoreCase = true)
+
     fun isRecognitionStreamingModel(model: String): Boolean = normalizeDashAsrModel(model).let {
         it.equals(Prefs.DASH_MODEL_FUN_ASR_REALTIME, ignoreCase = true) ||
+            it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE, ignoreCase = true) ||
             it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ||
             it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME, ignoreCase = true)
     }
@@ -80,7 +85,8 @@ internal object DashScopePrefsCompat {
         return when {
             normalized.equals(Prefs.DASH_MODEL_FUN_ASR_REALTIME, ignoreCase = true) ->
                 Prefs.DASH_MODEL_FUN_ASR_FLASH
-            normalized.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ->
+            normalized.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE, ignoreCase = true) ||
+                normalized.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ->
                 Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH
             normalized.equals(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME, ignoreCase = true) ->
                 Prefs.DASH_MODEL_QWEN_AUDIO_FLASH
@@ -92,11 +98,23 @@ internal object DashScopePrefsCompat {
 
     fun isSemanticPunctuationSupported(model: String): Boolean = isRecognitionStreamingModel(model)
 
+    fun isQwenAudio31Model(model: String): Boolean = normalizeDashAsrModel(model).let {
+        it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH, ignoreCase = true) ||
+            it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE, ignoreCase = true) ||
+            it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true)
+    }
+
+    /** 支持 language_hints 的 Qwen-Audio 模型（不含 message：文档注明不支持）。 */
     fun isQwenAudioModel(model: String): Boolean = normalizeDashAsrModel(model).let {
         it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH, ignoreCase = true) ||
             it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_FLASH, ignoreCase = true) ||
             it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ||
             it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME, ignoreCase = true)
+    }
+
+    fun isDisfluencyRemovalSupported(model: String): Boolean = normalizeDashAsrModel(model).let {
+        it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_FLASH, ignoreCase = true) ||
+            it.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE, ignoreCase = true)
     }
 
     fun isOmniModel(model: String): Boolean = normalizeDashAsrModel(model).let {
@@ -115,7 +133,12 @@ internal object DashScopePrefsCompat {
             !isGenerationAsrModel(normalized)
     }
 
-    fun isLanguageSupported(model: String): Boolean = !isOmniModel(model) && (!isGenerationAsrModel(model) || isQwenAudioModel(model))
+    fun isLanguageSupported(model: String): Boolean {
+        val normalized = normalizeDashAsrModel(model)
+        // message 文档不支持 language_hints；设置页隐藏识别语言项。
+        if (isOmniModel(normalized) || isQwenAudio31MessageModel(normalized)) return false
+        return !isGenerationAsrModel(normalized) || isQwenAudioModel(normalized)
+    }
 
     fun parseDashLanguages(value: String): List<String> = normalizeDashLanguages(listOf(value))
 

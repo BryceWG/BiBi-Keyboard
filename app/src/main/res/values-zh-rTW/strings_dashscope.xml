@@ -14,11 +14,14 @@
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非串流）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非串流）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（串流）</string>
+    <string name="dash_model_qwen_audio_31_message">Qwen-Audio-3.1-ASR-Flash-Message（串流）</string>
     <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming（串流）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（串流）</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime（串流）</string>
     <string name="label_dash_prompt">自定義提示詞/識別上下文（可選）</string>
     <string name="label_dash_language">識別語言</string>
+    <string name="label_dash_keep_dialect">保留方言表達</string>
+    <string name="label_dash_auto_polish">自動潤色</string>
     <string name="dash_language_max_4">最多選擇 4 種語言</string>
     <string name="label_dash_streaming">串流識別</string>
     <string name="label_dash_fun_asr">使用 Fun-ASR 模型進行識別（fun-asr-realtime）</string>
@@ -51,4 +54,12 @@
     <!-- Fun-ASR 模型（僅串流） -->
     <string name="feature_dash_fun_asr_off_desc">串流識別使用 Qwen-Audio-3.0-ASR-Flash-Streaming（預設）。</string>
     <string name="feature_dash_fun_asr_on_desc">串流識別使用 Fun-ASR-Realtime。</string>
+
+    <!-- Qwen-Audio 3.1 保留方言 -->
+    <string name="feature_dash_keep_dialect_off_desc">將方言轉寫為普通話。</string>
+    <string name="feature_dash_keep_dialect_on_desc">在轉寫結果中保留方言表達。</string>
+
+    <!-- Qwen-Audio 3.1 flash / message 自動潤色 -->
+    <string name="feature_dash_auto_polish_off_desc">保留原始口語轉寫，包括語氣詞與口吃重複。</string>
+    <string name="feature_dash_auto_polish_on_desc">過濾語氣詞、口吃重複，並潤色口語表達。</string>
 </resources>

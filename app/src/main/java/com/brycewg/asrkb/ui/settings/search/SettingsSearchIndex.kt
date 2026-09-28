@@ -240,6 +240,22 @@ object SettingsSearchIndex {
             "verbatim",
             forceAsrVendorId = AsrVendor.Gemini.id
         )
+        item(
+            R.string.label_dash_keep_dialect,
+            R.string.label_asr_vendor,
+            "keep_dialect",
+            "方言",
+            "dialect",
+            forceAsrVendorId = AsrVendor.DashScope.id
+        )
+        item(
+            R.string.label_dash_auto_polish,
+            R.string.label_asr_vendor,
+            "disfluency",
+            "润色",
+            "polish",
+            forceAsrVendorId = AsrVendor.DashScope.id
+        )
         item(R.string.label_backup_asr_vendor, R.string.label_backup_asr_engine)
         item(R.string.label_backup_asr_timeout_sensitivity, R.string.label_backup_asr_engine)
         item(R.string.label_backup_asr_local_residency, R.string.label_backup_asr_engine)

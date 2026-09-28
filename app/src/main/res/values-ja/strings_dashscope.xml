@@ -14,11 +14,14 @@
     <string name="dash_model_qwen38_omni_flash">Qwen3.8-Omni-Flash（非ストリーミング）</string>
     <string name="dash_model_qwen35_omni_plus">Qwen3.5-Omni-Plus（非ストリーミング）</string>
     <string name="dash_model_fun_realtime">Fun-ASR-Realtime（ストリーミング）</string>
+    <string name="dash_model_qwen_audio_31_message">Qwen-Audio-3.1-ASR-Flash-Message（ストリーミング）</string>
     <string name="dash_model_qwen_audio_31_realtime">Qwen-Audio-3.1-ASR-Flash-Streaming（ストリーミング）</string>
     <string name="dash_model_qwen_audio_realtime">Qwen-Audio-3.0-ASR-Flash-Streaming（ストリーミング）</string>
     <string name="dash_model_qwen3_realtime">Qwen3-ASR-Flash-Realtime（ストリーミング）</string>
     <string name="label_dash_prompt">カスタムプロンプト/コンテキスト（オプション）</string>
     <string name="label_dash_language">認識言語</string>
+    <string name="label_dash_keep_dialect">方言表現を残す</string>
+    <string name="label_dash_auto_polish">自動整形</string>
     <string name="dash_language_max_4">最大4言語まで選択できます</string>
     <string name="label_dash_streaming">ストリーミング認識</string>
     <string name="label_dash_fun_asr">Fun-ASR モデルを使用（fun-asr-realtime）</string>
@@ -51,4 +54,12 @@
     <!-- Fun-ASR モデル（ストリーミングのみ） -->
     <string name="feature_dash_fun_asr_off_desc">ストリーミングは Qwen-Audio-3.0-ASR-Flash-Streaming（既定）を使用します。</string>
     <string name="feature_dash_fun_asr_on_desc">ストリーミングは Fun-ASR-Realtime を使用します。</string>
+
+    <!-- Qwen-Audio 3.1 方言保持 -->
+    <string name="feature_dash_keep_dialect_off_desc">方言を標準中国語に書き起こします。</string>
+    <string name="feature_dash_keep_dialect_on_desc">書き起こし結果に方言表現を残します。</string>
+
+    <!-- Qwen-Audio 3.1 flash / message 自動整形 -->
+    <string name="feature_dash_auto_polish_off_desc">フィラーや言い淀みを含む、そのままの口語書き起こしを残します。</string>
+    <string name="feature_dash_auto_polish_on_desc">フィラーや言い淀みの繰り返しを除き、口語表現を整えます。</string>
 </resources>

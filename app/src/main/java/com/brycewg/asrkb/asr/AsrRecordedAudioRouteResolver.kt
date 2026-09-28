@@ -362,6 +362,8 @@ internal object AsrRecordedAudioRouteResolver {
                 R.string.dash_model_qwen35_omni_plus
             model.equals(Prefs.DASH_MODEL_FUN_ASR_REALTIME, ignoreCase = true) ->
                 R.string.dash_model_fun_realtime
+            model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_MESSAGE, ignoreCase = true) ->
+                R.string.dash_model_qwen_audio_31_message
             model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_31_REALTIME, ignoreCase = true) ->
                 R.string.dash_model_qwen_audio_31_realtime
             model.equals(Prefs.DASH_MODEL_QWEN_AUDIO_REALTIME, ignoreCase = true) ->
