@@ -34,6 +34,9 @@ class FxliangFcitxVoiceInputProviderService : Service() {
 
     @Volatile private var receivedPcmBytes: Long = 0L
 
+    /** endStream 之后结果尚未交付。此时客户端的 cancel/stop 是等待超时，不能丢掉正在进行的识别。 */
+    @Volatile private var awaitingRecognitionResult: Boolean = false
+
     override fun onBind(intent: Intent?): IBinder = binder
 
     private val binder = object : IVoiceInputProvider.Stub() {
@@ -85,6 +88,7 @@ class FxliangFcitxVoiceInputProviderService : Service() {
                 activeCallbacks = callbacks
                 activeDeathLink = deathLink
                 receivedPcmBytes = 0L
+                awaitingRecognitionResult = false
             }
             debugLog("startSession")
             session.start()
@@ -115,16 +119,22 @@ class FxliangFcitxVoiceInputProviderService : Service() {
 
         override fun endStream() {
             debugLog("endStream receivedPcmBytes=$receivedPcmBytes")
-            activeSession?.stop()
+            val session = synchronized(lock) {
+                if (activeSession != null) awaitingRecognitionResult = true
+                activeSession
+            }
+            session?.stop()
         }
 
         override fun cancelSession() {
             debugLog("cancelSession receivedPcmBytes=$receivedPcmBytes")
+            if (deferAbortUntilResult()) return
             cancelActiveSession()
         }
 
         override fun stopSession() {
             debugLog("stopSession receivedPcmBytes=$receivedPcmBytes")
+            if (deferAbortUntilResult()) return
             cancelActiveSession()
         }
     }
@@ -151,6 +161,7 @@ class FxliangFcitxVoiceInputProviderService : Service() {
             activeCallbacks = null
             activeDeathLink = null
             receivedPcmBytes = 0L
+            awaitingRecognitionResult = false
         }
         unlinkCallbackDeath(deathLink)
         session?.cancel()
@@ -169,8 +180,13 @@ class FxliangFcitxVoiceInputProviderService : Service() {
             activeCallbacks = null
             activeDeathLink = null
             receivedPcmBytes = 0L
+            awaitingRecognitionResult = false
         }
         unlinkCallbackDeath(deathLink)
+    }
+
+    private fun deferAbortUntilResult(): Boolean = synchronized(lock) {
+        awaitingRecognitionResult && activeSession != null
     }
 
     private fun linkCallbackDeath(
