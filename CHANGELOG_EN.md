@@ -1,5 +1,28 @@
 # Changelog
 
+## v4.5.1 (2026-10-03)
+
+### New Features
+
+- **Shake to Record**: While the keyboard is visible, shake once to start recording and again to stop. Sensitivity is adjustable, with optional sound, vibration, and auto-stop when the keyboard hides
+- **Alibaba Qianwen Qwen-Audio 3.1**: Adds the Flash, Streaming, and Message model series. The 3.1 series can optionally keep dialect wording; Flash and Message can optionally polish spoken expressions
+- **[Pro] Hotword Groups and Editing**: Organize hotwords into groups. Tap to edit the target, aliases, and group; long-press to move, multi-select, or delete
+
+### Improvements
+
+- **Alibaba Qianwen Rename and Endpoints**: The vendor is now shown as Alibaba Qianwen, and requests use the Qwen MaaS endpoints
+- **Alibaba Qianwen Streaming**: Fun-ASR and Qwen-Audio reuse the connection across sessions so the next recording starts sooner; semantic punctuation stays on
+- **Custom TypeSafe Channel**: You can enter a TypeSafe-compatible endpoint and a Jev-like model
+- **Prompt Preview Confidence**: The automatic-selection preview shows match confidence
+- **Vendor Configuration Documentation**: Migrated from Notion to the self-hosted documentation site
+
+### Bug Fixes
+
+- **Persistent Notification**: Fix the home screen staying on the wrong page when a keep-alive notification opens History or another page
+- **Fox Input Method Integration**: Compatible with input methods ending the waiting before recognition is complete, causing the request to be prematurely terminated
+
+---
+
 ## v4.5.0 (2026-09-20)
 
 ### New Features
