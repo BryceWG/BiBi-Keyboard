@@ -105,7 +105,7 @@ internal class ImeLayoutController(
         val root = rootView ?: viewRefsProvider()?.rootView ?: return
         if (floatingResizeLayoutPassPosted) return
         floatingResizeLayoutPassPosted = true
-        ViewCompat.postOnAnimation(root) {
+        root.postOnAnimation {
             floatingResizeLayoutPassPosted = false
             applyKeyboardHeightScaleAndRequestLayout()
         }

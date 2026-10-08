@@ -768,7 +768,7 @@ internal class ImeFloatingKeyboardController(
         hasPendingDragMove = true
         if (dragMovePosted) return
         dragMovePosted = true
-        ViewCompat.postOnAnimation(root) {
+        root.postOnAnimation {
             dragMovePosted = false
             applyPendingWindowMove(root)
         }
@@ -788,7 +788,7 @@ internal class ImeFloatingKeyboardController(
         hasPendingResizeFrame = true
         if (resizeFramePosted) return
         resizeFramePosted = true
-        ViewCompat.postOnAnimation(root) {
+        root.postOnAnimation {
             resizeFramePosted = false
             applyPendingResizeFrame(root)
         }
