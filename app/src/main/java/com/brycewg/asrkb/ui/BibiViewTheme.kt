@@ -15,6 +15,7 @@ import android.graphics.drawable.InsetDrawable
 import android.graphics.drawable.RippleDrawable
 import android.os.Build
 import androidx.annotation.ColorInt
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -54,11 +55,7 @@ internal object BibiViewThemes {
         val isDark = resolveDarkMode(context, prefs)
         if (isMiuix) return miuixTheme(isDark)
 
-        val scheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        } else {
-            if (isDark) darkColorScheme() else lightColorScheme()
-        }
+        val scheme = materialColorScheme(context, isDark)
 
         val surface = scheme.surface.toArgb()
         val onSurface = scheme.onSurface.toArgb()
@@ -93,6 +90,12 @@ internal object BibiViewThemes {
             keyInsetDp = 2,
             menuItemBackground = surface
         )
+    }
+
+    fun materialColorScheme(context: Context, isDark: Boolean): ColorScheme = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else {
+        if (isDark) darkColorScheme() else lightColorScheme()
     }
 
     fun roundedRipple(

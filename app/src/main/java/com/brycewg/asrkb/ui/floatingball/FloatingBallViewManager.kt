@@ -250,7 +250,7 @@ class FloatingBallViewManager(
     }
 
     fun applyBallTheme() {
-        recordingRibbonView?.setDarkTheme(BibiViewThemes.resolve(context, prefs).isDark)
+        recordingRibbonView?.setTheme(BibiViewThemes.resolve(context, prefs))
         val v = ballView ?: return
         FloatingBallComposeViewFactory.applyTheme(v, prefs)
         val theme = BibiViewThemes.resolve(v.context, prefs)
@@ -760,7 +760,7 @@ class FloatingBallViewManager(
             return
         }
         val ribbon = ensureRecordingRibbonOverlay() ?: return
-        ribbon.setDarkTheme(BibiViewThemes.resolve(context, prefs).isDark)
+        ribbon.setTheme(BibiViewThemes.resolve(context, prefs))
         if (state is FloatingBallState.Recording) {
             ribbon.beginRecording()
         } else {
