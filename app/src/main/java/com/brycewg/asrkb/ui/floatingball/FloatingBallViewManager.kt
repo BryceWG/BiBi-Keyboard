@@ -44,6 +44,7 @@ class FloatingBallViewManager(
         private const val RECORDING_FALLBACK_DELAY_MS = 600L
         private const val RECORDING_MIN_ALPHA = 0.85f
         private const val RECORDING_MAX_ALPHA = 1.0f
+        private const val RIBBON_ENVELOPE_SMOOTHING = 0.48f
         private const val STATE_VISIBLE_ALPHA_MIN = 0.95f
         private const val STATE_ALPHA_ANIMATION_MS = 180L
         private const val PROCESSING_SPINNER_FADE_IN_MS = 150L
@@ -73,6 +74,7 @@ class FloatingBallViewManager(
     private var recordingFallbackRunnable: Runnable? = null
     private var recordingAmplitudeReceived: Boolean = false
     private var smoothedRecordingAmplitude: Float = 0f
+    private var smoothedRibbonAmplitude: Float = 0f
     private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
     private var completionResetPosted: Boolean = false
     private var currentState: FloatingBallState = FloatingBallState.Idle
@@ -316,9 +318,14 @@ class FloatingBallViewManager(
             smoothedRecordingAmplitude,
             normalized
         )
+        smoothedRibbonAmplitude = RecordingAuraMath.smoothEnvelope(
+            smoothedRibbonAmplitude,
+            normalized,
+            RIBBON_ENVELOPE_SMOOTHING
+        )
         applyRecordingPulse(smoothedRecordingAmplitude)
         recordingAuraView?.updateLevel(smoothedRecordingAmplitude)
-        recordingRibbonView?.updateLevel(smoothedRecordingAmplitude)
+        recordingRibbonView?.updateLevel(smoothedRibbonAmplitude)
     }
 
     /** 根据悬浮球窗口大小按比例调整麦克风图标尺寸 */
@@ -1741,6 +1748,7 @@ class FloatingBallViewManager(
         stopRecordingBreathAnimation(resetVisual = false)
         recordingAmplitudeReceived = false
         smoothedRecordingAmplitude = 0f
+        smoothedRibbonAmplitude = 0f
         icon.imageAlpha = 255
         icon.alpha = RECORDING_MAX_ALPHA
         scheduleRecordingFallbackBreath()
@@ -1782,6 +1790,7 @@ class FloatingBallViewManager(
         stopRecordingFallbackBreath(resetVisual)
         recordingAmplitudeReceived = false
         smoothedRecordingAmplitude = 0f
+        smoothedRibbonAmplitude = 0f
     }
 
     private fun stopRecordingFallbackBreath(resetVisual: Boolean = true) {

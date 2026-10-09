@@ -775,13 +775,15 @@ internal class RecordingRibbonOverlayView @JvmOverloads constructor(
         private const val BOTTOM_INSET_FRACTION = 0.06f
         private const val BOTTOM_INSET_DP = 64f
         private const val RISE_FRACTION = 0.25f
-        private const val MAX_AMP_FRACTION = 0.16f
+        private const val MAX_AMP_FRACTION = 0.224f
         private const val BREATHE_FLOOR = 0.16f
         private const val BREATHE_SWING = 0.05f
-        private const val BREATHE_SPEED = 2.3
-        private const val LEVEL_ATTACK = 20f
-        private const val LEVEL_RELEASE = 4.5f
-        private const val WAVE_SPEED_SCALE = 1.2
+
+        // 横向波速提高后按同样比例收回，空闲起伏的周期保持不变。
+        private const val BREATHE_SPEED = 1.725
+        private const val LEVEL_ATTACK = 28f
+        private const val LEVEL_RELEASE = 8f
+        private const val WAVE_SPEED_SCALE = 1.6
         private const val DARK_RIBBON_BRIGHTNESS = 0.82f
         private const val WAVE_PRIMARY = 0.62
         private const val WAVE_SECONDARY = 0.38
