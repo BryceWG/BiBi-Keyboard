@@ -1,0 +1,11 @@
+local.properties
+
+.gradle
+.gradle-user
+.idea
+
+AGENTS.md 
+.agents/
+
+references/
+dev_docs/
