@@ -491,7 +491,7 @@ fun FloatingSettingsScreen(
 
             item("basic") {
                 FloatingSection(uiMode = uiMode, titleRes = R.string.section_floating_basic) {
-                    val basicItemCount = if (uiState.asrEnabled) 6 else 1
+                    val basicItemCount = if (uiState.asrEnabled) 7 else 1
                     FloatingExplainedSwitch(
                         id = "floating_asr",
                         titleRes = R.string.label_floating_asr,
@@ -569,6 +569,23 @@ fun FloatingSettingsScreen(
                             index = 3,
                             count = basicItemCount
                         )
+                        FloatingExplainedSwitch(
+                            id = "floating_recording_fullscreen_anim",
+                            titleRes = R.string.label_floating_recording_fullscreen_anim,
+                            checked = uiState.recordingFullscreenAnimEnabled,
+                            onToggle = { target ->
+                                applyExplainedSwitch(
+                                    current = uiState.recordingFullscreenAnimEnabled,
+                                    target = target,
+                                    titleRes = R.string.label_floating_recording_fullscreen_anim,
+                                    offDescRes = R.string.feature_floating_recording_fullscreen_anim_off_desc,
+                                    onDescRes = R.string.feature_floating_recording_fullscreen_anim_on_desc,
+                                    preferenceKey = "floating_recording_fullscreen_anim_explained"
+                                ) { prefs.floatingBallRecordingFullscreenAnimEnabled = it }
+                            },
+                            index = 4,
+                            count = basicItemCount
+                        )
                         FloatingSliderPreference(
                             titleRes = R.string.label_floating_alpha,
                             valueLabel = { "${it.roundFloatingToStep(5).toInt()}%" },
@@ -576,7 +593,7 @@ fun FloatingSettingsScreen(
                             valueRange = 30f..100f,
                             step = 5,
                             uiMode = uiMode,
-                            index = 4,
+                            index = 5,
                             count = basicItemCount,
                             onValueChange = { value ->
                                 uiState = uiState.copy(alphaPercent = value.roundFloatingToStep(5))
@@ -595,7 +612,7 @@ fun FloatingSettingsScreen(
                             valueRange = 28f..96f,
                             step = 4,
                             uiMode = uiMode,
-                            index = 5,
+                            index = 6,
                             count = basicItemCount,
                             onValueChange = { value ->
                                 uiState = uiState.copy(sizeDp = value.roundFloatingToStep(4).toInt().coerceIn(28, 96))

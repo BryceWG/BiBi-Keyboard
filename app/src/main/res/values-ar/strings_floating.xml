@@ -14,6 +14,7 @@
     <string name="label_floating_only_when_ime_visible">إظهار الكرة العائمة فقط عند ظهور لوحة المفاتيح</string>
     <string name="label_floating_hold_to_record">اضغط مطوّلاً على الكرة العائمة للتسجيل</string>
     <string name="label_floating_direct_drag">اسحب لتحريك الكرة العائمة</string>
+    <string name="label_floating_recording_fullscreen_anim">عرض رسم متحرك بملء الشاشة أثناء التسجيل</string>
     <string name="label_floating_alpha">شفافية الكرة العائمة</string>
     <string name="label_floating_size">حجم الكرة العائمة</string>
     <string name="toast_need_overlay_perm">امنح إذن «العرض فوق التطبيقات الأخرى» في إعدادات النظام لتفعيل الكرة العائمة</string>
@@ -140,6 +141,10 @@
     <!-- Floating direct drag -->
     <string name="feature_floating_direct_drag_off_desc">تحريك الكرة العائمة يتطلّب ضغطاً مطوّلاً لدخول وضع التحريك أو استخدام القائمة.</string>
     <string name="feature_floating_direct_drag_on_desc">يمكنك سحب الكرة العائمة مباشرة لإعادة وضعها.</string>
+
+    <!-- Floating recording fullscreen animation -->
+    <string name="feature_floating_recording_fullscreen_anim_off_desc">لا يعرض التسجيل بالكرة العائمة رسماً متحركاً بملء الشاشة.</string>
+    <string name="feature_floating_recording_fullscreen_anim_on_desc">أثناء التسجيل بالكرة العائمة، يظهر شريط ملون عبر الشاشة ويتجاوب مع مستوى الصوت، ثم يتحول بعد الإيقاف إلى رسم تحميل حتى ينتهي التعرف. تمر اللمسات إلى ما خلفه. يتطلب إذن العرض فوق التطبيقات.</string>
 
     <!-- Volume key recording -->
     <string name="feature_volume_key_recording_off_desc">تحتفظ مفاتيح الصوت بسلوك النظام العادي ولن تتحكم بالتسجيل.</string>

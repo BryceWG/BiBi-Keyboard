@@ -14,6 +14,7 @@
     <string name="label_floating_only_when_ime_visible">Only show floating ball when keyboard is visible</string>
     <string name="label_floating_hold_to_record">Hold the floating ball to record</string>
     <string name="label_floating_direct_drag">Drag to move the floating ball</string>
+    <string name="label_floating_recording_fullscreen_anim">Show a full-screen animation while recording</string>
     <string name="label_floating_alpha">Floating ball transparency</string>
     <string name="label_floating_size">Floating ball size</string>
     <string name="toast_need_overlay_perm">Please grant "Display over other apps" in system settings to enable the floating ball</string>
@@ -140,6 +141,10 @@
     <!-- Floating direct drag -->
     <string name="feature_floating_direct_drag_off_desc">Moving the floating ball requires long-pressing to enter move mode or using the menu.</string>
     <string name="feature_floating_direct_drag_on_desc">You can drag the floating ball directly to reposition it.</string>
+
+    <!-- Floating recording fullscreen animation -->
+    <string name="feature_floating_recording_fullscreen_anim_off_desc">Recording with the floating ball does not show a full-screen animation.</string>
+    <string name="feature_floating_recording_fullscreen_anim_on_desc">While the floating ball is recording, a color ribbon plays across the screen and reacts to volume. After you stop, it becomes a loading animation until recognition finishes. Touches pass through. Overlay permission is required.</string>
 
     <!-- Volume key recording -->
     <string name="feature_volume_key_recording_off_desc">Volume keys keep their normal system behavior and will not control recording.</string>

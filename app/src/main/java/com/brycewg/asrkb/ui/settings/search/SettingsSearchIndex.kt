@@ -159,6 +159,14 @@ object SettingsSearchIndex {
         item(R.string.label_floating_only_when_ime_visible, R.string.section_floating_basic)
         item(R.string.label_floating_hold_to_record, R.string.section_floating_basic)
         item(R.string.label_floating_direct_drag, R.string.section_floating_basic)
+        item(
+            R.string.label_floating_recording_fullscreen_anim,
+            R.string.section_floating_basic,
+            "animation",
+            "ribbon",
+            "动画",
+            "丝带"
+        )
         item(R.string.label_floating_alpha, R.string.section_floating_basic)
         item(R.string.label_floating_size, R.string.section_floating_basic)
         item(R.string.label_reset_floating_position, R.string.section_floating_basic)

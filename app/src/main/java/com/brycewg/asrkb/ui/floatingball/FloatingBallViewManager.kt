@@ -11,6 +11,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PixelFormat
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -57,6 +58,7 @@ class FloatingBallViewManager(
     private var processingSpinner: ProcessingSpinnerView? = null
     private var recordingAuraView: RecordingAuraView? = null
     private var recordingAuraLp: WindowManager.LayoutParams? = null
+    private var recordingRibbonView: RecordingRibbonOverlayView? = null
     private var lp: WindowManager.LayoutParams? = null
 
     // 动画
@@ -315,6 +317,7 @@ class FloatingBallViewManager(
         )
         applyRecordingPulse(smoothedRecordingAmplitude)
         recordingAuraView?.updateLevel(smoothedRecordingAmplitude)
+        recordingRibbonView?.updateLevel(smoothedRecordingAmplitude)
     }
 
     /** 根据悬浮球窗口大小按比例调整麦克风图标尺寸 */
@@ -402,6 +405,7 @@ class FloatingBallViewManager(
                 }
             }
         }
+        syncRecordingRibbon(state)
     }
 
     /**
@@ -661,6 +665,7 @@ class FloatingBallViewManager(
 
     /** 清理所有动画 */
     fun cleanup() {
+        dismissRecordingRibbon(animated = false)
         stopRecordingAura()
         removeRecordingAuraOverlay()
         stopProcessingSpinner()
@@ -743,6 +748,104 @@ class FloatingBallViewManager(
             Log.w(TAG, "Failed to cancel state alpha animator", e)
         }
         stateAlphaAnimator = null
+    }
+
+    private fun syncRecordingRibbon(state: FloatingBallState) {
+        val enabled = readRecordingRibbonEnabled()
+        val show = enabled &&
+            (state is FloatingBallState.Recording || state is FloatingBallState.Processing)
+        if (!show) {
+            dismissRecordingRibbon(animated = enabled && recordingRibbonView != null)
+            return
+        }
+        val ribbon = ensureRecordingRibbonOverlay() ?: return
+        if (state is FloatingBallState.Recording) {
+            ribbon.beginRecording()
+        } else {
+            ribbon.beginLoading()
+        }
+    }
+
+    private fun readRecordingRibbonEnabled(): Boolean = try {
+        prefs.floatingBallRecordingFullscreenAnimEnabled
+    } catch (e: Throwable) {
+        Log.w(TAG, "Failed to read recording ribbon preference", e)
+        false
+    }
+
+    private fun ensureRecordingRibbonOverlay(): RecordingRibbonOverlayView? {
+        recordingRibbonView?.let { return it }
+        if (!Settings.canDrawOverlays(context)) {
+            Log.w(TAG, "Skip recording ribbon: overlay permission missing")
+            return null
+        }
+        val ribbon = RecordingRibbonOverlayView(context)
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.TOP or Gravity.START
+        }
+        return try {
+            windowManager.addView(ribbon, params)
+            recordingRibbonView = ribbon
+            bringBallAboveRibbon()
+            ribbon
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to add recording ribbon overlay", e)
+            recordingRibbonView = null
+            null
+        }
+    }
+
+    private fun dismissRecordingRibbon(animated: Boolean) {
+        val ribbon = recordingRibbonView ?: return
+        if (!animated) {
+            ribbon.cancelMotion()
+            removeRecordingRibbonOverlay()
+            return
+        }
+        ribbon.playExit { removeRecordingRibbonOverlay() }
+    }
+
+    private fun removeRecordingRibbonOverlay() {
+        val ribbon = recordingRibbonView ?: return
+        recordingRibbonView = null
+        try {
+            windowManager.removeView(ribbon)
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to remove recording ribbon overlay", e)
+        }
+    }
+
+    private fun bringBallAboveRibbon() {
+        val ball = ballView ?: return
+        // 延后到当前帧之后，避免摘掉悬浮球时丢掉 showBall 里尚未执行的 post。
+        ball.post {
+            if (ballView !== ball || recordingRibbonView == null) return@post
+            val params = lp ?: return@post
+            try {
+                windowManager.removeViewImmediate(ball)
+            } catch (e: Throwable) {
+                Log.w(TAG, "Failed to detach floating ball before raising it", e)
+                return@post
+            }
+            try {
+                windowManager.addView(ball, params)
+            } catch (e: Throwable) {
+                Log.e(TAG, "Failed to reattach floating ball above recording ribbon", e)
+                try {
+                    windowManager.addView(ball, params)
+                } catch (retry: Throwable) {
+                    Log.e(TAG, "Failed to restore floating ball after recording ribbon", retry)
+                }
+            }
+        }
     }
 
     private fun startRecordingAura() {

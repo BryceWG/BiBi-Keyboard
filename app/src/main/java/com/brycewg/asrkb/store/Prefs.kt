@@ -590,6 +590,11 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_FLOATING_DIRECT_DRAG_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_FLOATING_DIRECT_DRAG_ENABLED, value) }
 
+    // 悬浮球录音时在屏幕上叠加全屏丝带动画
+    var floatingBallRecordingFullscreenAnimEnabled: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_RECORDING_FULLSCREEN_ANIM, false)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_RECORDING_FULLSCREEN_ANIM, value) }
+
     // 悬浮球语音识别模式开关
     var floatingAsrEnabled: Boolean
         get() = sp.getBoolean(KEY_FLOATING_ASR_ENABLED, false)

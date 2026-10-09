@@ -15,6 +15,7 @@
     <string name="label_floating_only_when_ime_visible">キーボード表示時のみフローティングボールを表示する</string>
     <string name="label_floating_hold_to_record">フローティングボールを長押しして録音</string>
     <string name="label_floating_direct_drag">直接ドラッグでフローティングボールを移動</string>
+    <string name="label_floating_recording_fullscreen_anim">録音中に全画面アニメーションを表示</string>
     <string name="label_floating_alpha">フローティングボールの透明度</string>
     <string name="label_floating_size">フローティングボールのサイズ</string>
     <string name="toast_need_overlay_perm">フローティングボールを有効にするには、システム設定で「他のアプリの上に表示」を許可してください</string>
@@ -141,6 +142,10 @@
     <!-- 直接ドラッグ移動 -->
     <string name="feature_floating_direct_drag_off_desc">移動するには長押しで移動モードに入るか、メニューから移動を選ぶ必要があります。</string>
     <string name="feature_floating_direct_drag_on_desc">フローティングボールを直接ドラッグして移動できます。</string>
+
+    <!-- 録音中の全画面アニメーション -->
+    <string name="feature_floating_recording_fullscreen_anim_off_desc">フローティングボールの録音中は全画面アニメーションを表示しません。</string>
+    <string name="feature_floating_recording_fullscreen_anim_on_desc">フローティングボールの録音中、画面上にカラーリボンを表示し、音量に合わせて動かします。停止後は認識が終わるまで読み込みアニメーションになります。タッチは背面へ通り抜けます。オーバーレイ権限が必要です。</string>
 
     <!-- 音量キー録音 -->
     <string name="feature_volume_key_recording_off_desc">音量キーは通常のシステム動作のままで、録音操作には使われません。</string>

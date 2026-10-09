@@ -14,6 +14,7 @@
     <string name="label_floating_only_when_ime_visible">仅在键盘显示时显示悬浮球</string>
     <string name="label_floating_hold_to_record">长按悬浮球录音</string>
     <string name="label_floating_direct_drag">直接拖动移动悬浮球</string>
+    <string name="label_floating_recording_fullscreen_anim">录音时显示全屏动画</string>
     <string name="label_floating_alpha">悬浮球透明度</string>
     <string name="label_floating_size">悬浮球大小</string>
     <string name="toast_need_overlay_perm">请在系统设置中授予"在其他应用上层显示"权限以启用悬浮球</string>
@@ -140,6 +141,10 @@
     <!-- 直接拖动移动悬浮球 -->
     <string name="feature_floating_direct_drag_off_desc">移动悬浮球需要长按进入移动模式或通过菜单开启移动模式。</string>
     <string name="feature_floating_direct_drag_on_desc">可直接拖动悬浮球调整位置。</string>
+
+    <!-- 悬浮球录音全屏动画 -->
+    <string name="feature_floating_recording_fullscreen_anim_off_desc">悬浮球录音时不显示全屏动画。</string>
+    <string name="feature_floating_recording_fullscreen_anim_on_desc">悬浮球录音时在其他应用上方播放彩色丝带动画，并随音量变化。停止后变为加载动画，直到识别结束。触摸会穿透到背后，需要悬浮窗权限。</string>
 
     <!-- 音量键录音模式 -->
     <string name="feature_volume_key_recording_off_desc">音量键保持系统默认行为，不用于控制录音。</string>

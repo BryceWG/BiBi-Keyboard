@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="recording_animation_base">#FFF9FAFC</color>
+
+    <color name="recording_ribbon_teal_0">#FFACF6E3</color>
+    <color name="recording_ribbon_teal_1">#FF62DFCE</color>
+    <color name="recording_ribbon_teal_2">#FF38B8C5</color>
+    <color name="recording_ribbon_teal_3">#FF7DCFEF</color>
+
+    <color name="recording_ribbon_warm_0">#FFFFE1BD</color>
+    <color name="recording_ribbon_warm_1">#FFFFB6A3</color>
+    <color name="recording_ribbon_warm_2">#FFEE839F</color>
+    <color name="recording_ribbon_warm_3">#FFF4BCE0</color>
+
+    <color name="recording_ribbon_magenta_0">#FFF4BCE0</color>
+    <color name="recording_ribbon_magenta_1">#FFE3ACCC</color>
+    <color name="recording_ribbon_magenta_2">#FF98AED6</color>
+    <color name="recording_ribbon_magenta_3">#FFEE839F</color>
+
+    <color name="recording_ribbon_ice_0">#FFC6EEFF</color>
+    <color name="recording_ribbon_ice_1">#FF7DCFEF</color>
+    <color name="recording_ribbon_ice_2">#FF68AFD8</color>
+    <color name="recording_ribbon_ice_3">#FF62DFCE</color>
+
+    <color name="recording_ribbon_core_0">#00FFFFFF</color>
+    <color name="recording_ribbon_core_1">#BFFFFFFF</color>
+    <color name="recording_ribbon_core_2">#33F4F7FA</color>
+    <color name="recording_ribbon_core_3">#73F4F7FA</color>
+
+    <color name="recording_ribbon_glow_0">#8062DFCE</color>
+    <color name="recording_ribbon_glow_1">#33FFB6A3</color>
+    <color name="recording_ribbon_glow_2">#00FFB6A3</color>
+
+    <color name="recording_orb_glow_0">#99E5EAF0</color>
+    <color name="recording_orb_glow_1">#33C5D5E5</color>
+    <color name="recording_orb_glow_2">#00C5D5E5</color>
+
+    <color name="recording_orb_teal_0">#FFACF6E3</color>
+    <color name="recording_orb_teal_1">#D962DFCE</color>
+    <color name="recording_orb_teal_2">#5938B8C5</color>
+    <color name="recording_orb_teal_3">#0038B8C5</color>
+
+    <color name="recording_orb_warm_0">#FFFFE1BD</color>
+    <color name="recording_orb_warm_1">#E6FFB6A3</color>
+    <color name="recording_orb_warm_2">#73EE839F</color>
+    <color name="recording_orb_warm_3">#00EE839F</color>
+
+    <color name="recording_orb_magenta_0">#D9F4BCE0</color>
+    <color name="recording_orb_magenta_1">#A6E3ACCC</color>
+    <color name="recording_orb_magenta_2">#40AABBDC</color>
+    <color name="recording_orb_magenta_3">#00AABBDC</color>
+
+    <color name="recording_orb_ice_0">#CCC6EEFF</color>
+    <color name="recording_orb_ice_1">#8C9CDCF1</color>
+    <color name="recording_orb_ice_2">#408ABFDB</color>
+    <color name="recording_orb_ice_3">#008ABFDB</color>
+
+    <color name="recording_orb_core_0">#D9FFFFFF</color>
+    <color name="recording_orb_core_1">#99F4F7FA</color>
+    <color name="recording_orb_core_2">#26F4F7FA</color>
+    <color name="recording_orb_core_3">#00F4F7FA</color>
+
+    <array name="recording_ribbon_teal">
+        <item>@color/recording_ribbon_teal_0</item>
+        <item>@color/recording_ribbon_teal_1</item>
+        <item>@color/recording_ribbon_teal_2</item>
+        <item>@color/recording_ribbon_teal_3</item>
+    </array>
+    <array name="recording_ribbon_warm">
+        <item>@color/recording_ribbon_warm_0</item>
+        <item>@color/recording_ribbon_warm_1</item>
+        <item>@color/recording_ribbon_warm_2</item>
+        <item>@color/recording_ribbon_warm_3</item>
+    </array>
+    <array name="recording_ribbon_magenta">
+        <item>@color/recording_ribbon_magenta_0</item>
+        <item>@color/recording_ribbon_magenta_1</item>
+        <item>@color/recording_ribbon_magenta_2</item>
+        <item>@color/recording_ribbon_magenta_3</item>
+    </array>
+    <array name="recording_ribbon_base">
+        <item>@color/recording_animation_base</item>
+        <item>@color/recording_animation_base</item>
+    </array>
+    <array name="recording_ribbon_ice">
+        <item>@color/recording_ribbon_ice_0</item>
+        <item>@color/recording_ribbon_ice_1</item>
+        <item>@color/recording_ribbon_ice_2</item>
+        <item>@color/recording_ribbon_ice_3</item>
+    </array>
+    <array name="recording_ribbon_core">
+        <item>@color/recording_ribbon_core_0</item>
+        <item>@color/recording_ribbon_core_1</item>
+        <item>@color/recording_ribbon_core_2</item>
+        <item>@color/recording_ribbon_core_3</item>
+    </array>
+    <array name="recording_ribbon_glow">
+        <item>@color/recording_ribbon_glow_0</item>
+        <item>@color/recording_ribbon_glow_1</item>
+        <item>@color/recording_ribbon_glow_2</item>
+    </array>
+    <array name="recording_orb_glow">
+        <item>@color/recording_orb_glow_0</item>
+        <item>@color/recording_orb_glow_1</item>
+        <item>@color/recording_orb_glow_2</item>
+    </array>
+    <array name="recording_orb_body">
+        <item>@color/recording_animation_base</item>
+        <item>@color/recording_animation_base</item>
+    </array>
+    <array name="recording_orb_teal">
+        <item>@color/recording_orb_teal_0</item>
+        <item>@color/recording_orb_teal_1</item>
+        <item>@color/recording_orb_teal_2</item>
+        <item>@color/recording_orb_teal_3</item>
+    </array>
+    <array name="recording_orb_warm">
+        <item>@color/recording_orb_warm_0</item>
+        <item>@color/recording_orb_warm_1</item>
+        <item>@color/recording_orb_warm_2</item>
+        <item>@color/recording_orb_warm_3</item>
+    </array>
+    <array name="recording_orb_magenta">
+        <item>@color/recording_orb_magenta_0</item>
+        <item>@color/recording_orb_magenta_1</item>
+        <item>@color/recording_orb_magenta_2</item>
+        <item>@color/recording_orb_magenta_3</item>
+    </array>
+    <array name="recording_orb_ice">
+        <item>@color/recording_orb_ice_0</item>
+        <item>@color/recording_orb_ice_1</item>
+        <item>@color/recording_orb_ice_2</item>
+        <item>@color/recording_orb_ice_3</item>
+    </array>
+    <array name="recording_orb_core">
+        <item>@color/recording_orb_core_0</item>
+        <item>@color/recording_orb_core_1</item>
+        <item>@color/recording_orb_core_2</item>
+        <item>@color/recording_orb_core_3</item>
+    </array>
+</resources>
