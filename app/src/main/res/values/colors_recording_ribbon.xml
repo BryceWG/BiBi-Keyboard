@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="recording_animation_base">#FFF9FAFC</color>
+    <color name="recording_animation_base_dark">#FF454A52</color>
 
     <color name="recording_ribbon_teal_0">#FFACF6E3</color>
     <color name="recording_ribbon_teal_1">#FF62DFCE</color>
@@ -34,6 +35,9 @@
     <color name="recording_orb_glow_0">#99E5EAF0</color>
     <color name="recording_orb_glow_1">#33C5D5E5</color>
     <color name="recording_orb_glow_2">#00C5D5E5</color>
+    <color name="recording_orb_glow_dark_0">#997B8693</color>
+    <color name="recording_orb_glow_dark_1">#33606B79</color>
+    <color name="recording_orb_glow_dark_2">#00606B79</color>
 
     <color name="recording_orb_teal_0">#FFACF6E3</color>
     <color name="recording_orb_teal_1">#D962DFCE</color>
@@ -59,6 +63,10 @@
     <color name="recording_orb_core_1">#99F4F7FA</color>
     <color name="recording_orb_core_2">#26F4F7FA</color>
     <color name="recording_orb_core_3">#00F4F7FA</color>
+    <color name="recording_orb_core_dark_0">#D99AA3AC</color>
+    <color name="recording_orb_core_dark_1">#9977818B</color>
+    <color name="recording_orb_core_dark_2">#26515B66</color>
+    <color name="recording_orb_core_dark_3">#00515B66</color>
 
     <array name="recording_ribbon_teal">
         <item>@color/recording_ribbon_teal_0</item>
@@ -104,9 +112,18 @@
         <item>@color/recording_orb_glow_1</item>
         <item>@color/recording_orb_glow_2</item>
     </array>
+    <array name="recording_orb_glow_dark">
+        <item>@color/recording_orb_glow_dark_0</item>
+        <item>@color/recording_orb_glow_dark_1</item>
+        <item>@color/recording_orb_glow_dark_2</item>
+    </array>
     <array name="recording_orb_body">
         <item>@color/recording_animation_base</item>
         <item>@color/recording_animation_base</item>
+    </array>
+    <array name="recording_orb_body_dark">
+        <item>@color/recording_animation_base_dark</item>
+        <item>@color/recording_animation_base_dark</item>
     </array>
     <array name="recording_orb_teal">
         <item>@color/recording_orb_teal_0</item>
@@ -137,5 +154,11 @@
         <item>@color/recording_orb_core_1</item>
         <item>@color/recording_orb_core_2</item>
         <item>@color/recording_orb_core_3</item>
+    </array>
+    <array name="recording_orb_core_dark">
+        <item>@color/recording_orb_core_dark_0</item>
+        <item>@color/recording_orb_core_dark_1</item>
+        <item>@color/recording_orb_core_dark_2</item>
+        <item>@color/recording_orb_core_dark_3</item>
     </array>
 </resources>

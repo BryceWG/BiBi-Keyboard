@@ -14,6 +14,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -62,10 +64,17 @@ internal class RecordingRibbonOverlayView @JvmOverloads constructor(
         val matrix = Matrix()
         var shader: LinearGradient? = null
         val orbMatrix = Matrix()
-        val orbShader = RadialGradient(0f, 0f, 1f, orbColors, null, Shader.TileMode.CLAMP)
+        var orbShader = RadialGradient(0f, 0f, 1f, orbColors, null, Shader.TileMode.CLAMP)
+            private set
         val orbPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
             shader = orbShader
+        }
+
+        fun setOrbColors(colors: IntArray) {
+            orbShader = RadialGradient(0f, 0f, 1f, colors, null, Shader.TileMode.CLAMP)
+            orbShader.setLocalMatrix(orbMatrix)
+            orbPaint.shader = orbShader
         }
     }
 
@@ -166,13 +175,18 @@ internal class RecordingRibbonOverlayView @JvmOverloads constructor(
 
     private val glowColors = colorArray(R.array.recording_ribbon_glow)
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val orbGlowColors = colorArray(R.array.recording_orb_glow)
+    private var orbGlowColors = colorArray(R.array.recording_orb_glow)
     private val orbGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val orbBody = ribbons[3]
 
     // 录音只叠半透明彩色色带；白色基底和高光仅在收成球体时渐入。
     private val shapeLayers = listOf(orbBody, ribbons[0], ribbons[1], ribbons[2], ribbons[4])
     private val orbLayers = shapeLayers + ribbons[5]
+    private val darkRibbonFilter = ColorMatrixColorFilter(
+        ColorMatrix().apply {
+            setScale(DARK_RIBBON_BRIGHTNESS, DARK_RIBBON_BRIGHTNESS, DARK_RIBBON_BRIGHTNESS, 1f)
+        }
+    )
     private val xs = FloatArray(SAMPLE_COUNT)
     private val topXs = FloatArray(SAMPLE_COUNT)
     private val topYs = FloatArray(SAMPLE_COUNT)
@@ -196,12 +210,31 @@ internal class RecordingRibbonOverlayView @JvmOverloads constructor(
     private var exitListener: (() -> Unit)? = null
     private var shaderWidth = 0f
     private var shaderHeight = 0f
+    private var darkTheme = false
 
     init {
         isClickable = false
         isFocusable = false
         importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO
         applyBlur()
+    }
+
+    fun setDarkTheme(isDark: Boolean) {
+        if (darkTheme == isDark) return
+        darkTheme = isDark
+        val ribbonFilter = if (isDark) darkRibbonFilter else null
+        // 只压低录音色带的 RGB，保留 alpha 和球体彩色光团的原有混合。
+        for (ribbon in shapeLayers) {
+            if (ribbon !== orbBody) ribbon.paint.colorFilter = ribbonFilter
+        }
+        glowPaint.colorFilter = ribbonFilter
+        orbBody.setOrbColors(colorArray(if (isDark) R.array.recording_orb_body_dark else R.array.recording_orb_body))
+        ribbons[5].setOrbColors(colorArray(if (isDark) R.array.recording_orb_core_dark else R.array.recording_orb_core))
+        orbGlowColors = colorArray(if (isDark) R.array.recording_orb_glow_dark else R.array.recording_orb_glow)
+        // 让下一帧按现有尺寸重建渐变，不重置动画进度或形态。
+        shaderWidth = 0f
+        shaderHeight = 0f
+        invalidate()
     }
 
     fun beginRecording() {
@@ -708,6 +741,7 @@ internal class RecordingRibbonOverlayView @JvmOverloads constructor(
         private const val LEVEL_ATTACK = 20f
         private const val LEVEL_RELEASE = 4.5f
         private const val WAVE_SPEED_SCALE = 1.2
+        private const val DARK_RIBBON_BRIGHTNESS = 0.82f
         private const val WAVE_PRIMARY = 0.62
         private const val WAVE_SECONDARY = 0.38
         private const val PULSE_FLOOR = 0.78
