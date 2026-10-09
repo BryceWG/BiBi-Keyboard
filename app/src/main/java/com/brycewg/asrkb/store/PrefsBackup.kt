@@ -76,17 +76,16 @@ internal object PrefsBackup {
         o.put(KEY_FLOATING_DOCK_HIDDEN, floatingBallDockHidden)
         o.put(KEY_FLOATING_HOLD_TO_RECORD_ENABLED, floatingBallHoldToRecordEnabled)
         o.put(KEY_FLOATING_DIRECT_DRAG_ENABLED, floatingBallDirectDragEnabled)
-        o.put(KEY_FLOATING_RECORDING_FULLSCREEN_ANIM, floatingBallRecordingFullscreenAnimEnabled)
+        o.put(KEY_FLOATING_RECORDING_SCREEN_ANIM, floatingRecordingScreenAnimEnabled)
+        o.put(KEY_FLOATING_RECORDING_STATUS_TOAST, floatingRecordingStatusToastEnabled)
+        o.put(KEY_FLOATING_RECORDING_STOP_ON_IME_HIDDEN, floatingRecordingStopOnImeHidden)
+        o.put(KEY_FLOATING_RECORDING_FEEDBACK_MODE, floatingRecordingFeedbackMode.id)
         o.put(KEY_FLOATING_ASR_ENABLED, floatingAsrEnabled)
         o.put(KEY_FLOATING_ONLY_WHEN_IME_VISIBLE, floatingSwitcherOnlyWhenImeVisible)
         o.put(KEY_VOLUME_KEY_RECORDING_ENABLED, volumeKeyRecordingEnabled)
         o.put(KEY_VOLUME_KEY_RECORDING_MODE, volumeKeyRecordingMode)
-        o.put(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED, volumeKeyStatusToastEnabled)
-        o.put(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, volumeKeyStopOnImeHidden)
         o.put(KEY_SHAKE_RECORDING_ENABLED, shakeRecordingEnabled)
         o.put(KEY_SHAKE_RECORDING_SENSITIVITY, shakeRecordingSensitivity)
-        o.put(KEY_SHAKE_RECORDING_SOUND_ENABLED, shakeRecordingSoundEnabled)
-        o.put(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, shakeRecordingStopOnImeHidden)
         o.put(KEY_FLOATING_KEEP_ALIVE_ENABLED, floatingKeepAliveEnabled)
         o.put(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED, floatingKeepAlivePrivilegedEnabled)
 
@@ -393,8 +392,35 @@ internal object PrefsBackup {
                 floatingBallHoldToRecordEnabled = it
             }
             optBool(KEY_FLOATING_DIRECT_DRAG_ENABLED)?.let { floatingBallDirectDragEnabled = it }
-            optBool(KEY_FLOATING_RECORDING_FULLSCREEN_ANIM)?.let {
-                floatingBallRecordingFullscreenAnimEnabled = it
+            optBool(KEY_FLOATING_RECORDING_SCREEN_ANIM)?.let {
+                floatingRecordingScreenAnimEnabled = it
+            }
+            (
+                optBool(KEY_FLOATING_RECORDING_STATUS_TOAST)
+                    ?: optBool(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED)
+                )?.let {
+                floatingRecordingStatusToastEnabled = it
+            }
+            val importedFeedbackMode = optString(KEY_FLOATING_RECORDING_FEEDBACK_MODE)
+            if (importedFeedbackMode != null) {
+                floatingRecordingFeedbackMode = Prefs.RecordingFeedbackMode.fromId(importedFeedbackMode)
+            } else {
+                (
+                    optBool(KEY_FLOATING_RECORDING_FEEDBACK)
+                        ?: optBool(KEY_SHAKE_RECORDING_SOUND_ENABLED)
+                    )?.let {
+                    floatingRecordingFeedbackMode = Prefs.RecordingFeedbackMode.fromLegacyEnabled(it)
+                }
+            }
+            val importedStopOnHidden = optBool(KEY_FLOATING_RECORDING_STOP_ON_IME_HIDDEN)
+            val legacyVolumeStop = optBool(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN)
+            val legacyShakeStop = optBool(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN)
+            if (importedStopOnHidden != null) {
+                floatingRecordingStopOnImeHidden = importedStopOnHidden
+            } else if (legacyVolumeStop != null ||
+                legacyShakeStop != null
+            ) {
+                floatingRecordingStopOnImeHidden = (legacyVolumeStop ?: true) && (legacyShakeStop ?: true)
             }
             optBool(KEY_FLOATING_ASR_ENABLED)?.let { floatingAsrEnabled = it }
             optBool(KEY_FLOATING_ONLY_WHEN_IME_VISIBLE)?.let {
@@ -403,12 +429,8 @@ internal object PrefsBackup {
             }
             optBool(KEY_VOLUME_KEY_RECORDING_ENABLED)?.let { volumeKeyRecordingEnabled = it }
             optString(KEY_VOLUME_KEY_RECORDING_MODE)?.let { volumeKeyRecordingMode = it }
-            optBool(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED)?.let { volumeKeyStatusToastEnabled = it }
-            optBool(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN)?.let { volumeKeyStopOnImeHidden = it }
             optBool(KEY_SHAKE_RECORDING_ENABLED)?.let { shakeRecordingEnabled = it }
             optString(KEY_SHAKE_RECORDING_SENSITIVITY)?.let { shakeRecordingSensitivity = it }
-            optBool(KEY_SHAKE_RECORDING_SOUND_ENABLED)?.let { shakeRecordingSoundEnabled = it }
-            optBool(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN)?.let { shakeRecordingStopOnImeHidden = it }
             optBool(KEY_FLOATING_KEEP_ALIVE_ENABLED)?.let { floatingKeepAliveEnabled = it }
             optBool(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED)?.let {
                 floatingKeepAlivePrivilegedEnabled =

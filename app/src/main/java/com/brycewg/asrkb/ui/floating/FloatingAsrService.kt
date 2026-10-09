@@ -570,10 +570,14 @@ class FloatingAsrService : Service() {
         fallbackOnFailure: Boolean?
     ) {
         if (!::visibilityCoordinator.isInitialized) return
+        val previousBridgeVisible = bridgeImeVisible
         bridgeImeVisible = if (result.isSuccess) {
             result.isImeWindowVisible
         } else {
             fallbackOnFailure
+        }
+        if (previousBridgeVisible == true && bridgeImeVisible == false) {
+            interactionController.stopRecordingOnImeWindowHidden()
         }
         applyImeVisibilitySideEffects(src)
     }

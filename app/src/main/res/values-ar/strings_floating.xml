@@ -2,19 +2,20 @@
     <!-- Floating ball related strings -->
 
     <string name="title_floating_settings">طرق إدخال إضافية</string>
-    <string name="section_floating_basic">إعدادات الكرة العائمة</string>
+    <string name="section_floating_basic">إعدادات الكرة العائمة التسجيل</string>
     <string name="section_volume_key_recording">وضع التسجيل بمفاتيح الصوت</string>
-    <string name="section_shake_recording">التسجيل بالهز</string>
+    <string name="section_shake_recording">التسجيل بالهز التسجيل</string>
     <string name="label_shake_recording">هز الهاتف لبدء التسجيل أو إيقافه</string>
     <string name="label_shake_recording_sensitivity">حساسية الهز</string>
-    <string name="label_shake_recording_sound">تنبيه عند بدء التسجيل أو إيقافه</string>
-    <string name="label_shake_recording_stop_on_ime_hidden">إيقاف التسجيل عند اختفاء لوحة المفاتيح</string>
+    <string name="label_floating_recording_feedback">تنبيه عند بدء التسجيل أو إيقافه</string>
+    <string name="section_floating_recording_shared">إعدادات التسجيل المشتركة</string>
+    <string name="toast_need_recording_overlay_perm">امنح إذن العرض فوق التطبيقات لتفعيل الرسوم المتحركة أثناء التسجيل.</string>
     <string name="section_floating_compat">متقدم</string>
     <string name="section_floating_keep_alive">إبقاء التطبيق في الخلفية</string>
     <string name="label_floating_only_when_ime_visible">إظهار الكرة العائمة فقط عند ظهور لوحة المفاتيح</string>
     <string name="label_floating_hold_to_record">اضغط مطوّلاً على الكرة العائمة للتسجيل</string>
     <string name="label_floating_direct_drag">اسحب لتحريك الكرة العائمة</string>
-    <string name="label_floating_recording_fullscreen_anim">عرض رسم متحرك بملء الشاشة أثناء التسجيل</string>
+    <string name="label_floating_recording_screen_anim">عرض رسم متحرك على الشاشة أثناء التسجيل</string>
     <string name="label_floating_alpha">شفافية الكرة العائمة</string>
     <string name="label_floating_size">حجم الكرة العائمة</string>
     <string name="toast_need_overlay_perm">امنح إذن «العرض فوق التطبيقات الأخرى» في إعدادات النظام لتفعيل الكرة العائمة</string>
@@ -74,8 +75,8 @@
     <string name="option_shake_sensitivity_default">افتراضي</string>
     <string name="option_shake_sensitivity_conservative">حساسية منخفضة</string>
     <string name="option_shake_sensitivity_very_conservative">حساسية منخفضة جداً</string>
-    <string name="label_volume_key_status_toast">تذكير بحالة التسجيل</string>
-    <string name="label_volume_key_stop_on_ime_hidden">إيقاف التسجيل عند اختفاء لوحة المفاتيح</string>
+    <string name="label_floating_recording_status_toast">تذكير بحالة التسجيل</string>
+    <string name="label_floating_recording_stop_on_ime_hidden">إيقاف التسجيل عند اختفاء لوحة المفاتيح</string>
     <string name="toast_volume_key_recording_started">بدأ التسجيل</string>
     <string name="toast_volume_key_recording_stopped">توقف التسجيل</string>
     <string name="cd_floating_asr">التعرّف الصوتي عبر الكرة العائمة</string>
@@ -143,22 +144,22 @@
     <string name="feature_floating_direct_drag_on_desc">يمكنك سحب الكرة العائمة مباشرة لإعادة وضعها.</string>
 
     <!-- Floating recording fullscreen animation -->
-    <string name="feature_floating_recording_fullscreen_anim_off_desc">لا يعرض التسجيل بالكرة العائمة رسماً متحركاً بملء الشاشة.</string>
-    <string name="feature_floating_recording_fullscreen_anim_on_desc">أثناء التسجيل بالكرة العائمة، يظهر شريط ملون عبر الشاشة ويتجاوب مع مستوى الصوت، ثم يتحول بعد الإيقاف إلى رسم تحميل حتى ينتهي التعرف. تمر اللمسات إلى ما خلفه. يتطلب إذن العرض فوق التطبيقات.</string>
+    <string name="feature_floating_recording_screen_anim_off_desc">لا تعرض طرق التسجيل بالكرة العائمة ومفاتيح الصوت والهز رسوماً متحركة على الشاشة.</string>
+    <string name="feature_floating_recording_screen_anim_on_desc">تعرض طرق التسجيل الثلاث شريطاً ملوناً يتجاوب مع مستوى الصوت، ثم رسم تحميل حتى ينتهي التعرف. تمر اللمسات إلى ما خلفه. يتطلب إذن العرض فوق التطبيقات.</string>
 
     <!-- Volume key recording -->
     <string name="feature_volume_key_recording_off_desc">تحتفظ مفاتيح الصوت بسلوك النظام العادي ولن تتحكم بالتسجيل.</string>
     <string name="feature_volume_key_recording_on_desc">عند ظهور لوحة المفاتيح، تستمع خدمة إمكانية الوصول لنقرات مفاتيح الصوت لبدء أو إيقاف التعرّف. الضغط المطوّل على مفاتيح الصوت غير مستخدم.</string>
-    <string name="feature_volume_key_status_toast_off_desc">يبدأ التسجيل بمفاتيح الصوت ويتوقف بصمت، باستثناء تنبيهات الأخطاء الحالية.</string>
-    <string name="feature_volume_key_status_toast_on_desc">يعرض تنبيهاً قصيراً عند بدء أو إيقاف التسجيل بنجاح عبر مفاتيح الصوت.</string>
-    <string name="feature_volume_key_stop_on_ime_hidden_off_desc">إن اختفت اللوحة أثناء تسجيل مفاتيح الصوت، يستمر التسجيل حتى توقفه يدوياً.</string>
-    <string name="feature_volume_key_stop_on_ime_hidden_on_desc">إن اختفت اللوحة أثناء تسجيل مفاتيح الصوت، يتوقف التسجيل تلقائياً.</string>
+    <string name="feature_floating_recording_status_toast_off_desc">لا تعرض طرق التسجيل الثلاث تذكيرات عند البدء أو الإيقاف. لا تتأثر تنبيهات الأخطاء.</string>
+    <string name="feature_floating_recording_status_toast_on_desc">تعرض طرق التسجيل بالكرة العائمة ومفاتيح الصوت والهز تنبيهاً قصيراً عند البدء أو الإيقاف.</string>
+    <string name="feature_floating_recording_stop_on_ime_hidden_off_desc">تستمر طرق التسجيل الثلاث عند اختفاء لوحة المفاتيح. تبقى قواعد إيقاف التسجيل الأخرى سارية.</string>
+    <string name="feature_floating_recording_stop_on_ime_hidden_on_desc">تتوقف طرق التسجيل الثلاث عند اختفاء لوحة المفاتيح، باستخدام خدمة إمكانية الوصول أو جسر طريقة الإدخال للكشف عن حالتها.</string>
     <string name="feature_shake_recording_off_desc">هز الهاتف لا يتحكم بالتسجيل.</string>
     <string name="feature_shake_recording_on_desc">عند ظهور لوحة المفاتيح، هز الهاتف مرة لبدء التسجيل ومرة أخرى لإيقافه. تستخدم الميزة خدمة إمكانية الوصول ولا تستجيب عند إخفاء لوحة المفاتيح.</string>
-    <string name="feature_shake_recording_sound_off_desc">لا تشغل صوتاً أو اهتزازاً عند بدء أو إيقاف التسجيل بالهز.</string>
-    <string name="feature_shake_recording_sound_on_desc">تشغل نغمات مختلفة واهتزازاً (مرة خفيفة عند البدء ومرتين أقوى عند الإيقاف) عند بدء أو إيقاف التسجيل بالهز.</string>
-    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">إن اختفت اللوحة أثناء التسجيل بالهز، يستمر التسجيل حتى توقفه يدوياً.</string>
-    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">إن اختفت اللوحة أثناء التسجيل بالهز، يتوقف التسجيل تلقائياً.</string>
+    <string name="option_recording_feedback_off">إيقاف</string>
+    <string name="option_recording_feedback_sound">صوت</string>
+    <string name="option_recording_feedback_vibration">اهتزاز</string>
+    <string name="option_recording_feedback_sound_and_vibration">صوت + اهتزاز</string>
 
     <!-- Floating write compatibility mode -->
     <string name="feature_floating_ime_bridge_off_desc">يوقف قبول كل طلبات الربط عبر Hook. ميزات لوحة المفاتيح الرئيسية والكرة العائمة غير المعتمدة على Hook لا تتأثر.</string>

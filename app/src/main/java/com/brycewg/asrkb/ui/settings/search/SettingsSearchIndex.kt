@@ -160,8 +160,8 @@ object SettingsSearchIndex {
         item(R.string.label_floating_hold_to_record, R.string.section_floating_basic)
         item(R.string.label_floating_direct_drag, R.string.section_floating_basic)
         item(
-            R.string.label_floating_recording_fullscreen_anim,
-            R.string.section_floating_basic,
+            R.string.label_floating_recording_screen_anim,
+            R.string.section_floating_recording_shared,
             "animation",
             "ribbon",
             "动画",
@@ -172,19 +172,11 @@ object SettingsSearchIndex {
         item(R.string.label_reset_floating_position, R.string.section_floating_basic)
         item(R.string.label_volume_key_recording, R.string.section_volume_key_recording, "volume", "音量")
         item(R.string.label_volume_key_recording_mode, R.string.section_volume_key_recording, "volume+", "volume-", "音量+", "音量-")
-        item(R.string.label_volume_key_status_toast, R.string.section_volume_key_recording, "toast", "音量")
-        item(R.string.label_volume_key_stop_on_ime_hidden, R.string.section_volume_key_recording, "volume", "音量", "键盘")
+        item(R.string.label_floating_recording_status_toast, R.string.section_floating_recording_shared, "toast", "提醒")
+        item(R.string.label_floating_recording_stop_on_ime_hidden, R.string.section_floating_recording_shared, "键盘", "消失")
         item(R.string.label_shake_recording, R.string.section_shake_recording, "shake", "摇一摇", "振って")
         item(R.string.label_shake_recording_sensitivity, R.string.section_shake_recording, "shake", "灵敏度", "感度")
-        item(R.string.label_shake_recording_sound, R.string.section_shake_recording, "sound", "提示音", "音", "反馈", "震动", "haptic", "feedback")
-        item(
-            R.string.label_shake_recording_stop_on_ime_hidden,
-            R.string.section_shake_recording,
-            "shake",
-            "摇一摇",
-            "键盘",
-            "消失"
-        )
+        item(R.string.label_floating_recording_feedback, R.string.section_floating_recording_shared, "sound", "声音", "提示音", "反馈", "震动", "haptic", "feedback")
         item(
             R.string.label_floating_a11y_android13_api,
             R.string.section_floating_compat,

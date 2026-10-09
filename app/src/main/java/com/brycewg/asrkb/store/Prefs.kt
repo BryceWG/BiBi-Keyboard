@@ -79,6 +79,23 @@ class Prefs(context: Context) {
         }
     }
 
+    enum class RecordingFeedbackMode(
+        val id: String,
+        val soundEnabled: Boolean,
+        val vibrationEnabled: Boolean
+    ) {
+        OFF("off", false, false),
+        SOUND("sound", true, false),
+        VIBRATION("vibration", false, true),
+        SOUND_AND_VIBRATION("sound_and_vibration", true, true);
+
+        companion object {
+            fun fromId(id: String): RecordingFeedbackMode = entries.first { it.id == id }
+
+            fun fromLegacyEnabled(enabled: Boolean): RecordingFeedbackMode = if (enabled) SOUND_AND_VIBRATION else OFF
+        }
+    }
+
     internal val appContext = context.applicationContext
     private val sp = appContext.getSharedPreferences("asr_prefs", Context.MODE_PRIVATE)
     init {
@@ -590,10 +607,24 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_FLOATING_DIRECT_DRAG_ENABLED, true)
         set(value) = sp.edit { putBoolean(KEY_FLOATING_DIRECT_DRAG_ENABLED, value) }
 
-    // 悬浮球录音时在屏幕上叠加全屏丝带动画
-    var floatingBallRecordingFullscreenAnimEnabled: Boolean
-        get() = sp.getBoolean(KEY_FLOATING_RECORDING_FULLSCREEN_ANIM, false)
-        set(value) = sp.edit { putBoolean(KEY_FLOATING_RECORDING_FULLSCREEN_ANIM, value) }
+    // 悬浮球、音量键、摇一摇共享的录音设置
+    var floatingRecordingScreenAnimEnabled: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_RECORDING_SCREEN_ANIM, false)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_RECORDING_SCREEN_ANIM, value) }
+
+    var floatingRecordingStatusToastEnabled: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_RECORDING_STATUS_TOAST, true)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_RECORDING_STATUS_TOAST, value) }
+
+    var floatingRecordingStopOnImeHidden: Boolean
+        get() = sp.getBoolean(KEY_FLOATING_RECORDING_STOP_ON_IME_HIDDEN, true)
+        set(value) = sp.edit { putBoolean(KEY_FLOATING_RECORDING_STOP_ON_IME_HIDDEN, value) }
+
+    var floatingRecordingFeedbackMode: RecordingFeedbackMode
+        get() = RecordingFeedbackMode.fromId(
+            getPrefString(KEY_FLOATING_RECORDING_FEEDBACK_MODE, RecordingFeedbackMode.OFF.id)
+        )
+        set(value) = sp.edit { putString(KEY_FLOATING_RECORDING_FEEDBACK_MODE, value.id) }
 
     // 悬浮球语音识别模式开关
     var floatingAsrEnabled: Boolean
@@ -614,14 +645,6 @@ class Prefs(context: Context) {
         )
         set(value) = sp.edit { putString(KEY_VOLUME_KEY_RECORDING_MODE, normalizeVolumeKeyRecordingMode(value)) }
 
-    var volumeKeyStatusToastEnabled: Boolean
-        get() = sp.getBoolean(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED, true)
-        set(value) = sp.edit { putBoolean(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED, value) }
-
-    var volumeKeyStopOnImeHidden: Boolean
-        get() = sp.getBoolean(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, true)
-        set(value) = sp.edit { putBoolean(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, value) }
-
     // 无障碍摇一摇录音：仅在输入法场景活跃时响应，并复用悬浮录音 toggle。
     var shakeRecordingEnabled: Boolean
         get() = sp.getBoolean(KEY_SHAKE_RECORDING_ENABLED, false)
@@ -637,14 +660,6 @@ class Prefs(context: Context) {
                 ShakeRecordingSensitivity.fromId(value).id
             )
         }
-
-    var shakeRecordingSoundEnabled: Boolean
-        get() = sp.getBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, false)
-        set(value) = sp.edit { putBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, value) }
-
-    var shakeRecordingStopOnImeHidden: Boolean
-        get() = sp.getBoolean(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, true)
-        set(value) = sp.edit { putBoolean(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, value) }
 
     // 悬浮球：前台保活开关
     var floatingKeepAliveEnabled: Boolean

@@ -51,6 +51,7 @@ internal object PrefsInitTasks {
 
     fun run(appContext: Context, sp: SharedPreferences) {
         registerGlobalToggleListenerIfNeeded(sp)
+        migrateFloatingRecordingSettings(sp)
         migrateRecordingAutoStopModeIfNeeded(sp)
         migrateOnboardingGuideStateIfNeeded(sp)
         migrateTeleSpeechToFireRedAsrIfNeeded(sp)
@@ -113,6 +114,45 @@ internal object PrefsInitTasks {
             }
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to migrate SyncClipboard receive mode", t)
+        }
+    }
+
+    private fun migrateFloatingRecordingSettings(sp: SharedPreferences) {
+        val legacyKeys = listOf(
+            KEY_VOLUME_KEY_STATUS_TOAST_ENABLED,
+            KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN,
+            KEY_SHAKE_RECORDING_SOUND_ENABLED,
+            KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN,
+            KEY_FLOATING_RECORDING_FEEDBACK
+        )
+        if (legacyKeys.none { sp.contains(it) }) return
+        sp.edit {
+            if (!sp.contains(KEY_FLOATING_RECORDING_STATUS_TOAST)) {
+                putBoolean(
+                    KEY_FLOATING_RECORDING_STATUS_TOAST,
+                    sp.getBoolean(KEY_VOLUME_KEY_STATUS_TOAST_ENABLED, true)
+                )
+            }
+            if (!sp.contains(KEY_FLOATING_RECORDING_STOP_ON_IME_HIDDEN)) {
+                // 合并两个旧开关时，保留用户关闭自动停录的选择。
+                putBoolean(
+                    KEY_FLOATING_RECORDING_STOP_ON_IME_HIDDEN,
+                    sp.getBoolean(KEY_VOLUME_KEY_STOP_ON_IME_HIDDEN, true) &&
+                        sp.getBoolean(KEY_SHAKE_RECORDING_STOP_ON_IME_HIDDEN, true)
+                )
+            }
+            if (!sp.contains(KEY_FLOATING_RECORDING_FEEDBACK_MODE)) {
+                val enabled = if (sp.contains(KEY_FLOATING_RECORDING_FEEDBACK)) {
+                    sp.getBoolean(KEY_FLOATING_RECORDING_FEEDBACK, false)
+                } else {
+                    sp.getBoolean(KEY_SHAKE_RECORDING_SOUND_ENABLED, false)
+                }
+                putString(
+                    KEY_FLOATING_RECORDING_FEEDBACK_MODE,
+                    Prefs.RecordingFeedbackMode.fromLegacyEnabled(enabled).id
+                )
+            }
+            legacyKeys.forEach { remove(it) }
         }
     }
 

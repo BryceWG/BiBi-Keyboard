@@ -2,19 +2,20 @@
     <!-- 懸浮球相關字串 - Floating ball related strings -->
 
     <string name="title_floating_settings">更多輸入方式</string>
-    <string name="section_floating_basic">懸浮球設定</string>
+    <string name="section_floating_basic">懸浮球錄音模式</string>
     <string name="section_volume_key_recording">音量鍵錄音模式</string>
-    <string name="section_shake_recording">搖一搖錄音</string>
+    <string name="section_shake_recording">搖一搖錄音模式</string>
     <string name="label_shake_recording">搖一搖開始或停止錄音</string>
     <string name="label_shake_recording_sensitivity">搖一搖靈敏度</string>
-    <string name="label_shake_recording_sound">開始或停止錄音時回饋</string>
-    <string name="label_shake_recording_stop_on_ime_hidden">鍵盤消失時停止錄音</string>
+    <string name="label_floating_recording_feedback">開始或停止錄音時回饋</string>
+    <string name="section_floating_recording_shared">共用錄音設定</string>
+    <string name="toast_need_recording_overlay_perm">請授予「顯示在其他應用程式上層」權限以啟用錄音螢幕動畫。</string>
     <string name="section_floating_compat">進階功能</string>
     <string name="section_floating_keep_alive">背景保活</string>
     <string name="label_floating_only_when_ime_visible">僅在鍵盤顯示時顯示懸浮球</string>
     <string name="label_floating_hold_to_record">長按懸浮球錄音</string>
     <string name="label_floating_direct_drag">直接拖動移動懸浮球</string>
-    <string name="label_floating_recording_fullscreen_anim">錄音時顯示全螢幕動畫</string>
+    <string name="label_floating_recording_screen_anim">錄音時顯示螢幕動畫</string>
     <string name="label_floating_alpha">懸浮球透明度</string>
     <string name="label_floating_size">懸浮球大小</string>
     <string name="toast_need_overlay_perm">請在系統設定中授予「在其他應用程式上層顯示」權限以啟用懸浮球</string>
@@ -74,8 +75,8 @@
     <string name="option_shake_sensitivity_default">預設</string>
     <string name="option_shake_sensitivity_conservative">保守</string>
     <string name="option_shake_sensitivity_very_conservative">非常保守</string>
-    <string name="label_volume_key_status_toast">錄音狀態提醒</string>
-    <string name="label_volume_key_stop_on_ime_hidden">鍵盤消失時停止錄音</string>
+    <string name="label_floating_recording_status_toast">錄音狀態提醒</string>
+    <string name="label_floating_recording_stop_on_ime_hidden">鍵盤消失時停止錄音</string>
     <string name="toast_volume_key_recording_started">已開始錄音</string>
     <string name="toast_volume_key_recording_stopped">已停止錄音</string>
     <string name="cd_floating_asr">懸浮球語音識別</string>
@@ -143,22 +144,22 @@
     <string name="feature_floating_direct_drag_on_desc">可直接拖動懸浮球調整位置。</string>
 
     <!-- 懸浮球錄音全螢幕動畫 -->
-    <string name="feature_floating_recording_fullscreen_anim_off_desc">懸浮球錄音時不顯示全螢幕動畫。</string>
-    <string name="feature_floating_recording_fullscreen_anim_on_desc">懸浮球錄音時在其他應用程式上方播放彩色絲帶動畫，並隨音量變化。停止後變為載入動畫，直到識別結束。觸控會穿透到背後，需要懸浮窗權限。</string>
+    <string name="feature_floating_recording_screen_anim_off_desc">懸浮球、音量鍵和搖一搖錄音時均不顯示螢幕動畫。</string>
+    <string name="feature_floating_recording_screen_anim_on_desc">懸浮球、音量鍵和搖一搖錄音時均播放隨音量變化的彩色絲帶動畫，停止後變為載入動畫，直到辨識結束。觸控會穿透到背後，需要懸浮窗權限。</string>
 
     <!-- 音量鍵錄音模式 -->
     <string name="feature_volume_key_recording_off_desc">音量鍵保持系統預設行為，不用於控制錄音。</string>
     <string name="feature_volume_key_recording_on_desc">當鍵盤顯示時，無障礙服務會監聽音量鍵點擊，用於開始或停止語音識別。不監聽不穩定的音量鍵長按。</string>
-    <string name="feature_volume_key_status_toast_off_desc">音量鍵錄音開始和停止時不額外提示，現有錯誤提示不受影響。</string>
-    <string name="feature_volume_key_status_toast_on_desc">使用音量鍵成功開始或停止錄音時，顯示短 Toast 提示。</string>
-    <string name="feature_volume_key_stop_on_ime_hidden_off_desc">音量鍵錄音期間如果鍵盤消失，錄音會繼續，直到你手動停止。</string>
-    <string name="feature_volume_key_stop_on_ime_hidden_on_desc">音量鍵錄音期間如果鍵盤消失，會自動停止錄音。</string>
+    <string name="feature_floating_recording_status_toast_off_desc">懸浮球、音量鍵和搖一搖錄音開始和停止時均不額外提示，錯誤提示不受影響。</string>
+    <string name="feature_floating_recording_status_toast_on_desc">懸浮球、音量鍵和搖一搖錄音開始或停止時均顯示短 Toast 提示。</string>
+    <string name="feature_floating_recording_stop_on_ime_hidden_off_desc">懸浮球、音量鍵和搖一搖錄音不會因鍵盤消失而停止，其他錄音判停規則仍生效。</string>
+    <string name="feature_floating_recording_stop_on_ime_hidden_on_desc">懸浮球、音量鍵和搖一搖錄音期間，鍵盤消失時均自動停止錄音。鍵盤狀態透過無障礙服務或輸入法橋接偵測。</string>
     <string name="feature_shake_recording_off_desc">搖動手機不會控制錄音。</string>
     <string name="feature_shake_recording_on_desc">鍵盤顯示時，搖動一次手機開始錄音，再搖一次停止錄音。功能透過無障礙服務運作，鍵盤隱藏時不會觸發。</string>
-    <string name="feature_shake_recording_sound_off_desc">搖一搖錄音開始或停止時不播放提示音，也不震動。</string>
-    <string name="feature_shake_recording_sound_on_desc">搖一搖錄音開始或停止時播放不同提示音，並震動（開始輕震 1 次，停止重震 2 次）。</string>
-    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">搖一搖錄音期間如果鍵盤消失，錄音會繼續，直到你手動停止。</string>
-    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">搖一搖錄音期間如果鍵盤消失，會自動停止錄音。</string>
+    <string name="option_recording_feedback_off">關閉</string>
+    <string name="option_recording_feedback_sound">聲音</string>
+    <string name="option_recording_feedback_vibration">震動</string>
+    <string name="option_recording_feedback_sound_and_vibration">聲音+震動</string>
 
     <!-- 懸浮球寫入文字相容性模式 -->
     <string name="feature_floating_ime_bridge_off_desc">停止接受所有 Hook 聯動請求；主鍵盤與懸浮球的非 Hook 功能不受影響。</string>

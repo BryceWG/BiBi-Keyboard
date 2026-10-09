@@ -454,7 +454,7 @@ class AsrAccessibilityService :
     /**
      * 键盘窗口可见性边沿（与 holdByFocus 解耦）。
      * 场景活跃会因焦点 hold 在窗口消失后仍保持 true；
-     * 音量键/摇一摇「键盘消失停录」以 TYPE_INPUT_METHOD 窗口消失为边沿。
+     * 更多输入方式共享的「键盘消失停录」以 TYPE_INPUT_METHOD 窗口消失为边沿。
      */
     private fun maybeDispatchImeWindowHiddenStop(winVisible: Boolean) {
         val prev = lastImeWindowVisible

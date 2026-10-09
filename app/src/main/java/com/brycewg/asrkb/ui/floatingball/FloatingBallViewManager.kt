@@ -751,7 +751,7 @@ class FloatingBallViewManager(
         stateAlphaAnimator = null
     }
 
-    private fun syncRecordingRibbon(state: FloatingBallState) {
+    internal fun syncRecordingRibbon(state: FloatingBallState) {
         val enabled = readRecordingRibbonEnabled()
         val show = enabled &&
             (state is FloatingBallState.Recording || state is FloatingBallState.Processing)
@@ -769,7 +769,7 @@ class FloatingBallViewManager(
     }
 
     private fun readRecordingRibbonEnabled(): Boolean = try {
-        prefs.floatingBallRecordingFullscreenAnimEnabled
+        prefs.floatingRecordingScreenAnimEnabled
     } catch (e: Throwable) {
         Log.w(TAG, "Failed to read recording ribbon preference", e)
         false

@@ -3,19 +3,20 @@
     <!-- フローティングボール関連文字列 - Floating ball related strings -->
 
     <string name="title_floating_settings">その他の入力方法</string>
-    <string name="section_floating_basic">フローティングボール設定</string>
+    <string name="section_floating_basic">フローティングボール録音モード</string>
     <string name="section_volume_key_recording">音量キー録音モード</string>
-    <string name="section_shake_recording">振って録音</string>
+    <string name="section_shake_recording">振って録音モード</string>
     <string name="label_shake_recording">振って録音を開始／停止</string>
     <string name="label_shake_recording_sensitivity">振る感度</string>
-    <string name="label_shake_recording_sound">録音の開始／停止時にフィードバック</string>
-    <string name="label_shake_recording_stop_on_ime_hidden">キーボード非表示時に録音を停止</string>
+    <string name="label_floating_recording_feedback">録音の開始／停止時にフィードバック</string>
+    <string name="section_floating_recording_shared">共通の録音設定</string>
+    <string name="toast_need_recording_overlay_perm">録音中の画面アニメーションには、他のアプリの上に表示する権限が必要です。</string>
     <string name="section_floating_compat">高度な機能</string>
     <string name="section_floating_keep_alive">バックグラウンド保活</string>
     <string name="label_floating_only_when_ime_visible">キーボード表示時のみフローティングボールを表示する</string>
     <string name="label_floating_hold_to_record">フローティングボールを長押しして録音</string>
     <string name="label_floating_direct_drag">直接ドラッグでフローティングボールを移動</string>
-    <string name="label_floating_recording_fullscreen_anim">録音中に全画面アニメーションを表示</string>
+    <string name="label_floating_recording_screen_anim">録音中に画面アニメーションを表示</string>
     <string name="label_floating_alpha">フローティングボールの透明度</string>
     <string name="label_floating_size">フローティングボールのサイズ</string>
     <string name="toast_need_overlay_perm">フローティングボールを有効にするには、システム設定で「他のアプリの上に表示」を許可してください</string>
@@ -75,8 +76,8 @@
     <string name="option_shake_sensitivity_default">標準</string>
     <string name="option_shake_sensitivity_conservative">控えめ</string>
     <string name="option_shake_sensitivity_very_conservative">非常に控えめ</string>
-    <string name="label_volume_key_status_toast">録音状態の通知</string>
-    <string name="label_volume_key_stop_on_ime_hidden">キーボード非表示時に録音を停止</string>
+    <string name="label_floating_recording_status_toast">録音状態の通知</string>
+    <string name="label_floating_recording_stop_on_ime_hidden">キーボード非表示時に録音を停止</string>
     <string name="toast_volume_key_recording_started">録音を開始しました</string>
     <string name="toast_volume_key_recording_stopped">録音を停止しました</string>
     <string name="cd_floating_asr">フローティングボール音声認識</string>
@@ -144,22 +145,22 @@
     <string name="feature_floating_direct_drag_on_desc">フローティングボールを直接ドラッグして移動できます。</string>
 
     <!-- 録音中の全画面アニメーション -->
-    <string name="feature_floating_recording_fullscreen_anim_off_desc">フローティングボールの録音中は全画面アニメーションを表示しません。</string>
-    <string name="feature_floating_recording_fullscreen_anim_on_desc">フローティングボールの録音中、画面上にカラーリボンを表示し、音量に合わせて動かします。停止後は認識が終わるまで読み込みアニメーションになります。タッチは背面へ通り抜けます。オーバーレイ権限が必要です。</string>
+    <string name="feature_floating_recording_screen_anim_off_desc">フローティングボール、音量キー、振って録音のいずれでも画面アニメーションを表示しません。</string>
+    <string name="feature_floating_recording_screen_anim_on_desc">3つの録音方式すべてで音量に反応するカラーリボンを表示し、停止後は認識終了まで読み込みアニメーションになります。タッチは背面へ通り抜けます。オーバーレイ権限が必要です。</string>
 
     <!-- 音量キー録音 -->
     <string name="feature_volume_key_recording_off_desc">音量キーは通常のシステム動作のままで、録音操作には使われません。</string>
     <string name="feature_volume_key_recording_on_desc">キーボード表示中、アクセシビリティサービスが音量キーのクリックを監視し、音声認識の開始または停止に使用します。不安定な音量キー長押しは使用しません。</string>
-    <string name="feature_volume_key_status_toast_off_desc">音量キー録音の開始と停止は追加通知なしで行います。既存のエラー通知には影響しません。</string>
-    <string name="feature_volume_key_status_toast_on_desc">音量キーで録音の開始または停止に成功したとき、短い Toast を表示します。</string>
-    <string name="feature_volume_key_stop_on_ime_hidden_off_desc">音量キー録音中にキーボードが消えても、手動で停止するまで録音を続けます。</string>
-    <string name="feature_volume_key_stop_on_ime_hidden_on_desc">音量キー録音中にキーボードが消えると、自動的に録音を停止します。</string>
+    <string name="feature_floating_recording_status_toast_off_desc">3つの録音方式すべてで開始と停止の追加通知を表示しません。エラー通知には影響しません。</string>
+    <string name="feature_floating_recording_status_toast_on_desc">フローティングボール、音量キー、振って録音の開始と停止時に短い Toast を表示します。</string>
+    <string name="feature_floating_recording_stop_on_ime_hidden_off_desc">3つの録音方式すべてでキーボードが消えても録音を続けます。他の録音停止ルールは引き続き適用されます。</string>
+    <string name="feature_floating_recording_stop_on_ime_hidden_on_desc">3つの録音方式すべてでキーボードが消えると録音を停止します。キーボードの状態はユーザー補助サービスまたは入力メソッドブリッジで検出します。</string>
     <string name="feature_shake_recording_off_desc">スマートフォンを振っても録音を操作しません。</string>
     <string name="feature_shake_recording_on_desc">キーボード表示中にスマートフォンを振ると録音を開始し、もう一度振ると停止します。アクセシビリティサービスを使用し、キーボード非表示時は反応しません。</string>
-    <string name="feature_shake_recording_sound_off_desc">振って録音を開始または停止するとき、音もバイブレーションも出しません。</string>
-    <string name="feature_shake_recording_sound_on_desc">振って録音を開始または停止するとき、異なる通知音を再生し、バイブレーションします（開始は軽い1回、停止は強い2回）。</string>
-    <string name="feature_shake_recording_stop_on_ime_hidden_off_desc">振って録音中にキーボードが消えても、手動で停止するまで録音を続けます。</string>
-    <string name="feature_shake_recording_stop_on_ime_hidden_on_desc">振って録音中にキーボードが消えると、自動的に録音を停止します。</string>
+    <string name="option_recording_feedback_off">オフ</string>
+    <string name="option_recording_feedback_sound">サウンド</string>
+    <string name="option_recording_feedback_vibration">バイブレーション</string>
+    <string name="option_recording_feedback_sound_and_vibration">サウンド＋バイブレーション</string>
 
     <!-- フローティング書き込み互換モード -->
     <string name="feature_floating_ime_bridge_off_desc">すべての Hook 連携リクエストの受付を停止します。メインキーボードとフローティングボールの非 Hook 機能には影響しません。</string>

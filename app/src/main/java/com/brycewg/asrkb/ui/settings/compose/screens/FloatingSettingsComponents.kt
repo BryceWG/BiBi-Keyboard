@@ -7,32 +7,19 @@
 
 package com.brycewg.asrkb.ui.settings.compose.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.RestartAlt
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsActionButton
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsDetailScaffold
@@ -45,8 +32,6 @@ import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.settings.compose.model.SettingsEntry
 import kotlin.math.roundToInt
-import top.yukonga.miuix.kmp.basic.Card as MiuixCard
-import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 @Composable
 internal fun FloatingScaffold(
@@ -71,99 +56,6 @@ internal fun FloatingSection(
     SettingsSectionContainer(uiMode = uiMode, titleRes = titleRes) {
         content()
     }
-}
-
-@Composable
-internal fun FloatingPreviewCard(
-    uiMode: BibiUiMode,
-    enabled: Boolean,
-    alphaPercent: Float,
-    sizeDp: Int
-) {
-    val alpha = if (enabled) (alphaPercent / 100f).coerceIn(0.2f, 1f) else 0.38f
-    when (uiMode) {
-        BibiUiMode.Material -> Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(SettingsLayoutMetrics.MaterialSectionShape),
-            color = MaterialTheme.colorScheme.surfaceColorAtElevation(SettingsLayoutMetrics.MaterialSectionElevation),
-            contentColor = MaterialTheme.colorScheme.onSurface
-        ) {
-            FloatingPreviewContent(
-                uiMode = uiMode,
-                enabled = enabled,
-                alpha = alpha,
-                sizeDp = sizeDp
-            )
-        }
-
-        BibiUiMode.Miuix -> MiuixCard(modifier = Modifier.fillMaxWidth()) {
-            FloatingPreviewContent(
-                uiMode = uiMode,
-                enabled = enabled,
-                alpha = alpha,
-                sizeDp = sizeDp
-            )
-        }
-    }
-}
-
-@Composable
-private fun FloatingPreviewContent(
-    uiMode: BibiUiMode,
-    enabled: Boolean,
-    alpha: Float,
-    sizeDp: Int
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(128.dp)
-            .padding(20.dp)
-            .background(
-                color = when (uiMode) {
-                    BibiUiMode.Material -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
-                    BibiUiMode.Miuix -> MiuixTheme.colorScheme.surfaceVariant.copy(alpha = 0.42f)
-                },
-                shape = RoundedCornerShape(22.dp)
-            )
-            .padding(horizontal = 20.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        FloatingPreviewBall(
-            uiMode = uiMode,
-            enabled = enabled,
-            alpha = alpha,
-            sizeDp = sizeDp
-        )
-    }
-}
-
-@Composable
-private fun FloatingPreviewBall(
-    uiMode: BibiUiMode,
-    enabled: Boolean,
-    alpha: Float,
-    sizeDp: Int,
-    modifier: Modifier = Modifier
-) {
-    val ballSize = sizeDp.coerceIn(28, 96).dp
-    val tint = when (uiMode) {
-        BibiUiMode.Material -> {
-            if (enabled) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
-        }
-
-        BibiUiMode.Miuix -> {
-            if (enabled) MiuixTheme.colorScheme.secondary else MiuixTheme.colorScheme.outline
-        }
-    }
-    Image(
-        painter = painterResource(R.drawable.microphone_floatingball),
-        contentDescription = null,
-        modifier = modifier
-            .size(ballSize)
-            .alpha(alpha),
-        colorFilter = ColorFilter.tint(tint)
-    )
 }
 
 @Composable

@@ -35,18 +35,18 @@ import com.brycewg.asrkb.ui.AsrAccessibilityService
 import com.brycewg.asrkb.ui.floating.FloatingServiceManager
 import com.brycewg.asrkb.ui.floating.floatingAsrNeedsAccessibility as policyFloatingAsrNeedsAccessibility
 import com.brycewg.asrkb.ui.floating.floatingInputNeedsAccessibility as policyFloatingInputNeedsAccessibility
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheet
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsLazyColumn
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
-import com.brycewg.asrkb.ui.settings.compose.components.settingsChoiceSheetState
+import com.brycewg.asrkb.ui.settings.compose.components.SettingsPreference
 import com.brycewg.asrkb.ui.settings.compose.components.settingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsActionController
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
+import com.brycewg.asrkb.ui.settings.compose.model.DropdownOption
+import com.brycewg.asrkb.ui.settings.compose.model.SettingsEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -90,7 +90,6 @@ fun FloatingSettingsScreen(
     var pendingVolumeKeyEnable by remember { mutableStateOf(false) }
     var pendingShakeEnable by remember { mutableStateOf(false) }
     var autoAccessibilityRequested by remember { mutableStateOf(false) }
-    var choiceSheet by remember { mutableStateOf<SettingsChoiceSheetState?>(null) }
     var featureExplainerDialog by remember { mutableStateOf<SettingsFeatureExplainerDialogState?>(null) }
     var messageDialog by remember { mutableStateOf<SettingsMessageDialogState?>(null) }
     val latestCompatPackages by rememberUpdatedState(compatPackages)
@@ -409,23 +408,14 @@ fun FloatingSettingsScreen(
         }
     )
 
-    fun showVolumeKeyModeSheet() {
-        val modes = listOf(
-            Prefs.VOLUME_KEY_MODE_UP_TOGGLE,
-            Prefs.VOLUME_KEY_MODE_DOWN_TOGGLE,
-            Prefs.VOLUME_KEY_MODE_UP_START_DOWN_STOP,
-            Prefs.VOLUME_KEY_MODE_DOWN_START_UP_STOP
-        )
-        val selectedIndex = modes.indexOf(uiState.volumeKeyRecordingMode).takeIf { it >= 0 } ?: 0
-        choiceSheet = settingsChoiceSheetState(
-            title = context.getString(R.string.label_volume_key_recording_mode),
-            items = modes.map { volumeKeyModeLabel(it) },
-            selectedIndex = selectedIndex
-        ) { index ->
-            prefs.volumeKeyRecordingMode = modes.getOrElse(index) { Prefs.VOLUME_KEY_MODE_UP_TOGGLE }
-            refreshState()
+    fun recordingFeedbackLabel(mode: Prefs.RecordingFeedbackMode): String = context.getString(
+        when (mode) {
+            Prefs.RecordingFeedbackMode.OFF -> R.string.option_recording_feedback_off
+            Prefs.RecordingFeedbackMode.SOUND -> R.string.option_recording_feedback_sound
+            Prefs.RecordingFeedbackMode.VIBRATION -> R.string.option_recording_feedback_vibration
+            Prefs.RecordingFeedbackMode.SOUND_AND_VIBRATION -> R.string.option_recording_feedback_sound_and_vibration
         }
-    }
+    )
 
     fun shakeSensitivityLabel(id: String): String = context.getString(
         when (Prefs.ShakeRecordingSensitivity.fromId(id)) {
@@ -440,29 +430,7 @@ fun FloatingSettingsScreen(
         }
     )
 
-    fun showShakeSensitivitySheet() {
-        val sensitivities = Prefs.ShakeRecordingSensitivity.entries
-        val selectedIndex = sensitivities.indexOfFirst {
-            it.id == uiState.shakeRecordingSensitivity
-        }.takeIf { it >= 0 } ?: sensitivities.indexOf(Prefs.ShakeRecordingSensitivity.DEFAULT)
-        choiceSheet = settingsChoiceSheetState(
-            title = context.getString(R.string.label_shake_recording_sensitivity),
-            items = sensitivities.map { shakeSensitivityLabel(it.id) },
-            selectedIndex = selectedIndex
-        ) { index ->
-            prefs.shakeRecordingSensitivity = sensitivities.getOrElse(index) {
-                Prefs.ShakeRecordingSensitivity.DEFAULT
-            }.id
-            refreshState()
-        }
-    }
-
     FloatingScaffold(uiMode = uiMode, onBack = onBack) { innerPadding, scrollModifier ->
-        SettingsChoiceSheet(
-            state = choiceSheet,
-            uiMode = uiMode,
-            onDismiss = { choiceSheet = null }
-        )
         SettingsFeatureExplainerDialog(
             state = featureExplainerDialog,
             uiMode = uiMode,
@@ -480,18 +448,89 @@ fun FloatingSettingsScreen(
             contentPadding = SettingsLayoutMetrics.pageContentPadding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(SettingsLayoutMetrics.SectionSpacing)
         ) {
-            item("preview") {
-                FloatingPreviewCard(
-                    uiMode = uiMode,
-                    enabled = uiState.asrEnabled,
-                    alphaPercent = uiState.alphaPercent,
-                    sizeDp = uiState.sizeDp
-                )
+            item("shared_recording") {
+                FloatingSection(uiMode = uiMode, titleRes = R.string.section_floating_recording_shared) {
+                    FloatingExplainedSwitch(
+                        id = "floating_recording_stop_on_ime_hidden",
+                        titleRes = R.string.label_floating_recording_stop_on_ime_hidden,
+                        checked = uiState.floatingRecordingStopOnImeHidden,
+                        onToggle = { target ->
+                            applyExplainedSwitch(
+                                current = uiState.floatingRecordingStopOnImeHidden,
+                                target = target,
+                                titleRes = R.string.label_floating_recording_stop_on_ime_hidden,
+                                offDescRes = R.string.feature_floating_recording_stop_on_ime_hidden_off_desc,
+                                onDescRes = R.string.feature_floating_recording_stop_on_ime_hidden_on_desc,
+                                preferenceKey = "floating_recording_stop_on_ime_hidden_explained"
+                            ) { prefs.floatingRecordingStopOnImeHidden = it }
+                        },
+                        index = 0,
+                        count = 4
+                    )
+                    FloatingExplainedSwitch(
+                        id = "floating_recording_status_toast",
+                        titleRes = R.string.label_floating_recording_status_toast,
+                        checked = uiState.floatingRecordingStatusToastEnabled,
+                        onToggle = { target ->
+                            applyExplainedSwitch(
+                                current = uiState.floatingRecordingStatusToastEnabled,
+                                target = target,
+                                titleRes = R.string.label_floating_recording_status_toast,
+                                offDescRes = R.string.feature_floating_recording_status_toast_off_desc,
+                                onDescRes = R.string.feature_floating_recording_status_toast_on_desc,
+                                preferenceKey = "floating_recording_status_toast_explained"
+                            ) { prefs.floatingRecordingStatusToastEnabled = it }
+                        },
+                        index = 1,
+                        count = 4
+                    )
+                    FloatingExplainedSwitch(
+                        id = "floating_recording_screen_anim",
+                        titleRes = R.string.label_floating_recording_screen_anim,
+                        checked = uiState.recordingScreenAnimEnabled,
+                        onToggle = { target ->
+                            applyExplainedSwitch(
+                                current = uiState.recordingScreenAnimEnabled,
+                                target = target,
+                                titleRes = R.string.label_floating_recording_screen_anim,
+                                offDescRes = R.string.feature_floating_recording_screen_anim_off_desc,
+                                onDescRes = R.string.feature_floating_recording_screen_anim_on_desc,
+                                preferenceKey = "floating_recording_screen_anim_explained"
+                            ) { enabled ->
+                                if (enabled && !Settings.canDrawOverlays(context)) {
+                                    showFloatingMessage(R.string.toast_need_recording_overlay_perm)
+                                    requestOverlayPermission()
+                                } else {
+                                    prefs.floatingRecordingScreenAnimEnabled = enabled
+                                    serviceManager.refreshAsrService(uiState.asrEnabled)
+                                }
+                            }
+                        },
+                        index = 2,
+                        count = 4
+                    )
+                    SettingsPreference(
+                        entry = SettingsEntry.Dropdown(
+                            id = "floating_recording_feedback",
+                            titleRes = R.string.label_floating_recording_feedback,
+                            options = Prefs.RecordingFeedbackMode.entries.map {
+                                DropdownOption(it.id, recordingFeedbackLabel(it))
+                            },
+                            selectedOptionId = uiState.floatingRecordingFeedbackMode.id,
+                            onSelectedOptionChange = { id ->
+                                prefs.floatingRecordingFeedbackMode = Prefs.RecordingFeedbackMode.fromId(id)
+                                refreshState()
+                            }
+                        ),
+                        index = 3,
+                        count = 4
+                    )
+                }
             }
 
             item("basic") {
                 FloatingSection(uiMode = uiMode, titleRes = R.string.section_floating_basic) {
-                    val basicItemCount = if (uiState.asrEnabled) 7 else 1
+                    val basicItemCount = if (uiState.asrEnabled) 6 else 1
                     FloatingExplainedSwitch(
                         id = "floating_asr",
                         titleRes = R.string.label_floating_asr,
@@ -569,23 +608,6 @@ fun FloatingSettingsScreen(
                             index = 3,
                             count = basicItemCount
                         )
-                        FloatingExplainedSwitch(
-                            id = "floating_recording_fullscreen_anim",
-                            titleRes = R.string.label_floating_recording_fullscreen_anim,
-                            checked = uiState.recordingFullscreenAnimEnabled,
-                            onToggle = { target ->
-                                applyExplainedSwitch(
-                                    current = uiState.recordingFullscreenAnimEnabled,
-                                    target = target,
-                                    titleRes = R.string.label_floating_recording_fullscreen_anim,
-                                    offDescRes = R.string.feature_floating_recording_fullscreen_anim_off_desc,
-                                    onDescRes = R.string.feature_floating_recording_fullscreen_anim_on_desc,
-                                    preferenceKey = "floating_recording_fullscreen_anim_explained"
-                                ) { prefs.floatingBallRecordingFullscreenAnimEnabled = it }
-                            },
-                            index = 4,
-                            count = basicItemCount
-                        )
                         FloatingSliderPreference(
                             titleRes = R.string.label_floating_alpha,
                             valueLabel = { "${it.roundFloatingToStep(5).toInt()}%" },
@@ -593,7 +615,7 @@ fun FloatingSettingsScreen(
                             valueRange = 30f..100f,
                             step = 5,
                             uiMode = uiMode,
-                            index = 5,
+                            index = 4,
                             count = basicItemCount,
                             onValueChange = { value ->
                                 uiState = uiState.copy(alphaPercent = value.roundFloatingToStep(5))
@@ -612,7 +634,7 @@ fun FloatingSettingsScreen(
                             valueRange = 28f..96f,
                             step = 4,
                             uiMode = uiMode,
-                            index = 6,
+                            index = 5,
                             count = basicItemCount,
                             onValueChange = { value ->
                                 uiState = uiState.copy(sizeDp = value.roundFloatingToStep(4).toInt().coerceIn(28, 96))
@@ -643,7 +665,7 @@ fun FloatingSettingsScreen(
 
             item("volume_key") {
                 FloatingSection(uiMode = uiMode, titleRes = R.string.section_volume_key_recording) {
-                    val volumeItemCount = if (uiState.volumeKeyRecordingEnabled) 4 else 1
+                    val volumeItemCount = if (uiState.volumeKeyRecordingEnabled) 2 else 1
                     FloatingExplainedSwitch(
                         id = "volume_key_recording",
                         titleRes = R.string.label_volume_key_recording,
@@ -662,48 +684,23 @@ fun FloatingSettingsScreen(
                         count = volumeItemCount
                     )
                     if (uiState.volumeKeyRecordingEnabled) {
-                        FloatingValuePreference(
-                            titleRes = R.string.label_volume_key_recording_mode,
-                            value = volumeKeyModeLabel(uiState.volumeKeyRecordingMode),
-                            uiMode = uiMode,
+                        SettingsPreference(
+                            entry = SettingsEntry.Dropdown(
+                                id = "volume_key_recording_mode",
+                                titleRes = R.string.label_volume_key_recording_mode,
+                                options = listOf(
+                                    Prefs.VOLUME_KEY_MODE_UP_TOGGLE,
+                                    Prefs.VOLUME_KEY_MODE_DOWN_TOGGLE,
+                                    Prefs.VOLUME_KEY_MODE_UP_START_DOWN_STOP,
+                                    Prefs.VOLUME_KEY_MODE_DOWN_START_UP_STOP
+                                ).map { DropdownOption(it, volumeKeyModeLabel(it)) },
+                                selectedOptionId = uiState.volumeKeyRecordingMode,
+                                onSelectedOptionChange = { id ->
+                                    prefs.volumeKeyRecordingMode = id
+                                    refreshState()
+                                }
+                            ),
                             index = 1,
-                            count = volumeItemCount,
-                            onClick = {
-                                showVolumeKeyModeSheet()
-                            }
-                        )
-                        FloatingExplainedSwitch(
-                            id = "volume_key_status_toast",
-                            titleRes = R.string.label_volume_key_status_toast,
-                            checked = uiState.volumeKeyStatusToastEnabled,
-                            onToggle = { target ->
-                                applyExplainedSwitch(
-                                    current = uiState.volumeKeyStatusToastEnabled,
-                                    target = target,
-                                    titleRes = R.string.label_volume_key_status_toast,
-                                    offDescRes = R.string.feature_volume_key_status_toast_off_desc,
-                                    onDescRes = R.string.feature_volume_key_status_toast_on_desc,
-                                    preferenceKey = "volume_key_status_toast_explained"
-                                ) { prefs.volumeKeyStatusToastEnabled = it }
-                            },
-                            index = 2,
-                            count = volumeItemCount
-                        )
-                        FloatingExplainedSwitch(
-                            id = "volume_key_stop_on_ime_hidden",
-                            titleRes = R.string.label_volume_key_stop_on_ime_hidden,
-                            checked = uiState.volumeKeyStopOnImeHidden,
-                            onToggle = { target ->
-                                applyExplainedSwitch(
-                                    current = uiState.volumeKeyStopOnImeHidden,
-                                    target = target,
-                                    titleRes = R.string.label_volume_key_stop_on_ime_hidden,
-                                    offDescRes = R.string.feature_volume_key_stop_on_ime_hidden_off_desc,
-                                    onDescRes = R.string.feature_volume_key_stop_on_ime_hidden_on_desc,
-                                    preferenceKey = "volume_key_stop_on_ime_hidden_explained"
-                                ) { prefs.volumeKeyStopOnImeHidden = it }
-                            },
-                            index = 3,
                             count = volumeItemCount
                         )
                     }
@@ -712,7 +709,7 @@ fun FloatingSettingsScreen(
 
             item("shake_recording") {
                 FloatingSection(uiMode = uiMode, titleRes = R.string.section_shake_recording) {
-                    val shakeItemCount = if (uiState.shakeRecordingEnabled) 4 else 1
+                    val shakeItemCount = if (uiState.shakeRecordingEnabled) 2 else 1
                     FloatingExplainedSwitch(
                         id = "shake_recording",
                         titleRes = R.string.label_shake_recording,
@@ -731,46 +728,20 @@ fun FloatingSettingsScreen(
                         count = shakeItemCount
                     )
                     if (uiState.shakeRecordingEnabled) {
-                        FloatingValuePreference(
-                            titleRes = R.string.label_shake_recording_sensitivity,
-                            value = shakeSensitivityLabel(uiState.shakeRecordingSensitivity),
-                            uiMode = uiMode,
+                        SettingsPreference(
+                            entry = SettingsEntry.Dropdown(
+                                id = "shake_recording_sensitivity",
+                                titleRes = R.string.label_shake_recording_sensitivity,
+                                options = Prefs.ShakeRecordingSensitivity.entries.map {
+                                    DropdownOption(it.id, shakeSensitivityLabel(it.id))
+                                },
+                                selectedOptionId = uiState.shakeRecordingSensitivity,
+                                onSelectedOptionChange = { id ->
+                                    prefs.shakeRecordingSensitivity = id
+                                    refreshState()
+                                }
+                            ),
                             index = 1,
-                            count = shakeItemCount,
-                            onClick = { showShakeSensitivitySheet() }
-                        )
-                        FloatingExplainedSwitch(
-                            id = "shake_recording_sound",
-                            titleRes = R.string.label_shake_recording_sound,
-                            checked = uiState.shakeRecordingSoundEnabled,
-                            onToggle = { target ->
-                                applyExplainedSwitch(
-                                    current = uiState.shakeRecordingSoundEnabled,
-                                    target = target,
-                                    titleRes = R.string.label_shake_recording_sound,
-                                    offDescRes = R.string.feature_shake_recording_sound_off_desc,
-                                    onDescRes = R.string.feature_shake_recording_sound_on_desc,
-                                    preferenceKey = "shake_recording_sound_explained"
-                                ) { prefs.shakeRecordingSoundEnabled = it }
-                            },
-                            index = 2,
-                            count = shakeItemCount
-                        )
-                        FloatingExplainedSwitch(
-                            id = "shake_recording_stop_on_ime_hidden",
-                            titleRes = R.string.label_shake_recording_stop_on_ime_hidden,
-                            checked = uiState.shakeRecordingStopOnImeHidden,
-                            onToggle = { target ->
-                                applyExplainedSwitch(
-                                    current = uiState.shakeRecordingStopOnImeHidden,
-                                    target = target,
-                                    titleRes = R.string.label_shake_recording_stop_on_ime_hidden,
-                                    offDescRes = R.string.feature_shake_recording_stop_on_ime_hidden_off_desc,
-                                    onDescRes = R.string.feature_shake_recording_stop_on_ime_hidden_on_desc,
-                                    preferenceKey = "shake_recording_stop_on_ime_hidden_explained"
-                                ) { prefs.shakeRecordingStopOnImeHidden = it }
-                            },
-                            index = 3,
                             count = shakeItemCount
                         )
                     }
