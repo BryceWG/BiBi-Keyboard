@@ -230,6 +230,7 @@
   <string name="ext_btn_mic_tap_toggle">錄音模式切換</string>
   <string name="ext_btn_floating_keyboard">懸浮鍵盤</string>
   <string name="ext_btn_auto_enter_after_asr">輸入完成後自動Enter</string>
+  <string name="ext_btn_duck_media_on_record">音訊避讓</string>
   <string name="status_copied">已複製</string>
   <string name="status_pasted">已貼上</string>
   <string name="status_nothing_to_undo">無可復原的操作</string>
@@ -338,6 +339,8 @@
   <string name="toast_floating_keyboard_off">已關閉懸浮鍵盤</string>
   <string name="toast_auto_enter_after_asr_on">已開啟輸入完成後自動Enter</string>
   <string name="toast_auto_enter_after_asr_off">已關閉輸入完成後自動Enter</string>
+  <string name="toast_duck_media_on_record_on">已開啟音訊避讓</string>
+  <string name="toast_duck_media_on_record_off">已關閉音訊避讓</string>
 
   <!-- ============================================== -->
   <!-- 功能說明彈窗 -->

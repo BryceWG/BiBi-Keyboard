@@ -62,6 +62,7 @@ internal class ImeExtensionButtonsController(
         updateMicTapToggleExtButtonsUi()
         updateFloatingKeyboardExtButtonsUi()
         updateAutoEnterAfterAsrExtButtonsUi()
+        updateDuckMediaOnRecordExtButtonsUi()
     }
 
     private fun bindDynamicLayoutActionButtons(root: View) {
@@ -248,6 +249,11 @@ internal class ImeExtensionButtonsController(
         ) {
             updateAutoEnterAfterAsrExtButtonsUi()
         }
+        if (action == ExtensionButtonAction.DUCK_MEDIA_ON_RECORD_TOGGLE &&
+            result == KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
+        ) {
+            updateDuckMediaOnRecordExtButtonsUi()
+        }
     }
 
     private fun setupCursorButtonRepeat(btn: View, action: ExtensionButtonAction) {
@@ -316,6 +322,12 @@ internal class ImeExtensionButtonsController(
         }
     }
 
+    private fun updateDuckMediaOnRecordExtButtonsUi() {
+        updateDynamicToggleButtons(ExtensionButtonAction.DUCK_MEDIA_ON_RECORD_TOGGLE) { enabled ->
+            if (enabled) R.drawable.speaker_x else R.drawable.speaker_high
+        }
+    }
+
     private fun updateDynamicSelectButtons() {
         updateDynamicButtons(views.rootView) { view, def ->
             val isSelect = def.extensionActionId == ExtensionButtonAction.SELECT.id || def.id == "ai_select"
@@ -338,6 +350,7 @@ internal class ImeExtensionButtonsController(
             ExtensionButtonAction.MIC_TAP_TOGGLE -> prefs.micTapToggleEnabled
             ExtensionButtonAction.FLOATING_KEYBOARD_TOGGLE -> prefs.imeTabletFloatingKeyboardEnabled
             ExtensionButtonAction.AUTO_ENTER_AFTER_ASR_TOGGLE -> prefs.autoEnterAfterAsrEnabled
+            ExtensionButtonAction.DUCK_MEDIA_ON_RECORD_TOGGLE -> prefs.duckMediaOnRecordEnabled
             else -> return
         }
         updateDynamicButtons(views.rootView) { view, def ->

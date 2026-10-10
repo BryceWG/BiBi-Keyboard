@@ -129,6 +129,15 @@ enum class ExtensionButtonAction(val id: String, val titleResId: Int, val iconRe
     ),
 
     /**
+     * 录音时音频避让开关（与设置页 duckMediaOnRecordEnabled 共用）
+     */
+    DUCK_MEDIA_ON_RECORD_TOGGLE(
+        id = "duck_media_on_record_toggle",
+        titleResId = R.string.ext_btn_duck_media_on_record,
+        iconResId = R.drawable.speaker_high
+    ),
+
+    /**
      * 光标左移一位（长按连发）
      */
     CURSOR_LEFT(

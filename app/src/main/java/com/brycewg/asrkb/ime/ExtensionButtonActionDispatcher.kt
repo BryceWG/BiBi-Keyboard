@@ -43,6 +43,7 @@ internal class ExtensionButtonActionDispatcher(
         ExtensionButtonAction.MIC_TAP_TOGGLE -> toggleMicTapMode()
         ExtensionButtonAction.FLOATING_KEYBOARD_TOGGLE -> toggleFloatingKeyboard()
         ExtensionButtonAction.AUTO_ENTER_AFTER_ASR_TOGGLE -> toggleAutoEnterAfterAsr()
+        ExtensionButtonAction.DUCK_MEDIA_ON_RECORD_TOGGLE -> toggleDuckMediaOnRecord()
         ExtensionButtonAction.UNDO -> undo(ic)
         ExtensionButtonAction.HIDE_KEYBOARD -> KeyboardActionHandler.ExtensionButtonActionResult.NEED_HIDE_KEYBOARD
     }
@@ -191,6 +192,18 @@ internal class ExtensionButtonActionDispatcher(
             R.string.toast_auto_enter_after_asr_on
         } else {
             R.string.toast_auto_enter_after_asr_off
+        }
+        uiListenerProvider()?.onStatusMessage(context.getString(msgRes))
+        return KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
+    }
+
+    private fun toggleDuckMediaOnRecord(): KeyboardActionHandler.ExtensionButtonActionResult {
+        val newValue = !prefs.duckMediaOnRecordEnabled
+        prefs.duckMediaOnRecordEnabled = newValue
+        val msgRes = if (newValue) {
+            R.string.toast_duck_media_on_record_on
+        } else {
+            R.string.toast_duck_media_on_record_off
         }
         uiListenerProvider()?.onStatusMessage(context.getString(msgRes))
         return KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS

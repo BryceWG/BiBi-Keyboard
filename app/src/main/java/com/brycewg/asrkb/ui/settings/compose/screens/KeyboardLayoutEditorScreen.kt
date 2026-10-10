@@ -1626,6 +1626,7 @@ private val trayKeyOrder = listOf(
     "keep_screen_on_while_recording_toggle",
     "mic_tap_toggle",
     "auto_enter_after_asr_toggle",
+    "duck_media_on_record_toggle",
     "gesture_cancel",
     "gesture_send"
 )

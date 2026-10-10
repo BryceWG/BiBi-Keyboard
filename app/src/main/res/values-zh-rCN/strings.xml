@@ -230,6 +230,7 @@
   <string name="ext_btn_mic_tap_toggle">录音模式切换</string>
   <string name="ext_btn_floating_keyboard">悬浮键盘</string>
   <string name="ext_btn_auto_enter_after_asr">输入完成后自动回车</string>
+  <string name="ext_btn_duck_media_on_record">音频避让</string>
   <string name="status_copied">已复制</string>
   <string name="status_pasted">已粘贴</string>
   <string name="status_nothing_to_undo">无可撤销的操作</string>
@@ -338,6 +339,8 @@
   <string name="toast_floating_keyboard_off">已关闭悬浮键盘</string>
   <string name="toast_auto_enter_after_asr_on">已开启输入完成后自动回车</string>
   <string name="toast_auto_enter_after_asr_off">已关闭输入完成后自动回车</string>
+  <string name="toast_duck_media_on_record_on">已开启音频避让</string>
+  <string name="toast_duck_media_on_record_off">已关闭音频避让</string>
 
   <!-- ============================================== -->
   <!-- 功能说明弹窗 -->

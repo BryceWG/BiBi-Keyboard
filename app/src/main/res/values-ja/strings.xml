@@ -231,6 +231,7 @@
   <string name="ext_btn_mic_tap_toggle">録音モード</string>
   <string name="ext_btn_floating_keyboard">フローティングキーボード</string>
   <string name="ext_btn_auto_enter_after_asr">入力完了後に自動Enter</string>
+  <string name="ext_btn_duck_media_on_record">オーディオダッキング</string>
   <string name="status_copied">コピーしました</string>
   <string name="status_pasted">貼り付けました</string>
   <string name="status_nothing_to_undo">取り消す操作がありません</string>
@@ -339,6 +340,8 @@
   <string name="toast_floating_keyboard_off">フローティングキーボードを無効にしました</string>
   <string name="toast_auto_enter_after_asr_on">入力完了後の自動Enterを有効にしました</string>
   <string name="toast_auto_enter_after_asr_off">入力完了後の自動Enterを無効にしました</string>
+  <string name="toast_duck_media_on_record_on">オーディオダッキングを有効にしました</string>
+  <string name="toast_duck_media_on_record_off">オーディオダッキングを無効にしました</string>
 
   <!-- ============================================== -->
   <!-- 機能説明ダイアログ -->
