@@ -3,6 +3,8 @@ package com.brycewg.asrkb.ime
 import android.content.Context
 import android.util.Log
 import com.brycewg.asrkb.R
+import com.brycewg.asrkb.asr.AsrErrorMessageMapper
+import com.brycewg.asrkb.asr.AsrFailReasonCodes
 import com.brycewg.asrkb.asr.BaseFileAsrEngine
 
 internal class RetryUseCase(
@@ -23,9 +25,10 @@ internal class RetryUseCase(
         val isFileEngine = engine is BaseFileAsrEngine
         if (!isFileEngine) return false
 
+        if (AsrErrorMessageMapper.classify(context, message) == AsrFailReasonCodes.EMPTY_RESULT) {
+            return false
+        }
         val msgLower = message.lowercase()
-        val isEmptyResult = ("为空" in message) || ("empty" in msgLower)
-        if (isEmptyResult) return false
 
         val networkKeywords = arrayOf(
             "网络",

@@ -116,27 +116,111 @@ internal object AsrErrorMessageMapper {
             lower,
             listOf(
                 context.getString(R.string.error_asr_empty_result),
-                context.getString(R.string.asr_error_empty_result),
-                "empty asr result",
-                "empty asr",
-                "识别返回为空"
-            )
-        )
+                context.getString(R.string.asr_error_empty_result)
+            ) + emptyResultSignals
+        ) ||
+            containsNoMatchSignal(lower)
+    }
+
+    /**
+     * 供应商常把空白识别写成 HTTP/业务错误。这些片段与厂商无关，
+     * 备用切换也要先认出来，避免静音被当成主引擎故障。
+     */
+    fun containsEmptyRecognitionSignal(raw: String): Boolean {
+        if (raw.isEmpty()) return false
+        val lower = raw.lowercase(Locale.ROOT)
+        return containsAny(lower, emptyResultSignals) ||
+            containsAny(lower, emptyAudioSignals) ||
+            containsNoMatchSignal(lower)
     }
 
     private fun isEmptyAudio(context: Context, raw: String): Boolean {
         val lower = raw.lowercase(Locale.ROOT)
         return containsAny(
             lower,
-            listOf(
-                context.getString(R.string.error_audio_empty),
-                "empty audio",
-                "空音频"
-            )
+            listOf(context.getString(R.string.error_audio_empty)) + emptyAudioSignals
         )
     }
 
     private fun containsAny(lower: String, hints: List<String>): Boolean = hints.any { hint ->
         hint.isNotBlank() && lower.contains(hint.lowercase(Locale.ROOT))
     }
+
+    /** "no match" 算空结果，但 "no matching …" 是别的失败，不能算进去。 */
+    private fun containsNoMatchSignal(lower: String): Boolean {
+        if (lower.contains("nomatch")) return true
+        return containsPhraseNotFollowedBy(lower, "no match", "ing") ||
+            containsPhraseNotFollowedBy(lower, "no_match", "ing") ||
+            containsPhraseNotFollowedBy(lower, "no-match", "ing")
+    }
+
+    private fun containsPhraseNotFollowedBy(lower: String, phrase: String, suffix: String): Boolean {
+        var from = 0
+        while (true) {
+            val index = lower.indexOf(phrase, from)
+            if (index < 0) return false
+            val after = index + phrase.length
+            if (!lower.startsWith(suffix, after)) return true
+            from = after
+        }
+    }
+
+    private val emptyResultSignals = listOf(
+        "empty asr result",
+        "empty asr",
+        "empty transcript",
+        "empty transcription",
+        "recognition result is empty",
+        "result is empty",
+        "no speech",
+        "no_speech",
+        "nospeech",
+        "speech not detected",
+        "no valid speech",
+        "no words",
+        "no_words",
+        "asr_response_have_no_words",
+        "nomatch",
+        "initial silence timeout",
+        "initialsilencetimeout",
+        "no human voice",
+        "silent_speech",
+        "识别返回为空",
+        "识别结果为空",
+        "識別回傳為空",
+        "識別結果為空",
+        "未识别到内容",
+        "未识别到语音",
+        "未識別到內容",
+        "未識別到語音",
+        "未检测到语音",
+        "未检测到人声",
+        "未檢測到語音",
+        "未檢測到人聲",
+        "没有识别到",
+        "沒有識別到",
+        "无有效语音",
+        "無有效語音",
+        "没有有效的语音",
+        "沒有有效的語音",
+        "无语音内容",
+        "無語音內容",
+        "没有说话",
+        "沒有說話"
+    )
+
+    private val emptyAudioSignals = listOf(
+        "empty audio",
+        "audio is empty",
+        "no valid audio",
+        "no audio data",
+        "silent audio",
+        "空音频",
+        "无音频",
+        "無音訊",
+        "音频为空",
+        "音訊為空",
+        "音频内容为空",
+        "音訊內容為空"
+    )
 }

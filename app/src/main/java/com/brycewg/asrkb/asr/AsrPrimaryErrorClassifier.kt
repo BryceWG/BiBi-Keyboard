@@ -22,6 +22,9 @@ internal object AsrPrimaryErrorClassifier {
         message: String? = null,
         httpStatusCode: Int? = null
     ): AsrPrimaryErrorStrategy {
+        if (AsrErrorMessageMapper.containsEmptyRecognitionSignal(message.orEmpty())) {
+            return AsrPrimaryErrorStrategy.WaitTimeout
+        }
         if (httpStatusCode != null && httpStatusCode in 400..599) {
             return AsrPrimaryErrorStrategy.ImmediateFailover
         }
@@ -35,6 +38,10 @@ internal object AsrPrimaryErrorClassifier {
     fun classifyMessage(message: String?): AsrPrimaryErrorStrategy {
         val raw = message.orEmpty()
         val lower = raw.lowercase(Locale.ROOT)
+
+        if (AsrErrorMessageMapper.containsEmptyRecognitionSignal(raw)) {
+            return AsrPrimaryErrorStrategy.WaitTimeout
+        }
 
         val httpStatus = httpStatusRegex.find(raw)
             ?.groupValues

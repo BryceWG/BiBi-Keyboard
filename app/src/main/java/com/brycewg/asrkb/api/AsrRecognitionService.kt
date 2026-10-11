@@ -222,27 +222,28 @@ class AsrRecognitionService : RecognitionService() {
     /**
      * 将内部错误消息映射到 SpeechRecognizer 标准错误码
      */
-    private fun mapToSpeechRecognizerError(message: String): Int = when {
-        message.contains("permission", ignoreCase = true) ->
-            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS
-        message.contains("network", ignoreCase = true) ||
-            message.contains("timeout", ignoreCase = true) ||
-            message.contains("connect", ignoreCase = true) ->
-            SpeechRecognizer.ERROR_NETWORK
-        message.contains("audio", ignoreCase = true) ||
-            message.contains("microphone", ignoreCase = true) ||
-            message.contains("record", ignoreCase = true) ->
-            SpeechRecognizer.ERROR_AUDIO
-        message.contains("busy", ignoreCase = true) ->
-            SpeechRecognizer.ERROR_RECOGNIZER_BUSY
-        message.contains("empty", ignoreCase = true) ||
-            message.contains("no speech", ignoreCase = true) ||
-            message.contains("no match", ignoreCase = true) ->
-            SpeechRecognizer.ERROR_NO_MATCH
-        message.contains("server", ignoreCase = true) ||
-            message.contains("api", ignoreCase = true) ->
-            SpeechRecognizer.ERROR_SERVER
-        else -> SpeechRecognizer.ERROR_CLIENT
+    private fun mapToSpeechRecognizerError(message: String): Int {
+        if (AsrErrorMessageMapper.classify(this, message) == AsrFailReasonCodes.EMPTY_RESULT) {
+            return SpeechRecognizer.ERROR_NO_MATCH
+        }
+        return when {
+            message.contains("permission", ignoreCase = true) ->
+                SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS
+            message.contains("network", ignoreCase = true) ||
+                message.contains("timeout", ignoreCase = true) ||
+                message.contains("connect", ignoreCase = true) ->
+                SpeechRecognizer.ERROR_NETWORK
+            message.contains("audio", ignoreCase = true) ||
+                message.contains("microphone", ignoreCase = true) ||
+                message.contains("record", ignoreCase = true) ->
+                SpeechRecognizer.ERROR_AUDIO
+            message.contains("busy", ignoreCase = true) ->
+                SpeechRecognizer.ERROR_RECOGNIZER_BUSY
+            message.contains("server", ignoreCase = true) ||
+                message.contains("api", ignoreCase = true) ->
+                SpeechRecognizer.ERROR_SERVER
+            else -> SpeechRecognizer.ERROR_CLIENT
+        }
     }
 
     /**
