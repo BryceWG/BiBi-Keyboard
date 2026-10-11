@@ -609,7 +609,7 @@ class Prefs(context: Context) {
 
     // 悬浮球、音量键、摇一摇共享的录音设置
     var floatingRecordingScreenAnimEnabled: Boolean
-        get() = sp.getBoolean(KEY_FLOATING_RECORDING_SCREEN_ANIM, false)
+        get() = sp.getBoolean(KEY_FLOATING_RECORDING_SCREEN_ANIM, true)
         set(value) = sp.edit { putBoolean(KEY_FLOATING_RECORDING_SCREEN_ANIM, value) }
 
     var floatingRecordingStatusToastEnabled: Boolean
