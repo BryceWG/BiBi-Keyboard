@@ -374,6 +374,7 @@ class FloatingBallViewManager(
                 }
                 stopProcessingSpinner()
                 processingSpinner?.visibility = View.GONE
+                startRecordingAura()
                 startRecordingBreathAnimation()
             }
             is FloatingBallState.Processing -> {

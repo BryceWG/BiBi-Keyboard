@@ -45,7 +45,7 @@ internal data class FloatingSettingsUiState(
             onlyWhenImeVisible = false,
             holdToRecordEnabled = false,
             directDragEnabled = false,
-            recordingScreenAnimEnabled = false,
+            recordingScreenAnimEnabled = true,
             alphaPercent = 100f,
             sizeDp = 56,
             volumeKeyRecordingEnabled = false,
