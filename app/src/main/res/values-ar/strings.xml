@@ -167,7 +167,7 @@
   <string name="untitled_preset">قالب بدون عنوان</string>
   <string name="switched_preset">تم التبديل: %1$s</string>
   <string name="toast_search_changed_asr_vendor">تم تبديل مزود ASR: %1$s</string>
-  <string name="toast_search_changed_llm_vendor">تم تبديل مزود نموذج المعالجة اللاحقة: %1$s</string>
+  <string name="toast_search_changed_llm_vendor">تم تبديل مزود نموذج التلميع: %1$s</string>
 
   <!-- ============================================== -->
   <!-- Input Related -->
@@ -378,12 +378,12 @@
   <string name="feature_keep_screen_on_while_recording_on_desc">أثناء التسجيل عبر لوحة المفاتيح أو الكرة العائمة، تبقى الشاشة مضاءة حتى لا تنام في منتصف التسجيل.</string>
 
   <!-- Auto enter after input -->
-  <string name="feature_auto_enter_after_asr_off_desc">بعد التعرّف (ومعالجة الذكاء الاصطناعي إن فُعّلت)، يُدرج النص فقط. يمكنك السحب يميناً على الميكروفون للإرسال بـ Enter في تلك الجلسة.</string>
-  <string name="feature_auto_enter_after_asr_on_desc">بعد اكتمال التعرّف—بما فيه معالجة الذكاء الاصطناعي عند التفعيل—يُضغط Enter / إجراء الإرسال تلقائياً لإرسال الرسالة في تطبيقات الدردشة. تُتخطّى النتائج الفارغة.</string>
+  <string name="feature_auto_enter_after_asr_off_desc">بعد التعرّف (والتلميع بالذكاء الاصطناعي إن فُعّل)، يُدرج النص فقط. يمكنك السحب يميناً على الميكروفون للإرسال بـ Enter في تلك الجلسة.</string>
+  <string name="feature_auto_enter_after_asr_on_desc">بعد اكتمال الإدخال—بما فيه التلميع بالذكاء الاصطناعي عند التفعيل—يُضغط Enter / إجراء الإرسال تلقائياً لإرسال الرسالة في تطبيقات الدردشة. تُتخطّى النتائج الفارغة.</string>
 
   <!-- Auto switch IME after input -->
   <string name="feature_auto_switch_ime_after_asr_off_desc">بعد اكتمال الإدخال تبقى طريقة الإدخال الحالية. لا يتم التبديل تلقائياً.</string>
-  <string name="feature_auto_switch_ime_after_asr_on_desc">بعد انتهاء المعالجة اللاحقة وتثبيت نص المعاينة، يتم التبديل تلقائياً إلى طريقة الإدخال المحددة في «طريقة الإدخال المستهدفة» لمتابعة التحرير. إن لم تُضبط تُستخدم السابقة. تُتخطّى النتائج الفارغة.</string>
+  <string name="feature_auto_switch_ime_after_asr_on_desc">بعد اكتمال الإدخال وتثبيت نص المعاينة، يتم التبديل تلقائياً إلى طريقة الإدخال المحددة في «طريقة الإدخال المستهدفة» لمتابعة التحرير. إن لم تُضبط تُستخدم السابقة. تُتخطّى النتائج الفارغة.</string>
 
   <!-- Fcitx5 return on switcher -->
   <string name="feature_fcitx5_return_on_switcher_off_desc">مفتاح تبديل IME يفتح منتقي طرق الإدخال بالنظام.</string>
@@ -437,7 +437,7 @@
 
   <!-- Data collection consent dialog -->
   <string name="title_data_collection_consent">جمع بيانات مجهولة</string>
-  <string name="msg_data_collection_consent">للمساعدة على تحسين BiBi Keyboard، نود جمع إحصاءات استخدام مجهولة. يشمل ذلك: إصدار التطبيق، قناة التثبيت، تاريخ أول ظهور، إصدار Android (SDK)، طراز الجهاز، بيانات أحداث ASR الوصفية (المزود، مدة الصوت، وقت المعالجة، عدد الأحرف، قناة المصدر، هل استُخدمت معالجة الذكاء الاصطناعي)، لغة التطبيق، وأحداث بدء التطبيق. لن يُرفع نص التعرّف أو محتوى شخصي. رمز الجمع مفتوح المصدر. هل توافق على التفعيل؟</string>
+  <string name="msg_data_collection_consent">للمساعدة على تحسين BiBi Keyboard، نود جمع إحصاءات استخدام مجهولة. يشمل ذلك: إصدار التطبيق، قناة التثبيت، تاريخ أول ظهور، إصدار Android (SDK)، طراز الجهاز، بيانات أحداث ASR الوصفية (المزود، مدة الصوت، وقت المعالجة، عدد الأحرف، قناة المصدر، هل استُخدم التلميع بالذكاء الاصطناعي)، لغة التطبيق، وأحداث بدء التطبيق. لن يُرفع نص التعرّف أو محتوى شخصي. رمز الجمع مفتوح المصدر. هل توافق على التفعيل؟</string>
   <string name="btn_agree">موافق</string>
   <string name="btn_disagree">ليس الآن</string>
 
@@ -461,7 +461,7 @@
   <string name="pro_paywall_included_mark">✓</string>
   <string name="pro_paywall_not_included_mark">—</string>
   <string name="pro_paywall_feature_core_asr">ASR متعدد المزودين والبث والنماذج المحلية</string>
-  <string name="pro_paywall_feature_ai">معالجة AI اللاحقة والتحرير الأساسي</string>
+  <string name="pro_paywall_feature_ai">التلميع بالذكاء الاصطناعي والتحرير الأساسي</string>
   <string name="pro_paywall_feature_input">لوحة المفاتيح والكرة العائمة والاستدعاءات الخارجية</string>
   <string name="pro_paywall_feature_layout">التخطيطات والإعدادات المسبقة والنسخ الاحتياطي</string>
   <string name="pro_paywall_feature_continuous">وضع الكلام المستمر</string>
@@ -523,8 +523,8 @@
   <string name="recording_test_backup_strategy_lazy">تسلسلي كسول</string>
   <string name="recording_test_auto_transcribe">نسخ نصي تلقائي</string>
   <string name="recording_test_ai_label">ذكاء اصطناعي</string>
-  <string name="recording_test_prompt_summary">اختر الموجّه المُعدّ مسبقاً لمعالجة الذكاء الاصطناعي</string>
-  <string name="recording_test_ai_process">معالجة ذكاء اصطناعي</string>
+  <string name="recording_test_prompt_summary">اختر الموجّه المُعدّ مسبقاً للتلميع بالذكاء الاصطناعي</string>
+  <string name="recording_test_ai_process">تلميع بالذكاء الاصطناعي</string>
   <string name="recording_test_result_compare">مقارنة النتائج</string>
   <string name="recording_test_raw_result">خام:</string>
   <string name="recording_test_ai_result">ذكاء اصطناعي:</string>

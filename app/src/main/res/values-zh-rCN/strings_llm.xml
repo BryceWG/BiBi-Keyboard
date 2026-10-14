@@ -7,7 +7,7 @@
     <string name="label_llm_model">模型名称（可选）</string>
     <string name="label_llm_temperature">温度</string>
     <string name="label_llm_more_params">更多参数</string>
-    <string name="label_llm_prompt">后处理 Prompt 内容（仅输出处理后的文本）</string>
+    <string name="label_llm_prompt">润色 Prompt 内容（仅输出润色后的文本）</string>
     <string name="label_llm_prompt_title">Prompt 预设标题</string>
     <string name="label_llm_prompt_presets">润色 Prompt 预设</string>
     <string name="btn_add_preset">新增预设</string>
@@ -54,8 +54,8 @@
     <string name="btn_llm_models_add">添加所选</string>
     <string name="toast_llm_models_none_selected">未选择任何模型</string>
     <!-- Skip AI under char count -->
-    <string name="label_ai_skip_under_chars">少于特定字数时跳过 AI 后处理</string>
-    <string name="helper_ai_skip_under_chars">当有效字数（中文按字，英文按词）小于该数值时不进行 AI 后处理；设为 0 表示不启用。</string>
+    <string name="label_ai_skip_under_chars">少于特定字数时跳过 AI 润色</string>
+    <string name="helper_ai_skip_under_chars">当有效字数（中文按字，英文按词）小于该数值时不进行 AI 润色；设为 0 表示不启用。</string>
     <string name="title_ai_skip_under">自动跳过阈值</string>
 
     <!-- ============================================== -->
@@ -65,12 +65,12 @@
 
     <!-- AI 后处理开关 - AI post-processing enabled -->
     <string name="feature_ai_post_process_off_desc">语音识别结果直接输出，不进行任何处理。</string>
-    <string name="feature_ai_post_process_on_desc">语音识别结果将经过 AI 处理后再输出，用于文本润色、标点、格式化等。</string>
+    <string name="feature_ai_post_process_on_desc">语音识别结果将经过 AI 润色后再输出，用于整理文本、标点、格式化等。</string>
 
     <!-- 后处理打字机效果 -->
-    <string name="label_postproc_typewriter_enabled">后处理打字机效果</string>
-    <string name="feature_postproc_typewriter_off_desc">等待后处理完成后，一次性应用完整结果。</string>
-    <string name="feature_postproc_typewriter_on_desc">将流式后处理结果以快速打字机效果平滑输出，观感更顺滑。</string>
+    <string name="label_postproc_typewriter_enabled">润色打字机效果</string>
+    <string name="feature_postproc_typewriter_off_desc">等待润色完成后，一次性应用完整结果。</string>
+    <string name="feature_postproc_typewriter_on_desc">将流式润色结果以快速打字机效果平滑输出，观感更顺滑。</string>
 
     <!-- AI 编辑默认使用上次识别结果 - AI Edit default scope -->
     <string name="feature_ai_edit_default_use_last_asr_off_desc">没有选中文本时，AI 编辑将针对整个输入字段生效。</string>
@@ -87,7 +87,7 @@
     <string name="section_ai_edit">AI 编辑</string>
     <string name="section_post_process_model">AI 模型</string>
 
-    <string name="label_ai_post_process_enabled">启用 AI 后处理</string>
+    <string name="label_ai_post_process_enabled">启用 AI 润色</string>
 
     <!-- LLM 供应商选择 -->
     <string name="label_llm_vendor">LLM 供应商</string>
@@ -128,7 +128,7 @@
 
     <!-- 硅基流动免费/付费切换 -->
     <string name="label_sf_use_free_service">使用免费服务</string>
-    <string name="sf_free_service_desc">硅基流动慷慨提供的免费 AI 后处理服务，无需 API Key。</string>
+    <string name="sf_free_service_desc">硅基流动慷慨提供的免费 AI 润色服务，无需 API Key。</string>
     <string name="sf_paid_service_hint">填写您自己的硅基流动 API Key 以使用更多模型。</string>
 
     <!-- 通用按钮 -->

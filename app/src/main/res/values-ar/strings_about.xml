@@ -14,7 +14,7 @@
     <string name="about_website_url">https://bibi.brycewg.com</string>
     <string name="about_open_docs">فتح الوثائق</string>
     <string name="about_docs_url">https://bibidocs.brycewg.com</string>
-    <string name="about_desc">لوحة مفاتيح صوتية خفيفة مع ASR متعدد المزودين ومعالجة لاحقة عبر LLM</string>
+    <string name="about_desc">لوحة مفاتيح صوتية خفيفة مع ASR متعدد المزودين وتلميع عبر LLM</string>
 
     <string name="label_asr_total_chars">إجمالي الأحرف من التعرّف على الكلام: %1$d</string>
 

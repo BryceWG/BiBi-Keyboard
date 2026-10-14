@@ -14,7 +14,7 @@
     <string name="sf_free_description">خدمة مجانية مقدَّمة من SiliconFlow لتجربة التعرّف على الصوت فوراً. لا يلزم مفتاح API.</string>
 
     <!-- SiliconFlow Free Service (LLM) -->
-    <string name="sf_free_llm_description">خدمة معالجة لاحقة مجانية بالذكاء الاصطناعي من SiliconFlow. لا يلزم مفتاح API.</string>
+    <string name="sf_free_llm_description">خدمة تلميع مجانية بالذكاء الاصطناعي من SiliconFlow. لا يلزم مفتاح API.</string>
     <string name="label_sf_free_llm_enabled">استخدام نموذج SiliconFlow المجاني</string>
     <string name="label_sf_free_llm_model">اختر النموذج</string>
 

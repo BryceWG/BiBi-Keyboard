@@ -7,7 +7,7 @@
     <string name="label_llm_model">模型名稱（可選）</string>
     <string name="label_llm_temperature">溫度</string>
     <string name="label_llm_more_params">更多參數</string>
-    <string name="label_llm_prompt">後處理提示詞內容（僅輸出處理後的文字）</string>
+    <string name="label_llm_prompt">潤飾提示詞內容（僅輸出潤飾後的文字）</string>
     <string name="label_llm_prompt_title">提示詞預設標題</string>
     <string name="label_llm_prompt_presets">潤飾提示詞預設</string>
     <string name="btn_add_preset">新增預設</string>
@@ -54,8 +54,8 @@
     <string name="btn_llm_models_add">加入所選</string>
     <string name="toast_llm_models_none_selected">未選擇任何模型</string>
     <!-- Skip AI under char count -->
-    <string name="label_ai_skip_under_chars">少於特定字數時跳過 AI 後處理</string>
-    <string name="helper_ai_skip_under_chars">當有效字數（中文按字，英文按詞）小於此數值時不執行 AI 後處理；設為 0 表示停用。</string>
+    <string name="label_ai_skip_under_chars">少於特定字數時跳過 AI 潤飾</string>
+    <string name="helper_ai_skip_under_chars">當有效字數（中文按字，英文按詞）小於此數值時不執行 AI 潤飾；設為 0 表示停用。</string>
     <string name="title_ai_skip_under">自動跳過閾值</string>
 
     <!-- ============================================== -->
@@ -64,12 +64,12 @@
 
     <!-- AI 後處理開關 -->
     <string name="feature_ai_post_process_off_desc">語音識別結果直接輸出，不進行任何處理。</string>
-    <string name="feature_ai_post_process_on_desc">語音識別結果將經過 AI 處理後再輸出，用於文字潤飾、標點、格式化等。</string>
+    <string name="feature_ai_post_process_on_desc">語音識別結果將經過 AI 潤飾後再輸出，用於整理文字、標點、格式化等。</string>
 
     <!-- 後處理打字機效果 -->
-    <string name="label_postproc_typewriter_enabled">後處理打字機效果</string>
-    <string name="feature_postproc_typewriter_off_desc">等待後處理完成後，一次套用完整結果。</string>
-    <string name="feature_postproc_typewriter_on_desc">將串流後處理結果以快速打字機效果平滑輸出，觀感更順滑。</string>
+    <string name="label_postproc_typewriter_enabled">潤飾打字機效果</string>
+    <string name="feature_postproc_typewriter_off_desc">等待潤飾完成後，一次套用完整結果。</string>
+    <string name="feature_postproc_typewriter_on_desc">將串流潤飾結果以快速打字機效果平滑輸出，觀感更順滑。</string>
 
     <!-- AI 編輯預設使用上次識別結果 -->
     <string name="feature_ai_edit_default_use_last_asr_off_desc">沒有選取文字時，AI 編輯將針對整個輸入欄位生效。</string>
@@ -86,7 +86,7 @@
     <string name="section_ai_edit">AI 編輯</string>
     <string name="section_post_process_model">AI 模型</string>
 
-    <string name="label_ai_post_process_enabled">啟用 AI 後處理</string>
+    <string name="label_ai_post_process_enabled">啟用 AI 潤飾</string>
 
     <!-- LLM 供應商選擇 -->
     <string name="label_llm_vendor">LLM 供應商</string>
@@ -127,7 +127,7 @@
 
     <!-- 矽基流動免費/付費切換 -->
     <string name="label_sf_use_free_service">使用免費服務</string>
-    <string name="sf_free_service_desc">矽基流動慷慨提供的免費 AI 後處理服務，無需 API Key。</string>
+    <string name="sf_free_service_desc">矽基流動慷慨提供的免費 AI 潤飾服務，無需 API Key。</string>
     <string name="sf_paid_service_hint">填寫您自己的矽基流動 API Key 以使用更多模型。</string>
 
     <!-- 通用按鈕 -->

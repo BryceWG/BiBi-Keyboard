@@ -32,7 +32,7 @@ English | [简体中文](README.md)
 <tr>
 <td width="33%" align="center"><b>Easy Setup</b><br/><sub>Step-by-step guidance for IME and permission setup</sub></td>
 <td width="34%" align="center"><b>Voice-first Typing</b><br/><sub>Open the keyboard and hold the microphone to speak</sub></td>
-<td width="33%" align="center"><b>Smart Enhancements</b><br/><sub>Manage recognition, AI post-processing, and history</sub></td>
+<td width="33%" align="center"><b>Smart Enhancements</b><br/><sub>Manage recognition, AI polish, and history</sub></td>
 </tr>
 </table>
 
@@ -50,7 +50,7 @@ English | [简体中文](README.md)
 - **Multi-Engine Support** - 18 ASR vendors (12 cloud + 6 local)
 - **Local ASR Models** - SenseVoice / FunASR Nano / Qwen3-ASR / Parakeet / FireRedASR / X-ASR for offline use
 - **Primary + Backup** - Backup engines and local backup residency for unstable networks
-- **AI Text Optimization** - LLM post-processing; history can cache audio and re-run recognition/post-processing
+- **AI Text Polish** - LLM polish; history can cache audio and re-run recognition or polish
 
 </td>
 <td width="50%">

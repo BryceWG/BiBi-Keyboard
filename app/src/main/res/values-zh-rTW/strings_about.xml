@@ -14,7 +14,7 @@
     <string name="about_website_url">https://bibi.brycewg.com</string>
     <string name="about_open_docs">查看專案文件</string>
     <string name="about_docs_url">https://bibidocs.brycewg.com</string>
-    <string name="about_desc">簡潔高效的語音輸入法，支援多家 ASR 與 LLM 後處理</string>
+    <string name="about_desc">簡潔高效的語音輸入法，支援多家 ASR 與 LLM 潤飾</string>
 
     <string name="label_asr_total_chars">歷史語音識別總字數：%1$d</string>
 

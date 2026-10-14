@@ -8,7 +8,7 @@
     <string name="label_llm_model">モデル名（任意）</string>
     <string name="label_llm_temperature">温度</string>
     <string name="label_llm_more_params">その他のパラメータ</string>
-    <string name="label_llm_prompt">後処理プロンプト（処理されたテキストのみ出力）</string>
+    <string name="label_llm_prompt">校正プロンプト（校正後のテキストのみ出力）</string>
     <string name="label_llm_prompt_title">プロンプトプリセットタイトル</string>
     <string name="label_llm_prompt_presets">校正プロンプトプリセット</string>
     <string name="btn_add_preset">プリセットとして追加</string>
@@ -55,8 +55,8 @@
     <string name="btn_llm_models_add">選択したモデルを追加</string>
     <string name="toast_llm_models_none_selected">モデルが選択されていません</string>
     <!-- Skip AI under char count -->
-    <string name="label_ai_skip_under_chars">文字数が閾値未満の場合はAI後処理をスキップ</string>
-    <string name="helper_ai_skip_under_chars">有効文字数（CJKは文字、英語は単語）がこの数値未満の場合、AI後処理を実行しません。0で無効化します。</string>
+    <string name="label_ai_skip_under_chars">文字数が閾値未満の場合はAI校正をスキップ</string>
+    <string name="helper_ai_skip_under_chars">有効文字数（CJKは文字、英語は単語）がこの数値未満の場合、AI校正を実行しません。0で無効化します。</string>
     <string name="title_ai_skip_under">自動スキップ閾値</string>
 
     <!-- ============================================== -->
@@ -65,12 +65,12 @@
 
     <!-- AI後処理スイッチ -->
     <string name="feature_ai_post_process_off_desc">音声認識結果を処理せずにそのまま出力します。</string>
-    <string name="feature_ai_post_process_on_desc">音声認識結果をAIで処理してから出力します。テキスト推敲、句読点、フォーマットなどに使用します。</string>
+    <string name="feature_ai_post_process_on_desc">音声認識結果をAIで校正してから出力します。テキスト整理、句読点、フォーマットなどに使用します。</string>
 
     <!-- 後処理タイプライター効果 -->
-    <string name="label_postproc_typewriter_enabled">後処理のタイプライター効果</string>
-    <string name="feature_postproc_typewriter_off_desc">後処理の完了を待ってから、結果全体を一度に反映します。</string>
-    <string name="feature_postproc_typewriter_on_desc">後処理のストリーミング結果を高速なタイプライター効果で滑らかに表示します。</string>
+    <string name="label_postproc_typewriter_enabled">校正のタイプライター効果</string>
+    <string name="feature_postproc_typewriter_off_desc">校正の完了を待ってから、結果全体を一度に反映します。</string>
+    <string name="feature_postproc_typewriter_on_desc">校正のストリーミング結果を高速なタイプライター効果で滑らかに表示します。</string>
 
     <!-- AI編集で最後のASR結果をデフォルト使用 -->
     <string name="feature_ai_edit_default_use_last_asr_off_desc">テキスト未選択時、AI編集は入力フィールド全体に適用されます。</string>
@@ -87,7 +87,7 @@
     <string name="section_ai_edit">AI編集</string>
     <string name="section_post_process_model">AIモデル</string>
 
-    <string name="label_ai_post_process_enabled">AI後処理を有効にする</string>
+    <string name="label_ai_post_process_enabled">AI校正を有効にする</string>
 
     <!-- LLMプロバイダー選択 -->
     <string name="label_llm_vendor">LLMプロバイダー</string>
@@ -128,7 +128,7 @@
 
     <!-- SiliconFlow無料/有料切替 -->
     <string name="label_sf_use_free_service">無料サービスを使用</string>
-    <string name="sf_free_service_desc">SiliconFlowが提供する無料AI後処理サービス。APIキー不要。</string>
+    <string name="sf_free_service_desc">SiliconFlowが提供する無料AI校正サービス。APIキー不要。</string>
     <string name="sf_paid_service_hint">より多くのモデルを使用するには、SiliconFlow APIキーを入力してください。</string>
 
     <!-- 共通ボタン -->

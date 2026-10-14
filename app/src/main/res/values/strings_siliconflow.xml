@@ -14,7 +14,7 @@
     <string name="sf_free_description">Free service generously provided by SiliconFlow to help you experience AI voice recognition instantly. No API key required.</string>
 
     <!-- SiliconFlow Free Service (LLM) -->
-    <string name="sf_free_llm_description">Free AI post-processing service generously provided by SiliconFlow. No API key required.</string>
+    <string name="sf_free_llm_description">Free AI polish service generously provided by SiliconFlow. No API key required.</string>
     <string name="label_sf_free_llm_enabled">Use SiliconFlow free model</string>
     <string name="label_sf_free_llm_model">Select Model</string>
 

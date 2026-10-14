@@ -15,7 +15,7 @@
     <string name="about_website_url">https://bibi.brycewg.com</string>
     <string name="about_open_docs">ドキュメントを開く</string>
     <string name="about_docs_url">https://bibidocs.brycewg.com</string>
-    <string name="about_desc">マルチベンダーASRとLLM後処理付きの軽量音声入力IME</string>
+    <string name="about_desc">マルチベンダーASRとLLM校正付きの軽量音声入力IME</string>
 
     <string name="label_asr_total_chars">音声認識からの総文字数：%1$d</string>
 

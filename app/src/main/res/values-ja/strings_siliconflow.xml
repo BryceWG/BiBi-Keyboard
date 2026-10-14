@@ -14,7 +14,7 @@
     <string name="sf_free_description">SiliconFlow から寛大に提供された無料サービスで、すぐに AI 音声認識を体験できます。APIキー不要。</string>
 
     <!-- SiliconFlow 無料サービス（LLM） -->
-    <string name="sf_free_llm_description">SiliconFlow から寛大に提供された無料AI後処理サービス。APIキー不要。</string>
+    <string name="sf_free_llm_description">SiliconFlow から寛大に提供された無料AI校正サービス。APIキー不要。</string>
     <string name="label_sf_free_llm_enabled">SiliconFlow 提供の無料モデルを使用</string>
     <string name="label_sf_free_llm_model">モデルを選択</string>
 

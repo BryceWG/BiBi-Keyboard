@@ -7,7 +7,7 @@
     <string name="label_llm_model">اسم النموذج (اختياري)</string>
     <string name="label_llm_temperature">درجة الحرارة</string>
     <string name="label_llm_more_params">مزيد من المعلمات</string>
-    <string name="label_llm_prompt">موجّه المعالجة اللاحقة (أخرج النص المعالَج فقط)</string>
+    <string name="label_llm_prompt">موجّه التلميع (أخرج النص المُلمَّع فقط)</string>
     <string name="label_llm_prompt_title">عنوان موجّه مُعدّ مسبقاً</string>
     <string name="label_llm_prompt_presets">موجّه التلميع المُعد مسبقاً</string>
     <string name="btn_add_preset">إضافة موجّه</string>
@@ -54,8 +54,8 @@
     <string name="btn_llm_models_add">إضافة المحدد</string>
     <string name="toast_llm_models_none_selected">لم يُحدد أي نموذج</string>
     <!-- Skip AI under char count -->
-    <string name="label_ai_skip_under_chars">تخطّي معالجة الذكاء الاصطناعي إذا أقصر من</string>
-    <string name="helper_ai_skip_under_chars">عندما يكون الطول الفعّال (CJK: أحرف، الإنجليزية: كلمات) أقل من هذا الرقم، تُتخطّى معالجة الذكاء الاصطناعي. عيّن 0 للتعطيل.</string>
+    <string name="label_ai_skip_under_chars">تخطّي التلميع بالذكاء الاصطناعي إذا أقصر من</string>
+    <string name="helper_ai_skip_under_chars">عندما يكون الطول الفعّال (CJK: أحرف، الإنجليزية: كلمات) أقل من هذا الرقم، يُتخطّى التلميع بالذكاء الاصطناعي. عيّن 0 للتعطيل.</string>
     <string name="title_ai_skip_under">عتبة التخطّي التلقائي</string>
 
     <!-- ============================================== -->
@@ -64,12 +64,12 @@
 
     <!-- AI post-processing enabled -->
     <string name="feature_ai_post_process_off_desc">تُخرج نتائج التعرّف مباشرة دون معالجة.</string>
-    <string name="feature_ai_post_process_on_desc">تُعالَج نتائج التعرّف بالذكاء الاصطناعي قبل الإخراج لتحسين النص والترقيم والتنسيق وغيرها.</string>
+    <string name="feature_ai_post_process_on_desc">تُلمَّع نتائج التعرّف بالذكاء الاصطناعي قبل الإخراج لتنظيم النص والترقيم والتنسيق وغيرها.</string>
 
     <!-- Post-processing typewriter effect -->
-    <string name="label_postproc_typewriter_enabled">تأثير الآلة الكاتبة (خرج المعالجة اللاحقة)</string>
-    <string name="feature_postproc_typewriter_off_desc">انتظر اكتمال المعالجة اللاحقة، ثم طبّق النتيجة الكاملة دفعة واحدة.</string>
-    <string name="feature_postproc_typewriter_on_desc">تحريك خرج المعالجة اللاحقة المتدفق بتأثير آلة كاتبة سريع لواجهة أنعم.</string>
+    <string name="label_postproc_typewriter_enabled">تأثير الآلة الكاتبة (خرج التلميع)</string>
+    <string name="feature_postproc_typewriter_off_desc">انتظر اكتمال التلميع، ثم طبّق النتيجة الكاملة دفعة واحدة.</string>
+    <string name="feature_postproc_typewriter_on_desc">تحريك خرج التلميع المتدفق بتأثير آلة كاتبة سريع لواجهة أنعم.</string>
 
     <!-- AI edit default use last ASR -->
     <string name="feature_ai_edit_default_use_last_asr_off_desc">عند عدم تحديد نص، يستهدف التحرير بالذكاء الاصطناعي حقل الإدخال بالكامل.</string>
@@ -86,7 +86,7 @@
     <string name="section_ai_edit">تحرير بالذكاء الاصطناعي</string>
     <string name="section_post_process_model">نموذج الذكاء الاصطناعي</string>
 
-    <string name="label_ai_post_process_enabled">تفعيل معالجة لاحقة بالذكاء الاصطناعي</string>
+    <string name="label_ai_post_process_enabled">تفعيل التلميع بالذكاء الاصطناعي</string>
 
     <!-- LLM vendor selection -->
     <string name="label_llm_vendor">مزود LLM</string>
@@ -127,7 +127,7 @@
 
     <!-- SiliconFlow free/paid toggle -->
     <string name="label_sf_use_free_service">استخدام الخدمة المجانية</string>
-    <string name="sf_free_service_desc">معالجة لاحقة مجانية بالذكاء الاصطناعي من SiliconFlow. لا يلزم مفتاح API.</string>
+    <string name="sf_free_service_desc">تلميع مجاني بالذكاء الاصطناعي من SiliconFlow. لا يلزم مفتاح API.</string>
     <string name="sf_paid_service_hint">أدخل مفتاح SiliconFlow API لمزيد من خيارات النماذج.</string>
 
     <!-- Common buttons -->

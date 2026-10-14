@@ -165,7 +165,7 @@
   <string name="untitled_preset">未命名預設</string>
   <string name="switched_preset">已切換：%1$s</string>
   <string name="toast_search_changed_asr_vendor">已切換語音辨識服務商：%1$s</string>
-  <string name="toast_search_changed_llm_vendor">已切換後處理模型供應商：%1$s</string>
+  <string name="toast_search_changed_llm_vendor">已切換潤飾模型供應商：%1$s</string>
 
   <!-- ============================================== -->
   <!-- 輸入相關 -->
@@ -376,12 +376,12 @@
   <string name="feature_keep_screen_on_while_recording_on_desc">開啟後，透過主鍵盤或懸浮球錄音時保持螢幕常亮，避免中途熄屏。</string>
 
   <!-- Auto enter after input -->
-  <string name="feature_auto_enter_after_asr_off_desc">辨識（及開啟時的 AI 後處理）完成後僅提交文字，不會自動 Enter。仍可在錄音時右滑麥克風，讓本次結果提交後 Enter 傳送。</string>
-  <string name="feature_auto_enter_after_asr_on_desc">每次輸入完成（若開啟 AI 後處理則在後處理完成後）自動 Enter 或觸發編輯器傳送動作，方便在聊天應用中直接傳送。空結果不會 Enter。</string>
+  <string name="feature_auto_enter_after_asr_off_desc">辨識（及開啟時的 AI 潤飾）完成後僅提交文字，不會自動 Enter。仍可在錄音時右滑麥克風，讓本次結果提交後 Enter 傳送。</string>
+  <string name="feature_auto_enter_after_asr_on_desc">每次輸入完成（若開啟 AI 潤飾則在潤飾完成後）自動 Enter 或觸發編輯器傳送動作，方便在聊天應用中直接傳送。空結果不會 Enter。</string>
 
   <!-- 輸入完成後自動切換輸入法 -->
   <string name="feature_auto_switch_ime_after_asr_off_desc">輸入完成後仍保持目前輸入法，不會自動切換。</string>
-  <string name="feature_auto_switch_ime_after_asr_on_desc">後處理完成且預覽文字固化後，自動切換到「指定輸入法」中選定的輸入法，方便二次編輯。未指定時切換到上一個輸入法。空結果不會切換。</string>
+  <string name="feature_auto_switch_ime_after_asr_on_desc">輸入完成且預覽文字固化後，自動切換到「指定輸入法」中選定的輸入法，方便二次編輯。未指定時切換到上一個輸入法。空結果不會切換。</string>
 
   <!-- 輸入法切換鍵功能 -->
   <string name="feature_fcitx5_return_on_switcher_off_desc">輸入法切換鍵開啟系統的輸入法選擇器。</string>
@@ -435,7 +435,7 @@
 
   <!-- 匿名資料收集同意彈窗 -->
   <string name="title_data_collection_consent">匿名資料收集說明</string>
-  <string name="msg_data_collection_consent">為了改進說點啥的體驗，我們希望收集少量匿名使用資料，包括：應用版本、安裝渠道、初次使用時間、Android 版本（SDK）、裝置型號、語音識別事件中繼資料（供應商、音訊時長、處理耗時、字數、來源渠道、是否使用 AI 後處理）、應用介面語言，以及應用啟動次數。不會上傳識別文字或任何個人資訊。相關收集與上報程式碼已開源。是否同意開啟？</string>
+  <string name="msg_data_collection_consent">為了改進說點啥的體驗，我們希望收集少量匿名使用資料，包括：應用版本、安裝渠道、初次使用時間、Android 版本（SDK）、裝置型號、語音識別事件中繼資料（供應商、音訊時長、處理耗時、字數、來源渠道、是否使用 AI 潤飾）、應用介面語言，以及應用啟動次數。不會上傳識別文字或任何個人資訊。相關收集與上報程式碼已開源。是否同意開啟？</string>
   <string name="btn_agree">同意</string>
   <string name="btn_disagree">暫不</string>
 
@@ -459,7 +459,7 @@
   <string name="pro_paywall_included_mark">✓</string>
   <string name="pro_paywall_not_included_mark">—</string>
   <string name="pro_paywall_feature_core_asr">多供應商 ASR、串流辨識與本地模型</string>
-  <string name="pro_paywall_feature_ai">AI 後處理與基礎 AI 編輯</string>
+  <string name="pro_paywall_feature_ai">AI 潤飾與基礎 AI 編輯</string>
   <string name="pro_paywall_feature_input">鍵盤、懸浮球與外部呼叫</string>
   <string name="pro_paywall_feature_layout">鍵盤配置、預設與設定備份</string>
   <string name="pro_paywall_feature_continuous">暢說模式</string>
@@ -521,8 +521,8 @@
   <string name="recording_test_backup_strategy_lazy">懶載入串行</string>
   <string name="recording_test_auto_transcribe">自動轉錄</string>
   <string name="recording_test_ai_label">AI</string>
-  <string name="recording_test_prompt_summary">選擇 AI 後處理使用的提示詞預設</string>
-  <string name="recording_test_ai_process">AI處理</string>
+  <string name="recording_test_prompt_summary">選擇 AI 潤飾使用的提示詞預設</string>
+  <string name="recording_test_ai_process">AI潤飾</string>
   <string name="recording_test_result_compare">結果對比</string>
   <string name="recording_test_raw_result">原始：</string>
   <string name="recording_test_ai_result">AI：</string>

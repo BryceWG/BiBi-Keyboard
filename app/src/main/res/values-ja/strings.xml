@@ -166,7 +166,7 @@
   <string name="untitled_preset">無題のプリセット</string>
   <string name="switched_preset">切り替え：%1$s</string>
   <string name="toast_search_changed_asr_vendor">音声認識プロバイダーを切り替えました：%1$s</string>
-  <string name="toast_search_changed_llm_vendor">後処理モデルのプロバイダーを切り替えました：%1$s</string>
+  <string name="toast_search_changed_llm_vendor">校正モデルのプロバイダーを切り替えました：%1$s</string>
 
   <!-- ============================================== -->
   <!-- 输入相关 -->
@@ -377,12 +377,12 @@
   <string name="feature_keep_screen_on_while_recording_on_desc">キーボードまたはフローティングボールで録音している間、画面を点灯したままにし、途中で消灯しないようにします。</string>
 
   <!-- Auto enter after input -->
-  <string name="feature_auto_enter_after_asr_off_desc">認識（および有効時の AI 後処理）完了後はテキストのみ確定し、自動 Enter しません。録音中にマイクを右スワイプすれば、今回の結果確定後に Enter 送信できます。</string>
-  <string name="feature_auto_enter_after_asr_on_desc">毎回の入力完了後（AI 後処理が有効な場合はその完了後）に自動で Enter / 送信アクションを実行し、チャットアプリでそのまま送信できます。空の結果では Enter しません。</string>
+  <string name="feature_auto_enter_after_asr_off_desc">認識（および有効時の AI 校正）完了後はテキストのみ確定し、自動 Enter しません。録音中にマイクを右スワイプすれば、今回の結果確定後に Enter 送信できます。</string>
+  <string name="feature_auto_enter_after_asr_on_desc">毎回の入力完了後（AI 校正が有効な場合はその完了後）に自動で Enter / 送信アクションを実行し、チャットアプリでそのまま送信できます。空の結果では Enter しません。</string>
 
   <!-- 入力完了後にIMEを自動切替 -->
   <string name="feature_auto_switch_ime_after_asr_off_desc">入力完了後も現在の入力法のままです。自動では切り替わりません。</string>
-  <string name="feature_auto_switch_ime_after_asr_on_desc">後処理が終わり、プレビューテキストが確定したあと、「指定IME」で選んだ入力法に自動切替し、続けて編集できます。未設定の場合は前の入力法に切り替えます。空の結果では切り替えません。</string>
+  <string name="feature_auto_switch_ime_after_asr_on_desc">入力が完了し、プレビューテキストが確定したあと、「指定IME」で選んだ入力法に自動切替し、続けて編集できます。未設定の場合は前の入力法に切り替えます。空の結果では切り替えません。</string>
 
   <!-- 入力法切替キーの機能 -->
   <string name="feature_fcitx5_return_on_switcher_off_desc">入力法切替キーはシステムの入力法選択画面を開きます。</string>
@@ -436,7 +436,7 @@
 
   <!-- Data collection consent dialog -->
   <string name="title_data_collection_consent">匿名データ収集について</string>
-  <string name="msg_data_collection_consent">BiBi Keyboardの改善のため、匿名の利用統計を収集したいと考えています。収集内容は、アプリのバージョン、インストール元チャネル、初回利用日、Android バージョン（SDK）、端末モデル、ASRイベントのメタ情報（プロバイダー、音声長、処理時間、文字数、使用元、AI後処理の有無）、アプリの表示言語、アプリ起動イベントです。認識テキストや個人情報はアップロードされません。収集コードはオープンソースです。同意しますか？</string>
+  <string name="msg_data_collection_consent">BiBi Keyboardの改善のため、匿名の利用統計を収集したいと考えています。収集内容は、アプリのバージョン、インストール元チャネル、初回利用日、Android バージョン（SDK）、端末モデル、ASRイベントのメタ情報（プロバイダー、音声長、処理時間、文字数、使用元、AI校正の有無）、アプリの表示言語、アプリ起動イベントです。認識テキストや個人情報はアップロードされません。収集コードはオープンソースです。同意しますか？</string>
   <string name="btn_agree">同意する</string>
   <string name="btn_disagree">今はしない</string>
 
@@ -460,7 +460,7 @@
   <string name="pro_paywall_included_mark">✓</string>
   <string name="pro_paywall_not_included_mark">—</string>
   <string name="pro_paywall_feature_core_asr">複数 ASR、ストリーミング、ローカルモデル</string>
-  <string name="pro_paywall_feature_ai">AI ポスト処理と基本 AI 編集</string>
+  <string name="pro_paywall_feature_ai">AI 校正と基本 AI 編集</string>
   <string name="pro_paywall_feature_input">キーボード、フローティングボール、外部呼び出し</string>
   <string name="pro_paywall_feature_layout">レイアウト、プリセット、設定バックアップ</string>
   <string name="pro_paywall_feature_continuous">連続発話モード</string>
@@ -522,8 +522,8 @@
   <string name="recording_test_backup_strategy_lazy">遅延読み込み直列</string>
   <string name="recording_test_auto_transcribe">自動文字起こし</string>
   <string name="recording_test_ai_label">AI</string>
-  <string name="recording_test_prompt_summary">AI 後処理で使うプロンプトプリセットを選択</string>
-  <string name="recording_test_ai_process">AI処理</string>
+  <string name="recording_test_prompt_summary">AI 校正で使うプロンプトプリセットを選択</string>
+  <string name="recording_test_ai_process">AI校正</string>
   <string name="recording_test_result_compare">結果比較</string>
   <string name="recording_test_raw_result">原文：</string>
   <string name="recording_test_ai_result">AI：</string>

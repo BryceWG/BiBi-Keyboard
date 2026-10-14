@@ -167,7 +167,7 @@
   <string name="untitled_preset">Untitled preset</string>
   <string name="switched_preset">Switched: %1$s</string>
   <string name="toast_search_changed_asr_vendor">Switched ASR provider: %1$s</string>
-  <string name="toast_search_changed_llm_vendor">Switched post-processing model provider: %1$s</string>
+  <string name="toast_search_changed_llm_vendor">Switched polish model provider: %1$s</string>
 
   <!-- ============================================== -->
   <!-- Input Related -->
@@ -378,12 +378,12 @@
   <string name="feature_keep_screen_on_while_recording_on_desc">While recording from the keyboard or floating ball, the screen stays on so it will not sleep mid-recording.</string>
 
   <!-- Auto enter after input -->
-  <string name="feature_auto_enter_after_asr_off_desc">After recognition (and AI post-processing if enabled), only the text is committed. You can still swipe right on the mic to send with Enter for that session.</string>
-  <string name="feature_auto_enter_after_asr_on_desc">After input finishes—including AI post-processing when enabled—automatically presses Enter / the editor Send action so chat apps can send the message. Empty results are skipped.</string>
+  <string name="feature_auto_enter_after_asr_off_desc">After recognition (and AI polish if enabled), only the text is committed. You can still swipe right on the mic to send with Enter for that session.</string>
+  <string name="feature_auto_enter_after_asr_on_desc">After input finishes—including AI polish when enabled—automatically presses Enter / the editor Send action so chat apps can send the message. Empty results are skipped.</string>
 
   <!-- Auto switch IME after input -->
   <string name="feature_auto_switch_ime_after_asr_off_desc">After input finishes, this keyboard stays current. It does not switch to another IME.</string>
-  <string name="feature_auto_switch_ime_after_asr_on_desc">After post-processing finishes and the composing preview is committed, automatically switches to the IME selected in “Target IME” so you can continue editing. If none is set, switches to the previous IME. Empty results are skipped.</string>
+  <string name="feature_auto_switch_ime_after_asr_on_desc">After input finishes and the composing preview is committed, automatically switches to the IME selected in “Target IME” so you can continue editing. If none is set, switches to the previous IME. Empty results are skipped.</string>
 
   <!-- Fcitx5 return on switcher -->
   <string name="feature_fcitx5_return_on_switcher_off_desc">The IME switcher key opens the system input method picker.</string>
@@ -437,7 +437,7 @@
 
   <!-- Data collection consent dialog -->
   <string name="title_data_collection_consent">Anonymous Data Collection</string>
-  <string name="msg_data_collection_consent">To help improve BiBi Keyboard, we would like to collect anonymous usage statistics. This includes: app version, install channel, first seen date, Android version (SDK), device model, ASR event metadata (provider, audio duration, processing time, character count, source channel, whether AI post-processing was used), app language, and app start events. No recognition text or personal content will be uploaded. The collection code is open-source. Do you agree to enable this?</string>
+  <string name="msg_data_collection_consent">To help improve BiBi Keyboard, we would like to collect anonymous usage statistics. This includes: app version, install channel, first seen date, Android version (SDK), device model, ASR event metadata (provider, audio duration, processing time, character count, source channel, whether AI polish was used), app language, and app start events. No recognition text or personal content will be uploaded. The collection code is open-source. Do you agree to enable this?</string>
   <string name="btn_agree">Agree</string>
   <string name="btn_disagree">Not now</string>
 
@@ -461,7 +461,7 @@
   <string name="pro_paywall_included_mark">✓</string>
   <string name="pro_paywall_not_included_mark">—</string>
   <string name="pro_paywall_feature_core_asr">Multi-provider ASR, streaming and local models</string>
-  <string name="pro_paywall_feature_ai">AI post-processing and basic AI editing</string>
+  <string name="pro_paywall_feature_ai">AI polish and basic AI editing</string>
   <string name="pro_paywall_feature_input">Keyboard, floating ball and external calls</string>
   <string name="pro_paywall_feature_layout">Layouts, presets and settings backup</string>
   <string name="pro_paywall_feature_continuous">Continuous speaking mode</string>
@@ -523,8 +523,8 @@
   <string name="recording_test_backup_strategy_lazy">Lazy serial</string>
   <string name="recording_test_auto_transcribe">Auto transcribe</string>
   <string name="recording_test_ai_label">AI</string>
-  <string name="recording_test_prompt_summary">Choose the prompt preset used for AI post-processing</string>
-  <string name="recording_test_ai_process">AI Process</string>
+  <string name="recording_test_prompt_summary">Choose the prompt preset used for AI polish</string>
+  <string name="recording_test_ai_process">AI Polish</string>
   <string name="recording_test_result_compare">Result Compare</string>
   <string name="recording_test_raw_result">Raw:</string>
   <string name="recording_test_ai_result">AI:</string>

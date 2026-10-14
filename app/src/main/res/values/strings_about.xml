@@ -14,7 +14,7 @@
     <string name="about_website_url">https://bibi.brycewg.com</string>
     <string name="about_open_docs">Open Documentation</string>
     <string name="about_docs_url">https://bibidocs.brycewg.com</string>
-    <string name="about_desc">A lightweight voice input IME with multi-vendor ASR and LLM post-processing</string>
+    <string name="about_desc">A lightweight voice input IME with multi-vendor ASR and LLM polish</string>
 
     <string name="label_asr_total_chars">Total characters from speech recognition: %1$d</string>
 

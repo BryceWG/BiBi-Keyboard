@@ -14,7 +14,7 @@
     <string name="sf_free_description">硅基流动慷慨提供的免费服务，助力您即刻体验 AI 语音识别，无需 API Key。</string>
 
     <!-- SiliconFlow 免费服务（LLM） -->
-    <string name="sf_free_llm_description">硅基流动慷慨提供的免费 AI 后处理服务。无需 API Key。</string>
+    <string name="sf_free_llm_description">硅基流动慷慨提供的免费 AI 润色服务。无需 API Key。</string>
     <string name="label_sf_free_llm_enabled">使用 SiliconFlow 提供的免费模型</string>
     <string name="label_sf_free_llm_model">选择模型</string>
 

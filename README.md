@@ -32,7 +32,7 @@
 <tr>
 <td width="33%" align="center"><b>开箱即用</b><br/><sub>分步引导完成输入法与权限配置</sub></td>
 <td width="34%" align="center"><b>语音即输</b><br/><sub>打开键盘，长按麦克风即可自然表达</sub></td>
-<td width="33%" align="center"><b>智能增强</b><br/><sub>识别、AI 后处理与历史记录集中管理</sub></td>
+<td width="33%" align="center"><b>智能增强</b><br/><sub>识别、AI 润色与历史记录集中管理</sub></td>
 </tr>
 </table>
 
@@ -50,7 +50,7 @@
 - **多引擎支持** - 18 个 ASR 供应商（12 个云端 + 6 个本地）
 - **本地 ASR 模型** - SenseVoice / FunASR Nano / Qwen3-ASR / Parakeet / FireRedASR / X-ASR，离线可用
 - **主备与本地兜底** - 支持备用引擎与本地备用驻留，网络不稳时更可靠
-- **AI 文本后处理** - LLM 后处理修正识别结果；历史可缓存音频并重跑识别/后处理
+- **AI 文本润色** - LLM 润色修正识别结果；历史可缓存音频并重跑识别或润色
 
 </td>
 <td width="50%">
