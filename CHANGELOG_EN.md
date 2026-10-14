@@ -1,5 +1,24 @@
 # Changelog
 
+## v4.5.2 (2026-10-12)
+
+### New Features
+
+- **Recording Screen Animation**: In floating ball, volume key, and shake recording modes, an animation at the bottom of the screen follows the volume. Touches pass through, and it is on by default
+- **Audio Ducking Key**: Adds a keyboard extension button to control audio ducking while recording
+- **[Pro] Cursor Glide Selection**: In selection mode, gliding the cursor selects text
+
+### Improvements
+
+- **Shared Recording Settings**: Floating ball, volume key, and shake recording share "Stop recording when keyboard disappears", "Recording status reminder", and "Feedback when recording starts or stops". Feedback can be off, sound, vibration, or both
+
+### Bug Fixes
+
+- **Empty Recognition**: When some vendors return an empty result, it is no longer treated as a recognition failure
+- **Floating Ball Recording Halo**: Fix the halo around the floating ball not showing while recording
+
+---
+
 ## v4.5.1 (2026-10-03)
 
 ### New Features
