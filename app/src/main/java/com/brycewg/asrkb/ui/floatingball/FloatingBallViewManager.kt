@@ -60,6 +60,8 @@ class FloatingBallViewManager(
     private var recordingAuraView: RecordingAuraView? = null
     private var recordingAuraLp: WindowManager.LayoutParams? = null
     private var recordingRibbonView: RecordingRibbonOverlayView? = null
+    private var ribbonStackedAboveBall: Boolean = false
+    private var ballGestureActive: Boolean = false
     private var lp: WindowManager.LayoutParams? = null
 
     // 动画
@@ -186,6 +188,10 @@ class FloatingBallViewManager(
             val params = createWindowLayoutParams()
             lp = params
             ensureRecordingAuraOverlay()
+            // 与光晕一样先于悬浮球加入，z-order 天然更低，录音时不必拆掉悬浮球。
+            if (readRecordingRibbonEnabled()) {
+                ensureRecordingRibbonOverlay()
+            }
 
             // 添加视图
             windowManager.addView(view, params)
@@ -205,6 +211,7 @@ class FloatingBallViewManager(
             return true
         } catch (e: Throwable) {
             removeRecordingAuraOverlay()
+            removeRecordingRibbonOverlay()
             lp = null
             Log.e(TAG, "Failed to add ball view", e)
             return false
@@ -342,6 +349,8 @@ class FloatingBallViewManager(
 
     /** 更新悬浮球状态显示 */
     fun updateStateVisual(state: FloatingBallState, force: Boolean = false) {
+        // 开关刷新可能停在同一状态，仍要补上或拆掉录音条窗口。
+        syncRecordingRibbon(state)
         val prevState = currentState
         if (!force && state == prevState) return
 
@@ -414,7 +423,6 @@ class FloatingBallViewManager(
                 }
             }
         }
-        syncRecordingRibbon(state)
     }
 
     /**
@@ -674,7 +682,8 @@ class FloatingBallViewManager(
 
     /** 清理所有动画 */
     fun cleanup() {
-        dismissRecordingRibbon(animated = false)
+        ballGestureActive = false
+        dismissRecordingRibbon()
         stopRecordingAura()
         removeRecordingAuraOverlay()
         stopProcessingSpinner()
@@ -759,15 +768,27 @@ class FloatingBallViewManager(
         stateAlphaAnimator = null
     }
 
+    /** 手指按在悬浮球上时不能拆窗口重排，否则系统会补发 ACTION_CANCEL。 */
+    internal fun setBallGestureActive(active: Boolean) {
+        if (ballGestureActive == active) return
+        ballGestureActive = active
+        if (!active) {
+            raiseBallAboveRibbonIfIdle()
+        }
+    }
+
     internal fun syncRecordingRibbon(state: FloatingBallState) {
         val enabled = readRecordingRibbonEnabled()
-        val show = enabled &&
-            (state is FloatingBallState.Recording || state is FloatingBallState.Processing)
-        if (!show) {
-            dismissRecordingRibbon(animated = enabled && recordingRibbonView != null)
+        if (!enabled || ballView == null) {
+            dismissRecordingRibbon()
             return
         }
         val ribbon = ensureRecordingRibbonOverlay() ?: return
+        val active = state is FloatingBallState.Recording || state is FloatingBallState.Processing
+        if (!active) {
+            concealRecordingRibbon()
+            return
+        }
         ribbon.setTheme(BibiViewThemes.resolve(context, prefs))
         if (state is FloatingBallState.Recording) {
             ribbon.beginRecording()
@@ -790,6 +811,12 @@ class FloatingBallViewManager(
             return null
         }
         val ribbon = RecordingRibbonOverlayView(context)
+        ribbon.cancelMotion()
+        try {
+            ribbon.setTheme(BibiViewThemes.resolve(context, prefs))
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to theme recording ribbon", e)
+        }
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
@@ -804,7 +831,13 @@ class FloatingBallViewManager(
         return try {
             windowManager.addView(ribbon, params)
             recordingRibbonView = ribbon
-            bringBallAboveRibbon()
+            if (ballView != null) {
+                // 后加上的窗口会盖住悬浮球。空闲时再把球挪回来；按着时绝不摘窗口。
+                ribbonStackedAboveBall = true
+                raiseBallAboveRibbonIfIdle()
+            } else {
+                ribbonStackedAboveBall = false
+            }
             ribbon
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to add recording ribbon overlay", e)
@@ -813,19 +846,25 @@ class FloatingBallViewManager(
         }
     }
 
-    private fun dismissRecordingRibbon(animated: Boolean) {
+    private fun concealRecordingRibbon() {
         val ribbon = recordingRibbonView ?: return
-        if (!animated) {
+        if (ribbon.visibility != View.VISIBLE) return
+        ribbon.playExit {
+            if (recordingRibbonView !== ribbon) return@playExit
             ribbon.cancelMotion()
-            removeRecordingRibbonOverlay()
-            return
         }
-        ribbon.playExit { removeRecordingRibbonOverlay() }
+    }
+
+    private fun dismissRecordingRibbon() {
+        val ribbon = recordingRibbonView ?: return
+        ribbon.cancelMotion()
+        removeRecordingRibbonOverlay()
     }
 
     private fun removeRecordingRibbonOverlay() {
         val ribbon = recordingRibbonView ?: return
         recordingRibbonView = null
+        ribbonStackedAboveBall = false
         try {
             windowManager.removeView(ribbon)
         } catch (e: Throwable) {
@@ -833,27 +872,35 @@ class FloatingBallViewManager(
         }
     }
 
-    private fun bringBallAboveRibbon() {
+    private fun raiseBallAboveRibbonIfIdle() {
+        if (!ribbonStackedAboveBall || ballGestureActive) return
         val ball = ballView ?: return
-        // 延后到当前帧之后，避免摘掉悬浮球时丢掉 showBall 里尚未执行的 post。
+        if (recordingRibbonView == null) return
         ball.post {
+            if (!ribbonStackedAboveBall || ballGestureActive) return@post
             if (ballView !== ball || recordingRibbonView == null) return@post
             val params = lp ?: return@post
-            try {
-                windowManager.removeViewImmediate(ball)
-            } catch (e: Throwable) {
-                Log.w(TAG, "Failed to detach floating ball before raising it", e)
-                return@post
-            }
+            reattachBallAboveRibbon(ball, params)
+        }
+    }
+
+    private fun reattachBallAboveRibbon(ball: View, params: WindowManager.LayoutParams) {
+        try {
+            windowManager.removeViewImmediate(ball)
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to detach floating ball before placing ribbon", e)
+            return
+        }
+        try {
+            windowManager.addView(ball, params)
+            ribbonStackedAboveBall = false
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to reattach floating ball above recording ribbon", e)
             try {
                 windowManager.addView(ball, params)
-            } catch (e: Throwable) {
-                Log.e(TAG, "Failed to reattach floating ball above recording ribbon", e)
-                try {
-                    windowManager.addView(ball, params)
-                } catch (retry: Throwable) {
-                    Log.e(TAG, "Failed to restore floating ball after recording ribbon", retry)
-                }
+                ribbonStackedAboveBall = false
+            } catch (retry: Throwable) {
+                Log.e(TAG, "Failed to restore floating ball after recording ribbon", retry)
             }
         }
     }

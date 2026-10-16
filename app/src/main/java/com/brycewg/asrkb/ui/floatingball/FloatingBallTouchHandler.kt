@@ -94,14 +94,28 @@ class FloatingBallTouchHandler(
             viewManager.getLayoutParams() ?: return@OnTouchListener false
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    // 先于长按录音标记，补录音条窗口时才知道手指还按着。
+                    viewManager.setBallGestureActive(true)
                     handleActionDown(e, isMoveMode())
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     handleActionMove(v, e)
                 }
-                MotionEvent.ACTION_UP -> handleActionUp(v, e)
-                MotionEvent.ACTION_CANCEL -> handleActionCancel()
+                MotionEvent.ACTION_UP -> {
+                    try {
+                        handleActionUp(v, e)
+                    } finally {
+                        viewManager.setBallGestureActive(false)
+                    }
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    try {
+                        handleActionCancel()
+                    } finally {
+                        viewManager.setBallGestureActive(false)
+                    }
+                }
                 else -> false
             }
         }
