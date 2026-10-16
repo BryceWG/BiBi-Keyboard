@@ -60,12 +60,14 @@ internal class ImeUiRenderer(
                 is KeyboardState.Idle -> updateUiIdle()
                 is KeyboardState.Listening -> updateUiListening(state)
                 is KeyboardState.Processing -> updateUiProcessing()
-                is KeyboardState.AiProcessing -> updateUiAiProcessing()
+                is KeyboardState.AiProcessing -> updateUiAiProcessing(state)
                 is KeyboardState.AiEditListening -> updateUiAiEditListening()
                 is KeyboardState.AiEditProcessing -> updateUiAiEditProcessing()
             }
         } else if (state is KeyboardState.Listening) {
             showRecordingGesturesOverlay(state)
+        } else if (state is KeyboardState.AiProcessing) {
+            updateAiProcessingLabel(state)
         }
 
         // 更新中间结果到 composing
@@ -92,7 +94,7 @@ internal class ImeUiRenderer(
         updateAiEditInfoBar(state)
     }
 
-    fun showStatusMessage(message: String) {
+    fun showStatusMessage(message: String, reportError: Boolean = true) {
         clearStatusTextStyle()
         setTextIfChanged(views.txtStatusText, message)
         enableStatusMarquee()
@@ -107,7 +109,7 @@ internal class ImeUiRenderer(
             message.contains("invalid", ignoreCase = true) ||
             message.contains(Regex("\\b(401|403|404|500|502|503)\\b"))
 
-        if (isError) {
+        if (reportError && isError) {
             val copied = try {
                 copyTextToSystemClipboard("ASR Error", message)
             } catch (e: Exception) {
@@ -389,13 +391,13 @@ internal class ImeUiRenderer(
         setImageResourceIfChanged(views.btnPromptPicker, R.drawable.pencil_simple_line)
     }
 
-    private fun updateUiAiProcessing() {
+    private fun updateUiAiProcessing(state: KeyboardState.AiProcessing) {
         hideRecordingGesturesOverlay()
         clearStatusTextStyle()
         // 显示文字，隐藏波形
         setVisibilityIfChanged(views.txtStatusText, View.VISIBLE)
         val tv = views.txtStatusText
-        setTextIfChanged(tv, context.getString(R.string.status_ai_processing))
+        setTextIfChanged(tv, context.aiProcessingStatusText(state.promptTitle, state.selectingPrompt))
         tv?.isClickable = true
         tv?.isFocusable = true
         tv?.setOnClickListener { v ->
@@ -407,6 +409,16 @@ internal class ImeUiRenderer(
 
         setMicButtons(selected = false, imageRes = R.drawable.microphone)
         setImageResourceIfChanged(views.btnPromptPicker, R.drawable.pencil_simple_line)
+    }
+
+    private fun updateAiProcessingLabel(state: KeyboardState.AiProcessing) {
+        val tv = views.txtStatusText ?: return
+        val text = context.aiProcessingStatusText(state.promptTitle, state.selectingPrompt)
+        if (tv.text?.contentEquals(text) == true) return
+        setTextIfChanged(tv, text)
+        // 文案变长后重新挂上跑马灯，避免沿用上一次 isSelected 导致不滚动
+        tv.isSelected = false
+        tv.isSelected = true
     }
 
     private fun updateUiAiEditListening() {

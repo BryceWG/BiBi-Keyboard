@@ -18,6 +18,8 @@
   <string name="status_backup_asr_loading">ローカルバックアップ認識を起動中…</string>
   <string name="status_backup_asr_recognizing">ローカルバックアップで認識中…</string>
   <string name="status_ai_processing">AI校正中…</string>
+  <string name="status_ai_processing_named">%1$s…</string>
+  <string name="status_prompt_selecting">プロンプト選択中…</string>
   <string name="status_ai_edit_listening">編集指示を話してください…</string>
   <string name="status_ai_editing">AI編集中…</string>
   <string name="status_cancelled">キャンセルしました</string>

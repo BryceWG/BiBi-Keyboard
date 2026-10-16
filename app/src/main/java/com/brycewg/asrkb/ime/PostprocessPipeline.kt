@@ -41,7 +41,8 @@ internal class PostprocessPipeline(
         onPostprocFailed: () -> Unit,
         aiTimingObserver: AsrFinalFilters.AiPostprocessTimingObserver? = null,
         promptSelectionMode: AsrFinalFilters.PromptSelectionMode =
-            AsrFinalFilters.PromptSelectionMode.DISABLED
+            AsrFinalFilters.PromptSelectionMode.DISABLED,
+        onPolishPrompt: ((selecting: Boolean, title: String?) -> Unit)? = null
     ): Result? {
         val rawText = try {
             if (AsrFinalFilters.shouldTrimTrailingPunctAndEmoji(prefs, text)) {
@@ -102,7 +103,8 @@ internal class PostprocessPipeline(
                 onStreamingUpdate = onStreamingUpdate,
                 aiTimingObserver = aiTimingObserver,
                 promptSelectionMode = promptSelectionMode,
-                isCancelled = isCancelled
+                isCancelled = isCancelled,
+                onPolishPrompt = onPolishPrompt
             )
         } catch (t: Throwable) {
             Log.e(logTag, "applyWithAi failed", t)

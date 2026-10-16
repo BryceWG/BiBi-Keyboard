@@ -29,8 +29,14 @@ sealed class KeyboardState {
     /**
      * AI 后处理中：正在使用 LLM 优化识别结果
      * @param rawText 原始识别文本
+     * @param promptTitle 本次润色实际使用的提示词名称；自动选择尚未完成时为空
+     * @param selectingPrompt 正在自动选择提示词，信息条先展示选择中
      */
-    data class AiProcessing(val rawText: String) : KeyboardState()
+    data class AiProcessing(
+        val rawText: String,
+        val promptTitle: String? = null,
+        val selectingPrompt: Boolean = false
+    ) : KeyboardState()
 
     /**
      * AI 编辑模式：正在录音捕获编辑指令

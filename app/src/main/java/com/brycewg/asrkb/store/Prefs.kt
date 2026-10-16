@@ -955,6 +955,18 @@ class Prefs(context: Context) {
                 ?: ""
         }
 
+    /**
+     * 当前选中预设的标题。回退顺序与 [activePromptContent] 一致：选中预设，否则第一条。
+     */
+    val activePromptTitle: String
+        get() {
+            val presets = getPromptPresets()
+            val id = activePromptId
+            return presets.firstOrNull { it.id == id }?.title
+                ?: presets.firstOrNull()?.title
+                ?: ""
+        }
+
     // ========== 自动选择提示词（润色模式） ==========
 
     /** 自动选择开关。默认关闭。 */

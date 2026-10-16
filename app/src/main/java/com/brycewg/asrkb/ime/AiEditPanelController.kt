@@ -282,7 +282,8 @@ internal class AiEditPanelController(
             val preset = presets.getOrNull(position) ?: return@setOnMenuItemClickListener false
             actionHandler.applyPromptToSelectionOrAll(
                 inputConnectionProvider(),
-                promptContent = preset.content
+                promptContent = preset.content,
+                promptTitle = preset.title
             )
             true
         }

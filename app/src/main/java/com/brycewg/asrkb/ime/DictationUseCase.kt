@@ -27,6 +27,7 @@ internal class DictationUseCase(
     private val consumeAutoEnterOnce: () -> Boolean,
     private val updateSessionContext: ((KeyboardSessionContext) -> KeyboardSessionContext) -> Unit,
     private val transitionToState: (KeyboardState) -> Unit,
+    private val updateAiProcessingPrompt: (selecting: Boolean, title: String?) -> Unit,
     private val transitionToIdle: (keepMessage: Boolean) -> Unit,
     private val transitionToIdleWithTiming: (showBackupUsedHint: Boolean) -> Unit,
     private val scheduleProcessingTimeout: (audioMsOverride: Long?) -> Unit,
@@ -72,7 +73,18 @@ internal class DictationUseCase(
             stableLen = state.committedStableLen,
             ai = true
         )
-        transitionToState(KeyboardState.AiProcessing(rawText = text))
+        val selectingPrompt = prefs.promptAutoSelectEnabled
+        transitionToState(
+            KeyboardState.AiProcessing(
+                rawText = text,
+                promptTitle = if (selectingPrompt) {
+                    null
+                } else {
+                    prefs.activePromptTitle.takeIf { it.isNotBlank() }
+                },
+                selectingPrompt = selectingPrompt
+            )
+        )
         inputHelper.replaceStreamingPreview(ic, text)
 
         val postprocessResult = postprocessPipeline.process(
@@ -114,7 +126,8 @@ internal class DictationUseCase(
             },
             // 首次语音识别属于自动流程，允许按开关自动选择预设。
             promptSelectionMode =
-            com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED
+            com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
+            onPolishPrompt = updateAiProcessingPrompt
         ) ?: return
 
         if (isCancelled(seq)) return

@@ -102,7 +102,8 @@ object AsrFinalFilters {
         onStreamingUpdate: ((String) -> Unit)? = null,
         aiTimingObserver: AiPostprocessTimingObserver? = null,
         promptSelectionMode: PromptSelectionMode = PromptSelectionMode.DISABLED,
-        isCancelled: (() -> Boolean)? = null
+        isCancelled: (() -> Boolean)? = null,
+        onPolishPrompt: ((selecting: Boolean, title: String?) -> Unit)? = null
     ): LlmPostProcessor.LlmProcessResult {
         if (input.isBlank()) {
             return LlmPostProcessor.LlmProcessResult(
@@ -192,18 +193,30 @@ object AsrFinalFilters {
         if (!skipForShort && (forceAi || prefs.postProcessEnabled) && prefs.hasLlmKeys()) {
             var effectivePromptOverride = promptOverride
             var skipPolish = false
+            var polishTitle: String? = null
             if (autoSelectionRequested) {
                 // 自动选择失败必须使用当前激活预设；手动模式下的 override 不参与自动流程回退。
                 effectivePromptOverride = null
+                notifyPolishPrompt(onPolishPrompt, selecting = true, title = null)
                 val selection = runPromptSelection(prefs, postProcessor, base, aiTimingObserver)
                 selectionStatus = selection.status
                 when (val candidate = selection.candidate) {
-                    null -> Unit
-                    is PromptSelectionCandidate.Preset ->
+                    null -> {
+                        if (onPolishPrompt != null) {
+                            polishTitle = resolvePromptTitle(prefs, promptOverride = null)
+                        }
+                    }
+                    is PromptSelectionCandidate.Preset -> {
                         effectivePromptOverride = candidate.contentForPolish
-
+                        if (onPolishPrompt != null) {
+                            polishTitle = candidate.displayTitle.takeIf { it.isNotBlank() }
+                                ?: resolvePromptTitle(prefs, promptOverride = null)
+                        }
+                    }
                     is PromptSelectionCandidate.SkipPolish -> skipPolish = true
                 }
+            } else if (onPolishPrompt != null) {
+                polishTitle = resolvePromptTitle(prefs, effectivePromptOverride)
             }
             // 分类与润色共享取消语义：即使命中“跳过润色”，分类结束后取消也不能返回成功结果。
             val cancelledAfterSelection = isCancelled?.invoke() == true
@@ -213,6 +226,7 @@ object AsrFinalFilters {
                 processed = base
                 err = "Request canceled"
             } else if (!skipPolish) {
+                notifyPolishPrompt(onPolishPrompt, selecting = false, title = polishTitle)
                 aiAttempted = true
                 val t0 = System.nanoTime()
                 notifyAiTimingStarted(aiTimingObserver)
@@ -351,6 +365,37 @@ object AsrFinalFilters {
             observer?.onPromptSelectionStarted()
         } catch (t: Throwable) {
             Log.w(TAG, "Prompt selection timing observer start failed", t)
+        }
+    }
+
+    /**
+     * 本次润色实际使用的提示词标题。显式 override 按内容匹配预设名，否则用当前激活预设。
+     */
+    private fun resolvePromptTitle(prefs: Prefs, promptOverride: String?): String? = try {
+        val presets = prefs.getPromptPresets()
+        val matched = if (!promptOverride.isNullOrBlank()) {
+            presets.firstOrNull { it.content == promptOverride }?.title?.takeIf { it.isNotBlank() }
+        } else {
+            null
+        }
+        matched
+            ?: presets.firstOrNull { it.id == prefs.activePromptId }?.title?.takeIf { it.isNotBlank() }
+            ?: presets.firstOrNull()?.title?.takeIf { it.isNotBlank() }
+    } catch (t: Throwable) {
+        Log.w(TAG, "resolve prompt title failed", t)
+        null
+    }
+
+    private fun notifyPolishPrompt(
+        listener: ((selecting: Boolean, title: String?) -> Unit)?,
+        selecting: Boolean,
+        title: String?
+    ) {
+        if (listener == null) return
+        try {
+            listener(selecting, title?.trim()?.takeIf { it.isNotEmpty() })
+        } catch (t: Throwable) {
+            Log.w(TAG, "Polish prompt listener failed", t)
         }
     }
 

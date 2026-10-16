@@ -19,6 +19,8 @@
   <string name="status_backup_asr_loading">جارٍ بدء التعرّف الاحتياطي المحلي…</string>
   <string name="status_backup_asr_recognizing">جارٍ التعرّف بالاحتياطي المحلي…</string>
   <string name="status_ai_processing">تلميع بالذكاء الاصطناعي…</string>
+  <string name="status_ai_processing_named">%1$s…</string>
+  <string name="status_prompt_selecting">جارٍ اختيار الموجّه…</string>
   <string name="status_ai_edit_listening">انطق تعليمات التحرير…</string>
   <string name="status_ai_editing">تحرير بالذكاء الاصطناعي…</string>
   <string name="status_cancelled">أُلغي</string>

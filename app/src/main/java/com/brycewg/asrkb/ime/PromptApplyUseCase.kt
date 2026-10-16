@@ -21,7 +21,7 @@ internal class PromptApplyUseCase(
     private val updateSessionContext: ((KeyboardSessionContext) -> KeyboardSessionContext) -> Unit,
     private val logTag: String
 ) {
-    fun apply(ic: InputConnection?, promptOverride: String?) {
+    fun apply(ic: InputConnection?, promptOverride: String?, promptTitle: String? = null) {
         if (ic == null) return
         scope.launch {
             if (!prefs.hasLlmKeys()) {
@@ -33,7 +33,10 @@ internal class PromptApplyUseCase(
 
             val target = resolveTargetText(ic) ?: return@launch
 
-            uiListenerProvider()?.onStatusMessage(context.getString(R.string.status_ai_processing))
+            uiListenerProvider()?.onStatusMessage(
+                context.aiProcessingStatusText(resolvePromptTitle(promptOverride, promptTitle)),
+                reportError = false
+            )
 
             val res = try {
                 com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
@@ -94,6 +97,18 @@ internal class PromptApplyUseCase(
                 uiListenerProvider()?.onStatusMessage(context.getString(R.string.status_idle))
             }
         }
+    }
+
+    private fun resolvePromptTitle(promptOverride: String?, promptTitle: String?): String? {
+        promptTitle?.trim()?.takeIf { it.isNotEmpty() }?.let { return it }
+        if (promptOverride.isNullOrBlank()) {
+            return prefs.activePromptTitle.takeIf { it.isNotBlank() }
+        }
+        return prefs.getPromptPresets()
+            .firstOrNull { it.content == promptOverride }
+            ?.title
+            ?.takeIf { it.isNotBlank() }
+            ?: prefs.activePromptTitle.takeIf { it.isNotBlank() }
     }
 
     private data class Target(val mode: TargetMode, val text: String)

@@ -48,7 +48,7 @@ class KeyboardActionHandler(
     // 回调接口：通知 UI 更新
     interface UiListener {
         fun onStateChanged(state: KeyboardState)
-        fun onStatusMessage(message: String)
+        fun onStatusMessage(message: String, reportError: Boolean = true)
         fun onVibrate()
         fun onShowClipboardPreview(preview: ClipboardPreview)
         fun onHideClipboardPreview()
@@ -130,6 +130,9 @@ class KeyboardActionHandler(
         consumeAutoEnterOnce = { consumeAutoEnterOnce() },
         updateSessionContext = { transform -> sessionContext = transform(sessionContext) },
         transitionToState = { transitionToState(it) },
+        updateAiProcessingPrompt = { selecting, title ->
+            publishAiProcessingPrompt(selecting, title)
+        },
         transitionToIdle = { keepMessage -> transitionToIdle(keepMessage = keepMessage) },
         transitionToIdleWithTiming = { showBackupUsedHint ->
             transitionToIdleWithTiming(showBackupUsedHint)
@@ -830,8 +833,12 @@ class KeyboardActionHandler(
      * 使用指定的 Prompt 内容对文本进行处理：优先处理选区，否则处理整个输入框文本。
      * 不修改全局激活的 Prompt；成功则用返回结果替换（保留撤销快照）。
      */
-    fun applyPromptToSelectionOrAll(ic: InputConnection?, promptContent: String) {
-        promptApplyUseCase.apply(ic, promptOverride = promptContent)
+    fun applyPromptToSelectionOrAll(
+        ic: InputConnection?,
+        promptContent: String,
+        promptTitle: String
+    ) {
+        promptApplyUseCase.apply(ic, promptOverride = promptContent, promptTitle = promptTitle)
     }
 
     /**
@@ -1167,6 +1174,21 @@ class KeyboardActionHandler(
     }
 
     // ========== 私有方法：状态转换 ==========
+
+    /**
+     * 润色进行中更新信息条文案。状态已离开 AiProcessing 时不再写回，避免覆盖取消结果。
+     */
+    private fun publishAiProcessingPrompt(selecting: Boolean, title: String?) {
+        val current = currentState as? KeyboardState.AiProcessing ?: return
+        val normalizedTitle = title?.trim()?.takeIf { it.isNotEmpty() }
+        if (current.selectingPrompt == selecting && current.promptTitle == normalizedTitle) return
+        transitionToState(
+            current.copy(
+                promptTitle = normalizedTitle,
+                selectingPrompt = selecting
+            )
+        )
+    }
 
     private fun transitionToState(newState: KeyboardState) {
         // 不在进入 Processing 时主动 finishComposing，保留预览供最终结果做差量合并

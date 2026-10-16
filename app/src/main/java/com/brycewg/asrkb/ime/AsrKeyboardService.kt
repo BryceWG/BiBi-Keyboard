@@ -496,8 +496,8 @@ class AsrKeyboardService :
         uiRenderer?.render(state)
     }
 
-    override fun onStatusMessage(message: String) {
-        uiRenderer?.showStatusMessage(message)
+    override fun onStatusMessage(message: String, reportError: Boolean) {
+        uiRenderer?.showStatusMessage(message, reportError)
     }
 
     override fun onVibrate() {
