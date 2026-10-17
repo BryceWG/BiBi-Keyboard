@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.brycewg.asrkb.asr.normalizeCohereLanguageForModel
+import com.brycewg.asrkb.store.DashScopePrefsCompat
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.settings.asr.AsrSettingsViewModel
 import java.util.UUID
@@ -34,6 +35,7 @@ internal class AsrOnlineSettingsFields(
     var dashKeepDialect by mutableStateOf(prefs.dashKeepDialect)
     var dashAutoPolish by mutableStateOf(prefs.dashAutoPolish)
     var dashRegion by mutableStateOf(normalizeDashRegion(prefs.dashRegion))
+    var dashCustomEndpoint by mutableStateOf(prefs.dashCustomEndpoint)
     var sfFreeAsrEnabled by mutableStateOf(prefs.sfFreeAsrEnabled)
     var sfFreeAsrModel by mutableStateOf(displaySfFreeAsrModel(prefs))
     var sfApiKey by mutableStateOf(prefs.sfApiKey)
@@ -116,6 +118,7 @@ internal class AsrOnlineSettingsFields(
         dashKeepDialect = prefs.dashKeepDialect
         dashAutoPolish = prefs.dashAutoPolish
         dashRegion = normalizeDashRegion(prefs.dashRegion)
+        dashCustomEndpoint = prefs.dashCustomEndpoint
         sfFreeAsrEnabled = prefs.sfFreeAsrEnabled
         sfFreeAsrModel = displaySfFreeAsrModel(prefs)
         sfApiKey = prefs.sfApiKey
@@ -267,8 +270,22 @@ internal class AsrOnlineSettingsFields(
         },
         dashRegion = dashRegion,
         onDashRegionChange = { value ->
-            dashRegion = value
-            prefs.dashRegion = value
+            val normalized = normalizeDashRegion(value)
+            dashRegion = normalized
+            prefs.dashRegion = normalized
+            if (
+                normalized == DashScopePrefsCompat.DASH_REGION_CUSTOM &&
+                prefs.dashCustomEndpoint.isBlank()
+            ) {
+                val origin = DashScopePrefsCompat.DASH_HTTP_ORIGIN_CN
+                dashCustomEndpoint = origin
+                prefs.dashCustomEndpoint = origin
+            }
+        },
+        dashCustomEndpoint = dashCustomEndpoint,
+        onDashCustomEndpointChange = { value ->
+            dashCustomEndpoint = value
+            prefs.dashCustomEndpoint = value
         },
         sfFreeAsrEnabled = sfFreeAsrEnabled,
         onSfFreeAsrEnabledChange = { checked ->

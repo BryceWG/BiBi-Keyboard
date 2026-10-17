@@ -41,6 +41,9 @@ internal fun DashScopeConfig(
     autoPolishVisible: Boolean,
     selectedRegion: String,
     onRegionSelected: (String) -> Unit,
+    customEndpoint: String,
+    onCustomEndpointChange: (String) -> Unit,
+    customEndpointVisible: Boolean,
     onOpenGuide: () -> Unit,
     primaryIndexOffset: Int = 0,
     primaryGroupCount: Int? = null
@@ -50,7 +53,8 @@ internal fun DashScopeConfig(
         languageVisible = languageVisible,
         promptVisible = promptVisible,
         keepDialectVisible = keepDialectVisible,
-        autoPolishVisible = autoPolishVisible
+        autoPolishVisible = autoPolishVisible,
+        customEndpointVisible = customEndpointVisible
     )
     var itemIndex = primaryIndexOffset
     AsrTextField(
@@ -124,6 +128,17 @@ internal fun DashScopeConfig(
         count = itemCount,
         onSelectedOptionChange = onRegionSelected
     )
+    if (customEndpointVisible) {
+        AsrTextField(
+            uiMode = uiMode,
+            value = customEndpoint,
+            onValueChange = onCustomEndpointChange,
+            label = stringResource(R.string.label_dash_custom_endpoint),
+            highlightId = "dash_custom_endpoint",
+            index = itemIndex++,
+            count = itemCount
+        )
+    }
     if (promptVisible) {
         AsrTextField(
             uiMode = uiMode,
@@ -149,11 +164,13 @@ internal fun dashScopePrimaryItemCount(
     languageVisible: Boolean,
     promptVisible: Boolean,
     keepDialectVisible: Boolean = false,
-    autoPolishVisible: Boolean = false
+    autoPolishVisible: Boolean = false,
+    customEndpointVisible: Boolean = false
 ): Int = 4 +
     (if (languageVisible) 1 else 0) +
     (if (keepDialectVisible) 1 else 0) +
     (if (autoPolishVisible) 1 else 0) +
+    (if (customEndpointVisible) 1 else 0) +
     (if (promptVisible) 1 else 0)
 
 internal fun dashModelOptions(context: Context): List<DashChoice> = listOf(
@@ -239,8 +256,9 @@ internal fun dashLanguageSummary(context: Context, languages: String): String {
 }
 
 internal fun dashRegionOptions(context: Context): List<DashChoice> = listOf(
-    DashChoice("cn", context.getString(R.string.dash_region_cn)),
-    DashChoice("intl", context.getString(R.string.dash_region_intl))
+    DashChoice(DashScopePrefsCompat.DASH_REGION_CN, context.getString(R.string.dash_region_cn)),
+    DashChoice(DashScopePrefsCompat.DASH_REGION_INTL, context.getString(R.string.dash_region_intl)),
+    DashChoice(DashScopePrefsCompat.DASH_REGION_CUSTOM, context.getString(R.string.dash_region_custom))
 )
 
 internal fun dashRegionLabel(context: Context, region: String): String {
@@ -251,10 +269,12 @@ internal fun dashRegionLabel(context: Context, region: String): String {
 
 internal fun normalizeDashModel(model: String): String = DashScopePrefsCompat.normalizeDashAsrModel(model)
 
-internal fun normalizeDashRegion(region: String): String = if (region.equals("intl", ignoreCase = true)) {
-    "intl"
-} else {
-    "cn"
+internal fun normalizeDashRegion(region: String): String = when {
+    region.equals(DashScopePrefsCompat.DASH_REGION_INTL, ignoreCase = true) ->
+        DashScopePrefsCompat.DASH_REGION_INTL
+    region.equals(DashScopePrefsCompat.DASH_REGION_CUSTOM, ignoreCase = true) ->
+        DashScopePrefsCompat.DASH_REGION_CUSTOM
+    else -> DashScopePrefsCompat.DASH_REGION_CN
 }
 
 internal fun isDashPromptSupported(model: String): Boolean = DashScopePrefsCompat.isPromptSupported(model)

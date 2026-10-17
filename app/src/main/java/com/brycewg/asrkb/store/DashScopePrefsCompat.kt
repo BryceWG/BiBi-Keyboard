@@ -1,6 +1,8 @@
 package com.brycewg.asrkb.store
 
 import android.content.SharedPreferences
+import java.net.URI
+import java.util.Locale
 
 /**
  * DashScope 偏好项的兼容/推导逻辑（从 [Prefs] / [PrefsBackup] 中拆出）。
@@ -8,6 +10,20 @@ import android.content.SharedPreferences
 internal object DashScopePrefsCompat {
     private const val DASH_LEGACY_QWEN3_REALTIME_VERSIONED_MODEL = "qwen3-asr-flash-realtime-2026-02-10"
     const val MAX_QWEN_AUDIO_LANGUAGE_HINTS = 4
+
+    const val DASH_REGION_CN = "cn"
+    const val DASH_REGION_INTL = "intl"
+    const val DASH_REGION_CUSTOM = "custom"
+
+    /** 中国大陆主机，不含路径。 */
+    const val DASH_HTTP_ORIGIN_CN = "https://maas.qianwenaiapi.com"
+    const val DASH_HTTP_ORIGIN_INTL = "https://maas.qwencloudapi.com"
+
+    private const val HTTP_API_V1_PATH = "/api/v1"
+    private const val COMPATIBLE_CHAT_PATH = "/compatible-mode/v1/chat/completions"
+    private const val MULTIMODAL_GENERATION_SUFFIX = "/services/aigc/multimodal-generation/generation"
+    private const val WS_REALTIME_PATH = "/api-ws/v1/realtime"
+    private const val WS_INFERENCE_PATH = "/api-ws/v1/inference"
 
     private val KNOWN_ASR_MODELS = setOf(
         Prefs.DASH_MODEL_FUN_ASR_FLASH,
@@ -24,22 +40,44 @@ internal object DashScopePrefsCompat {
         Prefs.DASH_MODEL_QWEN3_REALTIME
     )
 
-    fun getDashHttpBaseUrl(dashRegion: String): String = if (dashRegion.equals("intl", ignoreCase = true)) {
-        "https://maas.qwencloudapi.com/api/v1"
-    } else {
-        // 中国大陆：阿里千问 MaaS（原 DashScope / 百炼 host 迁移）
-        "https://maas.qianwenaiapi.com/api/v1"
+    fun getDashHttpBaseUrl(dashRegion: String, customEndpoint: String = ""): String = resolveDashHttpOrigin(dashRegion, customEndpoint) + HTTP_API_V1_PATH
+
+    fun getDashCompatibleModeChatEndpoint(dashRegion: String, customEndpoint: String = ""): String = resolveDashHttpOrigin(dashRegion, customEndpoint) + COMPATIBLE_CHAT_PATH
+
+    fun getDashMultimodalGenerationEndpoint(dashRegion: String, customEndpoint: String = ""): String = getDashHttpBaseUrl(dashRegion, customEndpoint).trimEnd('/') + MULTIMODAL_GENERATION_SUFFIX
+
+    fun getDashWebsocketRealtimeUrl(dashRegion: String, customEndpoint: String = ""): String = toDashWebsocketOrigin(resolveDashHttpOrigin(dashRegion, customEndpoint)) + WS_REALTIME_PATH
+
+    fun getDashWebsocketInferenceUrl(dashRegion: String, customEndpoint: String = ""): String = toDashWebsocketOrigin(resolveDashHttpOrigin(dashRegion, customEndpoint)) + WS_INFERENCE_PATH
+
+    fun resolveDashHttpOrigin(dashRegion: String, customEndpoint: String = ""): String = when {
+        dashRegion.equals(DASH_REGION_INTL, ignoreCase = true) -> DASH_HTTP_ORIGIN_INTL
+        dashRegion.equals(DASH_REGION_CUSTOM, ignoreCase = true) ->
+            normalizeDashCustomHttpOrigin(customEndpoint) ?: customEndpoint
+        else -> DASH_HTTP_ORIGIN_CN
     }
 
-    fun getDashCompatibleModeChatEndpoint(dashRegion: String): String = if (
-        dashRegion.equals("intl", ignoreCase = true)
-    ) {
-        "https://maas.qwencloudapi.com/compatible-mode/v1/chat/completions"
-    } else {
-        "https://maas.qianwenaiapi.com/compatible-mode/v1/chat/completions"
+    /**
+     * 收成「协议 + 主机」：去掉路径、query、fragment 和末尾斜杠。
+     * 空串或无法解析出 http(s) 主机时返回 null，调用方原样使用用户输入。
+     */
+    fun normalizeDashCustomHttpOrigin(raw: String): String? {
+        val trimmed = raw.trim()
+        if (trimmed.isEmpty()) return null
+        val uri = runCatching { URI(trimmed) }.getOrNull() ?: return null
+        val scheme = uri.scheme?.lowercase(Locale.ROOT) ?: return null
+        if (scheme != "https" && scheme != "http") return null
+        val host = uri.host?.takeIf { it.isNotEmpty() } ?: return null
+        val hostPart = if (':' in host) "[$host]" else host
+        val portSuffix = if (uri.port >= 0) ":${uri.port}" else ""
+        return "$scheme://$hostPart$portSuffix"
     }
 
-    fun getDashMultimodalGenerationEndpoint(dashRegion: String): String = getDashHttpBaseUrl(dashRegion).trimEnd('/') + "/services/aigc/multimodal-generation/generation"
+    private fun toDashWebsocketOrigin(httpOrigin: String): String = when {
+        httpOrigin.startsWith("https://") -> "wss://" + httpOrigin.removePrefix("https://")
+        httpOrigin.startsWith("http://") -> "wss://" + httpOrigin.removePrefix("http://")
+        else -> httpOrigin
+    }
 
     fun normalizeDashAsrModel(model: String): String {
         val trimmed = model.trim()

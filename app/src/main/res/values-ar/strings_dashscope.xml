@@ -29,6 +29,8 @@
     <string name="label_dash_region">نقطة النهاية</string>
     <string name="dash_region_cn">الصين القارية (maas.qianwenaiapi.com)</string>
     <string name="dash_region_intl">دولي (maas.qwencloudapi.com)</string>
+    <string name="dash_region_custom">مخصص</string>
+    <string name="label_dash_custom_endpoint">نقطة نهاية مخصصة</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">الصينية (zh)</string>

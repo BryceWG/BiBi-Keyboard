@@ -29,6 +29,8 @@
     <string name="label_dash_region">請求端點</string>
     <string name="dash_region_cn">中國大陸（maas.qianwenaiapi.com）</string>
     <string name="dash_region_intl">國際（maas.qwencloudapi.com）</string>
+    <string name="dash_region_custom">自訂</string>
+    <string name="label_dash_custom_endpoint">自訂端點</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中文 (zh)</string>

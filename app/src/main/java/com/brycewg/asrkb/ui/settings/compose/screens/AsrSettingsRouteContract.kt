@@ -46,6 +46,8 @@ internal data class AsrOnlineSettingsRouteState(
     val onDashAutoPolishChange: (Boolean) -> Unit,
     val dashRegion: String,
     val onDashRegionChange: (String) -> Unit,
+    val dashCustomEndpoint: String,
+    val onDashCustomEndpointChange: (String) -> Unit,
     val sfFreeAsrEnabled: Boolean,
     val onSfFreeAsrEnabledChange: (Boolean) -> Unit,
     val sfFreeAsrModel: String,

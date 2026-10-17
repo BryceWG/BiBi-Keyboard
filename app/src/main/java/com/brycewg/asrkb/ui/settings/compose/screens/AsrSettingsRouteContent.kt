@@ -148,6 +148,10 @@ internal fun AsrSettingsRouteContent(
                             onRegionSelected = { region ->
                                 onlineState.onDashRegionChange(region)
                             },
+                            customEndpoint = onlineState.dashCustomEndpoint,
+                            onCustomEndpointChange = onlineState.onDashCustomEndpointChange,
+                            customEndpointVisible =
+                            normalizeDashRegion(onlineState.dashRegion) == DashScopePrefsCompat.DASH_REGION_CUSTOM,
                             onOpenGuide = {
                                 onOpenUrl(DASH_SCOPE_ASR_GUIDE_URL)
                             },
@@ -348,7 +352,9 @@ private fun currentAsrVendorPrimaryItemCount(
         languageVisible = isDashLanguageSupported(onlineState.dashModel),
         promptVisible = isDashPromptSupported(onlineState.dashModel),
         keepDialectVisible = isDashKeepDialectSupported(onlineState.dashModel),
-        autoPolishVisible = isDashAutoPolishSupported(onlineState.dashModel)
+        autoPolishVisible = isDashAutoPolishSupported(onlineState.dashModel),
+        customEndpointVisible =
+        normalizeDashRegion(onlineState.dashRegion) == DashScopePrefsCompat.DASH_REGION_CUSTOM
     )
 
     AsrVendor.SiliconFlow,

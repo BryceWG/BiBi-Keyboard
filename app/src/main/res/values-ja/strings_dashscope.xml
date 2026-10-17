@@ -29,6 +29,8 @@
     <string name="label_dash_region">エンドポイント</string>
     <string name="dash_region_cn">中国本土（maas.qianwenaiapi.com）</string>
     <string name="dash_region_intl">国際（maas.qwencloudapi.com）</string>
+    <string name="dash_region_custom">カスタム</string>
+    <string name="label_dash_custom_endpoint">カスタムエンドポイント</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中国語（zh）</string>

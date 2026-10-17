@@ -77,23 +77,31 @@ internal fun AsrTextField(
     minLines: Int = 1,
     enabled: Boolean = true,
     keyboardType: KeyboardType = KeyboardType.Text,
+    highlightId: String? = null,
     index: Int = 0,
     count: Int = 1
 ) {
-    SettingsTextField(
-        uiMode = uiMode,
-        value = value,
-        onValueChange = onValueChange,
-        label = label,
-        modifier = modifier,
-        password = password,
-        singleLine = singleLine,
-        minLines = minLines,
-        enabled = enabled,
-        keyboardType = keyboardType,
-        index = index,
-        count = count
-    )
+    val content: @Composable () -> Unit = {
+        SettingsTextField(
+            uiMode = uiMode,
+            value = value,
+            onValueChange = onValueChange,
+            label = label,
+            modifier = modifier,
+            password = password,
+            singleLine = singleLine,
+            minLines = minLines,
+            enabled = enabled,
+            keyboardType = keyboardType,
+            index = index,
+            count = count
+        )
+    }
+    if (highlightId == null) {
+        content()
+    } else {
+        SettingsHighlightContainer(entryId = highlightId, uiMode = uiMode, content = content)
+    }
 }
 
 @Composable

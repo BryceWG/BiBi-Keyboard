@@ -29,6 +29,8 @@
     <string name="label_dash_region">Request endpoint</string>
     <string name="dash_region_cn">Mainland China (maas.qianwenaiapi.com)</string>
     <string name="dash_region_intl">International (maas.qwencloudapi.com)</string>
+    <string name="dash_region_custom">Custom</string>
+    <string name="label_dash_custom_endpoint">Custom endpoint</string>
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">Chinese (zh)</string>

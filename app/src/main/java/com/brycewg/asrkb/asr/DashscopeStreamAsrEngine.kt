@@ -53,10 +53,6 @@ class DashscopeStreamAsrEngine(
 
     companion object {
         private const val TAG = "DashscopeStreamAsrEngine"
-        private const val WS_URL_CN = "wss://maas.qianwenaiapi.com/api-ws/v1/realtime"
-        private const val WS_URL_INTL = "wss://maas.qwencloudapi.com/api-ws/v1/realtime"
-        private const val WS_URL_INFER_CN = "wss://maas.qianwenaiapi.com/api-ws/v1/inference"
-        private const val WS_URL_INFER_INTL = "wss://maas.qwencloudapi.com/api-ws/v1/inference"
         private const val FINAL_RESULT_TIMEOUT_MS = 6000L
     }
 
@@ -157,11 +153,7 @@ class DashscopeStreamAsrEngine(
     }
 
     private fun startQwen3RealtimeStreaming(model: String) {
-        val wsUrl = if (prefs.dashRegion.equals("intl", ignoreCase = true)) {
-            WS_URL_INTL
-        } else {
-            WS_URL_CN
-        }
+        val wsUrl = prefs.getDashWebsocketRealtimeUrl()
         prepareApiLog(
             wsUrl = wsUrl,
             model = model,
@@ -318,15 +310,7 @@ class DashscopeStreamAsrEngine(
 
     private fun startRecognitionStreaming(model: String) {
         // Fun-ASR 与 Qwen-Audio 3.x 使用 Recognition SDK 和 inference endpoint。
-        val wsUrl = if (prefs.dashRegion.equals(
-                "intl",
-                ignoreCase = true
-            )
-        ) {
-            WS_URL_INFER_INTL
-        } else {
-            WS_URL_INFER_CN
-        }
+        val wsUrl = prefs.getDashWebsocketInferenceUrl()
         prepareApiLog(
             wsUrl = wsUrl,
             model = model,

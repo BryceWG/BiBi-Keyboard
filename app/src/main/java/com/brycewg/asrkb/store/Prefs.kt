@@ -1197,17 +1197,32 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_DASH_AUTO_POLISH, true)
         set(value) = sp.edit { putBoolean(KEY_DASH_AUTO_POLISH, value) }
 
-    // DashScope：地域（cn=中国大陆，intl=国际）。默认 cn
+    // DashScope：地域（cn=中国大陆，intl=国际，custom=自定义主机）。默认 cn
     var dashRegion: String by stringPref(KEY_DASH_REGION, "cn")
 
-    fun getDashHttpBaseUrl(): String = DashScopePrefsCompat.getDashHttpBaseUrl(dashRegion)
+    // DashScope：自定义请求端点，仅地域为 custom 时参与请求。默认空。
+    var dashCustomEndpoint: String by stringPref(KEY_DASH_CUSTOM_ENDPOINT, "")
+
+    fun getDashHttpBaseUrl(): String = DashScopePrefsCompat.getDashHttpBaseUrl(dashRegion, dashCustomEndpoint)
 
     fun getDashCompatibleModeChatEndpoint(): String = DashScopePrefsCompat.getDashCompatibleModeChatEndpoint(
-        dashRegion
+        dashRegion,
+        dashCustomEndpoint
     )
 
     fun getDashMultimodalGenerationEndpoint(): String = DashScopePrefsCompat.getDashMultimodalGenerationEndpoint(
-        dashRegion
+        dashRegion,
+        dashCustomEndpoint
+    )
+
+    fun getDashWebsocketRealtimeUrl(): String = DashScopePrefsCompat.getDashWebsocketRealtimeUrl(
+        dashRegion,
+        dashCustomEndpoint
+    )
+
+    fun getDashWebsocketInferenceUrl(): String = DashScopePrefsCompat.getDashWebsocketInferenceUrl(
+        dashRegion,
+        dashCustomEndpoint
     )
 
     private fun isDashStreamingModelId(modelId: String): Boolean = DashScopePrefsCompat.isStreamingModel(modelId)
