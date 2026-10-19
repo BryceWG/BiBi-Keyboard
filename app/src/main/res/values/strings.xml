@@ -83,6 +83,13 @@
   <string name="home_summary_more_input_accessibility_missing">Accessibility not enabled</string>
   <string name="home_summary_setup_done">Basic setup complete</string>
   <string name="home_summary_setup_progress">Basic setup %1$d/%2$d</string>
+  <string name="home_summary_setup_next_step">Progress %1$d/%2$d · Next: %3$s</string>
+  <string name="home_setup_next_enable_ime">enable %1$s</string>
+  <string name="home_setup_next_switch_ime">switch to %1$s</string>
+  <string name="home_setup_next_microphone">grant microphone permission</string>
+  <string name="home_setup_next_overlay">grant overlay permission</string>
+  <string name="home_setup_next_notification">allow notifications</string>
+  <string name="home_setup_next_accessibility">enable accessibility service</string>
   <string name="home_summary_input_tap_control">Tap control</string>
   <string name="home_summary_input_hold_control">Long-press control</string>
   <string name="home_summary_asr_format">Auto-stop %1$s · %2$s</string>

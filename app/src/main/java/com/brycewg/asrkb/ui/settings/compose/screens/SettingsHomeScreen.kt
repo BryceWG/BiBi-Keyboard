@@ -7,13 +7,8 @@
 
 package com.brycewg.asrkb.ui.settings.compose.screens
 
-import android.Manifest
-import android.content.ComponentName
 import android.content.Context
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
-import android.view.inputmethod.InputMethodManager
+import android.view.ViewTreeObserver
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -59,18 +54,16 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.brycewg.asrkb.R
-import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.ApiLogStore
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.AsrVendorUi
-import com.brycewg.asrkb.ui.floating.floatingInputNeedsAccessibility
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsHomeSearchEntry
 import com.brycewg.asrkb.ui.settings.compose.core.BibiSettingsRoute
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
@@ -78,6 +71,8 @@ import com.brycewg.asrkb.ui.settings.compose.core.SettingsActionController
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.settings.compose.model.SettingsEntry
 import com.brycewg.asrkb.ui.settings.compose.model.SettingsSection
+import com.brycewg.asrkb.ui.setup.BasicSetupStatus
+import com.brycewg.asrkb.ui.setup.BasicSetupStep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -146,6 +141,24 @@ fun SettingsHomeScreen(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    DisposableEffect(appContext) {
+        val unregister = BasicSetupStatus.observeSystemChanges(appContext) {
+            refreshToken++
+        }
+        onDispose(unregister)
+    }
+    val view = LocalView.current
+    DisposableEffect(view) {
+        val listener = ViewTreeObserver.OnWindowFocusChangeListener { hasFocus ->
+            if (hasFocus) refreshToken++
+        }
+        view.viewTreeObserver.addOnWindowFocusChangeListener(listener)
+        onDispose {
+            if (view.viewTreeObserver.isAlive) {
+                view.viewTreeObserver.removeOnWindowFocusChangeListener(listener)
+            }
         }
     }
     LaunchedEffect(refreshToken) {
@@ -522,19 +535,13 @@ private data class SettingsHomeSnapshot(
         )
 
         fun fromPrefs(context: Context, prefs: Prefs): SettingsHomeSnapshot {
+            val status = BasicSetupStatus.read(context, prefs)
             val floatingEnabled = prefs.floatingAsrEnabled
             val volumeKeyEnabled = prefs.volumeKeyRecordingEnabled
             val shakeRecordingEnabled = prefs.shakeRecordingEnabled
-            val imeBridgeEnabled = prefs.floatingImeBridgeEnabled
-            val accessibilityMissing = floatingInputNeedsAccessibility(
-                floatingEnabled = floatingEnabled,
-                volumeKeyEnabled = volumeKeyEnabled,
-                imeBridgeEnabled = imeBridgeEnabled,
-                shakeRecordingEnabled = shakeRecordingEnabled
-            ) &&
-                !isAccessibilityServiceEnabled(context)
+            val accessibilityMissing = status.accessibilityRequired && !status.accessibilityGranted
             return SettingsHomeSnapshot(
-                oneClickSetupSummary = oneClickSetupSummary(context, prefs),
+                oneClickSetupSummary = oneClickSetupSummary(context, status),
                 inputControlSummary = inputControlSummary(context, prefs),
                 floatingSummary = moreInputSummary(
                     context = context,
@@ -614,88 +621,31 @@ private fun activePromptPresetTitle(prefs: Prefs): String {
         ?: ""
 }
 
-private fun oneClickSetupSummary(context: Context, prefs: Prefs): String {
-    val floatingEnabled = prefs.floatingAsrEnabled
-    val volumeKeyEnabled = prefs.volumeKeyRecordingEnabled
-    val shakeRecordingEnabled = prefs.shakeRecordingEnabled
-    val imeBridgeEnabled = prefs.floatingImeBridgeEnabled
-    val checks = buildList {
-        add(isOurImeEnabled(context))
-        add(isOurImeCurrent(context))
-        add(hasMicrophonePermission(context))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            add(hasNotificationPermission(context))
-        }
-        if (floatingEnabled) {
-            add(Settings.canDrawOverlays(context))
-        }
-        if (floatingInputNeedsAccessibility(
-                floatingEnabled = floatingEnabled,
-                volumeKeyEnabled = volumeKeyEnabled,
-                imeBridgeEnabled = imeBridgeEnabled,
-                shakeRecordingEnabled = shakeRecordingEnabled
-            )
-        ) {
-            add(isAccessibilityServiceEnabled(context))
-        }
-    }
-    val done = checks.count { it }
-    return if (done == checks.size) {
-        context.getString(R.string.home_summary_setup_done)
-    } else {
-        context.getString(R.string.home_summary_setup_progress, done, checks.size)
-    }
+private fun oneClickSetupSummary(context: Context, status: BasicSetupStatus): String {
+    // nextStep() 为 null 与“所有进度项为 true”等价（同一份快照推导），所以这里直接当作已完成。
+    val nextStep = status.nextStep()
+        ?: return context.getString(R.string.home_summary_setup_done)
+    val checks = status.progressChecks()
+    // 只显示 3/6 用户不知道还差什么，把下一步动作一起写进副标题。
+    return context.getString(
+        R.string.home_summary_setup_next_step,
+        checks.count { it },
+        checks.size,
+        setupStepLabel(context, nextStep)
+    )
+}
+
+private fun setupStepLabel(context: Context, step: BasicSetupStep): String = when (step) {
+    BasicSetupStep.EnableIme ->
+        context.getString(R.string.home_setup_next_enable_ime, context.getString(R.string.app_name))
+    BasicSetupStep.SwitchIme ->
+        context.getString(R.string.home_setup_next_switch_ime, context.getString(R.string.app_name))
+    BasicSetupStep.Microphone -> context.getString(R.string.home_setup_next_microphone)
+    BasicSetupStep.Overlay -> context.getString(R.string.home_setup_next_overlay)
+    BasicSetupStep.Notification -> context.getString(R.string.home_setup_next_notification)
+    BasicSetupStep.Accessibility -> context.getString(R.string.home_setup_next_accessibility)
 }
 
 private fun hasRecentApiLogErrors(): Boolean = ApiLogStore.listAll()
     .take(10)
     .any { !it.success && !it.canceled }
-
-private fun hasMicrophonePermission(context: Context): Boolean = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-
-private fun hasNotificationPermission(context: Context): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
-} else {
-    true
-}
-
-private fun isOurImeEnabled(context: Context): Boolean {
-    val imm = try {
-        context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    } catch (_: Exception) {
-        return false
-    }
-    val enabledList = try {
-        imm.enabledInputMethodList
-    } catch (_: Exception) {
-        null
-    }
-    if (enabledList?.any { it.packageName == context.packageName } == true) return true
-    return try {
-        val enabled = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.ENABLED_INPUT_METHODS
-        )
-        val ids = ourImeIdCandidates(context)
-        ids.any { enabled?.contains(it) == true } ||
-            (enabled?.split(':')?.any { it.startsWith(context.packageName) } == true)
-    } catch (_: Exception) {
-        false
-    }
-}
-
-private fun isOurImeCurrent(context: Context): Boolean = try {
-    val current = Settings.Secure.getString(
-        context.contentResolver,
-        Settings.Secure.DEFAULT_INPUT_METHOD
-    )
-    current != null && ourImeIdCandidates(context).contains(current)
-} catch (_: Exception) {
-    false
-}
-
-private fun ourImeIdCandidates(context: Context): Set<String> {
-    val component = ComponentName(context, AsrKeyboardService::class.java)
-    return setOf(component.flattenToShortString(), component.flattenToString())
-}

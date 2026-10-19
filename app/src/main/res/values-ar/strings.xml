@@ -83,6 +83,13 @@
   <string name="home_summary_more_input_accessibility_missing">إمكانية الوصول غير مفعّلة</string>
   <string name="home_summary_setup_done">اكتمل الإعداد الأساسي</string>
   <string name="home_summary_setup_progress">الإعداد الأساسي %1$d/%2$d</string>
+  <string name="home_summary_setup_next_step">التقدم %1$d/%2$d · التالي %3$s</string>
+  <string name="home_setup_next_enable_ime">تفعيل %1$s</string>
+  <string name="home_setup_next_switch_ime">التبديل إلى %1$s</string>
+  <string name="home_setup_next_microphone">منح إذن الميكروفون</string>
+  <string name="home_setup_next_overlay">منح إذن النافذة العائمة</string>
+  <string name="home_setup_next_notification">السماح بالإشعارات</string>
+  <string name="home_setup_next_accessibility">تفعيل خدمة إمكانية الوصول</string>
   <string name="home_summary_input_tap_control">تحكم بالضغط</string>
   <string name="home_summary_input_hold_control">تحكم بالضغط المطوّل</string>
   <string name="home_summary_asr_format">إيقاف تلقائي %1$s · %2$s</string>

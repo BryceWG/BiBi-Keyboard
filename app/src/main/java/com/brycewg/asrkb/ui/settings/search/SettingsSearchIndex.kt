@@ -256,6 +256,14 @@ object SettingsSearchIndex {
             "polish",
             forceAsrVendorId = AsrVendor.DashScope.id
         )
+        item(
+            R.string.label_dash_custom_endpoint,
+            R.string.label_asr_vendor,
+            "endpoint",
+            "custom",
+            "端点",
+            forceAsrVendorId = AsrVendor.DashScope.id
+        )
         item(R.string.label_backup_asr_vendor, R.string.label_backup_asr_engine)
         item(R.string.label_backup_asr_timeout_sensitivity, R.string.label_backup_asr_engine)
         item(R.string.label_backup_asr_local_residency, R.string.label_backup_asr_engine)

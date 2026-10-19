@@ -6,12 +6,12 @@
 package com.brycewg.asrkb.ui.settings.compose.state
 
 import android.content.Intent
-import android.provider.Settings
 import android.util.Log
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.BaseActivity
 import com.brycewg.asrkb.ui.setup.OnboardingGuideActivity
+import com.brycewg.asrkb.ui.setup.isAccessibilityServiceEnabled as isAccessibilityServiceListed
 
 /**
  * 汇总进入设置页时需要触发的非 Compose UI 副作用。
@@ -55,26 +55,7 @@ class SettingsEntryEffectsCoordinator(
         wasAccessibilityEnabled = isNowEnabled
     }
 
-    private fun isAccessibilityServiceEnabled(): Boolean {
-        val expectedComponentName =
-            "${activity.packageName}/com.brycewg.asrkb.ui.AsrAccessibilityService"
-        val enabledServicesSetting = try {
-            Settings.Secure.getString(
-                activity.contentResolver,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to get accessibility services", e)
-            return false
-        }
-
-        Log.d(TAG, "Expected accessibility service: $expectedComponentName")
-        Log.d(TAG, "Enabled accessibility services: $enabledServicesSetting")
-
-        val result = enabledServicesSetting?.contains(expectedComponentName) == true
-        Log.d(TAG, "Accessibility service enabled: $result")
-        return result
-    }
+    private fun isAccessibilityServiceEnabled(): Boolean = isAccessibilityServiceListed(activity)
 
     private companion object {
         private const val TAG = "SettingsEntryEffects"

@@ -81,6 +81,13 @@
   <string name="home_summary_more_input_accessibility_missing">無障礙未開啟</string>
   <string name="home_summary_setup_done">基礎設定已完成</string>
   <string name="home_summary_setup_progress">基礎設定進度 %1$d/%2$d</string>
+  <string name="home_summary_setup_next_step">進度 %1$d/%2$d · 下一步 %3$s</string>
+  <string name="home_setup_next_enable_ime">啟用%1$s</string>
+  <string name="home_setup_next_switch_ime">切換到%1$s</string>
+  <string name="home_setup_next_microphone">授予麥克風權限</string>
+  <string name="home_setup_next_overlay">授予懸浮窗權限</string>
+  <string name="home_setup_next_notification">允許通知</string>
+  <string name="home_setup_next_accessibility">開啟無障礙服務</string>
   <string name="home_summary_input_tap_control">點按控制</string>
   <string name="home_summary_input_hold_control">長按控制</string>
   <string name="home_summary_asr_format">錄音判停%1$s · %2$s</string>

@@ -3,13 +3,14 @@ package com.brycewg.asrkb.ui.setup
 /**
  * 一键设置流程的状态机定义
  *
- * 流程顺序：
- * 1. NotStarted -> EnablingIme: 用户未启用输入法，需要前往系统设置启用
- * 2. EnablingIme -> SelectingIme: 输入法已启用，但未选择为当前输入法
- * 3. SelectingIme -> RequestingPermissions: 输入法已选择，开始请求权限
- * 4. RequestingPermissions -> Completed: 所有必需权限已授予，设置完成
+ * 流程顺序（与首页基础设置进度同一份完成态）：
+ * 1. NotStarted -> EnablingIme: 输入法未启用
+ * 2. EnablingIme -> RequestingPermissions: 已启用，但必需权限或通知权限仍缺
+ * 3. RequestingPermissions -> SelectingIme: 必需权限已齐，但还不是当前输入法
+ * 4. SelectingIme -> Completed: 已切到本输入法
  *
- * 每个状态对应一个具体的操作，状态转换通过 advance() 方法触发
+ * 权限已齐且已是当前输入法时，从上述任一状态直接进入 Completed。
+ * 每个状态对应一个具体的操作，状态转换通过 advance() 方法触发。
  */
 sealed class SetupState {
     /**

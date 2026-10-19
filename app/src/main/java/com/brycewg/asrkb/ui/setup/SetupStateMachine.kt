@@ -1,20 +1,14 @@
 package com.brycewg.asrkb.ui.setup
 
-import android.Manifest
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.brycewg.asrkb.R
-import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.ui.floating.floatingInputNeedsAccessibility
+import com.brycewg.asrkb.store.debug.DebugLogManager
 
 /**
  * 一键设置流程的状态机管理器
@@ -43,79 +37,68 @@ class SetupStateMachine(
      * @return 下一个状态，如果无法继续则返回当前状态
      */
     fun advance(): SetupState {
+        val previous = currentState
         Log.d(TAG, "Advancing from state: $currentState")
 
+        // 整份状态要读 IME 列表和悬浮窗权限，都是跨进程调用。
+        // 等待输入法选择的轮询每 300ms 走一次这里，只有真正要判定时才读，避免在 UI 线程反复打 binder。
+        var cachedStatus: BasicSetupStatus? = null
+        fun status(): BasicSetupStatus = cachedStatus ?: BasicSetupStatus.read(context, prefs).also { cachedStatus = it }
+
         currentState = when (val state = currentState) {
-            is SetupState.NotStarted -> {
-                // 优化：将“选择输入法”作为最后一步；权限优先
-                val needOptional = hasMissingOptionalPermissions()
-                if (!isOurImeEnabled()) {
-                    SetupState.EnablingIme()
-                } else if (!hasAllRequiredPermissions() || needOptional) {
-                    // 必需权限或可选权限（如通知权限）缺失，先请求权限
-                    SetupState.RequestingPermissions()
-                } else if (!isOurImeCurrent()) {
-                    SetupState.SelectingIme()
-                } else {
-                    SetupState.Completed
-                }
-            }
+            is SetupState.NotStarted -> nextStep(status())
 
             is SetupState.EnablingIme -> {
-                if (isOurImeEnabled()) {
-                    // 输入法已启用，下一步优先补齐权限，再进行“选择输入法”
+                val snapshot = status()
+                if (snapshot.imeEnabled) {
                     Log.d(TAG, "IME enabled; prioritizing permissions before selecting IME")
-                    val needOptional = hasMissingOptionalPermissions()
-                    if (!hasAllRequiredPermissions() || needOptional) {
-                        SetupState.RequestingPermissions()
-                    } else if (!isOurImeCurrent()) {
-                        SetupState.SelectingIme()
-                    } else {
-                        SetupState.Completed
-                    }
+                    nextStepAfterImeEnabled(snapshot)
                 } else {
-                    // 仍未启用，保持当前状态
                     state
                 }
             }
 
             is SetupState.SelectingIme -> {
-                if (isOurImeCurrent()) {
-                    // 已选择为当前输入法，进入权限请求阶段
-                    Log.d(TAG, "IME selected, moving to RequestingPermissions")
-                    val needOptional = hasMissingOptionalPermissions()
-                    if (!hasAllRequiredPermissions() || needOptional) {
-                        SetupState.RequestingPermissions()
-                    } else {
-                        SetupState.Completed
+                when {
+                    // 只有切到本输入法之后才需要判定权限，等待期间不读。
+                    isOurImeCurrent(context) -> {
+                        Log.d(TAG, "IME selected, resolving next setup step")
+                        // 通知权限在进入选择器前已经问过；这里只在必需权限被收回时回到权限步骤。
+                        if (status().requiredPermissionsGranted) {
+                            SetupState.Completed
+                        } else {
+                            SetupState.RequestingPermissions(askedNotif = true)
+                        }
                     }
-                } else if (state.waitingSince > 0 &&
-                    System.currentTimeMillis() - state.waitingSince > IME_PICKER_TIMEOUT_MS
-                ) {
-                    // 超时，中止流程
-                    Log.w(TAG, "IME selection timeout")
-                    SetupState.Aborted(context.getString(R.string.setup_abort_reason_ime_timeout))
-                } else {
-                    // 继续等待
-                    state
+
+                    state.waitingSince > 0 &&
+                        System.currentTimeMillis() - state.waitingSince > IME_PICKER_TIMEOUT_MS -> {
+                        Log.w(TAG, "IME selection timeout")
+                        SetupState.Aborted(context.getString(R.string.setup_abort_reason_ime_timeout))
+                    }
+
+                    else -> state
                 }
             }
 
             is SetupState.RequestingPermissions -> {
-                if (hasAllRequiredPermissions()) {
-                    // 所有权限已授予
-                    Log.d(TAG, "All permissions granted, setup completed")
-                    SetupState.Completed
-                } else {
-                    // 继续请求缺失的权限
-                    state
+                val snapshot = status()
+                when {
+                    !snapshot.requiredPermissionsGranted -> state
+                    snapshot.optionalPermissionMissing && !state.askedNotif -> state
+                    !snapshot.imeCurrent -> SetupState.SelectingIme()
+                    else -> {
+                        Log.d(TAG, "Required permissions granted and IME selected, setup completed")
+                        SetupState.Completed
+                    }
                 }
             }
 
-            is SetupState.Completed, is SetupState.Aborted -> {
-                // 终态，不再转换
-                state
-            }
+            is SetupState.Completed, is SetupState.Aborted -> state
+        }
+
+        if (previous::class != currentState::class) {
+            logDiag("state", transitionData(previous, currentState, cachedStatus))
         }
 
         Log.d(TAG, "Advanced to state: $currentState")
@@ -207,16 +190,17 @@ class SetupStateMachine(
      * @return true 表示发起了权限请求，false 表示所有权限已授予或已全部请求过
      */
     private fun requestNextMissingPermission(state: SetupState.RequestingPermissions): Boolean {
+        val status = BasicSetupStatus.read(context, prefs)
+
         // 1) 麦克风权限（必需）
-        if (!state.askedMic && !hasMicrophonePermission()) {
+        if (!state.askedMic && !status.microphoneGranted) {
             Log.d(TAG, "Requesting microphone permission")
             currentState = state.copy(askedMic = true)
             return true
         }
 
         // 2) 悬浮窗权限（当启用悬浮功能时需要）
-        val needOverlay = prefs.floatingAsrEnabled
-        if (!state.askedOverlay && needOverlay && !hasOverlayPermission()) {
+        if (!state.askedOverlay && status.overlayRequired && !status.overlayGranted) {
             Log.d(TAG, "Requesting overlay permission")
             showSetupMessage(R.string.toast_need_overlay_perm)
             try {
@@ -235,25 +219,17 @@ class SetupStateMachine(
         }
 
         // 3) 通知权限（Android 13+，增强项）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (!state.askedNotif && !hasNotificationPermission()) {
-                Log.d(TAG, "Requesting notification permission")
-                // 注意：实际请求需要通过 Activity.requestPermissions()
-                // 这里只更新状态，实际请求由 Activity 处理
-                currentState = state.copy(askedNotif = true)
-                return true
-            }
+        if (status.notificationApplicable && !state.askedNotif && !status.notificationGranted) {
+            Log.d(TAG, "Requesting notification permission")
+            // 实际请求由 Activity.requestPermissions() 处理，这里只标记已发起。
+            currentState = state.copy(askedNotif = true)
+            return true
         }
 
         // 4) 无障碍权限（音量键始终依赖；悬浮球在输入法桥接关闭时依赖）
-        val needA11y = floatingInputNeedsAccessibility(
-            floatingEnabled = prefs.floatingAsrEnabled,
-            volumeKeyEnabled = prefs.volumeKeyRecordingEnabled,
-            imeBridgeEnabled = prefs.floatingImeBridgeEnabled,
-            shakeRecordingEnabled = prefs.shakeRecordingEnabled
-        )
-        if (!state.askedA11y && needA11y && !hasAccessibilityPermission()) {
+        if (!state.askedA11y && status.accessibilityRequired && !status.accessibilityGranted) {
             Log.d(TAG, "Requesting accessibility permission")
+            logA11yDiagnostics()
             showSetupMessage(R.string.toast_need_accessibility_perm)
             try {
                 context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -266,9 +242,56 @@ class SetupStateMachine(
             }
         }
 
-        // 所有权限都已请求过或已授予
         Log.d(TAG, "All permissions requested or granted")
         return false
+    }
+
+    private fun nextStep(status: BasicSetupStatus): SetupState {
+        if (!status.imeEnabled) return SetupState.EnablingIme()
+        return nextStepAfterImeEnabled(status)
+    }
+
+    /**
+     * 输入法已启用之后：先补权限（含通知），再把切换当前输入法放在最后。
+     */
+    private fun nextStepAfterImeEnabled(status: BasicSetupStatus): SetupState = when {
+        !status.requiredPermissionsGranted || status.optionalPermissionMissing ->
+            SetupState.RequestingPermissions()
+        !status.imeCurrent -> SetupState.SelectingIme()
+        else -> SetupState.Completed
+    }
+
+    private fun logDiag(event: String, data: Map<String, Any?>) {
+        DebugLogManager.logBase(context, "setup", event, data)
+    }
+
+    /**
+     * 状态迁移日志只记录判定用到的现场；等待输入法期间没读状态，就不写空字段。
+     */
+    private fun transitionData(
+        from: SetupState,
+        to: SetupState,
+        status: BasicSetupStatus?
+    ): Map<String, Any?> = buildMap {
+        put("from", from.diagName())
+        put("to", to.diagName())
+        if (status == null) return@buildMap
+        put("imeEnabled", status.imeEnabled)
+        put("imeCurrent", status.imeCurrent)
+        put("mic", status.microphoneGranted)
+        put("overlayRequired", status.overlayRequired)
+        put("overlay", status.overlayGranted)
+        put("a11yRequired", status.accessibilityRequired)
+        put("a11y", status.accessibilityGranted)
+        put("notif", status.notificationGranted)
+    }
+
+    /**
+     * 无障碍“已开启却判定未开启”的现场快照，只在排查这类反馈时才有用。
+     * 走 verbose 流，避免每次用户走到这一步都往常驻日志里写一条只有开发者看得懂的记录。
+     */
+    private fun logA11yDiagnostics() {
+        DebugLogManager.log("setup", "a11y_missing", accessibilityMismatchDiagnostics(context))
     }
 
     /**
@@ -284,122 +307,23 @@ class SetupStateMachine(
     }
 
     /**
-     * 检查是否所有必需权限已授予
-     */
-    private fun hasAllRequiredPermissions(): Boolean {
-        val micGranted = hasMicrophonePermission()
-        val needOverlay = prefs.floatingAsrEnabled
-        val overlayGranted = !needOverlay || hasOverlayPermission()
-        val needA11y = floatingInputNeedsAccessibility(
-            floatingEnabled = prefs.floatingAsrEnabled,
-            volumeKeyEnabled = prefs.volumeKeyRecordingEnabled,
-            imeBridgeEnabled = prefs.floatingImeBridgeEnabled,
-            shakeRecordingEnabled = prefs.shakeRecordingEnabled
-        )
-        val a11yGranted = !needA11y || hasAccessibilityPermission()
-
-        // Android 13+ 通知权限仅作为增强项，缺失不阻塞核心功能
-        return micGranted && overlayGranted && a11yGranted
-    }
-
-    /**
-     * 是否存在缺失的“可选权限”。
-     * 目前仅包含 Android 13+ 的通知权限，用于在一键设置中补询。
-     */
-    private fun hasMissingOptionalPermissions(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !hasNotificationPermission()
-
-    private fun hasMicrophonePermission(): Boolean = ContextCompat.checkSelfPermission(
-        context,
-        Manifest.permission.RECORD_AUDIO
-    ) == PackageManager.PERMISSION_GRANTED
-
-    private fun hasOverlayPermission(): Boolean = Settings.canDrawOverlays(context)
-
-    private fun hasNotificationPermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-    } else {
-        true // Android 13 以下默认已授予
-    }
-
-    private fun hasAccessibilityPermission(): Boolean {
-        val expectedComponentName = "${context.packageName}/com.brycewg.asrkb.ui.AsrAccessibilityService"
-        val enabledServicesSetting = try {
-            Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to check accessibility permission", e)
-            return false
-        }
-        return enabledServicesSetting?.contains(expectedComponentName) == true
-    }
-
-    private fun isOurImeEnabled(): Boolean {
-        val imm = try {
-            context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to get InputMethodManager", e)
-            return false
-        }
-
-        val enabledList = try {
-            imm.enabledInputMethodList
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to get enabled IME list", e)
-            null
-        }
-
-        if (enabledList?.any { it.packageName == context.packageName } == true) {
-            return true
-        }
-
-        return try {
-            val enabled = Settings.Secure.getString(
-                context.contentResolver,
-                Settings.Secure.ENABLED_INPUT_METHODS
-            )
-            val ids = getOurImeIdCandidates()
-            ids.any { enabled?.contains(it) == true } ||
-                (enabled?.split(':')?.any { it.startsWith(context.packageName) } == true)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to check IME enabled via Settings", e)
-            false
-        }
-    }
-
-    private fun isOurImeCurrent(): Boolean = try {
-        val current = Settings.Secure.getString(
-            context.contentResolver,
-            Settings.Secure.DEFAULT_INPUT_METHOD
-        )
-        val ids = getOurImeIdCandidates()
-        current != null && ids.contains(current)
-    } catch (e: Exception) {
-        Log.e(TAG, "Failed to check current IME", e)
-        false
-    }
-
-    private fun getOurImeIdCandidates(): Set<String> {
-        val component = ComponentName(context, AsrKeyboardService::class.java)
-        return setOf(
-            component.flattenToShortString(),
-            component.flattenToString()
-        )
-    }
-
-    /**
      * 提供给 UI 层用于判断当前输入法是否已切换为本应用。
      * 仅暴露只读查询，不改变状态机状态。
      */
-    fun isOurImeCurrentForUi(): Boolean = isOurImeCurrent()
+    fun isOurImeCurrentForUi(): Boolean = isOurImeCurrent(context)
 
     /**
      * 获取当前状态对应的 RequestingPermissions，如果不是则返回 null
      * 用于从 Activity 的 onRequestPermissionsResult 回调中更新状态
      */
     fun getCurrentPermissionState(): SetupState.RequestingPermissions? = currentState as? SetupState.RequestingPermissions
+}
+
+private fun SetupState.diagName(): String = when (this) {
+    is SetupState.NotStarted -> "NotStarted"
+    is SetupState.EnablingIme -> "EnablingIme"
+    is SetupState.SelectingIme -> "SelectingIme"
+    is SetupState.RequestingPermissions -> "RequestingPermissions"
+    is SetupState.Completed -> "Completed"
+    is SetupState.Aborted -> "Aborted"
 }

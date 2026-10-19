@@ -82,6 +82,13 @@
   <string name="home_summary_more_input_accessibility_missing">アクセシビリティ未有効</string>
   <string name="home_summary_setup_done">基本設定は完了</string>
   <string name="home_summary_setup_progress">基本設定 %1$d/%2$d</string>
+  <string name="home_summary_setup_next_step">進捗 %1$d/%2$d · 次は %3$s</string>
+  <string name="home_setup_next_enable_ime">%1$sを有効化</string>
+  <string name="home_setup_next_switch_ime">%1$sに切り替え</string>
+  <string name="home_setup_next_microphone">マイク権限を許可</string>
+  <string name="home_setup_next_overlay">フローティングウィンドウ権限を許可</string>
+  <string name="home_setup_next_notification">通知を許可</string>
+  <string name="home_setup_next_accessibility">アクセシビリティサービスを有効化</string>
   <string name="home_summary_input_tap_control">タップ操作</string>
   <string name="home_summary_input_hold_control">長押し操作</string>
   <string name="home_summary_asr_format">自動停止 %1$s · %2$s</string>
