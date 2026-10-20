@@ -26,7 +26,8 @@ import org.json.JSONObject
 
 /**
  * Soniox WebSocket 实时 ASR 引擎实现。
- * 连接后首包发送 JSON 配置（含 api_key + 音频参数），随后流式发送 PCM 二进制帧；
+ * 鉴权走 Upgrade 请求的 Authorization: Bearer <key>（Soniox 新协议，start 消息不再带 api_key）；
+ * 连接后首包发送 JSON 配置（音频参数），随后流式发送 PCM 二进制帧；
  * 服务端返回 tokens 队列，已最终的 tokens 追加缓存，非最终 tokens 用于增量预览。
  */
 class SonioxStreamAsrEngine(
@@ -148,10 +149,13 @@ class SonioxStreamAsrEngine(
             category = "ASR",
             vendor = "soniox",
             model = MODEL,
-            requestStructure = "WebSocket config keys=api_key, audio_format, enable_endpoint_detection, endpoint_sensitivity?, enable_language_identification, language_hints?, language_hints_strict?, model, num_channels, sample_rate"
+            requestStructure = "WebSocket auth=Authorization Bearer; config keys=audio_format, enable_endpoint_detection, endpoint_sensitivity?, enable_language_identification, language_hints?, language_hints_strict?, model, num_channels, sample_rate"
         )
+        // 连接级鉴权：key 随 Upgrade 请求携带，start 消息里不再放 api_key。
+        val apiKey = prefs.sonioxApiKey.filter { it in '!'..'~' }
         val req = Request.Builder()
             .url(Prefs.SONIOX_WS_URL)
+            .addHeader("Authorization", "Bearer $apiKey")
             .tag(ApiLogMeta::class.java, meta)
             .build()
         val apiLogSession = ApiCallLogger.startWebSocket(req, meta)
@@ -388,7 +392,6 @@ class SonioxStreamAsrEngine(
 
     private fun buildConfigJson(): String {
         val o = JSONObject().apply {
-            put("api_key", prefs.sonioxApiKey)
             put("model", MODEL)
             // 原始 PCM；若改为 auto，可不传采样率/通道
             put("audio_format", "pcm_s16le")

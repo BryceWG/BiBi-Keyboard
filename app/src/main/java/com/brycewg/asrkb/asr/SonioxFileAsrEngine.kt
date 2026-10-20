@@ -73,7 +73,7 @@ class SonioxFileAsrEngine(
             tmp = created
             FileOutputStream(created).use { it.write(audio.bytes) }
 
-            val apiKey = prefs.sonioxApiKey
+            val apiKey = prefs.sonioxApiKey.trim()
             val t0 = System.nanoTime()
             val fileId = uploadAudioFile(apiKey, created, audio)
             val transcriptionId = createTranscription(apiKey, fileId)
