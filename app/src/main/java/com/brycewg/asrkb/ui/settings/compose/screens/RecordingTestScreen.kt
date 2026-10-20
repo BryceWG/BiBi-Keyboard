@@ -13,13 +13,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoFixHigh
@@ -714,6 +721,11 @@ private fun RecordingTestBottomBar(
         topStart = SettingsLayoutMetrics.BottomBarTopCorner,
         topEnd = SettingsLayoutMetrics.BottomBarTopCorner
     )
+    // 底栏背景继续绘制到系统导航栏下方，只给内容让出安全边距，
+    // 否则 Edge-to-Edge 下录音按钮会被虚拟导航栏遮挡。
+    val contentInsets = WindowInsets.systemBars
+        .union(WindowInsets.displayCutout)
+        .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
     when (uiMode) {
         BibiUiMode.Material -> Surface(
             shadowElevation = SettingsLayoutMetrics.BottomBarElevation,
@@ -723,7 +735,8 @@ private fun RecordingTestBottomBar(
             RecordingTestBottomBarContent(
                 uiMode = uiMode,
                 isRecording = isRecording,
-                onClick = onClick
+                onClick = onClick,
+                contentInsets = contentInsets
             )
         }
 
@@ -732,14 +745,12 @@ private fun RecordingTestBottomBar(
                 .fillMaxWidth()
                 .clip(shape)
                 .background(MiuixTheme.colorScheme.surfaceVariant)
-                .heightIn(min = SettingsLayoutMetrics.BottomBarMinHeight)
-                .padding(horizontal = 24.dp, vertical = 10.dp),
-            contentAlignment = Alignment.Center
         ) {
-            RecordingTestRecordButton(
+            RecordingTestBottomBarContent(
                 uiMode = uiMode,
                 isRecording = isRecording,
-                onClick = onClick
+                onClick = onClick,
+                contentInsets = contentInsets
             )
         }
     }
@@ -749,11 +760,13 @@ private fun RecordingTestBottomBar(
 private fun RecordingTestBottomBarContent(
     uiMode: BibiUiMode,
     isRecording: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    contentInsets: WindowInsets
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .windowInsetsPadding(contentInsets)
             .heightIn(min = SettingsLayoutMetrics.BottomBarMinHeight)
             .padding(horizontal = 24.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
