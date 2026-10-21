@@ -290,6 +290,45 @@ enum class LlmVendor(
         )
     ),
 
+    /** Requesty - multi-provider router */
+    REQUESTY(
+        id = "requesty",
+        displayNameResId = R.string.llm_vendor_requesty,
+        endpoint = "https://router.requesty.ai/v1",
+        defaultModel = "gpt-5.4-mini",
+        models = listOf(
+            "gpt-5.4-mini",
+            "gpt-5.4-nano",
+            "gpt-5.4",
+            "claude-haiku-4-5",
+            "claude-sonnet-4-6",
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash",
+            "deepseek-v4-flash",
+            "qwen3.8-flash",
+            "kimi-k2.6",
+            "glm-5.3-flash"
+        ),
+        registerUrl = "https://app.requesty.ai/api-keys",
+        guideUrl = "https://docs.requesty.ai",
+        temperatureMin = 0f,
+        temperatureMax = 2f,
+        reasoningMode = ReasoningMode.REASONING_EFFORT,
+        reasoningModels = setOf(
+            "gpt-5.4-mini",
+            "gpt-5.4-nano",
+            "gpt-5.4",
+            "claude-haiku-4-5",
+            "claude-sonnet-4-6",
+            "gemini-3.5-flash-lite",
+            "gemini-3.5-flash",
+            "deepseek-v4-flash",
+            "qwen3.8-flash",
+            "kimi-k2.6",
+            "glm-5.3-flash"
+        )
+    ),
+
     /** Fireworks AI - fast inference with multiple models */
     FIREWORKS(
         id = "fireworks",
@@ -405,6 +444,7 @@ enum class LlmVendor(
             GROQ.id -> GROQ
             CEREBRAS.id -> CEREBRAS
             OHMYGPT.id -> OHMYGPT
+            REQUESTY.id -> REQUESTY
             FIREWORKS.id -> FIREWORKS
             DASHSCOPE.id -> DASHSCOPE
             TYPESAFE.id -> TYPESAFE
@@ -429,8 +469,9 @@ enum class LlmVendor(
             CEREBRAS, // 10. International - free tier
             FIREWORKS, // 11. International - fast inference
             OHMYGPT, // 12. Relay platform
-            TYPESAFE, // 13. Decision-only classifier
-            CUSTOM // 13. Custom
+            REQUESTY, // 13. Relay platform
+            TYPESAFE, // 14. Decision-only classifier
+            CUSTOM // 15. Custom
         )
 
         /** Get built-in vendors (excluding custom) */
