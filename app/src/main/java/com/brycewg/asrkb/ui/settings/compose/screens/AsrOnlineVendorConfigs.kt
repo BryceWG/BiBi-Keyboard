@@ -711,7 +711,7 @@ internal fun CurrentAsrVendorConfig(
 
         AsrVendor.Tencent -> {
             var itemIndex = primaryIndexOffset
-            val itemCount = primaryGroupCount ?: 8
+            val itemCount = primaryGroupCount ?: 7
             AsrTextField(
                 uiMode = uiMode,
                 value = tencentAppId,
@@ -1230,7 +1230,7 @@ internal fun currentOnlineAsrPrimaryItemCount(
         openAiUseCompletions
     )
     AsrVendor.Soniox -> 6
-    AsrVendor.Tencent -> 8
+    AsrVendor.Tencent -> 7
     else -> 0
 }
 

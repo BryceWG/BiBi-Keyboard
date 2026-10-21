@@ -15,6 +15,7 @@
     <string name="error_missing_stepaudio_key">未配置阶跃星辰 API Key</string>
     <string name="error_missing_openrouter_key">未配置 OpenRouter API Key</string>
     <string name="error_missing_mimo_key">未配置 MiMo API Key</string>
+    <string name="error_missing_tencent_key">未配置腾讯云密钥</string>
     <string name="error_request_failed_http">识别请求失败: HTTP %1$d%2$s</string>
     <string name="error_asr_request_failed_http">ASR 请求失败: HTTP %1$d%2$s</string>
     <string name="error_dash_getpolicy_failed_http">getPolicy 失败: HTTP %1$d%2$s</string>

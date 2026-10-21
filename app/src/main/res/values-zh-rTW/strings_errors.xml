@@ -15,6 +15,7 @@
     <string name="error_missing_stepaudio_key">未設定階躍星辰 API Key</string>
     <string name="error_missing_openrouter_key">未設定 OpenRouter API Key</string>
     <string name="error_missing_mimo_key">未設定 MiMo API Key</string>
+    <string name="error_missing_tencent_key">未設定騰訊雲金鑰</string>
     <string name="error_request_failed_http">識別請求失敗：HTTP %1$d%2$s</string>
     <string name="error_asr_request_failed_http">ASR 請求失敗：HTTP %1$d%2$s</string>
     <string name="error_dash_getpolicy_failed_http">getPolicy 失敗：HTTP %1$d%2$s</string>
