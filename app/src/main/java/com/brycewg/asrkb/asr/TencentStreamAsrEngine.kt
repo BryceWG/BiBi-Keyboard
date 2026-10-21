@@ -23,6 +23,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -31,9 +32,13 @@ import okhttp3.WebSocketListener
 import okio.ByteString.Companion.toByteString
 
 /**
- * https://cloud.tencent.com/document/product/1093/48982
+ * 腾讯云 ASR 实时流式识别引擎（WebSocket + HMAC-SHA1 签名）。
+ *
+ * 归属模块：asr
+ *
+ * 文档：https://cloud.tencent.com/document/product/1093/48982
  */
-class TencentStreamAsrEngine(
+internal class TencentStreamAsrEngine(
     private val context: Context,
     private val scope: CoroutineScope,
     private val prefs: Prefs,
@@ -89,19 +94,22 @@ class TencentStreamAsrEngine(
     override fun stop() {
         if (!running.get()) return
         running.set(false)
-        wsReady.set(false)
         audioJob?.cancel()
         audioJob = null
-        wssJob?.cancel()
-        wssJob = null
+        // 只关闭音频通道，让发送协程把剩余帧刷完并自然退出，再由 runSession 收尾发送 end 帧、
+        // 等待最终结果并回调 onFinal；直接 cancel(wssJob) 会把 end 帧和最终文本一起吞掉。
         try {
             audioChan?.close()
         } catch (_: Throwable) { }
     }
 
     private fun openWebSocket() {
-        wssJob = scope.launch(Dispatchers.IO) {
+        val job = scope.launch(Dispatchers.IO) {
             runSession(listener)
+        }
+        wssJob = job
+        job.invokeOnCompletion {
+            if (wssJob === job) wssJob = null
         }
     }
 
@@ -355,12 +363,15 @@ class TencentStreamAsrEngine(
                     code = response?.code ?: 0,
                     error = response?.message ?: t.message.orEmpty()
                 )
+                running.set(false)
+                audioJob?.cancel()
+                audioJob = null
                 if (finalTextDelivered.get()) return
-                if (!finalTextDelivered.getAndSet(true)) {
-                    val ft = accumulatedText.toString()
-                    if (ft.isNotBlank()) {
-                        listener.onFinal(ft)
-                    }
+                val ft = accumulatedText.toString()
+                if (ft.isNotBlank()) {
+                    // 已有部分结果时以最终文本收口，避免再弹错误造成双终态。
+                    if (!finalTextDelivered.getAndSet(true)) listener.onFinal(ft)
+                    return
                 }
                 listener.onError(
                     context.getString(R.string.error_recognize_failed_with_reason, t.message ?: "")
@@ -371,7 +382,7 @@ class TencentStreamAsrEngine(
         val ws = client.newWebSocket(request, wsListener)
 
         val sendJob = scope.launch(Dispatchers.IO) {
-            while (isActive && running.get() && !wsClosed.get()) {
+            while (isActive && !wsClosed.get()) {
                 val pcm = try {
                     chan.receive()
                 } catch (_: Exception) {
@@ -381,18 +392,22 @@ class TencentStreamAsrEngine(
             }
         }
 
-        try {
-            sendJob.join()
-        } catch (_: Exception) { }
+        // 队列里的剩余帧很快刷完；服务端先断开时不能让收尾无限等待。
+        withTimeoutOrNull(SEND_DRAIN_TIMEOUT_MS) { sendJob.join() }
+        sendJob.cancel()
 
-        try {
-            ws.send("{\"type\": \"end\"}")
-        } catch (_: Exception) { }
+        // 握手未完成时不会有最终结果，直接收口，避免空等 10s。
+        if (wsReady.get() && !wsClosed.get()) {
+            wsReady.set(false)
+            try {
+                ws.send("{\"type\": \"end\"}")
+            } catch (_: Exception) { }
 
-        val finalWaitStart = System.currentTimeMillis()
-        val finalTimeoutMs = 10000L
-        while (!wsClosed.get() && (System.currentTimeMillis() - finalWaitStart < finalTimeoutMs)) {
-            delay(100)
+            val finalWaitStart = System.currentTimeMillis()
+            val finalTimeoutMs = 10_000L
+            while (!wsClosed.get() && (System.currentTimeMillis() - finalWaitStart < finalTimeoutMs)) {
+                delay(100)
+            }
         }
 
         try {
@@ -411,6 +426,7 @@ class TencentStreamAsrEngine(
     companion object {
         private const val TAG = "TencentStreamAsrEngine"
         private const val CHUNK_MILLIS = 200
+        private const val SEND_DRAIN_TIMEOUT_MS = 5_000L
 
         fun hmacSha1Base64(plainText: String, secretKey: String): String {
             val mac = Mac.getInstance("HmacSHA1")

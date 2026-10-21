@@ -1,3 +1,10 @@
+/**
+ * 腾讯云 ASR 文件识别引擎（SentenceRecognition，TC3-HMAC-SHA256 签名）。
+ *
+ * 归属模块：asr
+ *
+ * 文档：https://cloud.tencent.com/document/product/1093/35646
+ */
 package com.brycewg.asrkb.asr
 
 import android.content.Context
@@ -13,10 +20,9 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 
-/**
- * https://cloud.tencent.com/document/product/1093/35646
- */
-class TencentFileAsrEngine(
+private const val TENCENT_API_REGION = "ap-shanghai"
+
+internal class TencentFileAsrEngine(
     context: Context,
     scope: CoroutineScope,
     prefs: Prefs,
@@ -27,14 +33,14 @@ class TencentFileAsrEngine(
 ) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration),
     PcmBatchRecognizer {
 
-    override val maxRecordDurationMillis: Int = 60_000
     override val uploadAudioEncodingSpec: UploadAudioEncodingSpec? = null
 
-    private val http: OkHttpClient = httpClient ?: OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+    private val http: OkHttpClient = httpClient ?: AsrHttpClientProvider.newBuilder()
         .addInterceptor(ApiLogInterceptor())
+        .connectTimeout(15, TimeUnit.SECONDS)
+        .readTimeout(120, TimeUnit.SECONDS)
+        .writeTimeout(120, TimeUnit.SECONDS)
+        .callTimeout(180, TimeUnit.SECONDS)
         .build()
 
     override suspend fun recognize(pcm: ByteArray) {
@@ -94,7 +100,7 @@ class TencentFileAsrEngine(
             .addHeader("X-TC-Action", action)
             .addHeader("X-TC-Version", "2019-06-14")
             .addHeader("X-TC-Timestamp", timestamp.toString())
-            .addHeader("X-TC-Region", "ap-shanghai")
+            .addHeader("X-TC-Region", TENCENT_API_REGION)
             .post(payload.toRequestBody(contentType.toMediaType()))
             .build()
 
@@ -210,24 +216,24 @@ class TencentFileAsrEngine(
     )
 }
 
-internal fun sha256Hex(s: String): String {
+private fun sha256Hex(s: String): String {
     val md = java.security.MessageDigest.getInstance("SHA-256")
     return md.digest(s.toByteArray()).joinToString("") { "%02x".format(it) }
 }
 
-internal fun hmac256(key: ByteArray, msg: String): ByteArray {
+private fun hmac256(key: ByteArray, msg: String): ByteArray {
     val mac = javax.crypto.Mac.getInstance("HmacSHA256")
     mac.init(javax.crypto.spec.SecretKeySpec(key, "HmacSHA256"))
     return mac.doFinal(msg.toByteArray())
 }
 
-internal fun hmac256(key: String, msg: String): ByteArray = hmac256(key.toByteArray(), msg)
+private fun hmac256(key: String, msg: String): ByteArray = hmac256(key.toByteArray(), msg)
 
-internal fun hmac256Hex(key: ByteArray, msg: String): String = hmac256(key, msg).joinToString("") { "%02x".format(it) }
+private fun hmac256Hex(key: ByteArray, msg: String): String = hmac256(key, msg).joinToString("") { "%02x".format(it) }
 
-internal fun hmac256Hex(key: String, msg: String): String = hmac256Hex(key.toByteArray(), msg)
+private fun hmac256Hex(key: String, msg: String): String = hmac256Hex(key.toByteArray(), msg)
 
-internal fun formatDate(timestamp: Long): String {
+private fun formatDate(timestamp: Long): String {
     val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
     sdf.timeZone = java.util.TimeZone.getTimeZone("UTC")
     return sdf.format(java.util.Date(timestamp * 1000))
