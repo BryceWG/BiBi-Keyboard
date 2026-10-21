@@ -165,7 +165,19 @@ internal data class AsrOnlineSettingsRouteState(
     val onSonioxEndpointSensitivityLevelChange: (Int) -> Unit,
     val sonioxLanguages: List<String>,
     val sonioxLanguageStrict: Boolean,
-    val onSonioxLanguageStrictChange: (Boolean) -> Unit
+    val onSonioxLanguageStrictChange: (Boolean) -> Unit,
+    val tencentAppId: String,
+    val onTencentAppIdChange: (String) -> Unit,
+    val tencentSecretId: String,
+    val onTencentSecretIdChange: (String) -> Unit,
+    val tencentSecretKey: String,
+    val onTencentSecretKeyChange: (String) -> Unit,
+    val tencentEngineCategory: String,
+    val onChooseTencentEngineCategory: () -> Unit,
+    val tencentEngineType: String,
+    val onChooseTencentModel: () -> Unit,
+    val tencentVadEnabled: Boolean,
+    val onTencentVadEnabledChange: (Boolean) -> Unit
 )
 
 internal data class AsrBackupSettingsRouteState(
@@ -198,6 +210,8 @@ internal data class AsrSettingsRouteActions(
     val showDashLanguagePicker: () -> Unit,
     val showStepAudioModelPicker: () -> Unit,
     val showSonioxLanguagePicker: () -> Unit,
+    val showTencentEngineCategoryPicker: () -> Unit,
+    val showTencentModelPicker: () -> Unit,
     val onPrimaryVendorSelected: (AsrVendor) -> Unit,
     val applyRecordingAutoStopMode: (Prefs.RecordingAutoStopMode) -> Unit,
     val applyAutoStopSwitch: (Boolean) -> Unit,

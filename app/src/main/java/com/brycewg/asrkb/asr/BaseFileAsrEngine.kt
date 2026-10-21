@@ -206,6 +206,8 @@ abstract class BaseFileAsrEngine(
                                 recognizeEncoded(seg.audio)
                             }
                         }
+                    } catch (t: kotlinx.coroutines.CancellationException) {
+                        throw t
                     } catch (t: Throwable) {
                         Log.e(TAG, "Recognition failed for segment", t)
                         try {

@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
+import com.brycewg.asrkb.asr.TencentAsrModelCatalog
 import com.brycewg.asrkb.store.DashScopePrefsCompat
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.AsrVendorUi
@@ -292,6 +293,18 @@ internal fun AsrSettingsRouteContent(
                         onChooseSonioxLanguages = showSonioxLanguagePicker,
                         sonioxLanguageStrict = onlineState.sonioxLanguageStrict,
                         onSonioxLanguageStrictChange = onlineState.onSonioxLanguageStrictChange,
+                        tencentAppId = onlineState.tencentAppId,
+                        onTencentAppIdChange = onlineState.onTencentAppIdChange,
+                        tencentSecretId = onlineState.tencentSecretId,
+                        onTencentSecretIdChange = onlineState.onTencentSecretIdChange,
+                        tencentSecretKey = onlineState.tencentSecretKey,
+                        onTencentSecretKeyChange = onlineState.onTencentSecretKeyChange,
+                        tencentEngineCategory = onlineState.tencentEngineCategory,
+                        onChooseTencentEngineCategory = showTencentEngineCategoryPicker,
+                        tencentEngineType = onlineState.tencentEngineType,
+                        onChooseTencentModel = showTencentModelPicker,
+                        tencentVadEnabled = onlineState.tencentVadEnabled,
+                        onTencentVadEnabledChange = onlineState.onTencentVadEnabledChange,
                         onOpenGuide = onOpenUrl,
                         primaryIndexOffset = 1,
                         primaryGroupCount = vendorGroupCount
@@ -355,6 +368,13 @@ private fun currentAsrVendorPrimaryItemCount(
         autoPolishVisible = isDashAutoPolishSupported(onlineState.dashModel),
         customEndpointVisible =
         normalizeDashRegion(onlineState.dashRegion) == DashScopePrefsCompat.DASH_REGION_CUSTOM
+    )
+
+    AsrVendor.Tencent -> tencentPrimaryItemCount(
+        streaming = TencentAsrModelCatalog.resolveSelection(
+            categoryId = onlineState.tencentEngineCategory,
+            modelId = onlineState.tencentEngineType
+        ).streaming
     )
 
     AsrVendor.SiliconFlow,

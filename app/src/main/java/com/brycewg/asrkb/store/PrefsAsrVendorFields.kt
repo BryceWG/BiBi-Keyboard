@@ -182,7 +182,16 @@ internal object PrefsAsrVendorFields {
         // 本地 FireRedASR（sherpa-onnx）无需鉴权
         AsrVendor.FireRedAsr to emptyList(),
         // 本地 X-ASR（sherpa-onnx）无需鉴权
-        AsrVendor.XAsr to emptyList()
+        AsrVendor.XAsr to emptyList(),
+        // 腾讯云 ASR
+        AsrVendor.Tencent to listOf(
+            VendorField.credential(KEY_TENCENT_APP_ID),
+            VendorField.credential(KEY_TENCENT_SECRET_ID),
+            VendorField.credential(KEY_TENCENT_SECRET_KEY),
+            VendorField(KEY_TENCENT_ENGINE_CATEGORY, default = ""),
+            VendorField(KEY_TENCENT_ENGINE_TYPE, default = ""),
+            VendorField.boolean(KEY_TENCENT_VAD_ENABLED, default = false)
+        )
     )
 
     internal val backupFields: List<VendorField> =

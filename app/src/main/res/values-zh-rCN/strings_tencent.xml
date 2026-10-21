@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_tencent">腾讯云 ASR</string>
+    <string name="label_tencent_app_id">AppId</string>
+    <string name="label_tencent_secret_id">SecretId</string>
+    <string name="label_tencent_secret_key">SecretKey</string>
+    <string name="label_tencent_engine_category">识别引擎</string>
+    <string name="label_tencent_engine_language">识别语言</string>
+    <string name="tencent_lang_zh_en">中英语言</string>
+    <string name="tencent_lang_multi_lang">多语言</string>
+    <string name="tencent_model_hy_preview">Hy-ASR-3.0-preview</string>
+    <string name="tencent_category_large_stream_2_0">大模型流式语音识别 2.0</string>
+    <string name="tencent_category_large_stream_1_0">大模型流式语音识别 1.0</string>
+    <string name="tencent_category_standard_stream">普通流式语音识别</string>
+    <string name="tencent_category_large_file">大模型录音文件识别极速版</string>
+    <string name="tencent_category_standard_file">普通录音文件识别极速版</string>
+    <string name="tencent_lang_zh">中文通用</string>
+    <string name="tencent_lang_zh_tw">中文繁体</string>
+    <string name="tencent_lang_zh_edu">中文教育</string>
+    <string name="tencent_lang_zh_medical">中文医疗</string>
+    <string name="tencent_lang_zh_court">中文法庭</string>
+    <string name="tencent_lang_zh_py">中英粤混合</string>
+    <string name="tencent_lang_yue">粤语</string>
+    <string name="tencent_lang_en">英语通用</string>
+    <string name="tencent_lang_en_game">英语游戏</string>
+    <string name="tencent_lang_en_edu">英语教育</string>
+    <string name="tencent_lang_ko">韩语</string>
+    <string name="tencent_lang_ja">日语</string>
+    <string name="tencent_lang_th">泰语</string>
+    <string name="tencent_lang_id">印尼语</string>
+    <string name="tencent_lang_vi">越南语</string>
+    <string name="tencent_lang_ms">马来语</string>
+    <string name="tencent_lang_fil">菲律宾语</string>
+    <string name="tencent_lang_pt">葡萄牙语</string>
+    <string name="tencent_lang_tr">土耳其语</string>
+    <string name="tencent_lang_ar">阿拉伯语</string>
+    <string name="tencent_lang_es">西班牙语</string>
+    <string name="tencent_lang_hi">印地语</string>
+    <string name="tencent_lang_fr">法语</string>
+    <string name="tencent_lang_de">德语</string>
+    <string name="label_tencent_vad_enabled">自动断句</string>
+    <string name="feature_tencent_vad_off_desc">服务端不按静音断句，超过60秒会被强制切分。</string>
+    <string name="feature_tencent_vad_on_desc">服务端检测到静音时自动断句，一句话结束即切分。</string>
+</resources>

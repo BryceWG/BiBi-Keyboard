@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_tencent">Tencent Cloud ASR</string>
+    <string name="label_tencent_app_id">AppId</string>
+    <string name="label_tencent_secret_id">SecretId</string>
+    <string name="label_tencent_secret_key">SecretKey</string>
+    <string name="label_tencent_engine_category">محرك التعرف</string>
+    <string name="label_tencent_engine_language">اللغة</string>
+    <string name="tencent_lang_zh_en">الصينية والإنجليزية</string>
+    <string name="tencent_lang_multi_lang">متعدد اللغات</string>
+    <string name="tencent_model_hy_preview">Hy-ASR-3.0-preview</string>
+    <string name="tencent_category_large_stream_2_0">التعرف الصوتي المتدفق بالنموذج الكبير 2.0</string>
+    <string name="tencent_category_large_stream_1_0">التعرف الصوتي المتدفق بالنموذج الكبير 1.0</string>
+    <string name="tencent_category_standard_stream">التعرف الصوتي المتدفق القياسي</string>
+    <string name="tencent_category_large_file">التعرف على ملفات الصوت بالنموذج الكبير (سريع)</string>
+    <string name="tencent_category_standard_file">التعرف القياسي على ملفات الصوت (سريع)</string>
+    <string name="tencent_lang_zh">الصينية (عامة)</string>
+    <string name="tencent_lang_zh_tw">الصينية (التقليدية)</string>
+    <string name="tencent_lang_zh_edu">الصينية (تعليمية)</string>
+    <string name="tencent_lang_zh_medical">الصينية (طبية)</string>
+    <string name="tencent_lang_zh_court">الصينية (محاكم)</string>
+    <string name="tencent_lang_zh_py">مختلط صيني-إنجليزي-كانتوني</string>
+    <string name="tencent_lang_yue">الكانتونية</string>
+    <string name="tencent_lang_en">الإنجليزية (عامة)</string>
+    <string name="tencent_lang_en_game">الإنجليزية (ألعاب)</string>
+    <string name="tencent_lang_en_edu">الإنجليزية (تعليمية)</string>
+    <string name="tencent_lang_ko">الكورية</string>
+    <string name="tencent_lang_ja">اليابانية</string>
+    <string name="tencent_lang_th">التايلاندية</string>
+    <string name="tencent_lang_id">الإندونيسية</string>
+    <string name="tencent_lang_vi">الفيتنامية</string>
+    <string name="tencent_lang_ms">الماليزية</string>
+    <string name="tencent_lang_fil">الفلبينية</string>
+    <string name="tencent_lang_pt">البرتغالية</string>
+    <string name="tencent_lang_tr">التركية</string>
+    <string name="tencent_lang_ar">العربية</string>
+    <string name="tencent_lang_es">الإسبانية</string>
+    <string name="tencent_lang_hi">الهندية</string>
+    <string name="tencent_lang_fr">الفرنسية</string>
+    <string name="tencent_lang_de">الألمانية</string>
+    <string name="label_tencent_vad_enabled">تقسيم الجمل تلقائيًا</string>
+    <string name="feature_tencent_vad_off_desc">لا يقسّم الخادم عند الصمت. يتم تقسيم الصوت الأطول من 60 ثانية قسريًا.</string>
+    <string name="feature_tencent_vad_on_desc">يقسّم الخادم عند اكتشاف الصمت، فتنتهي الجملة عند كل توقف.</string>
+</resources>

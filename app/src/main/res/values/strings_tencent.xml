@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_tencent">Tencent Cloud ASR</string>
+    <string name="label_tencent_app_id">AppId</string>
+    <string name="label_tencent_secret_id">SecretId</string>
+    <string name="label_tencent_secret_key">SecretKey</string>
+    <string name="label_tencent_engine_category">Recognition engine</string>
+    <string name="label_tencent_engine_language">Language</string>
+    <string name="tencent_lang_zh_en">Chinese &amp; English</string>
+    <string name="tencent_lang_multi_lang">Multilingual</string>
+    <string name="tencent_model_hy_preview">Hy-ASR-3.0-preview</string>
+    <string name="tencent_category_large_stream_2_0">Large model streaming ASR 2.0</string>
+    <string name="tencent_category_large_stream_1_0">Large model streaming ASR 1.0</string>
+    <string name="tencent_category_standard_stream">Standard streaming ASR</string>
+    <string name="tencent_category_large_file">Large model file ASR (Flash)</string>
+    <string name="tencent_category_standard_file">Standard file ASR (Flash)</string>
+    <string name="tencent_lang_zh">Chinese (general)</string>
+    <string name="tencent_lang_zh_tw">Chinese (traditional)</string>
+    <string name="tencent_lang_zh_edu">Chinese (education)</string>
+    <string name="tencent_lang_zh_medical">Chinese (medical)</string>
+    <string name="tencent_lang_zh_court">Chinese (court)</string>
+    <string name="tencent_lang_zh_py">Chinese-English-Cantonese</string>
+    <string name="tencent_lang_yue">Cantonese</string>
+    <string name="tencent_lang_en">English (general)</string>
+    <string name="tencent_lang_en_game">English (gaming)</string>
+    <string name="tencent_lang_en_edu">English (education)</string>
+    <string name="tencent_lang_ko">Korean</string>
+    <string name="tencent_lang_ja">Japanese</string>
+    <string name="tencent_lang_th">Thai</string>
+    <string name="tencent_lang_id">Indonesian</string>
+    <string name="tencent_lang_vi">Vietnamese</string>
+    <string name="tencent_lang_ms">Malay</string>
+    <string name="tencent_lang_fil">Filipino</string>
+    <string name="tencent_lang_pt">Portuguese</string>
+    <string name="tencent_lang_tr">Turkish</string>
+    <string name="tencent_lang_ar">Arabic</string>
+    <string name="tencent_lang_es">Spanish</string>
+    <string name="tencent_lang_hi">Hindi</string>
+    <string name="tencent_lang_fr">French</string>
+    <string name="tencent_lang_de">German</string>
+    <string name="label_tencent_vad_enabled">Auto sentence break</string>
+    <string name="feature_tencent_vad_off_desc">Server does not split on silence. Audio exceeding 60s is force-split.</string>
+    <string name="feature_tencent_vad_on_desc">Server splits on silence. Each pause triggers a sentence break.</string>
+</resources>

@@ -144,6 +144,11 @@ internal object CurrentAsrConstructionBaseline {
             localFile("FireRedAsrFileAsrEngine")
         }
         AsrVendor.XAsr -> stream("XAsrStreamAsrEngine")
+        AsrVendor.Tencent -> if (settings.streamingEnabled) {
+            stream("TencentStreamAsrEngine")
+        } else {
+            file("TencentFileAsrEngine")
+        }
     }
 
     private fun describeExternalDirect(
@@ -212,6 +217,11 @@ internal object CurrentAsrConstructionBaseline {
             pushAdapter("FireRedAsrFileAsrEngine")
         }
         AsrVendor.XAsr -> pushStream("XAsrStreamAsrEngine")
+        AsrVendor.Tencent -> if (settings.streamingEnabled) {
+            pushStream("TencentStreamAsrEngine")
+        } else {
+            pushAdapter("TencentFileAsrEngine")
+        }
     }
 
     private fun isRecordingTestPushPcmMode(
@@ -224,6 +234,7 @@ internal object CurrentAsrConstructionBaseline {
         AsrVendor.ElevenLabs,
         AsrVendor.OpenAI -> settings.streamingEnabled
         AsrVendor.XAsr -> true
+        AsrVendor.Tencent -> settings.streamingEnabled
         AsrVendor.SenseVoice,
         AsrVendor.FireRedAsr -> settings.pseudoStreamEnabled
         AsrVendor.SiliconFlow,

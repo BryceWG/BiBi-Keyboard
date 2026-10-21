@@ -43,7 +43,8 @@ internal enum class AsrFileRecognizerKey(
     FunAsrNanoFile("FunAsrNanoFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
     Qwen3AsrFile("Qwen3AsrFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
     ParakeetFile("ParakeetFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
-    FireRedAsrFile("FireRedAsrFileAsrEngine", AsrFileRecognizerFamily.LocalFile)
+    FireRedAsrFile("FireRedAsrFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
+    TencentFile("TencentFileAsrEngine", AsrFileRecognizerFamily.File)
 }
 
 internal fun fileRecognizerKeyFor(
@@ -71,6 +72,7 @@ internal fun fileRecognizerKeyFor(
     AsrVendor.Parakeet -> AsrFileRecognizerKey.ParakeetFile
     AsrVendor.FireRedAsr -> AsrFileRecognizerKey.FireRedAsrFile
     AsrVendor.XAsr -> error("X-ASR has no file recognizer")
+    AsrVendor.Tencent -> AsrFileRecognizerKey.TencentFile
 }
 
 internal fun interface AsrFileRecognizerConstructorTable {
@@ -142,6 +144,8 @@ internal object RealAsrFileRecognizerConstructorTable : AsrFileRecognizerConstru
             ParakeetFileAsrEngine(request.context, request.scope, request.prefs, request.listener, request.onRequestDuration)
         AsrFileRecognizerKey.FireRedAsrFile ->
             FireRedAsrFileAsrEngine(request.context, request.scope, request.prefs, request.listener, request.onRequestDuration)
+        AsrFileRecognizerKey.TencentFile ->
+            TencentFileAsrEngine(request.context, request.scope, request.prefs, request.listener, request.onRequestDuration)
     }
 }
 

@@ -15,6 +15,7 @@
     <string name="error_missing_stepaudio_key">مفتاح StepFun API غير مضبوط</string>
     <string name="error_missing_openrouter_key">مفتاح OpenRouter API غير مضبوط</string>
     <string name="error_missing_mimo_key">مفتاح MiMo API غير مضبوط</string>
+    <string name="error_missing_tencent_key">بيانات اعتماد Tencent Cloud غير مضبوطة</string>
     <string name="error_request_failed_http">فشل طلب التعرّف: HTTP %1$d%2$s</string>
     <string name="error_asr_request_failed_http">فشل طلب ASR: HTTP %1$d%2$s</string>
     <string name="error_dash_getpolicy_failed_http">فشل getPolicy: HTTP %1$d%2$s</string>

@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.GeminiAsrMode
+import com.brycewg.asrkb.asr.TencentAsrModelCatalog
 import com.brycewg.asrkb.asr.cohereSupportedLanguageCodes
 import com.brycewg.asrkb.asr.normalizeCohereLanguageForModel
 import com.brycewg.asrkb.store.KEY_GEM_API_KEY
@@ -163,6 +164,18 @@ internal fun CurrentAsrVendorConfig(
     onChooseSonioxLanguages: () -> Unit,
     sonioxLanguageStrict: Boolean,
     onSonioxLanguageStrictChange: (Boolean) -> Unit,
+    tencentAppId: String,
+    onTencentAppIdChange: (String) -> Unit,
+    tencentSecretId: String,
+    onTencentSecretIdChange: (String) -> Unit,
+    tencentSecretKey: String,
+    onTencentSecretKeyChange: (String) -> Unit,
+    tencentEngineCategory: String,
+    onChooseTencentEngineCategory: () -> Unit,
+    tencentEngineType: String,
+    onChooseTencentModel: () -> Unit,
+    tencentVadEnabled: Boolean,
+    onTencentVadEnabledChange: (Boolean) -> Unit,
     onOpenGuide: (String) -> Unit,
     primaryIndexOffset: Int = 0,
     primaryGroupCount: Int? = null
@@ -697,6 +710,80 @@ internal fun CurrentAsrVendorConfig(
             )
         }
 
+        AsrVendor.Tencent -> {
+            var itemIndex = primaryIndexOffset
+            val selection = TencentAsrModelCatalog.resolveSelection(
+                categoryId = tencentEngineCategory,
+                modelId = tencentEngineType
+            )
+            val itemCount = primaryGroupCount ?: tencentPrimaryItemCount(selection.streaming)
+            AsrTextField(
+                uiMode = uiMode,
+                value = tencentAppId,
+                onValueChange = onTencentAppIdChange,
+                label = stringResource(R.string.label_tencent_app_id),
+                password = false,
+                index = itemIndex++,
+                count = itemCount
+            )
+            AsrTextField(
+                uiMode = uiMode,
+                value = tencentSecretId,
+                onValueChange = onTencentSecretIdChange,
+                label = stringResource(R.string.label_tencent_secret_id),
+                password = false,
+                index = itemIndex++,
+                count = itemCount
+            )
+            AsrTextField(
+                uiMode = uiMode,
+                value = tencentSecretKey,
+                onValueChange = onTencentSecretKeyChange,
+                label = stringResource(R.string.label_tencent_secret_key),
+                password = true,
+                index = itemIndex++,
+                count = itemCount
+            )
+            val categoryLabel = stringResource(selection.category.displayNameRes)
+            val modelLabel = stringResource(selection.model.displayNameRes)
+            AsrValuePreference(
+                titleRes = R.string.label_tencent_engine_category,
+                value = categoryLabel,
+                uiMode = uiMode,
+                highlightId = "tencent_engine_category",
+                index = itemIndex++,
+                count = itemCount,
+                onClick = onChooseTencentEngineCategory
+            )
+            AsrValuePreference(
+                titleRes = R.string.label_tencent_engine_language,
+                value = modelLabel,
+                uiMode = uiMode,
+                highlightId = "tencent_engine_model",
+                index = itemIndex++,
+                count = itemCount,
+                onClick = onChooseTencentModel
+            )
+            // VAD 仅对 WebSocket 流式识别生效，录音文件类不展示该开关。
+            if (selection.streaming) {
+                AsrSwitchPreference(
+                    id = "tencent_vad_enabled",
+                    titleRes = R.string.label_tencent_vad_enabled,
+                    checked = tencentVadEnabled,
+                    index = itemIndex++,
+                    count = itemCount,
+                    onCheckedChange = onTencentVadEnabledChange
+                )
+            }
+            AsrActionPreference(
+                id = "tencent_get_key_guide",
+                titleRes = R.string.btn_get_api_key_guide,
+                index = itemIndex,
+                count = itemCount,
+                onClick = { onOpenGuide(TENCENT_KEY_GUIDE_URL) }
+            )
+        }
+
         else -> Unit
     }
 }
@@ -1122,6 +1209,9 @@ private fun SonioxAsrConfig(
     )
 }
 
+internal fun tencentPrimaryItemCount(streaming: Boolean): Int = // 3 个密钥输入 + 引擎大类 + 模型/语言 + 获取密钥入口；流式识别额外多一个 VAD 开关。
+    3 + 2 + (if (streaming) 1 else 0) + 1
+
 internal fun currentOnlineAsrPrimaryItemCount(
     selectedVendor: AsrVendor,
     openAiProviders: List<Prefs.OpenAiAsrProvider>,
@@ -1153,6 +1243,7 @@ internal fun currentOnlineAsrPrimaryItemCount(
         openAiUseCompletions
     )
     AsrVendor.Soniox -> 6
+    AsrVendor.Tencent -> tencentPrimaryItemCount(streaming = true)
     else -> 0
 }
 
@@ -1308,6 +1399,7 @@ private const val COHERE_DASHBOARD_URL = "https://dashboard.cohere.com/api-keys"
 internal const val COHERE_CUSTOM_MODEL_OPTION_ID = "__custom__"
 private const val OPENROUTER_KEY_URL = "https://openrouter.ai/settings/keys"
 private const val STEPAUDIO_KEY_URL = "https://platform.stepfun.com"
+private const val TENCENT_KEY_GUIDE_URL = "https://console.cloud.tencent.com/cam/capi"
 
 private fun openAiProfileDisplayName(
     context: Context,

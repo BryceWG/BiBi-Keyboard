@@ -129,7 +129,9 @@ class AsrSettingsViewModel : ViewModel() {
             xAsrNumThreads = prefs.xAsrNumThreads,
             xAsrKeepAliveMinutes = prefs.xAsrKeepAliveMinutes,
             xAsrPreloadEnabled = prefs.xAsrPreloadEnabled,
-            xAsrUseItn = prefs.xAsrUseItn
+            xAsrUseItn = prefs.xAsrUseItn,
+            // Tencent settings
+            tencentVadEnabled = prefs.tencentVadEnabled
         )
     }
 
@@ -366,6 +368,11 @@ class AsrSettingsViewModel : ViewModel() {
     fun updateSonioxStreaming(enabled: Boolean) {
         prefs.sonioxStreamingEnabled = enabled
         _uiState.value = _uiState.value.copy(sonioxStreamingEnabled = enabled)
+    }
+
+    fun updateTencentVadEnabled(enabled: Boolean) {
+        prefs.tencentVadEnabled = enabled
+        _uiState.value = _uiState.value.copy(tencentVadEnabled = enabled)
     }
 
     fun updateSonioxLanguages(languages: List<String>) {
@@ -981,7 +988,9 @@ data class AsrSettingsUiState(
     val xAsrNumThreads: Int = 2,
     val xAsrKeepAliveMinutes: Int = -1,
     val xAsrPreloadEnabled: Boolean = true,
-    val xAsrUseItn: Boolean = false
+    val xAsrUseItn: Boolean = false,
+    // Tencent settings
+    val tencentVadEnabled: Boolean = false
 ) {
     val isVolcStreaming: Boolean
         get() = VolcAsrModelCatalog.isStreaming(volcAsrModel)

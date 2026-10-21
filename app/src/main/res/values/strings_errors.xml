@@ -15,6 +15,7 @@
     <string name="error_missing_stepaudio_key">StepFun API Key not set</string>
     <string name="error_missing_openrouter_key">OpenRouter API Key not set</string>
     <string name="error_missing_mimo_key">MiMo API Key not set</string>
+    <string name="error_missing_tencent_key">Tencent Cloud credentials not set</string>
     <string name="error_request_failed_http">Recognition request failed: HTTP %1$d%2$s</string>
     <string name="error_asr_request_failed_http">ASR request failed: HTTP %1$d%2$s</string>
     <string name="error_dash_getpolicy_failed_http">getPolicy failed: HTTP %1$d%2$s</string>
