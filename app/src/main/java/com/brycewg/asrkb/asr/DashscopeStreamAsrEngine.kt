@@ -25,6 +25,7 @@ import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.google.gson.JsonObject
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +58,8 @@ class DashscopeStreamAsrEngine(
     }
 
     private val running = AtomicBoolean(false)
-    private var audioJob: Job? = null
+
+    @Volatile private var audioJob: Job? = null
     private var controlJob: Job? = null
 
     private val sampleRate = 16000
@@ -622,6 +624,12 @@ class DashscopeStreamAsrEngine(
     }
 
     private fun startCaptureAndSend() {
+        // 流式引擎的 start() 是异步的：连接可能在用户抬手（stop()）之后才建立完成；
+        // 此时 running 已为 false，若仍然起采集协程，它将无人取消，AudioRecord 会一直占用麦克风。
+        if (!running.get()) {
+            logDiag("dash_capture_skip", mapOf("reason" to "stopped"))
+            return
+        }
         audioJob?.cancel()
         audioJob = scope.launch(Dispatchers.IO) {
             val chunkMillis = 100 // 建议 100ms 左右
@@ -659,7 +667,10 @@ class DashscopeStreamAsrEngine(
 
             try {
                 audioManager.startCapture().collect { audioChunk ->
-                    if (!running.get()) return@collect
+                    if (!running.get()) {
+                        logDiag("dash_capture_abort", mapOf("reason" to "stopped"))
+                        throw CancellationException("engine stopped")
+                    }
 
                     val leveled = vadInputLeveler.process(audioChunk)
 
