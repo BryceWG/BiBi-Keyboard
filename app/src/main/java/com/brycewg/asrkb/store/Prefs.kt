@@ -1004,9 +1004,17 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_JEV_OPENROUTER_API_KEY, "") ?: ""
         set(value) = sp.edit { putString(KEY_JEV_OPENROUTER_API_KEY, value.trim()) }
 
+    var jevOpenRouterModel: String
+        get() = sp.getString(KEY_JEV_OPENROUTER_MODEL, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_OPENROUTER_MODEL, value.trim()) }
+
     var jevCloudflareApiKey: String
         get() = sp.getString(KEY_JEV_CLOUDFLARE_API_KEY, "") ?: ""
         set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_API_KEY, value.trim()) }
+
+    var jevCloudflareModel: String
+        get() = sp.getString(KEY_JEV_CLOUDFLARE_MODEL, "") ?: ""
+        set(value) = sp.edit { putString(KEY_JEV_CLOUDFLARE_MODEL, value.trim()) }
 
     var jevCloudflareAccountId: String
         get() = sp.getString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, "") ?: ""

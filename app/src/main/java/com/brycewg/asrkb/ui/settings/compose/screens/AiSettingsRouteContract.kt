@@ -6,6 +6,7 @@
 package com.brycewg.asrkb.ui.settings.compose.screens
 
 import com.brycewg.asrkb.asr.LlmVendor
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptPreset
 import com.brycewg.asrkb.ui.settings.ai.AiPostSettingsViewModel
@@ -43,6 +44,7 @@ internal data class AiSettingsRouteState(
     val sfPresetModels: List<String>,
     val sfStaticModels: List<String>,
     val builtinPresetModels: List<String>,
+    val typesafeChannel: JevClassifierProvider,
     val sfCustomModelInputVisible: Boolean,
     val builtinCustomModelInputVisible: Boolean,
     val builtinReasoningOnJson: String,
@@ -69,6 +71,7 @@ internal data class AiSettingsRouteActions(
     val onSfTemperatureChange: (Float) -> Unit,
     val onSfCustomModelInputVisibleChange: (Boolean) -> Unit,
     val onBuiltinCustomModelInputVisibleChange: (Boolean) -> Unit,
+    val onTypesafeChannelChange: (JevClassifierProvider) -> Unit,
     val onBuiltinReasoningOnJsonChange: (String) -> Unit,
     val onBuiltinReasoningOffJsonChange: (String) -> Unit,
     val onFocusProfileNameAfterAddChange: (Boolean) -> Unit,

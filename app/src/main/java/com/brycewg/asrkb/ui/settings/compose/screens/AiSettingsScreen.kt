@@ -307,6 +307,11 @@ fun AiSettingsScreen(
                 onSfTemperatureChange = { localState.sfTemperature = it },
                 onSfCustomModelInputVisibleChange = { localState.sfCustomModelInputVisible = it },
                 onBuiltinCustomModelInputVisibleChange = { localState.builtinCustomModelInputVisible = it },
+                onTypesafeChannelChange = { provider ->
+                    localState.typesafeChannel = provider
+                    localState.builtinCustomModelInputVisible = false
+                    viewModel.selectClassifierChannel(prefs, provider)
+                },
                 onBuiltinReasoningOnJsonChange = { localState.builtinReasoningOnJson = it },
                 onBuiltinReasoningOffJsonChange = { localState.builtinReasoningOffJson = it },
                 onFocusProfileNameAfterAddChange = { localState.focusProfileNameAfterAdd = it },

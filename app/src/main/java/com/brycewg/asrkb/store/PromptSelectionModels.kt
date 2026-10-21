@@ -1,11 +1,18 @@
 package com.brycewg.asrkb.store
 
+import com.brycewg.asrkb.asr.LlmVendor
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 const val PROMPT_SELECTION_SKIP_POLISH_ID = "candidate.skip_polish"
 
 const val JEV_MODEL_ID = "jev-latest"
+
+/** OpenRouter 渠道的默认分类模型 ID。 */
+const val JEV_OPENROUTER_MODEL_ID = "~typesafe/jev-latest"
+
+/** Cloudflare Workers AI 渠道的默认分类模型 ID。 */
+const val JEV_CLOUDFLARE_MODEL_ID = "typesafe/jev"
 
 enum class JevClassifierProvider(val id: String) {
     TYPESAFE("typesafe"),
@@ -22,6 +29,39 @@ enum class JevClassifierProvider(val id: String) {
         OPENROUTER -> "OpenRouter"
         CLOUDFLARE -> "Cloudflare"
         CUSTOM -> "Custom (TypeSafe-compatible)"
+    }
+
+    /** 各渠道的默认分类模型；CUSTOM 渠道由用户自行填写。 */
+    fun defaultModelId(): String = when (this) {
+        TYPESAFE -> JEV_MODEL_ID
+        OPENROUTER -> JEV_OPENROUTER_MODEL_ID
+        CLOUDFLARE -> JEV_CLOUDFLARE_MODEL_ID
+        CUSTOM -> ""
+    }
+}
+
+/** 当前渠道生效的分类模型 ID：未自定义时回退渠道默认值。 */
+fun jevModelId(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {
+    JevClassifierProvider.TYPESAFE ->
+        prefs.getLlmVendorModel(LlmVendor.TYPESAFE).trim().ifBlank { JEV_MODEL_ID }
+
+    JevClassifierProvider.OPENROUTER ->
+        prefs.jevOpenRouterModel.trim().ifBlank { JEV_OPENROUTER_MODEL_ID }
+
+    JevClassifierProvider.CLOUDFLARE ->
+        prefs.jevCloudflareModel.trim().ifBlank { JEV_CLOUDFLARE_MODEL_ID }
+
+    JevClassifierProvider.CUSTOM -> prefs.jevCustomModel.trim()
+}
+
+/** 写入渠道分类模型；CUSTOM 渠道复用自定义 endpoint 的模型字段。 */
+fun setJevModelId(prefs: Prefs, provider: JevClassifierProvider, model: String) {
+    val value = model.trim()
+    when (provider) {
+        JevClassifierProvider.TYPESAFE -> prefs.setLlmVendorModel(LlmVendor.TYPESAFE, value)
+        JevClassifierProvider.OPENROUTER -> prefs.jevOpenRouterModel = value
+        JevClassifierProvider.CLOUDFLARE -> prefs.jevCloudflareModel = value
+        JevClassifierProvider.CUSTOM -> prefs.jevCustomModel = value
     }
 }
 

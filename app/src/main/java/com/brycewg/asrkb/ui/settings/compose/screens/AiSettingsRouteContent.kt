@@ -141,6 +141,7 @@ internal fun AiSettingsRouteContent(
                         sfPresetModels = sfPresetModels,
                         sfStaticModels = sfStaticModels,
                         builtinPresetModels = builtinPresetModels,
+                        typesafeChannel = typesafeChannel,
                         sfCustomModelInputVisible = sfCustomModelInputVisible,
                         builtinCustomModelInputVisible = builtinCustomModelInputVisible,
                         builtinReasoningOnJson = builtinReasoningOnJson,
@@ -282,6 +283,7 @@ internal fun AiSettingsRouteContent(
                             onBuiltinCustomModelInputVisibleChange(true)
                             viewModel.updateBuiltinModel(prefs, value)
                         },
+                        onTypesafeChannelChange = onTypesafeChannelChange,
                         onFetchBuiltinModels = {
                             onFetchModels(
                                 selectedVendor.endpoint,

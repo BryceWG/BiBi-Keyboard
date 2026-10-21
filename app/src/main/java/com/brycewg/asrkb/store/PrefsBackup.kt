@@ -141,7 +141,9 @@ internal object PrefsBackup {
         o.put(KEY_JEV_TYPESAFE_API_KEY, jevTypesafeApiKey)
         o.put(KEY_JEV_PROVIDER, jevClassifierProvider.id)
         o.put(KEY_JEV_OPENROUTER_API_KEY, jevOpenRouterApiKey)
+        o.put(KEY_JEV_OPENROUTER_MODEL, jevOpenRouterModel)
         o.put(KEY_JEV_CLOUDFLARE_API_KEY, jevCloudflareApiKey)
+        o.put(KEY_JEV_CLOUDFLARE_MODEL, jevCloudflareModel)
         o.put(KEY_JEV_CLOUDFLARE_ACCOUNT_ID, jevCloudflareAccountId)
         o.put(KEY_JEV_CUSTOM_ENDPOINT, jevCustomEndpoint)
         o.put(KEY_JEV_CUSTOM_API_KEY, jevCustomApiKey)
@@ -523,7 +525,9 @@ internal object PrefsBackup {
                 JevClassifierProvider.fromId(providerId)?.let { jevClassifierProvider = it }
             }
             optString(KEY_JEV_OPENROUTER_API_KEY)?.let { jevOpenRouterApiKey = it }
+            optString(KEY_JEV_OPENROUTER_MODEL)?.let { jevOpenRouterModel = it }
             optString(KEY_JEV_CLOUDFLARE_API_KEY)?.let { jevCloudflareApiKey = it }
+            optString(KEY_JEV_CLOUDFLARE_MODEL)?.let { jevCloudflareModel = it }
             optString(KEY_JEV_CLOUDFLARE_ACCOUNT_ID)?.let { jevCloudflareAccountId = it }
             optString(KEY_JEV_CUSTOM_ENDPOINT)?.let { jevCustomEndpoint = it }
             optString(KEY_JEV_CUSTOM_API_KEY)?.let { jevCustomApiKey = it }

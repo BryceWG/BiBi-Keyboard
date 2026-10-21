@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmVendor
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.settings.ai.AiPostSettingsViewModel
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
@@ -38,6 +39,7 @@ internal fun AiPostProcessModelSection(
     builtinPresetModels: List<String>,
     sfCustomModelInputVisible: Boolean,
     builtinCustomModelInputVisible: Boolean,
+    typesafeChannel: JevClassifierProvider,
     builtinReasoningOnJson: String,
     builtinReasoningOffJson: String,
     sfCustomReasoningParamsEnabled: Boolean,
@@ -64,6 +66,7 @@ internal fun AiPostProcessModelSection(
     onBuiltinApiKeyChange: (String) -> Unit,
     onChooseBuiltinModel: () -> Unit,
     onBuiltinCustomModelChange: (String) -> Unit,
+    onTypesafeChannelChange: (JevClassifierProvider) -> Unit,
     onFetchBuiltinModels: () -> Unit,
     onBuiltinReasoningChange: (Int) -> Unit,
     onBuiltinCustomReasoningParamsEnabledChange: (Boolean) -> Unit,
@@ -77,11 +80,11 @@ internal fun AiPostProcessModelSection(
 
     AiSection(uiMode = uiMode, titleRes = R.string.section_post_process_model) {
         val primaryConfigItemCount = when (selectedVendor) {
-            LlmVendor.TYPESAFE -> when (prefs.jevClassifierProvider) {
-                com.brycewg.asrkb.store.JevClassifierProvider.CLOUDFLARE -> 4
-                com.brycewg.asrkb.store.JevClassifierProvider.CUSTOM -> 4
-                else -> 3
-            }
+            LlmVendor.TYPESAFE -> typeSafeLlmPrimaryItemCount(
+                channel = typesafeChannel,
+                model = builtinConfig.model,
+                customModelInputVisible = builtinCustomModelInputVisible
+            )
             LlmVendor.SF_FREE -> sfFreeLlmPrimaryItemCount(
                 presetModels = sfPresetModels,
                 staticModels = sfStaticModels,
@@ -113,7 +116,12 @@ internal fun AiPostProcessModelSection(
                 TypeSafeLlmSection(
                     uiMode = uiMode,
                     prefs = prefs,
+                    channel = typesafeChannel,
+                    onChannelChange = onTypesafeChannelChange,
+                    model = builtinConfig.model,
+                    customModelInputVisible = builtinCustomModelInputVisible,
                     onChooseModel = onChooseBuiltinModel,
+                    onCustomModelChange = onBuiltinCustomModelChange,
                     primaryIndexOffset = 1,
                     primaryGroupCount = primaryGroupCount
                 )

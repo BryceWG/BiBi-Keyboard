@@ -41,9 +41,10 @@ internal class AiSettingsLocalState(
     var sfCustomModelInputVisible by mutableStateOf(
         sfModel.isNotBlank() && !sfPresetModels.contains(sfModel)
     )
+    var typesafeChannel by mutableStateOf(prefs.jevClassifierProvider)
     var builtinPresetModels by mutableStateOf(prefs.getLlmVendorModels(selectedVendor))
     var builtinCustomModelInputVisible by mutableStateOf(
-        isBuiltinCustomModelVisible(selectedVendor, builtinConfig, builtinPresetModels)
+        isBuiltinCustomModelVisible(prefs, selectedVendor, builtinConfig, builtinPresetModels)
     )
     var builtinReasoningOnJson by mutableStateOf(prefs.getLlmVendorReasoningParamsOnJson(selectedVendor))
     var builtinReasoningOffJson by mutableStateOf(prefs.getLlmVendorReasoningParamsOffJson(selectedVendor))
@@ -71,7 +72,7 @@ internal class AiSettingsLocalState(
     ) {
         builtinPresetModels = prefs.getLlmVendorModels(selectedVendor)
         builtinCustomModelInputVisible =
-            isBuiltinCustomModelVisible(selectedVendor, builtinConfig, builtinPresetModels)
+            isBuiltinCustomModelVisible(prefs, selectedVendor, builtinConfig, builtinPresetModels)
         builtinReasoningOnJson = prefs.getLlmVendorReasoningParamsOnJson(selectedVendor)
         builtinReasoningOffJson = prefs.getLlmVendorReasoningParamsOffJson(selectedVendor)
     }
@@ -111,6 +112,7 @@ internal class AiSettingsLocalState(
         sfPresetModels = sfPresetModels,
         sfStaticModels = sfStaticModels,
         builtinPresetModels = builtinPresetModels,
+        typesafeChannel = typesafeChannel,
         sfCustomModelInputVisible = sfCustomModelInputVisible,
         builtinCustomModelInputVisible = builtinCustomModelInputVisible,
         builtinReasoningOnJson = builtinReasoningOnJson,
@@ -132,10 +134,16 @@ internal fun rememberAiSettingsLocalState(
 }
 
 private fun isBuiltinCustomModelVisible(
+    prefs: Prefs,
     selectedVendor: LlmVendor,
     builtinConfig: AiPostSettingsViewModel.BuiltinVendorConfig,
     builtinPresetModels: List<String>
 ): Boolean {
+    if (selectedVendor == LlmVendor.TYPESAFE) {
+        // TypeSafe 按当前渠道的默认模型判定；模型为空表示正在编辑自定义值。
+        val model = builtinConfig.model
+        return model.isBlank() || model != prefs.jevClassifierProvider.defaultModelId()
+    }
     val displayModel = builtinConfig.model.ifBlank { selectedVendor.defaultModel }
     return displayModel.isNotBlank() && !builtinPresetModels.contains(displayModel)
 }

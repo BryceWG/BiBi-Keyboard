@@ -32,15 +32,18 @@ import com.brycewg.asrkb.ui.settings.compose.model.DropdownOption
 internal fun TypeSafeLlmSection(
     uiMode: BibiUiMode,
     prefs: Prefs,
+    channel: JevClassifierProvider,
+    onChannelChange: (JevClassifierProvider) -> Unit,
+    model: String,
+    customModelInputVisible: Boolean,
     onChooseModel: () -> Unit,
+    onCustomModelChange: (String) -> Unit,
     primaryIndexOffset: Int,
     primaryGroupCount: Int
 ) {
-    var channel by remember { mutableStateOf(prefs.jevClassifierProvider) }
     var apiKey by remember(channel) { mutableStateOf(jevApiKey(prefs, channel)) }
     var accountId by remember { mutableStateOf(prefs.jevCloudflareAccountId) }
     var endpoint by remember(channel) { mutableStateOf(prefs.jevCustomEndpoint) }
-    var model by remember(channel) { mutableStateOf(prefs.jevCustomModel) }
     var index = primaryIndexOffset
 
     AsrDropdownPreference(
@@ -51,10 +54,7 @@ internal fun TypeSafeLlmSection(
         index = index++,
         count = primaryGroupCount,
         onSelectedOptionChange = { id ->
-            JevClassifierProvider.fromId(id)?.let {
-                channel = it
-                prefs.jevClassifierProvider = it
-            }
+            JevClassifierProvider.fromId(id)?.let(onChannelChange)
         }
     )
     AiTextField(
@@ -97,10 +97,7 @@ internal fun TypeSafeLlmSection(
         AiTextField(
             uiMode = uiMode,
             value = model,
-            onValueChange = {
-                model = it
-                prefs.jevCustomModel = it
-            },
+            onValueChange = onCustomModelChange,
             label = stringResource(R.string.label_prompt_selection_jev_model),
             index = index++,
             count = primaryGroupCount
@@ -108,14 +105,47 @@ internal fun TypeSafeLlmSection(
     } else {
         AiValuePreference(
             titleRes = R.string.label_llm_model_select,
-            value = LlmVendor.TYPESAFE.defaultModel,
+            value = model.ifBlank { channel.defaultModelId() },
             uiMode = uiMode,
-            index = index,
+            index = index++,
             count = primaryGroupCount,
             onClick = onChooseModel
         )
+        if (typeSafeCustomModelVisible(channel, model, customModelInputVisible)) {
+            AiTextField(
+                uiMode = uiMode,
+                value = model,
+                onValueChange = onCustomModelChange,
+                label = stringResource(R.string.label_custom_model_id),
+                index = index++,
+                count = primaryGroupCount
+            )
+        }
     }
     AiBodyText(uiMode = uiMode, textRes = R.string.helper_prompt_selection_jev_only)
+}
+
+/** TypeSafe 渠道在模型行之下是否展示自定义模型 ID 输入框；CUSTOM 渠道自带模型输入框。 */
+internal fun typeSafeCustomModelVisible(
+    channel: JevClassifierProvider,
+    model: String,
+    customModelInputVisible: Boolean
+): Boolean {
+    if (channel == JevClassifierProvider.CUSTOM) return false
+    return customModelInputVisible || model.isBlank() || model != channel.defaultModelId()
+}
+
+/** TypeSafe 渠道主配置组行数：渠道 + API Key + [账号 ID / endpoint] + 模型 [+ 自定义模型]。 */
+internal fun typeSafeLlmPrimaryItemCount(
+    channel: JevClassifierProvider,
+    model: String,
+    customModelInputVisible: Boolean
+): Int {
+    val base = when (channel) {
+        JevClassifierProvider.TYPESAFE, JevClassifierProvider.OPENROUTER -> 3
+        JevClassifierProvider.CLOUDFLARE, JevClassifierProvider.CUSTOM -> 4
+    }
+    return base + if (typeSafeCustomModelVisible(channel, model, customModelInputVisible)) 1 else 0
 }
 
 private fun jevApiKey(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {

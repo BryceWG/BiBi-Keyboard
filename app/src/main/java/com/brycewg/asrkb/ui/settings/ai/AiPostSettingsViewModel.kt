@@ -6,8 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.asr.ReasoningMode
+import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptPreset
+import com.brycewg.asrkb.store.jevModelId
+import com.brycewg.asrkb.store.setJevModelId
 import java.util.UUID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -98,7 +101,11 @@ class AiPostSettingsViewModel : ViewModel() {
         }
         _builtinVendorConfig.value = BuiltinVendorConfig(
             apiKey = prefs.getLlmVendorApiKey(vendor),
-            model = prefs.getLlmVendorModel(vendor),
+            model = if (vendor == LlmVendor.TYPESAFE) {
+                jevModelId(prefs, prefs.jevClassifierProvider)
+            } else {
+                prefs.getLlmVendorModel(vendor)
+            },
             temperature = prefs.getLlmVendorTemperature(vendor),
             reasoningCharThreshold = prefs.getLlmVendorReasoningCharThreshold(vendor),
             customReasoningParamsEnabled = prefs.getLlmVendorCustomReasoningParamsEnabled(vendor)
@@ -119,6 +126,24 @@ class AiPostSettingsViewModel : ViewModel() {
             Log.d(TAG, "Selected LLM vendor: ${vendor.id}")
         } catch (e: Exception) {
             Log.e(TAG, "Failed to select LLM vendor", e)
+        }
+    }
+
+    /**
+     * 切换 TypeSafe 分类渠道，并刷新该渠道生效的模型。
+     */
+    fun selectClassifierChannel(prefs: Prefs, provider: JevClassifierProvider) {
+        rememberPrefs(prefs)
+        if (prefs.jevClassifierProvider == provider) return
+        try {
+            prefs.jevClassifierProvider = provider
+            if (_selectedVendor.value == LlmVendor.TYPESAFE) {
+                _builtinVendorConfig.value = _builtinVendorConfig.value.copy(
+                    model = jevModelId(prefs, provider)
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to select classifier channel", e)
         }
     }
 
@@ -145,7 +170,11 @@ class AiPostSettingsViewModel : ViewModel() {
         val vendor = _selectedVendor.value
         if (vendor == LlmVendor.CUSTOM || vendor == LlmVendor.SF_FREE) return
         try {
-            prefs.setLlmVendorModel(vendor, model)
+            if (vendor == LlmVendor.TYPESAFE) {
+                setJevModelId(prefs, prefs.jevClassifierProvider, model)
+            } else {
+                prefs.setLlmVendorModel(vendor, model)
+            }
             _builtinVendorConfig.value = _builtinVendorConfig.value.copy(model = model)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to update builtin model", e)

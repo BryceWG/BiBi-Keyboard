@@ -200,7 +200,7 @@ object LlmModelConfigResolver {
                                 customProviderId = null,
                                 endpoint = "jev://typesafe",
                                 apiKey = "configured",
-                                model = JEV_MODEL_ID,
+                                model = jevModelId(prefs, prefs.jevClassifierProvider),
                                 temperature = 0.0,
                                 reasoningCharThreshold = LlmReasoningThreshold.NEVER,
                                 useCustomReasoningParams = false,

@@ -2,10 +2,10 @@ package com.brycewg.asrkb.asr
 
 import android.util.Log
 import com.brycewg.asrkb.R
-import com.brycewg.asrkb.store.JEV_MODEL_ID
 import com.brycewg.asrkb.store.JevClassifierProvider
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptSelectionFailReason
+import com.brycewg.asrkb.store.jevModelId
 import java.io.IOException
 import java.io.InterruptedIOException
 import java.util.concurrent.TimeUnit
@@ -73,7 +73,7 @@ internal class JevClassifier(
                             JevSelectionResult(
                                 choice = null,
                                 vendorId = provider.id,
-                                model = modelFor(prefs, provider),
+                                model = jevModelId(prefs, provider),
                                 elapsedMs = elapsedMs(startedAt),
                                 requestSent = true,
                                 failureReason = reason
@@ -112,7 +112,7 @@ internal class JevClassifier(
                                     vendorId = provider.id,
                                     model = responseJson?.optString("model")
                                         ?.takeIf(String::isNotBlank)
-                                        ?: modelFor(prefs, provider),
+                                        ?: jevModelId(prefs, provider),
                                     elapsedMs = elapsedMs(startedAt),
                                     requestSent = true,
                                     failureReason = when {
@@ -153,16 +153,17 @@ internal class JevClassifier(
                 .put("criteria", criteria)
         )
         val state = asrText
+        val model = jevModelId(prefs, provider)
         val payload = when (provider) {
             JevClassifierProvider.TYPESAFE,
             JevClassifierProvider.OPENROUTER,
             JevClassifierProvider.CUSTOM -> JSONObject()
-                .put("model", modelFor(prefs, provider))
+                .put("model", model)
                 .put("state", state)
                 .put("questions", questions)
 
             JevClassifierProvider.CLOUDFLARE -> JSONObject()
-                .put("model", "typesafe/jev")
+                .put("model", model)
                 .put(
                     "input",
                     JSONObject()
@@ -176,11 +177,11 @@ internal class JevClassifier(
             JevClassifierProvider.OPENROUTER ->
                 "https://openrouter.ai/api/alpha/decisions" to prefs.jevOpenRouterApiKey
             JevClassifierProvider.CLOUDFLARE ->
-                "https://api.cloudflare.com/client/v4/accounts/${prefs.jevCloudflareAccountId}/ai/run/typesafe/jev" to
+                "https://api.cloudflare.com/client/v4/accounts/${prefs.jevCloudflareAccountId}/ai/run/$model" to
                     prefs.jevCloudflareApiKey
             JevClassifierProvider.CUSTOM -> prefs.jevCustomEndpoint.trim() to prefs.jevCustomApiKey
         }
-        val payloadModel = modelFor(prefs, provider)
+        val payloadModel = model
         val requestStructure = when (provider) {
             JevClassifierProvider.CLOUDFLARE ->
                 "json object keys=model,input; input keys=state,questions"
@@ -204,13 +205,6 @@ internal class JevClassifier(
             )
             .post(payload.toString().toRequestBody(JSON_MEDIA))
             .build()
-    }
-
-    private fun modelFor(prefs: Prefs, provider: JevClassifierProvider): String = when (provider) {
-        JevClassifierProvider.TYPESAFE -> JEV_MODEL_ID
-        JevClassifierProvider.OPENROUTER -> "~typesafe/jev-latest"
-        JevClassifierProvider.CLOUDFLARE -> "typesafe/jev"
-        JevClassifierProvider.CUSTOM -> prefs.jevCustomModel.trim()
     }
 
     private fun elapsedMs(startedAt: Long): Long = TimeUnit.NANOSECONDS.toMillis((System.nanoTime() - startedAt).coerceAtLeast(0L))

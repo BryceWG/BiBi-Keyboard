@@ -192,7 +192,7 @@ internal object PrefsLlmVendorStore {
                 Prefs.EffectiveLlmConfig(
                     endpoint = "",
                     apiKey = "",
-                    model = LlmVendor.TYPESAFE.defaultModel,
+                    model = jevModelId(prefs, prefs.jevClassifierProvider),
                     temperature = 0f,
                     vendor = vendor,
                     reasoningCharThreshold = LlmReasoningThreshold.NEVER,

@@ -10,6 +10,7 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.PromptPreset
+import com.brycewg.asrkb.store.jevModelId
 import com.brycewg.asrkb.ui.settings.ai.AiPostSettingsViewModel
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMultiChoiceSheetState
@@ -70,15 +71,29 @@ internal class AiSettingsPickerActions(
 
     fun showBuiltinModelDialog() {
         if (selectedVendor == LlmVendor.CUSTOM || selectedVendor == LlmVendor.SF_FREE) return
-        val currentModel = builtinConfig.model.ifBlank { selectedVendor.defaultModel }
+        val isTypesafe = selectedVendor == LlmVendor.TYPESAFE
+        val typesafeChannel = prefs.jevClassifierProvider
+        val presetModels = if (isTypesafe) {
+            listOf(typesafeChannel.defaultModelId())
+        } else {
+            localState.builtinPresetModels
+        }
+        val currentModel = if (isTypesafe) {
+            jevModelId(prefs, typesafeChannel)
+        } else {
+            builtinConfig.model.ifBlank { selectedVendor.defaultModel }
+        }
         onChoiceSheetChange(
             aiModelChoiceSheetState(
                 context = context,
                 titleRes = R.string.label_llm_model_select,
-                presetModels = localState.builtinPresetModels,
+                presetModels = presetModels,
                 currentModel = currentModel,
-                onCustomSelected = {
+                onCustomSelected = { customModel ->
                     localState.builtinCustomModelInputVisible = true
+                    if (customModel.isNotBlank()) {
+                        viewModel.updateBuiltinModel(prefs, customModel)
+                    }
                 },
                 onModelSelected = { selected ->
                     localState.builtinCustomModelInputVisible = false

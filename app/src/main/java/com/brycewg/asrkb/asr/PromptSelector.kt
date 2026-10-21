@@ -166,11 +166,7 @@ internal object PromptSelector {
                         prefs.jevCustomApiKey.isNotBlank() &&
                         prefs.jevCustomModel.isNotBlank()
             }
-            val modelReady = when (provider) {
-                JevClassifierProvider.CUSTOM -> prefs.jevCustomModel.isNotBlank()
-                else -> modelRef.model == com.brycewg.asrkb.store.JEV_MODEL_ID
-            }
-            if (!credentialsReady || !modelReady) {
+            if (!credentialsReady) {
                 return PromptSelectionOutcome(
                     status = PromptSelectionStatus.failure(
                         reason = PromptSelectionFailReason.INVALID_CONFIG,
