@@ -172,10 +172,10 @@ internal data class AsrOnlineSettingsRouteState(
     val onTencentSecretIdChange: (String) -> Unit,
     val tencentSecretKey: String,
     val onTencentSecretKeyChange: (String) -> Unit,
+    val tencentEngineCategory: String,
+    val onChooseTencentEngineCategory: () -> Unit,
     val tencentEngineType: String,
-    val onTencentEngineTypeChange: (String) -> Unit,
-    val tencentStreaming: Boolean,
-    val onTencentStreamingChange: (Boolean) -> Unit,
+    val onChooseTencentModel: () -> Unit,
     val tencentVadEnabled: Boolean,
     val onTencentVadEnabledChange: (Boolean) -> Unit
 )
@@ -210,6 +210,8 @@ internal data class AsrSettingsRouteActions(
     val showDashLanguagePicker: () -> Unit,
     val showStepAudioModelPicker: () -> Unit,
     val showSonioxLanguagePicker: () -> Unit,
+    val showTencentEngineCategoryPicker: () -> Unit,
+    val showTencentModelPicker: () -> Unit,
     val onPrimaryVendorSelected: (AsrVendor) -> Unit,
     val applyRecordingAutoStopMode: (Prefs.RecordingAutoStopMode) -> Unit,
     val applyAutoStopSwitch: (Boolean) -> Unit,

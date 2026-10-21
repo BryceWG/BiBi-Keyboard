@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.GeminiAsrMode
+import com.brycewg.asrkb.asr.TencentAsrModelCatalog
 import com.brycewg.asrkb.asr.cohereSupportedLanguageCodes
 import com.brycewg.asrkb.asr.normalizeCohereLanguageForModel
 import com.brycewg.asrkb.store.KEY_GEM_API_KEY
@@ -169,10 +170,10 @@ internal fun CurrentAsrVendorConfig(
     onTencentSecretIdChange: (String) -> Unit,
     tencentSecretKey: String,
     onTencentSecretKeyChange: (String) -> Unit,
+    tencentEngineCategory: String,
+    onChooseTencentEngineCategory: () -> Unit,
     tencentEngineType: String,
-    onTencentEngineTypeChange: (String) -> Unit,
-    tencentStreaming: Boolean,
-    onTencentStreamingChange: (Boolean) -> Unit,
+    onChooseTencentModel: () -> Unit,
     tencentVadEnabled: Boolean,
     onTencentVadEnabledChange: (Boolean) -> Unit,
     onOpenGuide: (String) -> Unit,
@@ -711,7 +712,11 @@ internal fun CurrentAsrVendorConfig(
 
         AsrVendor.Tencent -> {
             var itemIndex = primaryIndexOffset
-            val itemCount = primaryGroupCount ?: 7
+            val selection = TencentAsrModelCatalog.resolveSelection(
+                categoryId = tencentEngineCategory,
+                modelId = tencentEngineType
+            )
+            val itemCount = primaryGroupCount ?: tencentPrimaryItemCount(selection.streaming)
             AsrTextField(
                 uiMode = uiMode,
                 value = tencentAppId,
@@ -739,32 +744,37 @@ internal fun CurrentAsrVendorConfig(
                 index = itemIndex++,
                 count = itemCount
             )
-            AsrSwitchPreference(
-                id = "tencent_streaming",
-                titleRes = R.string.label_tencent_streaming,
-                checked = tencentStreaming,
+            val categoryLabel = stringResource(selection.category.displayNameRes)
+            val modelLabel = stringResource(selection.model.displayNameRes)
+            AsrValuePreference(
+                titleRes = R.string.label_tencent_engine_category,
+                value = categoryLabel,
+                uiMode = uiMode,
+                highlightId = "tencent_engine_category",
                 index = itemIndex++,
                 count = itemCount,
-                onCheckedChange = onTencentStreamingChange
+                onClick = onChooseTencentEngineCategory
             )
-            AsrDropdownPreference(
-                titleRes = R.string.label_tencent_engine_type,
-                options = tencentEngineTypeOptions(context, tencentStreaming).map { option ->
-                    DropdownOption(option.value, option.label)
-                },
-                selectedOptionId = tencentEngineType,
+            AsrValuePreference(
+                titleRes = R.string.label_tencent_engine_language,
+                value = modelLabel,
+                uiMode = uiMode,
+                highlightId = "tencent_engine_model",
                 index = itemIndex++,
                 count = itemCount,
-                onSelectedOptionChange = onTencentEngineTypeChange
+                onClick = onChooseTencentModel
             )
-            AsrSwitchPreference(
-                id = "tencent_vad_enabled",
-                titleRes = R.string.label_tencent_vad_enabled,
-                checked = tencentVadEnabled,
-                index = itemIndex++,
-                count = itemCount,
-                onCheckedChange = onTencentVadEnabledChange
-            )
+            // VAD 仅对 WebSocket 流式识别生效，录音文件类不展示该开关。
+            if (selection.streaming) {
+                AsrSwitchPreference(
+                    id = "tencent_vad_enabled",
+                    titleRes = R.string.label_tencent_vad_enabled,
+                    checked = tencentVadEnabled,
+                    index = itemIndex++,
+                    count = itemCount,
+                    onCheckedChange = onTencentVadEnabledChange
+                )
+            }
             AsrActionPreference(
                 id = "tencent_get_key_guide",
                 titleRes = R.string.btn_get_api_key_guide,
@@ -1199,6 +1209,9 @@ private fun SonioxAsrConfig(
     )
 }
 
+internal fun tencentPrimaryItemCount(streaming: Boolean): Int = // 3 个密钥输入 + 引擎大类 + 模型/语言 + 获取密钥入口；流式识别额外多一个 VAD 开关。
+    3 + 2 + (if (streaming) 1 else 0) + 1
+
 internal fun currentOnlineAsrPrimaryItemCount(
     selectedVendor: AsrVendor,
     openAiProviders: List<Prefs.OpenAiAsrProvider>,
@@ -1230,7 +1243,7 @@ internal fun currentOnlineAsrPrimaryItemCount(
         openAiUseCompletions
     )
     AsrVendor.Soniox -> 6
-    AsrVendor.Tencent -> 7
+    AsrVendor.Tencent -> tencentPrimaryItemCount(streaming = true)
     else -> 0
 }
 
@@ -1453,70 +1466,4 @@ internal fun sonioxLanguageSummary(context: Context, languages: List<String>): S
     val labels = languages.mapNotNull { labelsByCode[it] }
     return labels.takeIf { it.isNotEmpty() }?.joinToString(separator = "、")
         ?: context.getString(R.string.soniox_lang_auto)
-}
-
-/**
- * 腾讯云引擎模型选项（按识别路径区分；枚举写死自官方文档，腾讯无运行时查询 API）。
- * - 流式（实时识别 WebSocket）：engine_model_type
- *   https://cloud.tencent.com/document/product/1093/48982
- * - 非流式（一句话识别 SentenceRecognition）：EngSerViceType
- *   https://cloud.tencent.com/document/product/1093/35646
- * 仅收录 16k 引擎：应用音频固定 16kHz PCM，8k 电话引擎采样率不匹配，无法正确使用。
- * 「大模型1.0版」引擎需账号开通大模型1.0计费方案，否则会被服务端拒绝（标签中已标注）。
- */
-internal fun tencentEngineTypeOptions(context: Context, streaming: Boolean): List<OnlineVendorChoice> {
-    fun entry(id: String, labelRes: Int) = OnlineVendorChoice(id, context.getString(labelRes))
-    return if (streaming) {
-        listOf(
-            entry("16k_zh", R.string.label_tencent_engine_type_16k_zh),
-            entry("16k_zh-TW", R.string.label_tencent_engine_type_16k_zh_TW),
-            entry("16k_zh_edu", R.string.label_tencent_engine_type_16k_zh_edu),
-            entry("16k_zh_medical", R.string.label_tencent_engine_type_16k_zh_medical),
-            entry("16k_zh_court", R.string.label_tencent_engine_type_16k_zh_court),
-            entry("16k_yue", R.string.label_tencent_engine_type_16k_yue),
-            entry("16k_en", R.string.label_tencent_engine_type_16k_en),
-            entry("16k_en_game", R.string.label_tencent_engine_type_16k_en_game),
-            entry("16k_en_edu", R.string.label_tencent_engine_type_16k_en_edu),
-            entry("16k_ko", R.string.label_tencent_engine_type_16k_ko),
-            entry("16k_ja", R.string.label_tencent_engine_type_16k_ja),
-            entry("16k_th", R.string.label_tencent_engine_type_16k_th),
-            entry("16k_id", R.string.label_tencent_engine_type_16k_id),
-            entry("16k_vi", R.string.label_tencent_engine_type_16k_vi),
-            entry("16k_ms", R.string.label_tencent_engine_type_16k_ms),
-            entry("16k_fil", R.string.label_tencent_engine_type_16k_fil),
-            entry("16k_pt", R.string.label_tencent_engine_type_16k_pt),
-            entry("16k_tr", R.string.label_tencent_engine_type_16k_tr),
-            entry("16k_ar", R.string.label_tencent_engine_type_16k_ar),
-            entry("16k_es", R.string.label_tencent_engine_type_16k_es),
-            entry("16k_hi", R.string.label_tencent_engine_type_16k_hi),
-            entry("16k_fr", R.string.label_tencent_engine_type_16k_fr),
-            entry("16k_de", R.string.label_tencent_engine_type_16k_de),
-            entry("16k_zh_en", R.string.label_tencent_engine_type_16k_zh_en),
-            entry("16k_multi_lang", R.string.label_tencent_engine_type_16k_multi_lang),
-            entry("16k_en_large", R.string.label_tencent_engine_type_16k_en_large)
-        )
-    } else {
-        listOf(
-            entry("16k_zh", R.string.label_tencent_engine_type_16k_zh),
-            entry("16k_zh-PY", R.string.label_tencent_engine_type_16k_zh_PY),
-            entry("16k_zh_medical", R.string.label_tencent_engine_type_16k_zh_medical),
-            entry("16k_zh_dialect", R.string.label_tencent_engine_type_16k_zh_dialect),
-            entry("16k_yue", R.string.label_tencent_engine_type_16k_yue),
-            entry("16k_en", R.string.label_tencent_engine_type_16k_en),
-            entry("16k_ja", R.string.label_tencent_engine_type_16k_ja),
-            entry("16k_ko", R.string.label_tencent_engine_type_16k_ko),
-            entry("16k_vi", R.string.label_tencent_engine_type_16k_vi),
-            entry("16k_ms", R.string.label_tencent_engine_type_16k_ms),
-            entry("16k_id", R.string.label_tencent_engine_type_16k_id),
-            entry("16k_fil", R.string.label_tencent_engine_type_16k_fil),
-            entry("16k_th", R.string.label_tencent_engine_type_16k_th),
-            entry("16k_pt", R.string.label_tencent_engine_type_16k_pt),
-            entry("16k_tr", R.string.label_tencent_engine_type_16k_tr),
-            entry("16k_ar", R.string.label_tencent_engine_type_16k_ar),
-            entry("16k_es", R.string.label_tencent_engine_type_16k_es),
-            entry("16k_hi", R.string.label_tencent_engine_type_16k_hi),
-            entry("16k_fr", R.string.label_tencent_engine_type_16k_fr),
-            entry("16k_de", R.string.label_tencent_engine_type_16k_de)
-        )
-    }
 }

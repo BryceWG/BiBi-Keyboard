@@ -188,8 +188,8 @@ internal object PrefsAsrVendorFields {
             VendorField.credential(KEY_TENCENT_APP_ID),
             VendorField.credential(KEY_TENCENT_SECRET_ID),
             VendorField.credential(KEY_TENCENT_SECRET_KEY),
-            VendorField.streamingToggle(KEY_TENCENT_STREAMING_ENABLED, default = false),
-            VendorField(KEY_TENCENT_ENGINE_TYPE, default = Prefs.DEFAULT_TENCENT_ENGINE_TYPE),
+            VendorField(KEY_TENCENT_ENGINE_CATEGORY, default = ""),
+            VendorField(KEY_TENCENT_ENGINE_TYPE, default = ""),
             VendorField.boolean(KEY_TENCENT_VAD_ENABLED, default = false)
         )
     )

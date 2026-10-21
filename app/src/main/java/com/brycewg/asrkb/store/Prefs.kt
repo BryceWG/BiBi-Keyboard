@@ -19,6 +19,8 @@ import com.brycewg.asrkb.asr.BackupAsrLocalResidency
 import com.brycewg.asrkb.asr.GeminiAsrMode
 import com.brycewg.asrkb.asr.LlmReasoningThreshold
 import com.brycewg.asrkb.asr.LlmVendor
+import com.brycewg.asrkb.asr.TencentAsrModelCatalog
+import com.brycewg.asrkb.asr.TencentAsrSelection
 import com.brycewg.asrkb.asr.VolcAsrModelCatalog
 import com.brycewg.asrkb.clipboard.ClipboardSyncReceiveMode
 import com.brycewg.asrkb.imebridge.ImeBridgeRuntimeShutdown
@@ -1928,10 +1930,15 @@ class Prefs(context: Context) {
     var tencentAppId: String by stringPref(KEY_TENCENT_APP_ID, "")
     var tencentSecretId: String by stringPref(KEY_TENCENT_SECRET_ID, "")
     var tencentSecretKey: String by stringPref(KEY_TENCENT_SECRET_KEY, "")
-    var tencentEngineType: String by stringPref(KEY_TENCENT_ENGINE_TYPE, DEFAULT_TENCENT_ENGINE_TYPE)
-    var tencentStreamingEnabled: Boolean
-        get() = sp.getBoolean(KEY_TENCENT_STREAMING_ENABLED, false)
-        set(value) = sp.edit { putBoolean(KEY_TENCENT_STREAMING_ENABLED, value) }
+    var tencentEngineType: String by stringPref(KEY_TENCENT_ENGINE_TYPE, "")
+    var tencentEngineCategory: String by stringPref(KEY_TENCENT_ENGINE_CATEGORY, "")
+
+    /** 设置里保存的大类与引擎 ID 联合解析结果；旧版本只存 engine type 时按流式优先兼容。 */
+    internal val tencentSelection: TencentAsrSelection
+        get() = TencentAsrModelCatalog.resolveSelection(tencentEngineCategory, tencentEngineType)
+
+    val tencentStreamingEnabled: Boolean
+        get() = tencentSelection.streaming
     var tencentVadEnabled: Boolean
         get() = sp.getBoolean(KEY_TENCENT_VAD_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_TENCENT_VAD_ENABLED, value) }
@@ -2468,8 +2475,6 @@ class Prefs(context: Context) {
         const val COHERE_ARABIC_ASR_MODEL = "cohere-transcribe-arabic-07-2026"
         const val DEFAULT_COHERE_ASR_LANGUAGE = "zh"
 
-        // 腾讯云 ASR 默认值
-        const val DEFAULT_TENCENT_ENGINE_TYPE = "16k_zh"
         val COHERE_ASR_MODELS: List<String> = listOf(
             DEFAULT_COHERE_ASR_MODEL,
             COHERE_ARABIC_ASR_MODEL

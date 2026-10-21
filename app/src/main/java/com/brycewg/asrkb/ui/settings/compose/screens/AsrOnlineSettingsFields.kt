@@ -109,8 +109,8 @@ internal class AsrOnlineSettingsFields(
     var tencentAppId by mutableStateOf(prefs.tencentAppId)
     var tencentSecretId by mutableStateOf(prefs.tencentSecretId)
     var tencentSecretKey by mutableStateOf(prefs.tencentSecretKey)
-    var tencentEngineType by mutableStateOf(prefs.tencentEngineType.ifBlank { Prefs.DEFAULT_TENCENT_ENGINE_TYPE })
-    var tencentStreaming by mutableStateOf(prefs.tencentStreamingEnabled)
+    var tencentEngineCategory by mutableStateOf(prefs.tencentEngineCategory)
+    var tencentEngineType by mutableStateOf(prefs.tencentSelection.engineId)
     var tencentVadEnabled by mutableStateOf(prefs.tencentVadEnabled)
 
     fun refreshFromPrefs() {
@@ -182,8 +182,8 @@ internal class AsrOnlineSettingsFields(
         tencentAppId = prefs.tencentAppId
         tencentSecretId = prefs.tencentSecretId
         tencentSecretKey = prefs.tencentSecretKey
-        tencentEngineType = prefs.tencentEngineType.ifBlank { Prefs.DEFAULT_TENCENT_ENGINE_TYPE }
-        tencentStreaming = prefs.tencentStreamingEnabled
+        tencentEngineCategory = prefs.tencentEngineCategory
+        tencentEngineType = prefs.tencentSelection.engineId
         tencentVadEnabled = prefs.tencentVadEnabled
     }
 
@@ -239,7 +239,8 @@ internal class AsrOnlineSettingsFields(
         applyDashKeepDialectSwitch: (Boolean) -> Unit,
         applyDashAutoPolishSwitch: (Boolean) -> Unit,
         applyStepAudioUseItnSwitch: (Boolean) -> Unit,
-        applyTencentStreamingSwitch: (Boolean) -> Unit,
+        showTencentEngineCategoryPicker: () -> Unit,
+        showTencentModelPicker: () -> Unit,
         applyTencentVadSwitch: (Boolean) -> Unit,
         openAiDefaultProfileName: (Int) -> String
     ): AsrOnlineSettingsRouteState = AsrOnlineSettingsRouteState(
@@ -665,15 +666,10 @@ internal class AsrOnlineSettingsFields(
             tencentSecretKey = value
             prefs.tencentSecretKey = value
         },
+        tencentEngineCategory = tencentEngineCategory,
+        onChooseTencentEngineCategory = showTencentEngineCategoryPicker,
         tencentEngineType = tencentEngineType,
-        onTencentEngineTypeChange = { value ->
-            tencentEngineType = value
-            prefs.tencentEngineType = value
-        },
-        tencentStreaming = tencentStreaming,
-        onTencentStreamingChange = { checked ->
-            applyTencentStreamingSwitch(checked)
-        },
+        onChooseTencentModel = showTencentModelPicker,
         tencentVadEnabled = tencentVadEnabled,
         onTencentVadEnabledChange = { checked ->
             applyTencentVadSwitch(checked)

@@ -9,6 +9,7 @@ import android.content.Context
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.BackupAsrLocalResidency
+import com.brycewg.asrkb.asr.TencentAsrModelCatalog
 import com.brycewg.asrkb.asr.VolcAsrModelCatalog
 import com.brycewg.asrkb.asr.partitionAsrVendorsByConfigured
 import com.brycewg.asrkb.store.Prefs
@@ -160,6 +161,44 @@ internal fun volcModelChoiceSheetState(
         fallbackValue = VolcAsrModelCatalog.DEFAULT_ID,
         valueOf = { it.id },
         labelOf = { context.getString(it.displayNameRes) },
+        onSelected = onSelected
+    )
+}
+
+internal fun tencentEngineCategoryChoiceSheetState(
+    context: Context,
+    selectedCategory: String,
+    onSelected: (String) -> Unit
+): SettingsChoiceSheetState? {
+    val selected = TencentAsrModelCatalog.categoryById(selectedCategory)
+        ?: TencentAsrModelCatalog.DEFAULT_CATEGORY
+    return asrValueChoiceSheetState(
+        context = context,
+        titleResId = R.string.label_tencent_engine_category,
+        options = TencentAsrModelCatalog.categories(),
+        selectedValue = selected.id,
+        fallbackValue = TencentAsrModelCatalog.DEFAULT_CATEGORY.id,
+        valueOf = { it.id },
+        labelOf = { context.getString(it.displayNameRes) },
+        onSelected = onSelected
+    )
+}
+
+internal fun tencentModelChoiceSheetState(
+    context: Context,
+    categoryId: String,
+    selectedModel: String,
+    onSelected: (String) -> Unit
+): SettingsChoiceSheetState? {
+    val selection = TencentAsrModelCatalog.resolveSelection(categoryId, selectedModel)
+    return asrValueChoiceSheetState(
+        context = context,
+        titleResId = R.string.label_tencent_engine_language,
+        options = TencentAsrModelCatalog.models(selection.category),
+        selectedValue = selection.model.id,
+        fallbackValue = TencentAsrModelCatalog.defaultModel(selection.category).id,
+        valueOf = { it.id },
+        labelOf = { model -> context.getString(model.displayNameRes) },
         onSelected = onSelected
     )
 }

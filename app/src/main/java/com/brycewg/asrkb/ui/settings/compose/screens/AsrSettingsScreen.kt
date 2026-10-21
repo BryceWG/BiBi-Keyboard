@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.LocalModelCheck
+import com.brycewg.asrkb.asr.TencentAsrModelCatalog
 import com.brycewg.asrkb.asr.VadDetector
 import com.brycewg.asrkb.store.DashScopePrefsCompat
 import com.brycewg.asrkb.store.Prefs
@@ -550,19 +551,29 @@ fun AsrSettingsScreen(
         )
     }
 
-    fun applyTencentStreamingSwitch(target: Boolean) {
-        featureExplainerDialog = settingsFeatureExplainerDialogState(
+    fun showTencentEngineCategoryPicker() {
+        choiceSheet = tencentEngineCategoryChoiceSheetState(
             context = context,
-            titleRes = R.string.label_tencent_streaming,
-            offDescRes = R.string.feature_tencent_streaming_off_desc,
-            onDescRes = R.string.feature_tencent_streaming_on_desc,
-            currentState = onlineFields.tencentStreaming,
-            preferenceKey = "tencent_streaming_explained",
-            onConfirm = {
-                onlineFields.tencentStreaming = target
-                viewModel.updateTencentStreaming(target)
-            }
-        )
+            selectedCategory = onlineFields.tencentEngineCategory
+        ) { categoryId ->
+            val category = TencentAsrModelCatalog.categoryById(categoryId) ?: return@tencentEngineCategoryChoiceSheetState
+            val modelId = TencentAsrModelCatalog.defaultModel(category).id
+            onlineFields.tencentEngineCategory = category.id
+            onlineFields.tencentEngineType = modelId
+            prefs.tencentEngineCategory = category.id
+            prefs.tencentEngineType = modelId
+        }
+    }
+
+    fun showTencentModelPicker() {
+        choiceSheet = tencentModelChoiceSheetState(
+            context = context,
+            categoryId = onlineFields.tencentEngineCategory,
+            selectedModel = onlineFields.tencentEngineType
+        ) { modelId ->
+            onlineFields.tencentEngineType = modelId
+            prefs.tencentEngineType = modelId
+        }
     }
 
     fun applyTencentVadSwitch(target: Boolean) {
@@ -760,7 +771,8 @@ fun AsrSettingsScreen(
                 applyDashKeepDialectSwitch = ::applyDashKeepDialectSwitch,
                 applyDashAutoPolishSwitch = ::applyDashAutoPolishSwitch,
                 applyStepAudioUseItnSwitch = ::applyStepAudioUseItnSwitch,
-                applyTencentStreamingSwitch = ::applyTencentStreamingSwitch,
+                showTencentEngineCategoryPicker = ::showTencentEngineCategoryPicker,
+                showTencentModelPicker = ::showTencentModelPicker,
                 applyTencentVadSwitch = ::applyTencentVadSwitch,
                 openAiDefaultProfileName = { index ->
                     context.getString(R.string.openai_profile_default_name, index)
@@ -794,6 +806,8 @@ fun AsrSettingsScreen(
                 showDashLanguagePicker = ::showDashLanguagePicker,
                 showStepAudioModelPicker = ::showStepAudioModelPicker,
                 showSonioxLanguagePicker = ::showSonioxLanguagePicker,
+                showTencentEngineCategoryPicker = ::showTencentEngineCategoryPicker,
+                showTencentModelPicker = ::showTencentModelPicker,
                 onPrimaryVendorSelected = { vendor ->
                     viewModel.updateVendor(vendor)
                     backupAsrVendor = prefs.backupAsrVendor

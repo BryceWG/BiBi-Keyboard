@@ -235,7 +235,7 @@ internal class TencentStreamAsrEngine(
 
         val voiceId = UUID.randomUUID().toString().replace("-", "")
         currentVoiceId = voiceId
-        val engineType = prefs.tencentEngineType.ifBlank { "16k_zh" }
+        val engineType = prefs.tencentSelection.engineId
         val voiceFormat = 1
         val needvad = if (prefs.tencentVadEnabled) 1 else 0
         val timestamp = System.currentTimeMillis() / 1000
@@ -276,11 +276,50 @@ internal class TencentStreamAsrEngine(
         val wsClosed = AtomicBoolean(false)
         val accumulatedText = StringBuilder()
         val finalTextDelivered = AtomicBoolean(false)
+        val responseFormat = prefs.tencentSelection.responseFormat
+
+        // V2（doc 131127）按句返回，需要自己把已确定的句子上文累加起来。
+        var lastSentenceId = -1
+        var currentSentence = ""
+        val committedText = StringBuilder()
+
+        fun handleSentenceMessage(obj: org.json.JSONObject) {
+            val sentences = obj.optJSONObject("sentences") ?: return
+            val sentenceId = sentences.optInt("sentence_id", -1)
+            if (sentenceId != lastSentenceId) {
+                committedText.append(currentSentence)
+                currentSentence = ""
+                lastSentenceId = sentenceId
+            }
+            currentSentence = sentences.optString("sentence", "")
+            if (sentences.optInt("sentence_type", 0) == 1) {
+                committedText.append(currentSentence)
+                currentSentence = ""
+            }
+            accumulatedText.setLength(0)
+            accumulatedText.append(committedText).append(currentSentence)
+            val partial = accumulatedText.toString()
+            if (partial.isNotBlank()) listener.onPartial(partial)
+        }
+
+        fun handleSliceMessage(obj: org.json.JSONObject) {
+            val resultObj = obj.optJSONObject("result") ?: return
+            val sliceType = resultObj.optInt("slice_type", -1)
+            val voiceText = resultObj.optString("voice_text_str", "")
+            when (sliceType) {
+                0 -> { }
+                1 -> if (voiceText.isNotEmpty()) listener.onPartial(voiceText)
+                2 -> if (voiceText.isNotEmpty()) {
+                    listener.onPartial(voiceText)
+                    accumulatedText.append(voiceText)
+                }
+            }
+        }
 
         val meta = ApiCallLogger.meta(
             category = "ASR",
             vendor = "tencent",
-            model = prefs.tencentEngineType.ifBlank { "16k_zh" },
+            model = prefs.tencentSelection.engineId,
             requestStructure = "WebSocket wss://asr.cloud.tencent.com/asr/v2/<appid>?signed_query, binary PCM frames"
         )
         val request = Request.Builder()
@@ -311,24 +350,17 @@ internal class TencentStreamAsrEngine(
                     }
 
                     val isFinal = obj.optInt("final") == 1
-                    val resultObj = obj.optJSONObject("result")
-
-                    if (resultObj != null) {
-                        val sliceType = resultObj.optInt("slice_type", -1)
-                        val voiceText = resultObj.optString("voice_text_str", "")
-                        when (sliceType) {
-                            0 -> { }
-                            1 -> if (voiceText.isNotEmpty()) listener.onPartial(voiceText)
-                            2 -> if (voiceText.isNotEmpty()) {
-                                listener.onPartial(voiceText)
-                                accumulatedText.append(voiceText)
-                            }
-                        }
+                    if (responseFormat == TencentAsrResponseFormat.Sentence) {
+                        handleSentenceMessage(obj)
+                    } else {
+                        handleSliceMessage(obj)
                     }
 
                     if (isFinal) {
-                        if (resultObj != null) {
-                            val finalText = resultObj.optString("voice_text_str", "")
+                        if (responseFormat == TencentAsrResponseFormat.Slice) {
+                            val finalText = obj.optJSONObject("result")
+                                ?.optString("voice_text_str", "")
+                                .orEmpty()
                             if (finalText.isNotBlank()) {
                                 accumulatedText.setLength(0)
                                 accumulatedText.append(finalText)

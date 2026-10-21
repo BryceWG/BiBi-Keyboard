@@ -131,7 +131,6 @@ class AsrSettingsViewModel : ViewModel() {
             xAsrPreloadEnabled = prefs.xAsrPreloadEnabled,
             xAsrUseItn = prefs.xAsrUseItn,
             // Tencent settings
-            tencentStreamingEnabled = prefs.tencentStreamingEnabled,
             tencentVadEnabled = prefs.tencentVadEnabled
         )
     }
@@ -369,11 +368,6 @@ class AsrSettingsViewModel : ViewModel() {
     fun updateSonioxStreaming(enabled: Boolean) {
         prefs.sonioxStreamingEnabled = enabled
         _uiState.value = _uiState.value.copy(sonioxStreamingEnabled = enabled)
-    }
-
-    fun updateTencentStreaming(enabled: Boolean) {
-        prefs.tencentStreamingEnabled = enabled
-        _uiState.value = _uiState.value.copy(tencentStreamingEnabled = enabled)
     }
 
     fun updateTencentVadEnabled(enabled: Boolean) {
@@ -996,7 +990,6 @@ data class AsrSettingsUiState(
     val xAsrPreloadEnabled: Boolean = true,
     val xAsrUseItn: Boolean = false,
     // Tencent settings
-    val tencentStreamingEnabled: Boolean = false,
     val tencentVadEnabled: Boolean = false
 ) {
     val isVolcStreaming: Boolean
