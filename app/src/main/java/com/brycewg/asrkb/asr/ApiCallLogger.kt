@@ -7,6 +7,7 @@ package com.brycewg.asrkb.asr
 
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import okhttp3.Request
 
 object ApiCallLogger {
@@ -44,6 +45,18 @@ object ApiCallLogger {
     ) {
         private val recorded = AtomicBoolean(false)
         private val startedNs = System.nanoTime()
+        private val responseSummary = AtomicReference("")
+
+        /**
+         * 记录最近一帧服务端消息的形态摘要（字段名、帧数、业务错误码），不含识别文本。
+         *
+         * WebSocket 没有 HTTP 响应体，不回填时 API Log 的响应列会一直是空的。
+         */
+        fun noteResponse(summary: String) {
+            if (summary.isNotBlank()) {
+                responseSummary.set(summary.take(MAX_RESPONSE_SUMMARY))
+            }
+        }
 
         fun success(code: Int = 0) {
             complete(success = true, code = code)
@@ -61,10 +74,13 @@ object ApiCallLogger {
                 success = success,
                 durationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedNs),
                 code = code,
-                error = error
+                error = error,
+                detail = responseSummary.get()
             )
         }
     }
+
+    private const val MAX_RESPONSE_SUMMARY = 240
 
     private fun String.toHttpUrlForOkHttp(): String = replaceFirst("wss://", "https://").replaceFirst("ws://", "http://")
 }
