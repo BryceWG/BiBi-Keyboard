@@ -129,6 +129,7 @@ class ApiLogInterceptor : Interceptor {
 object ApiLogRecorder {
     private const val MAX_ERROR = 240
     private const val MAX_STRUCTURE_BODY_BYTES = 32 * 1024L
+    private const val PEEK_JSON_BYTES = 16 * 1024L
 
     fun meta(
         category: String,
@@ -154,7 +155,8 @@ object ApiLogRecorder {
         success: Boolean,
         durationMs: Long,
         code: Int = 0,
-        error: String = ""
+        error: String = "",
+        detail: String = ""
     ) {
         val url = request.url
         ApiLogStore.add(
@@ -170,7 +172,10 @@ object ApiLogRecorder {
                 queryKeys = url.queryParameterNames.sorted(),
                 requestSummary = "headers=${safeHeaderNames(request)}",
                 requestStructure = meta.requestStructure,
-                responseSummary = if (code != 0) "closeCode=$code" else "",
+                responseSummary = buildList {
+                    if (code != 0) add("closeCode=$code")
+                    if (detail.isNotBlank()) add(detail)
+                }.joinToString("; "),
                 httpCode = code,
                 success = success,
                 durationMs = durationMs,
@@ -188,6 +193,7 @@ object ApiLogRecorder {
     ) {
         val meta = request.tag(ApiLogMeta::class.java)
             ?: ApiLogMeta(category = "ASR")
+        val businessError = if (throwable == null && !canceled) detectJsonBusinessError(response) else null
         val url = request.url
         ApiLogStore.add(
             ApiLogStore.ApiLogRecord(
@@ -204,11 +210,16 @@ object ApiLogRecorder {
                 requestStructure = meta.requestStructure.ifBlank { buildRequestStructure(request) },
                 responseSummary = buildResponseSummary(response),
                 httpCode = response?.code ?: 0,
-                success = response?.isSuccessful == true && throwable == null && !canceled,
+                success = response?.isSuccessful == true &&
+                    throwable == null &&
+                    !canceled &&
+                    businessError == null,
                 canceled = canceled,
                 durationMs = durationMs,
                 errorSummary = if (canceled) {
                     "Canceled by user"
+                } else if (businessError != null) {
+                    businessError.take(MAX_ERROR)
                 } else if (meta.redactErrorBody) {
                     throwable?.javaClass?.simpleName.orEmpty().ifBlank {
                         response?.let { "HTTP ${it.code}" }.orEmpty()
@@ -279,6 +290,12 @@ object ApiLogRecorder {
     private fun describeJsonStructure(raw: String): String {
         val trimmed = raw.trim()
         if (trimmed.isBlank()) return "json empty"
+        return describeJsonStructureOrNull(trimmed) ?: "json structure unavailable"
+    }
+
+    private fun describeJsonStructureOrNull(raw: String): String? {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) return null
         return try {
             when {
                 trimmed.startsWith("{") -> {
@@ -300,7 +317,7 @@ object ApiLogRecorder {
                 else -> "json text"
             }
         } catch (_: Throwable) {
-            "json structure unavailable"
+            null
         }
     }
 
@@ -313,7 +330,53 @@ object ApiLogRecorder {
             -1L
         }
         val sizePart = if (length >= 0) "bytes=$length" else "bytes=unknown"
-        return "contentType=${type.ifBlank { "unknown" }}; $sizePart"
+        val base = "contentType=${type.ifBlank { "unknown" }}; $sizePart"
+        if (!type.contains("json", ignoreCase = true)) return base
+        val raw = try {
+            response.peekBody(PEEK_JSON_BYTES).string()
+        } catch (_: Throwable) {
+            ""
+        }
+        val shape = describeJsonStructureOrNull(raw) ?: return base
+        return "$base; $shape"
+    }
+
+    /**
+     * 提取「HTTP 2xx + JSON 业务错误」形态（如腾讯极速版的顶层 code、或 Response.Error）。
+     *
+     * 这类接口失败时仍返回 200，不识别会把失败请求记成成功且错误为空。
+     */
+    private fun detectJsonBusinessError(response: Response?): String? {
+        if (response == null || !response.isSuccessful) return null
+        val type = response.body.contentType()?.toString().orEmpty()
+        if (!type.contains("json", ignoreCase = true)) return null
+        val raw = try {
+            response.peekBody(PEEK_JSON_BYTES).string()
+        } catch (_: Throwable) {
+            return null
+        }
+        if (raw.isBlank()) return null
+        return try {
+            val obj = JSONObject(raw)
+            val legacy = obj.optJSONObject("Response")?.optJSONObject("Error")
+            if (legacy != null) {
+                listOf(legacy.optString("Code").trim(), legacy.optString("Message").trim())
+                    .filter { it.isNotEmpty() }
+                    .joinToString(": ")
+                    .ifBlank { null }
+            } else {
+                val code = obj.opt("code")
+                if (code is Number && code.toInt() != 0) {
+                    listOf("code=$code", obj.optString("message").trim())
+                        .filter { it.isNotEmpty() }
+                        .joinToString(": ")
+                } else {
+                    null
+                }
+            }
+        } catch (_: Throwable) {
+            null
+        }
     }
 
     private fun buildErrorSummary(response: Response?, throwable: Throwable?): String {

@@ -277,6 +277,27 @@ internal class TencentStreamAsrEngine(
         val accumulatedText = StringBuilder()
         val finalTextDelivered = AtomicBoolean(false)
         val responseFormat = prefs.tencentSelection.responseFormat
+        var inboundFrames = 0
+
+        // 只记帧形态与业务码，不记识别文本；否则 API Log 的响应列对 WebSocket 永远是空的。
+        fun describeInbound(obj: org.json.JSONObject, code: Int, isFinal: Boolean): String {
+            inboundFrames += 1
+            val format = if (responseFormat == TencentAsrResponseFormat.Sentence) "sentence" else "slice"
+            val keys = obj.keys().asSequence().sorted().joinToString(",")
+            val resultKeys = obj.optJSONObject("result")
+                ?.keys()?.asSequence()?.sorted()?.joinToString(",").orEmpty()
+            val sentenceKeys = obj.optJSONObject("sentences")
+                ?.keys()?.asSequence()?.sorted()?.joinToString(",").orEmpty()
+            return buildString {
+                append("frames=").append(inboundFrames)
+                append("; format=").append(format)
+                append("; code=").append(code)
+                append("; final=").append(if (isFinal) 1 else 0)
+                append("; keys=").append(keys)
+                if (resultKeys.isNotEmpty()) append("; result_keys=").append(resultKeys)
+                if (sentenceKeys.isNotEmpty()) append("; sentence_keys=").append(sentenceKeys)
+            }
+        }
 
         // V2（doc 131127）按句返回，需要自己把已确定的句子上文累加起来。
         var lastSentenceId = -1
@@ -337,8 +358,11 @@ internal class TencentStreamAsrEngine(
                 try {
                     val obj = org.json.JSONObject(text)
                     val code = obj.optInt("code", 0)
+                    val isFinal = obj.optInt("final") == 1
+                    apiLogSession.noteResponse(describeInbound(obj, code, isFinal))
                     if (code != 0) {
                         val msg = obj.optString("message", "Unknown error")
+                        apiLogSession.complete(success = false, code = code, error = "$code: $msg")
                         listener.onError(
                             context.getString(
                                 R.string.error_recognize_failed_with_reason,
@@ -348,8 +372,6 @@ internal class TencentStreamAsrEngine(
                         wsClosed.set(true)
                         return
                     }
-
-                    val isFinal = obj.optInt("final") == 1
                     if (responseFormat == TencentAsrResponseFormat.Sentence) {
                         handleSentenceMessage(obj)
                     } else {
@@ -376,6 +398,7 @@ internal class TencentStreamAsrEngine(
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Parse error: ${e.message}")
+                    apiLogSession.noteResponse("parse_error=${e.javaClass.simpleName}")
                 }
             }
 
@@ -386,14 +409,23 @@ internal class TencentStreamAsrEngine(
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 wsClosed.set(true)
-                apiLogSession.complete(success = finalTextDelivered.get(), code = code, error = reason)
+                apiLogSession.complete(
+                    success = finalTextDelivered.get(),
+                    code = code,
+                    error = reason.ifBlank {
+                        if (finalTextDelivered.get()) "" else "closed before final result"
+                    }
+                )
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 wsClosed.set(true)
                 apiLogSession.failure(
                     code = response?.code ?: 0,
-                    error = response?.message ?: t.message.orEmpty()
+                    error = listOfNotNull(
+                        response?.let { "HTTP ${it.code} ${it.message}".trim() },
+                        t.message?.takeIf { it.isNotBlank() }
+                    ).joinToString(": ")
                 )
                 running.set(false)
                 audioJob?.cancel()
