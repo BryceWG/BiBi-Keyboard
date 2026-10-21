@@ -1979,6 +1979,7 @@ class Prefs(context: Context) {
                 appKey.isNotBlank() && accessKey.isNotBlank()
             }
         }
+        if (v == AsrVendor.Tencent) return hasTencentKeys()
         val fields = PrefsAsrVendorFields.requiredStringFieldsForValidation(v)
         if (fields.isEmpty() && !vendorFields.containsKey(v)) return false
         return fields.all { f ->
@@ -2014,7 +2015,7 @@ class Prefs(context: Context) {
     fun hasStepAudioKeys(): Boolean = hasVendorKeys(AsrVendor.StepAudio)
     fun hasZhipuKeys(): Boolean = hasVendorKeys(AsrVendor.Zhipu)
     fun hasCohereKeys(): Boolean = hasVendorKeys(AsrVendor.Cohere)
-    fun hasTencentKeys(): Boolean = hasVendorKeys(AsrVendor.Tencent)
+    fun hasTencentKeys(): Boolean = tencentAppId.isNotBlank() && tencentSecretId.isNotBlank() && tencentSecretKey.isNotBlank()
     fun hasAsrKeys(): Boolean = hasVendorKeys(asrVendor)
     fun hasLlmKeys(): Boolean {
         // 使用新的 getEffectiveLlmConfig 检查配置有效性

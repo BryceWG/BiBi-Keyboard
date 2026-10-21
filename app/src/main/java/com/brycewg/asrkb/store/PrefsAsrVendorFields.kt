@@ -185,9 +185,9 @@ internal object PrefsAsrVendorFields {
         AsrVendor.XAsr to emptyList(),
         // 腾讯云 ASR
         AsrVendor.Tencent to listOf(
-            VendorField.credential(KEY_TENCENT_APP_ID, required = false),
-            VendorField.credential(KEY_TENCENT_SECRET_ID, required = false),
-            VendorField.credential(KEY_TENCENT_SECRET_KEY, required = false),
+            VendorField.credential(KEY_TENCENT_APP_ID),
+            VendorField.credential(KEY_TENCENT_SECRET_ID),
+            VendorField.credential(KEY_TENCENT_SECRET_KEY),
             VendorField.streamingToggle(KEY_TENCENT_STREAMING_ENABLED, default = false),
             VendorField(KEY_TENCENT_ENGINE_TYPE, default = Prefs.DEFAULT_TENCENT_ENGINE_TYPE),
             VendorField.boolean(KEY_TENCENT_VAD_ENABLED, default = false)
