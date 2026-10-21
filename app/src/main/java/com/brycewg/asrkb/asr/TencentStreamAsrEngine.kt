@@ -276,63 +276,35 @@ internal class TencentStreamAsrEngine(
         val wsClosed = AtomicBoolean(false)
         val accumulatedText = StringBuilder()
         val finalTextDelivered = AtomicBoolean(false)
-        val responseFormat = prefs.tencentSelection.responseFormat
         var inboundFrames = 0
 
         // 只记帧形态与业务码，不记识别文本；否则 API Log 的响应列对 WebSocket 永远是空的。
         fun describeInbound(obj: org.json.JSONObject, code: Int, isFinal: Boolean): String {
             inboundFrames += 1
-            val format = if (responseFormat == TencentAsrResponseFormat.Sentence) "sentence" else "slice"
             val keys = obj.keys().asSequence().sorted().joinToString(",")
             val resultKeys = obj.optJSONObject("result")
                 ?.keys()?.asSequence()?.sorted()?.joinToString(",").orEmpty()
-            val sentenceKeys = obj.optJSONObject("sentences")
-                ?.keys()?.asSequence()?.sorted()?.joinToString(",").orEmpty()
             return buildString {
                 append("frames=").append(inboundFrames)
-                append("; format=").append(format)
                 append("; code=").append(code)
                 append("; final=").append(if (isFinal) 1 else 0)
                 append("; keys=").append(keys)
                 if (resultKeys.isNotEmpty()) append("; result_keys=").append(resultKeys)
-                if (sentenceKeys.isNotEmpty()) append("; sentence_keys=").append(sentenceKeys)
             }
         }
 
-        // V2（doc 131127）按句返回，需要自己把已确定的句子上文累加起来。
-        var lastSentenceId = -1
-        var currentSentence = ""
-        val committedText = StringBuilder()
-
-        fun handleSentenceMessage(obj: org.json.JSONObject) {
-            val sentences = obj.optJSONObject("sentences") ?: return
-            val sentenceId = sentences.optInt("sentence_id", -1)
-            if (sentenceId != lastSentenceId) {
-                committedText.append(currentSentence)
-                currentSentence = ""
-                lastSentenceId = sentenceId
-            }
-            currentSentence = sentences.optString("sentence", "")
-            if (sentences.optInt("sentence_type", 0) == 1) {
-                committedText.append(currentSentence)
-                currentSentence = ""
-            }
-            accumulatedText.setLength(0)
-            accumulatedText.append(committedText).append(currentSentence)
-            val partial = accumulatedText.toString()
-            if (partial.isNotBlank()) listener.onPartial(partial)
-        }
-
+        // 各引擎统一走 result.slice_type 分片：0=开始，1=中间结果，2=本句确定结果。
         fun handleSliceMessage(obj: org.json.JSONObject) {
             val resultObj = obj.optJSONObject("result") ?: return
-            val sliceType = resultObj.optInt("slice_type", -1)
             val voiceText = resultObj.optString("voice_text_str", "")
-            when (sliceType) {
+            when (resultObj.optInt("slice_type", -1)) {
                 0 -> { }
-                1 -> if (voiceText.isNotEmpty()) listener.onPartial(voiceText)
+                1 -> if (voiceText.isNotEmpty()) {
+                    listener.onPartial(accumulatedText.toString() + voiceText)
+                }
                 2 -> if (voiceText.isNotEmpty()) {
-                    listener.onPartial(voiceText)
                     accumulatedText.append(voiceText)
+                    listener.onPartial(accumulatedText.toString())
                 }
             }
         }
@@ -372,21 +344,15 @@ internal class TencentStreamAsrEngine(
                         wsClosed.set(true)
                         return
                     }
-                    if (responseFormat == TencentAsrResponseFormat.Sentence) {
-                        handleSentenceMessage(obj)
-                    } else {
-                        handleSliceMessage(obj)
-                    }
+                    handleSliceMessage(obj)
 
                     if (isFinal) {
-                        if (responseFormat == TencentAsrResponseFormat.Slice) {
-                            val finalText = obj.optJSONObject("result")
-                                ?.optString("voice_text_str", "")
-                                .orEmpty()
-                            if (finalText.isNotBlank()) {
-                                accumulatedText.setLength(0)
-                                accumulatedText.append(finalText)
-                            }
+                        val finalText = obj.optJSONObject("result")
+                            ?.optString("voice_text_str", "")
+                            .orEmpty()
+                        if (finalText.isNotBlank()) {
+                            accumulatedText.setLength(0)
+                            accumulatedText.append(finalText)
                         }
                         if (!finalTextDelivered.getAndSet(true)) {
                             val ft = accumulatedText.toString()
@@ -452,13 +418,24 @@ internal class TencentStreamAsrEngine(
                 } catch (_: Exception) {
                     break
                 }
+                if (wsClosed.get()) break
                 ws.send(pcm.toByteString())
             }
         }
 
-        // 队列里的剩余帧很快刷完；服务端先断开时不能让收尾无限等待。
-        withTimeoutOrNull(SEND_DRAIN_TIMEOUT_MS) { sendJob.join() }
-        sendJob.cancel()
+        // 发送协程跟随录音生命周期：用户停止时音频通道关闭，协程自然退出；
+        // 服务端先结束时立即中断。不能用固定超时在这里截断，否则会话会被强行在
+        // SEND_DRAIN_TIMEOUT_MS 后结束（表现为录音约 5 秒后自动停止并打断）。
+        while (!wsClosed.get() && !sendJob.isCompleted) {
+            delay(50)
+        }
+        if (wsClosed.get()) {
+            sendJob.cancel()
+        } else {
+            // 用户主动停止：给队列里的剩余帧留出排空时间。
+            withTimeoutOrNull(SEND_DRAIN_TIMEOUT_MS) { sendJob.join() }
+            sendJob.cancel()
+        }
 
         // 握手未完成时不会有最终结果，直接收口，避免空等 10s。
         if (wsReady.get() && !wsClosed.get()) {

@@ -4,7 +4,7 @@
  * 归属模块：asr
  *
  * 腾讯没有可运行时查询的引擎清单，这里按官方文档静态维护：
- * - 实时语音识别 WebSocket（doc 48982）与 V2（doc 131127）共用 asr/v2 通道，仅响应结构不同；
+ * - 实时语音识别 WebSocket（doc 48982）与 V2 通道（doc 131127）共用 asr/v2 地址，实测各引擎均按 result.slice_type 分片返回；
  * - 录音文件识别极速版（doc 52097）走 asr/flash/v1 HTTP 通道。
  * 应用音频固定 16kHz，因此不收录 8k 电话引擎。
  */
@@ -17,12 +17,6 @@ import com.brycewg.asrkb.store.debug.DebugLogManager
 internal enum class TencentAsrProtocol {
     Stream,
     FlashFile
-}
-
-/** WebSocket 响应结构：Slice 走 48982 的 result.slice_type，Sentence 走 131127 的 sentences。 */
-internal enum class TencentAsrResponseFormat {
-    Slice,
-    Sentence
 }
 
 internal enum class TencentAsrCategory(
@@ -61,8 +55,7 @@ internal enum class TencentAsrCategory(
 
 internal data class TencentAsrModel(
     val id: String,
-    @param:StringRes val displayNameRes: Int,
-    val responseFormat: TencentAsrResponseFormat = TencentAsrResponseFormat.Slice
+    @param:StringRes val displayNameRes: Int
 )
 
 internal data class TencentAsrSelection(
@@ -71,7 +64,6 @@ internal data class TencentAsrSelection(
 ) {
     val streaming: Boolean get() = category.streaming
     val engineId: String get() = model.id
-    val responseFormat: TencentAsrResponseFormat get() = model.responseFormat
 }
 
 internal object TencentAsrModelCatalog {
@@ -80,12 +72,11 @@ internal object TencentAsrModelCatalog {
 
     private fun model(
         id: String,
-        @StringRes displayNameRes: Int,
-        responseFormat: TencentAsrResponseFormat = TencentAsrResponseFormat.Slice
-    ): TencentAsrModel = TencentAsrModel(id = id, displayNameRes = displayNameRes, responseFormat = responseFormat)
+        @StringRes displayNameRes: Int
+    ): TencentAsrModel = TencentAsrModel(id = id, displayNameRes = displayNameRes)
 
     private val largeStream20Models = listOf(
-        model("16k_zh_en_2.0", R.string.tencent_lang_zh_en, TencentAsrResponseFormat.Sentence),
+        model("16k_zh_en_2.0", R.string.tencent_lang_zh_en),
         model("Hy-ASR-3.0-preview", R.string.tencent_model_hy_preview)
     )
 
