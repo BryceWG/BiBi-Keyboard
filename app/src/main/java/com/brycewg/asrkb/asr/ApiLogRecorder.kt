@@ -170,7 +170,8 @@ object ApiLogRecorder {
                 host = url.host,
                 path = if (meta.redactPath) "/redacted" else url.encodedPath,
                 queryKeys = url.queryParameterNames.sorted(),
-                requestSummary = "headers=${safeHeaderNames(request)}",
+                // 无自定义 header 时留空，避免网络日志里出现恒为空的 headers=[]。
+                requestSummary = safeHeaderNames(request).let { if (it.isBlank()) "" else "headers=$it" },
                 requestStructure = meta.requestStructure,
                 responseSummary = buildList {
                     if (code != 0) add("closeCode=$code")

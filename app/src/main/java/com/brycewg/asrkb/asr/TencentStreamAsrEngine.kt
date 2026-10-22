@@ -277,19 +277,26 @@ internal class TencentStreamAsrEngine(
         val accumulatedText = StringBuilder()
         val finalTextDelivered = AtomicBoolean(false)
         var inboundFrames = 0
+        var inboundTextChars = 0
+        val inboundKeys = sortedSetOf<String>()
 
         // 只记帧形态与业务码，不记识别文本；否则 API Log 的响应列对 WebSocket 永远是空的。
+        // chars 与 seen_keys 用来判断“没出结果是服务端判定无语音，还是解析丢了文本”。
         fun describeInbound(obj: org.json.JSONObject, code: Int, isFinal: Boolean): String {
             inboundFrames += 1
-            val keys = obj.keys().asSequence().sorted().joinToString(",")
-            val resultKeys = obj.optJSONObject("result")
-                ?.keys()?.asSequence()?.sorted()?.joinToString(",").orEmpty()
+            val resultObj = obj.optJSONObject("result")
+            val sliceType = resultObj?.optInt("slice_type", -1) ?: -1
+            inboundTextChars += resultObj?.optString("voice_text_str", "").orEmpty().length
+            inboundKeys.addAll(obj.keys().asSequence().toList())
+            val resultKeys = resultObj?.keys()?.asSequence()?.sorted()?.joinToString(",").orEmpty()
             return buildString {
                 append("frames=").append(inboundFrames)
                 append("; code=").append(code)
                 append("; final=").append(if (isFinal) 1 else 0)
-                append("; keys=").append(keys)
+                if (sliceType >= 0) append("; slice=").append(sliceType)
+                append("; chars=").append(inboundTextChars)
                 if (resultKeys.isNotEmpty()) append("; result_keys=").append(resultKeys)
+                append("; seen_keys=").append(inboundKeys.joinToString(","))
             }
         }
 
@@ -370,29 +377,42 @@ internal class TencentStreamAsrEngine(
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 wsClosed.set(true)
+                // 服务端收到 end 后主动断开属正常收尾：已收到 final=1 或已产出文本即算完成。
+                // 只看 finalTextDelivered 会把“结果为空但服务端正常结束”的会话记成失败。
+                val completed = finalTextDelivered.get() || accumulatedText.isNotBlank()
+                apiLogSession.complete(
+                    success = completed,
+                    code = code,
+                    error = reason.ifBlank { if (completed) "" else "closed before final result" }
+                )
                 webSocket.close(1000, null)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 wsClosed.set(true)
+                val completed = finalTextDelivered.get() || accumulatedText.isNotBlank()
                 apiLogSession.complete(
-                    success = finalTextDelivered.get(),
+                    success = completed,
                     code = code,
-                    error = reason.ifBlank {
-                        if (finalTextDelivered.get()) "" else "closed before final result"
-                    }
+                    error = reason.ifBlank { if (completed) "" else "closed before final result" }
                 )
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 wsClosed.set(true)
-                apiLogSession.failure(
-                    code = response?.code ?: 0,
-                    error = listOfNotNull(
-                        response?.let { "HTTP ${it.code} ${it.message}".trim() },
-                        t.message?.takeIf { it.isNotBlank() }
-                    ).joinToString(": ")
-                )
+                // 腾讯在 final=1 之后常常直接断开 TCP，OkHttp 会回调 onFailure（如 EOFException）；
+                // 此时识别已完成，不能记成失败，也不该再弹错误。
+                if (finalTextDelivered.get()) {
+                    apiLogSession.complete(success = true, code = response?.code ?: 0)
+                } else {
+                    apiLogSession.failure(
+                        code = response?.code ?: 0,
+                        error = listOfNotNull(
+                            response?.let { "HTTP ${it.code} ${it.message}".trim() },
+                            t.message?.takeIf { it.isNotBlank() }
+                        ).joinToString(": ").ifBlank { t.javaClass.simpleName }
+                    )
+                }
                 running.set(false)
                 audioJob?.cancel()
                 audioJob = null
@@ -451,16 +471,17 @@ internal class TencentStreamAsrEngine(
             }
         }
 
-        try {
-            ws.close(1000, "client close")
-        } catch (_: Exception) { }
-
+        // 先交付兜底文本再关闭连接，保证关闭回调记到的成功状态与实际交付一致。
         if (!finalTextDelivered.getAndSet(true)) {
             val ft = accumulatedText.toString()
             if (ft.isNotBlank()) {
                 listener.onFinal(ft)
             }
         }
+
+        try {
+            ws.close(1000, "client close")
+        } catch (_: Exception) { }
         running.set(false)
     }
 
