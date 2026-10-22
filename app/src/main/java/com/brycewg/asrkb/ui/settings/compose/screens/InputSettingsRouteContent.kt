@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.LocaleListCompat
 import com.brycewg.asrkb.R
-import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsLazyColumn
@@ -453,12 +452,7 @@ internal fun InputSettingsRouteContent(
                                     true
                                 }
                             },
-                            { enabled ->
-                                if (!enabled) {
-                                    BluetoothRouteManager.onRecordingStopped(context)
-                                    BluetoothRouteManager.setImeActive(context, false)
-                                }
-                            }
+                            null
                         ) { prefs.headsetMicPriorityEnabled = it }
                     },
                     index = 5,

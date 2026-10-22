@@ -426,7 +426,7 @@
 
   <!-- Headset mic priority -->
   <string name="feature_headset_mic_priority_off_desc">يستخدم ميكروفون الجهاز المدمج للتسجيل.</string>
-  <string name="feature_headset_mic_priority_on_desc">يفضّل ميكروفون السماعة عند توفره. ميزة تجريبية، تتطلّب إذن Bluetooth وإذن الأجهزة القريبة.</string>
+  <string name="feature_headset_mic_priority_on_desc">يستخدم ميكروفون سماعة Bluetooth أو السماعة السلكية المتصلة أثناء التسجيل، ويعود إلى ميكروفون الهاتف عند عدم توفر سماعة. يتطلب إذن Bluetooth وإذن الأجهزة القريبة.</string>
 
   <!-- ============================================== -->
   <!-- Other Settings - Feature Explanations -->

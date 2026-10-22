@@ -23,7 +23,6 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrLocalModelCatalog
 import com.brycewg.asrkb.asr.AsrLocalVendorLifecycles
 import com.brycewg.asrkb.asr.AsrVendor
-import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.asr.ContinuousCaptureCoordinator
 import com.brycewg.asrkb.asr.ContinuousCaptureOwner
 import com.brycewg.asrkb.asr.LlmPostProcessor
@@ -352,14 +351,6 @@ class AsrKeyboardService :
         // 监听系统剪贴板变更，IME 可见期间弹出预览
         clipboardCoordinator?.startClipboardPreviewListener()
 
-        // 预热耳机路由（键盘显示）
-        try {
-            BluetoothRouteManager.setImeActive(this, true)
-        } catch (
-            t: Throwable
-        ) {
-            android.util.Log.w("AsrKeyboardService", "BluetoothRouteManager setImeActive(true)", t)
-        }
         ContinuousCaptureCoordinator.acquire(ContinuousCaptureOwner.Ime, this)
 
         // 识别中收起后可能仍在 Processing/AiProcessing：按真实状态刷新，避免面板停在 Idle
@@ -416,14 +407,6 @@ class AsrKeyboardService :
 
         resetPanelsToMainKeyboard()
 
-        // 键盘收起，解除预热（若未在录音）
-        try {
-            BluetoothRouteManager.setImeActive(this, false)
-        } catch (
-            t: Throwable
-        ) {
-            android.util.Log.w("AsrKeyboardService", "BluetoothRouteManager setImeActive(false)", t)
-        }
         ContinuousCaptureCoordinator.release(ContinuousCaptureOwner.Ime)
 
         // 如开启：键盘收起后自动切回上一个输入法。

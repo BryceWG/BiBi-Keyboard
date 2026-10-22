@@ -424,7 +424,7 @@
 
   <!-- 耳机麦克风优先 -->
   <string name="feature_headset_mic_priority_off_desc">使用设备内置麦克风进行录音。</string>
-  <string name="feature_headset_mic_priority_on_desc">优先使用耳机麦克风（如果可用）。实验性功能，需要蓝牙权限和获取附近设备权限。</string>
+  <string name="feature_headset_mic_priority_on_desc">录音时优先使用已连接的蓝牙耳机或有线耳机麦克风；没有可用耳机时自动使用手机麦克风。需要蓝牙权限和获取附近设备权限。</string>
 
   <!-- ============================================== -->
   <!-- 其他设置 - 功能说明 -->

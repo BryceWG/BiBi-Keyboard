@@ -23,7 +23,6 @@ import androidx.core.content.ContextCompat
 import com.brycewg.asrkb.LocaleHelper
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
-import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.asr.ContinuousCaptureCoordinator
 import com.brycewg.asrkb.asr.ContinuousCaptureOwner
 import com.brycewg.asrkb.imebridge.ImeBridgeClient
@@ -606,11 +605,6 @@ class FloatingAsrService : Service() {
         // 停录主路径：a11y TYPE_INPUT_METHOD 窗口边沿 → ACTION_IME_WINDOW_HIDDEN_STOP_RECORDING。
         // 此处不再备份停录，避免与窗口边沿重复触发。
         visibilityCoordinator.applyVisibility(src)
-        try {
-            BluetoothRouteManager.setImeActive(this, visible)
-        } catch (t: Throwable) {
-            Log.w(TAG, "BluetoothRouteManager setImeActive($visible)", t)
-        }
     }
 
     private fun isEffectiveImeVisible(): Boolean = if (isImeBridgeEnabled()) bridgeImeVisible ?: imeVisible else imeVisible

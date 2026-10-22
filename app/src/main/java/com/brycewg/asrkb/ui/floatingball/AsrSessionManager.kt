@@ -11,7 +11,6 @@ import android.util.Log
 import com.brycewg.asrkb.asr.*
 import com.brycewg.asrkb.asr.AsrConnectionWarmer
 import com.brycewg.asrkb.asr.AsrTimeoutCalculator
-import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.imebridge.ImeBridgeClient
 import com.brycewg.asrkb.imebridge.ImeBridgeContract
 import com.brycewg.asrkb.imebridge.ImeBridgeResult
@@ -287,11 +286,6 @@ class AsrSessionManager(
     private fun releaseRecordingResources(reason: String) {
         recordingAudioFocusController.release()
         setRecordingKeepScreenOn(active = false)
-        try {
-            BluetoothRouteManager.onRecordingStopped(context)
-        } catch (t: Throwable) {
-            Log.w(TAG, "BluetoothRouteManager.onRecordingStopped failed on $reason", t)
-        }
     }
 
     /** 开始录音 */
@@ -407,13 +401,6 @@ class AsrSessionManager(
             preloadLocalAsrForImmediateUse(context, prefs)
             ContinuousCaptureCoordinator.beginSession(sessionToken)
             engine.start()
-        }
-        try {
-            BluetoothRouteManager.onRecordingStarted(context)
-        } catch (
-            t: Throwable
-        ) {
-            Log.w(TAG, "BluetoothRouteManager onRecordingStarted", t)
         }
     }
 

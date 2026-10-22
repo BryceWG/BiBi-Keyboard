@@ -22,7 +22,6 @@ import com.brycewg.asrkb.asr.AsrPushPcmEngineFactory
 import com.brycewg.asrkb.asr.AsrPushPcmEngineFamily
 import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.AudioCaptureManager
-import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.asr.CancelableAsrEngine
 import com.brycewg.asrkb.asr.ExternalPcmConsumer
 import com.brycewg.asrkb.asr.LlmPostProcessor
@@ -374,7 +373,6 @@ internal class RecordingTestViewModel(
             recordingAudioFocusController.acquire()
         }
         try {
-            BluetoothRouteManager.onRecordingStarted(appContext)
             preloadLocalAsrForImmediateUse(localizedContext, prefs)
         } catch (t: Throwable) {
             Log.w(TAG, "Recording test preparation failed", t)
@@ -686,11 +684,6 @@ internal class RecordingTestViewModel(
 
     private fun releaseRecordingResources() {
         recordingAudioFocusController.release()
-        try {
-            BluetoothRouteManager.onRecordingStopped(appContext)
-        } catch (t: Throwable) {
-            Log.w(TAG, "Failed to release recording test Bluetooth route", t)
-        }
     }
 
     private fun onRecordingAudioFocusLost(loss: RecordingAudioFocusLoss) {

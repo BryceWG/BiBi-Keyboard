@@ -2,12 +2,8 @@ package com.brycewg.asrkb.asr
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.media.AudioDeviceInfo
 import android.media.AudioFormat
-import android.media.AudioManager
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.os.Build
@@ -18,7 +14,6 @@ import androidx.core.content.ContextCompat
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import java.io.ByteArrayOutputStream
-import kotlin.coroutines.resume
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -30,8 +25,6 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * 音频采集管理器
@@ -248,115 +241,8 @@ class AudioCaptureManager(
             throw error
         }
 
-        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-        var scoStarted = false
-        var scoWasOnBefore = false
-        var audioModeChanged = false
-        var previousAudioMode: Int? = null
-        var commDeviceSet = false
-        var commListener: Any? = null
-        var preferredInputDevice: AudioDeviceInfo? = null
-        var routePrepared = false
-
-        // 1.5. 如开启“耳机麦克风优先”，在构建 AudioRecord 之前准备音频路由
-        if (prefs.headsetMicPriorityEnabled) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // 若已有通信设备（可能由预热设置），则不重复设置，也不在 finally 清理
-                val cur = try {
-                    audioManager.getCommunicationDevice()
-                } catch (
-                    _: Throwable
-                ) {
-                    null
-                }
-                if (cur != null &&
-                    (
-                        cur.type == AudioDeviceInfo.TYPE_BLE_HEADSET ||
-                            cur.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO ||
-                            cur.type == AudioDeviceInfo.TYPE_WIRED_HEADSET
-                        )
-                ) {
-                    preferredInputDevice = cur
-                    routePrepared = true
-                    commDeviceSet = false
-                } else {
-                    val res = prepareCommunicationDevice(audioManager)
-                    commDeviceSet = res.commDeviceSet
-                    commListener = res.listenerToken
-                    preferredInputDevice = res.selectedDevice
-                    routePrepared = res.routeReady
-                    if (!res.routeReady) {
-                        Log.w(
-                            TAG,
-                            "Communication device set but route not confirmed within timeout"
-                        )
-                    }
-                }
-            }
-
-            // 旧版/或现代 API 失败时：通过输入设备列表选择可用耳机，并在需要时启动 SCO
-            if (preferredInputDevice == null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val inputs = audioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)
-                    // 优先蓝牙（SCO/BLE），再有线耳机
-                    preferredInputDevice =
-                        inputs.find { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
-                            ?: (
-                                if (Build.VERSION.SDK_INT >=
-                                    34
-                                ) {
-                                    inputs.find { it.type == AudioDeviceInfo.TYPE_BLE_HEADSET }
-                                } else {
-                                    null
-                                }
-                                )
-                            ?: inputs.find { it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET }
-
-                    if (preferredInputDevice != null) {
-                        Log.i(
-                            TAG,
-                            "Preferred input device: ${preferredInputDevice.productName} (type=${preferredInputDevice.type})"
-                        )
-                    }
-
-                    if (preferredInputDevice?.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO) {
-                        // 通话模式可改善部分设备的路由与增益（仅在当前非通话模式时切换）
-                        val curMode = try {
-                            audioManager.mode
-                        } catch (
-                            _: Throwable
-                        ) {
-                            AudioManager.MODE_NORMAL
-                        }
-                        if (curMode != AudioManager.MODE_IN_COMMUNICATION) {
-                            previousAudioMode = curMode
-                            try {
-                                audioManager.mode = AudioManager.MODE_IN_COMMUNICATION
-                                audioModeChanged = true
-                            } catch (t: Throwable) {
-                                Log.w(TAG, "Failed to set audio mode to IN_COMMUNICATION", t)
-                            }
-                        }
-
-                        // 记录调用前是否已为 SCO，避免 finally 误停预热的 SCO
-                        scoWasOnBefore = isScoOnCompat(audioManager)
-                        val connected = startScoAndAwaitConnected(audioManager)
-                        if (connected) {
-                            scoStarted = true
-                            Log.i(TAG, "Bluetooth SCO connected")
-                            routePrepared = true
-                        } else {
-                            Log.w(
-                                TAG,
-                                "Bluetooth SCO did not connect in time; continue without SCO"
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // 2. 计算缓冲区大小
+        // 2. 计算缓冲区大小与读缓冲。分配放在路由准备之前：路由激活后只剩 AudioRecord 创建
+        // （内部已捕获异常），避免中途抛异常/取消时把耳机通信设备或 SCO 留在已终止的录音上。
         val minBuffer = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat)
         val chunkBytes = ((sampleRate * chunkMillis) / 1000) * bytesPerSample
         val bufferSize = maxOf(minBuffer, chunkBytes)
@@ -365,13 +251,48 @@ class AudioCaptureManager(
             chunkBytes,
             ((sampleRate * READ_SLICE_MILLIS) / 1000) * bytesPerSample
         ).coerceAtLeast(bytesPerSample)
+        val buf = ByteArray(chunkBytes)
+        // read 粒度小于 emit 粒度时用 pending 累积，保证下游帧长仍是 chunkMillis。
+        val pending = if (readSliceBytes < chunkBytes) ByteArray(chunkBytes) else null
+        var pendingSize = 0
 
-        // 3. 优先使用已验证的设备级音源；耳机路由始终绕过该缓存。
+        // 1.5. 如开启“耳机麦克风优先”，在构建 AudioRecord 之前把通信音频路由到耳机。
+        // 只在录音窗口内激活，避免键盘可见时长期占用耳机麦克风、把耳机锁在通话模式。
+        val headsetRoute = if (prefs.headsetMicPriorityEnabled) HeadsetAudioRoute(context) else null
+        if (headsetRoute != null) {
+            try {
+                headsetRoute.prepare()
+            } catch (t: Throwable) {
+                // prepare 只在取消时抛出：终止前先释放，避免路由泄漏。
+                headsetRoute.release()
+                throw t
+            }
+            Log.i(
+                TAG,
+                "Headset route: activated=${headsetRoute.activated} " +
+                    "device=${headsetRoute.selectedDevice?.productName} " +
+                    "type=${headsetRoute.selectedDevice?.type} " +
+                    "commPath=${headsetRoute.viaCommunicationPath} " +
+                    "elapsed=${headsetRoute.prepareElapsedMs}ms " +
+                    "failure=${headsetRoute.failureReason}"
+            )
+        }
+        val routeActive = headsetRoute?.activated == true
+        val routeUsesCommunicationPath = headsetRoute?.viaCommunicationPath == true
+        val preferredInputDevice = headsetRoute?.selectedDevice
+
+        // 3. 优先使用已验证的设备级音源；耳机通信路由生效时必须用 VOICE_COMMUNICATION 采集，
+        // 只有通信路径的音源才会跟随 setCommunicationDevice/SCO 切换到耳机麦克风。
         val deviceId = deviceIdentifier()
-        val useSourceCache = preferredInputDevice == null && !routePrepared
+        val primarySource = if (routeActive && routeUsesCommunicationPath) {
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION
+        } else {
+            MediaRecorder.AudioSource.VOICE_RECOGNITION
+        }
+        val useSourceCache = !routeActive && preferredInputDevice == null
         var cachedSource = if (useSourceCache) prefs.getAudioSourceCache(deviceId) else null
-        var selectedSource = cachedSource ?: MediaRecorder.AudioSource.VOICE_RECOGNITION
-        var recorder: AudioRecord? = createRecorderForSource(cachedSource ?: MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
+        var selectedSource = cachedSource ?: primarySource
+        var recorder: AudioRecord? = createRecorderForSource(selectedSource, bufferSize)
         var sourceIsCached = cachedSource != null
         if (recorder == null || recorder.state != AudioRecord.STATE_INITIALIZED) {
             recorder?.release()
@@ -379,11 +300,11 @@ class AudioCaptureManager(
                 prefs.clearAudioSourceCache(deviceId)
                 cachedSource = null
                 sourceIsCached = false
-                recorder = createRecorderForSource(MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
-                selectedSource = MediaRecorder.AudioSource.VOICE_RECOGNITION
+                recorder = createRecorderForSource(primarySource, bufferSize)
+                selectedSource = primarySource
             }
             if (recorder == null || recorder.state != AudioRecord.STATE_INITIALIZED) {
-                Log.w(TAG, "VOICE_RECOGNITION source unavailable, falling back to MIC")
+                Log.w(TAG, "Primary audio source unavailable, falling back to MIC")
                 recorder?.release()
                 recorder = createRecorderForSource(MediaRecorder.AudioSource.MIC, bufferSize)
                 selectedSource = MediaRecorder.AudioSource.MIC
@@ -392,9 +313,11 @@ class AudioCaptureManager(
 
         // 5. 最终校验
         if (recorder == null || recorder.state != AudioRecord.STATE_INITIALIZED) {
+            // 路由已激活但录音无法启动：立即恢复，避免耳机被锁在通话模式。
+            headsetRoute?.release()
             val error =
                 IllegalStateException(
-                    "AudioRecord initialization failed for both VOICE_RECOGNITION and MIC sources"
+                    "AudioRecord initialization failed for primary source and MIC"
                 )
             Log.e(TAG, "AudioRecord initialization failed", error)
             DebugLogManager.logError(
@@ -411,18 +334,19 @@ class AudioCaptureManager(
         }
 
         var activeRecorder: AudioRecord = requireNotNull(recorder)
-        // 优先路由到选中的输入设备（若存在）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && preferredInputDevice != null) {
+
+        // API 31+ 的通信设备路由不需要再指定 preferredDevice；旧版有线/SCO 仍靠它兜底。
+        // 抽成函数：录音中途重建 recorder（启动失败重试/读错误恢复）后仍能选中耳机输入。
+        fun applyPreferredDevice(target: AudioRecord) {
+            if (preferredInputDevice == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && routeUsesCommunicationPath) return
             try {
-                activeRecorder.preferredDevice = preferredInputDevice
+                target.preferredDevice = preferredInputDevice
             } catch (t: Throwable) {
                 Log.w(TAG, "Failed to set preferred input device on AudioRecord", t)
             }
         }
-        val buf = ByteArray(chunkBytes)
-        // read 粒度小于 emit 粒度时用 pending 累积，保证下游帧长仍是 chunkMillis。
-        val pending = if (readSliceBytes < chunkBytes) ByteArray(chunkBytes) else null
-        var pendingSize = 0
+        applyPreferredDevice(activeRecorder)
 
         try {
             // 6. 启动录音
@@ -439,10 +363,11 @@ class AudioCaptureManager(
                         Log.w(TAG, "Failed to release cached recorder after start failure", releaseError)
                     }
                     sourceIsCached = false
-                    val retryVoice = startRecorderForSource(MediaRecorder.AudioSource.VOICE_RECOGNITION, bufferSize)
-                    selectedSource = if (retryVoice != null) {
-                        activeRecorder = retryVoice
-                        MediaRecorder.AudioSource.VOICE_RECOGNITION
+                    val retryPrimary = startRecorderForSource(primarySource, bufferSize)
+                    selectedSource = if (retryPrimary != null) {
+                        activeRecorder = retryPrimary
+                        applyPreferredDevice(retryPrimary)
+                        primarySource
                     } else {
                         activeRecorder = startRecorderForSource(MediaRecorder.AudioSource.MIC, bufferSize)
                             ?: throw t
@@ -453,6 +378,8 @@ class AudioCaptureManager(
                 try {
                     DebugLogManager.log("audio", "recorder_started")
                 } catch (_: Throwable) { }
+                // 实际路由可能被系统改写（A2DP-only、被通话抢占等），记录一次供事后定位。
+                logHeadsetRoute(headsetRoute, activeRecorder, selectedSource)
             } catch (se: SecurityException) {
                 Log.e(TAG, "SecurityException during startRecording", se)
                 DebugLogManager.logError(
@@ -495,10 +422,8 @@ class AudioCaptureManager(
                 throw IllegalStateException("Failed to start recording", t)
             }
 
-            // 7. 探测音源是否近乎全零，必要时换回 MIC
-            val avoidMicFallback =
-                prefs.headsetMicPriorityEnabled &&
-                    (routePrepared || preferredInputDevice != null || scoStarted)
+            // 7. 探测音源是否近乎全零，必要时换回 MIC；耳机路由已确认时不再回退
+            val avoidMicFallback = routeActive
             val probeTargetBytes = ((sampleRate * WARMUP_PROBE_MILLIS) / 1000) * bytesPerSample
             val warmupResult = if (sourceIsCached) {
                 WarmupResult(activeRecorder, null, cachedSource!!, true)
@@ -592,13 +517,11 @@ class AudioCaptureManager(
                     }
                     sourceIsCached = false
                     cachedSource = null
-                    val retryVoice = startRecorderForSource(
-                        MediaRecorder.AudioSource.VOICE_RECOGNITION,
-                        bufferSize
-                    )
-                    selectedSource = if (retryVoice != null) {
-                        activeRecorder = retryVoice
-                        MediaRecorder.AudioSource.VOICE_RECOGNITION
+                    val retryPrimary = startRecorderForSource(primarySource, bufferSize)
+                    selectedSource = if (retryPrimary != null) {
+                        activeRecorder = retryPrimary
+                        applyPreferredDevice(retryPrimary)
+                        primarySource
                     } else {
                         activeRecorder = startRecorderForSource(MediaRecorder.AudioSource.MIC, bufferSize)
                             ?: throw error
@@ -668,25 +591,8 @@ class AudioCaptureManager(
                         event = "acm_cleanup"
                     )
                 } catch (_: Throwable) { }
-                // 清理通信设备与 SCO / 恢复模式
-                try {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && commDeviceSet) {
-                        clearCommunicationDeviceSafely(audioManager, commListener)
-                    }
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed clearing communication device", t)
-                }
-                if (scoStarted && !scoWasOnBefore) {
-                    stopScoCompat(audioManager)
-                }
-                val mode = previousAudioMode
-                if (audioModeChanged && mode != null) {
-                    try {
-                        audioManager.mode = mode
-                    } catch (t: Throwable) {
-                        Log.w(TAG, "Failed to restore audio mode", t)
-                    }
-                }
+                // 路由只覆盖本次录音窗口，收尾时恢复通信设备 / SCO / audio mode。
+                headsetRoute?.release()
             }
         }
     }
@@ -871,6 +777,47 @@ class AudioCaptureManager(
     }
 
     /**
+     * 记录一次耳机路由结果：实际采集设备可能被系统改写（A2DP-only 耳机、通话抢占等），
+     * 只有 routedDevice 才能说明录音到底来自耳机还是手机麦克风。
+     */
+    private fun logHeadsetRoute(route: HeadsetAudioRoute?, recorder: AudioRecord, source: Int) {
+        if (route == null) return
+        val routed = try {
+            recorder.routedDevice
+        } catch (t: Throwable) {
+            Log.w(TAG, "getRoutedDevice failed", t)
+            null
+        }
+        val requested = route.selectedDevice
+        try {
+            DebugLogManager.logBase(
+                category = "audio",
+                event = "headset_route",
+                data = mapOf(
+                    "activated" to route.activated,
+                    "comm_path" to route.viaCommunicationPath,
+                    "requested_type" to requested?.type,
+                    "routed_type" to routed?.type,
+                    "routed_name" to routed?.productName,
+                    "source" to audioSourceName(source),
+                    "prepare_ms" to route.prepareElapsedMs,
+                    "failure" to route.failureReason,
+                    "matched" to (requested != null && routed?.type == requested.type)
+                )
+            )
+        } catch (t: Throwable) {
+            Log.w(TAG, "Failed to log headset route", t)
+        }
+    }
+
+    private fun audioSourceName(source: Int): String = when (source) {
+        MediaRecorder.AudioSource.VOICE_COMMUNICATION -> "voice_communication"
+        MediaRecorder.AudioSource.VOICE_RECOGNITION -> "voice_recognition"
+        MediaRecorder.AudioSource.MIC -> "mic"
+        else -> source.toString()
+    }
+
+    /**
      * 把 [len] 字节喂入 [pending] 聚合缓冲，凑满 [chunkBytes] 就 emit 一帧，返回新的待聚合长度。
      *
      * [pending] 为 null 表示 read 粒度已等于 emit 粒度，直接透传不做聚合。
@@ -900,266 +847,4 @@ class AudioCaptureManager(
         }
         return size
     }
-
-    // ===== 蓝牙/耳机路由辅助 =====
-
-    /**
-     * API 31+：尝试将通信设备切换到蓝牙/有线耳机，并等待回调确认。
-     */
-    @RequiresApi(Build.VERSION_CODES.S)
-    private suspend fun prepareCommunicationDevice(audioManager: AudioManager): CommRouteResult {
-        var selected: AudioDeviceInfo? = null
-        var listenerToken: Any? = null
-        var setOk = false
-        var routeReady = false
-        val t0 = try {
-            android.os.SystemClock.elapsedRealtime()
-        } catch (_: Throwable) {
-            0L
-        }
-        try {
-            val candidates = try {
-                audioManager.getAvailableCommunicationDevices()
-            } catch (se: SecurityException) {
-                Log.w(
-                    TAG,
-                    "BLUETOOTH_CONNECT not granted or unavailable when listing comm devices",
-                    se
-                )
-                emptyList()
-            } catch (t: Throwable) {
-                Log.w(TAG, "getAvailableCommunicationDevices failed", t)
-                emptyList()
-            }
-
-            if (candidates.isEmpty()) return CommRouteResult(false, null, null, false)
-
-            // 选择优先级：BLE_HEADSET > BLUETOOTH_SCO > WIRED_HEADSET
-            selected = candidates.firstOrNull { it.type == AudioDeviceInfo.TYPE_BLE_HEADSET }
-                ?: candidates.firstOrNull { it.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO }
-                ?: candidates.firstOrNull { it.type == AudioDeviceInfo.TYPE_WIRED_HEADSET }
-
-            if (selected == null) return CommRouteResult(false, null, null, false)
-
-            setOk = try {
-                audioManager.setCommunicationDevice(selected)
-            } catch (t: Throwable) {
-                Log.w(TAG, "setCommunicationDevice failed", t)
-                false
-            }
-            if (!setOk) return CommRouteResult(false, selected, null, false)
-
-            val cur = try {
-                audioManager.getCommunicationDevice()
-            } catch (_: Throwable) {
-                null
-            }
-            if (cur != null && selected.id == cur.id) {
-                val dt = if (t0 > 0) (android.os.SystemClock.elapsedRealtime() - t0) else -1
-                if (dt >=
-                    0
-                ) {
-                    Log.i(
-                        TAG,
-                        "Communication device ready immediately in ${dt}ms (id=${cur.id})"
-                    )
-                }
-                return CommRouteResult(true, selected, null, true)
-            }
-
-            // 等待通信设备切换
-            routeReady = withTimeoutOrNull(2000L) {
-                suspendCancellableCoroutine<Boolean> { cont ->
-                    val exec = java.util.concurrent.Executor { r ->
-                        try {
-                            r.run()
-                        } catch (
-                            t: Throwable
-                        ) {
-                            Log.w(TAG, "CommDevice listener runnable error", t)
-                        }
-                    }
-                    val l = AudioManager.OnCommunicationDeviceChangedListener { dev ->
-                        selected.let { sel ->
-                            if (dev != null && dev.id == sel.id) {
-                                val dt = if (t0 >
-                                    0
-                                ) {
-                                    (android.os.SystemClock.elapsedRealtime() - t0)
-                                } else {
-                                    -1
-                                }
-                                if (dt >=
-                                    0
-                                ) {
-                                    Log.i(
-                                        TAG,
-                                        "Communication device ready in ${dt}ms (id=${dev.id})"
-                                    )
-                                }
-                                if (cont.isActive) cont.resume(true)
-                            }
-                        }
-                    }
-                    listenerToken = l
-                    try {
-                        audioManager.addOnCommunicationDeviceChangedListener(exec, l)
-                    } catch (t: Throwable) {
-                        Log.w(TAG, "addOnCommunicationDeviceChangedListener failed", t)
-                        if (cont.isActive) cont.resume(false)
-                    }
-                    cont.invokeOnCancellation {
-                        try {
-                            audioManager.removeOnCommunicationDeviceChangedListener(l)
-                        } catch (
-                            _: Throwable
-                        ) {}
-                    }
-                }
-            } ?: false
-
-            return CommRouteResult(true, selected, listenerToken, routeReady)
-        } catch (t: Throwable) {
-            Log.w(TAG, "prepareCommunicationDevice exception", t)
-            return CommRouteResult(false, selected, listenerToken, false)
-        }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.S)
-    private fun clearCommunicationDeviceSafely(audioManager: AudioManager, listenerToken: Any?) {
-        try {
-            if (listenerToken is AudioManager.OnCommunicationDeviceChangedListener) {
-                try {
-                    audioManager.removeOnCommunicationDeviceChangedListener(listenerToken)
-                } catch (t: Throwable) {
-                    Log.w(TAG, "removeOnCommunicationDeviceChangedListener failed", t)
-                }
-            }
-            try {
-                audioManager.clearCommunicationDevice()
-            } catch (t: Throwable) {
-                Log.w(TAG, "clearCommunicationDevice failed", t)
-            }
-        } catch (t: Throwable) {
-            Log.w(TAG, "clearCommunicationDeviceSafely exception", t)
-        }
-    }
-
-    /**
-     * 旧版：启动 SCO 并等待 ACTION_SCO_AUDIO_STATE_UPDATED 变为 CONNECTED。
-     */
-    @Suppress("DEPRECATION")
-    private suspend fun startScoAndAwaitConnected(am: AudioManager): Boolean {
-        return try {
-            if (!am.isBluetoothScoAvailableOffCall) {
-                Log.w(TAG, "Bluetooth SCO not available off call on this device")
-                return false
-            }
-            try {
-                if (am.isBluetoothScoOn) {
-                    Log.i(TAG, "Bluetooth SCO already on; treat as connected")
-                    return true
-                }
-            } catch (t: Throwable) {
-                Log.w(TAG, "Query isBluetoothScoOn failed", t)
-            }
-
-            val filter = IntentFilter(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
-            var receiver: android.content.BroadcastReceiver? = null
-            val t0 = try {
-                android.os.SystemClock.elapsedRealtime()
-            } catch (_: Throwable) {
-                0L
-            }
-            val ok = withTimeoutOrNull(2500L) {
-                suspendCancellableCoroutine<Boolean> { cont ->
-                    receiver = object : android.content.BroadcastReceiver() {
-                        override fun onReceive(context: Context?, intent: Intent?) {
-                            if (intent?.action !=
-                                AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED
-                            ) {
-                                return
-                            }
-                            val state = intent.getIntExtra(
-                                AudioManager.EXTRA_SCO_AUDIO_STATE,
-                                AudioManager.SCO_AUDIO_STATE_ERROR
-                            )
-                            when (state) {
-                                AudioManager.SCO_AUDIO_STATE_CONNECTED -> {
-                                    val dt = if (t0 >
-                                        0
-                                    ) {
-                                        (android.os.SystemClock.elapsedRealtime() - t0)
-                                    } else {
-                                        -1
-                                    }
-                                    if (dt >= 0) Log.i(TAG, "Bluetooth SCO connected in ${dt}ms")
-                                    if (cont.isActive) cont.resume(true)
-                                }
-                                AudioManager.SCO_AUDIO_STATE_ERROR -> if (cont.isActive) {
-                                    cont.resume(
-                                        false
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    try {
-                        context.registerReceiver(receiver, filter)
-                    } catch (
-                        t: Throwable
-                    ) {
-                        Log.w(TAG, "registerReceiver failed", t)
-                    }
-                    try {
-                        if (!am.isBluetoothScoOn) am.startBluetoothSco()
-                    } catch (t: Throwable) {
-                        Log.w(TAG, "startBluetoothSco failed", t)
-                        if (cont.isActive) cont.resume(false)
-                    }
-                    cont.invokeOnCancellation {
-                        try {
-                            val registeredReceiver = receiver
-                            if (registeredReceiver != null) context.unregisterReceiver(registeredReceiver)
-                        } catch (
-                            _: Throwable
-                        ) {}
-                    }
-                }
-            } ?: false
-            try {
-                receiver?.let { context.unregisterReceiver(it) }
-            } catch (_: Throwable) {}
-            ok
-        } catch (t: Throwable) {
-            Log.w(TAG, "startScoAndAwaitConnected exception", t)
-            false
-        }
-    }
-
-    // 仅用于兼容旧版 SCO 路径的封装，集中抑制弃用告警
-    @Suppress("DEPRECATION")
-    private fun isScoOnCompat(am: AudioManager): Boolean = try {
-        am.isBluetoothScoOn
-    } catch (t: Throwable) {
-        Log.w(TAG, "Query isBluetoothScoOn failed", t)
-        false
-    }
-
-    @Suppress("DEPRECATION")
-    private fun stopScoCompat(am: AudioManager) {
-        try {
-            am.stopBluetoothSco()
-            Log.i(TAG, "Bluetooth SCO stopped")
-        } catch (t: Throwable) {
-            Log.w(TAG, "stopBluetoothSco failed", t)
-        }
-    }
-
-    private data class CommRouteResult(
-        val commDeviceSet: Boolean,
-        val selectedDevice: AudioDeviceInfo?,
-        val listenerToken: Any?,
-        val routeReady: Boolean
-    )
 }

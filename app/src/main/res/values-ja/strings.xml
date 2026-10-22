@@ -425,7 +425,7 @@
 
   <!-- ヘッドセットマイク優先 -->
   <string name="feature_headset_mic_priority_off_desc">デバイス内蔵マイクを録音に使用します。</string>
-  <string name="feature_headset_mic_priority_on_desc">利用可能な場合はヘッドセットマイクを優先します。実験的機能で、Bluetooth権限と近くのデバイス権限が必要です。</string>
+  <string name="feature_headset_mic_priority_on_desc">録音時は接続済みのBluetooth／有線ヘッドセットのマイクを優先し、使用できない場合は端末内蔵マイクに切り替えます。Bluetooth権限と付近のデバイス権限が必要です。</string>
 
   <!-- ============================================== -->
   <!-- その他の設定 - 機能説明 -->

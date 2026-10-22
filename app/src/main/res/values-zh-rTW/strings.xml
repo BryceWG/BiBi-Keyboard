@@ -424,7 +424,7 @@
 
   <!-- 耳機麥克風優先 -->
   <string name="feature_headset_mic_priority_off_desc">使用裝置內建麥克風進行錄音。</string>
-  <string name="feature_headset_mic_priority_on_desc">優先使用耳機麥克風（如果可用）。實驗性功能，需要藍牙權限和取得附近裝置權限。</string>
+  <string name="feature_headset_mic_priority_on_desc">錄音時優先使用已連線的藍牙耳機或有線耳機麥克風；沒有可用耳機時自動使用手機麥克風。需要藍牙權限和取得附近裝置權限。</string>
 
   <!-- ============================================== -->
   <!-- 其他設定 - 功能說明 -->

@@ -13,7 +13,6 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.WindowManager
 import com.brycewg.asrkb.asr.*
-import com.brycewg.asrkb.asr.BluetoothRouteManager
 import com.brycewg.asrkb.store.AsrHistoryAudioCapture
 import com.brycewg.asrkb.store.AsrHistoryFailureRecorder
 import com.brycewg.asrkb.store.AsrHistoryStore
@@ -553,14 +552,6 @@ class AsrSessionManager(
                 )
             )
         } catch (_: Throwable) { }
-        // 录音期间保持耳机路由
-        try {
-            BluetoothRouteManager.onRecordingStarted(context)
-        } catch (
-            t: Throwable
-        ) {
-            Log.w(TAG, "BluetoothRouteManager onRecordingStarted", t)
-        }
     }
 
     /**
@@ -586,14 +577,6 @@ class AsrSessionManager(
         } catch (_: Throwable) { }
         recordingAudioFocusController.release()
         setRecordingKeepScreenOn(active = false)
-        // 若无键盘可见，录音结束后可撤销预热
-        try {
-            BluetoothRouteManager.onRecordingStopped(context)
-        } catch (
-            t: Throwable
-        ) {
-            Log.w(TAG, "BluetoothRouteManager onRecordingStopped", t)
-        }
     }
 
     /**

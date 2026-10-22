@@ -426,7 +426,7 @@
 
   <!-- Headset mic priority -->
   <string name="feature_headset_mic_priority_off_desc">Uses the device\'s built-in microphone for recording.</string>
-  <string name="feature_headset_mic_priority_on_desc">Prioritizes the headset microphone when available. Experimental feature, requires Bluetooth permission and nearby devices permission.</string>
+  <string name="feature_headset_mic_priority_on_desc">Uses the microphone of a connected Bluetooth or wired headset while recording, and falls back to the phone microphone when no headset is available. Requires Bluetooth and nearby devices permissions.</string>
 
   <!-- ============================================== -->
   <!-- Other Settings - Feature Explanations -->
