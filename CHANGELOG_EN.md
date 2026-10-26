@@ -1,5 +1,29 @@
 # Changelog
 
+## v4.5.3 (2026-10-26)
+
+### New Features
+
+- **Tencent Cloud ASR**: Adds Tencent Cloud speech recognition with Large Model Streaming 2.0/1.0, Standard Streaming, and Large Model and Standard fast file recognition, with configurable language and auto segmentation
+- **Qianwen Custom Endpoint**: The endpoint region picker adds a Custom option for a self-hosted or proxy endpoint
+- **[Pro] Tencent Hotword Sync**: Automatically syncs to a Tencent Cloud hotword table
+
+### Improvements
+
+- **Bluetooth Headset Microphone**: Improves the recording experience with Bluetooth headsets
+- **AI Polishing Status**: The keyboard status bar shows the current prompt name while polishing and "Selecting" during automatic prompt selection
+
+### Bug Fixes
+
+- **Microphone Not Released**: Fix DashScope streaming keeping the microphone when stopped before capture starts
+- **Floating Ball Hold-to-Record**: Fix long-press recording being interrupted when the recording screen animation appears
+- **Recording Test Bottom Bar**: Fix the bottom bar being covered by the navigation bar
+- **Setup Progress**: Improve accessibility service detection and show progress and the next step
+- **Soniox Auth**: Streaming recognition now uses the new Bearer authentication
+- **TypeSafe Classifier Model**: Fix the custom model ID field not appearing
+
+---
+
 ## v4.5.2 (2026-10-12)
 
 ### New Features
