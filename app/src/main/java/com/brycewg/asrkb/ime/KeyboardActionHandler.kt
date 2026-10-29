@@ -54,6 +54,7 @@ class KeyboardActionHandler(
         fun onHideClipboardPreview()
         fun onShowRetryChip(label: String)
         fun onHideRetryChip()
+        fun onShowCopyResultChip(text: String)
         fun onShowPostprocessUndo(label: String)
         fun onHidePostprocessUndo()
         fun onAmplitude(amplitude: Float) { /* 默认空实现 */ }
@@ -91,6 +92,7 @@ class KeyboardActionHandler(
         },
         onTimeout = {
             dropPendingFinal = true
+            dictationSession.cancelRecording()
             asrManager.abandonPendingRecognition(
                 status = AsrHistoryStore.AsrHistoryStatus.FAILED,
                 failStage = AsrHistoryStore.AsrHistoryFailStage.RECOGNITION,
@@ -107,11 +109,12 @@ class KeyboardActionHandler(
         logTag = TAG
     )
 
+    private val dictationSession = DictationTextSession(inputHelper = inputHelper)
+
     private val postprocessPipeline = PostprocessPipeline(
         context = context,
         scope = scope,
         prefs = prefs,
-        inputHelper = inputHelper,
         llmPostProcessor = llmPostProcessor,
         logTag = TAG
     )
@@ -121,6 +124,7 @@ class KeyboardActionHandler(
         prefs = prefs,
         asrManager = asrManager,
         inputHelper = inputHelper,
+        dictationSession = dictationSession,
         processingTimeoutController = processingTimeoutController,
         postprocessPipeline = postprocessPipeline,
         commitRecorder = commitRecorder,
@@ -142,7 +146,8 @@ class KeyboardActionHandler(
         },
         onPostprocessUndoAvailable = {
             uiListener?.onShowPostprocessUndo(context.getString(R.string.action_revert_postprocess))
-        }
+        },
+        onContinueSession = { dictationSession.continueAfterDelivery(getCurrentInputConnection()) }
     )
 
     private val aiEditUseCase = AiEditUseCase(
@@ -193,6 +198,7 @@ class KeyboardActionHandler(
         transitionToState = { transitionToState(it) },
         transitionToIdle = { transitionToIdle() },
         scheduleProcessingTimeout = { scheduleProcessingTimeout() },
+        beginRetrySession = { beginRetryDictationSession() },
         logTag = TAG
     )
 
@@ -465,19 +471,14 @@ class KeyboardActionHandler(
     }
 
     fun handleMicGestureCancel() {
-        val state = currentState as? KeyboardState.Listening ?: return
+        if (currentState !is KeyboardState.Listening) return
         markDropPendingRecognition()
         micHoldActive = false
         releaseAutoStopSuppression()
         autoEnterOnce = false
         isAutoStartedRecording = false
         asrManager.cancelRecording(discardPending = true)
-        // 清除已显示的 composing text（中间结果），避免取消时被固化提交
-        val ic = getCurrentInputConnection()
-        if (ic != null && !state.partialText.isNullOrEmpty()) {
-            inputHelper.setComposingText(ic, "")
-            inputHelper.finishComposingText(ic)
-        }
+        // composing 预览已在 markDropPendingRecognition 内清理，避免取消时被固化提交
         transitionToIdle(keepMessage = true)
         uiListener?.onStatusMessage(context.getString(R.string.status_cancelled))
         uiListener?.onVibrate()
@@ -664,10 +665,12 @@ class KeyboardActionHandler(
             )
         } catch (_: Throwable) { }
 
+        var delivered = false
         if (ic != null) {
-            inputHelper.setComposingText(ic, rawText)
-            inputHelper.finishComposingText(ic)
-            if (allowAutoEnter && rawText.isNotEmpty() && consumeAutoEnterOnce()) {
+            val delivery = dictationSession.cancelPolish(ic, rawText)
+            delivered = delivery == DictationTextSession.Delivery.CONFIRMED_REPLACED ||
+                delivery == DictationTextSession.Delivery.REPAIRED
+            if (delivered && allowAutoEnter && rawText.isNotEmpty() && consumeAutoEnterOnce()) {
                 try {
                     inputHelper.sendEnter(ic, getCurrentEditorInfo())
                 } catch (t: Throwable) {
@@ -677,10 +680,12 @@ class KeyboardActionHandler(
         }
         autoEnterOnce = false
 
-        sessionContext = sessionContext.copy(
-            lastAsrCommitText = rawText,
-            lastPostprocCommit = null
-        )
+        if (delivered) {
+            sessionContext = sessionContext.copy(
+                lastAsrCommitText = rawText,
+                lastPostprocCommit = null
+            )
+        }
         val historyTiming = asrManager.takeInFlightHistoryCommitContext()
         historyTiming?.timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.AI_POSTPROCESS)
         historyTiming?.timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
@@ -701,10 +706,14 @@ class KeyboardActionHandler(
         }
         transitionToState(KeyboardState.Idle)
         uiListener?.onStatusMessage(context.getString(R.string.status_postprocess_interrupted_raw))
+        if (!delivered) {
+            offerCopyResult(rawText)
+        }
         if (reason != "input_view_hidden") {
             uiListener?.onVibrate()
         }
         if (notifySolidified &&
+            delivered &&
             ic != null &&
             AsrInputCompletionPolicy.shouldNotifyInputSolidified(
                 committedText = rawText,
@@ -904,6 +913,9 @@ class KeyboardActionHandler(
      */
     fun restorePartialAsComposing(ic: InputConnection?) {
         if (ic == null) return
+        // 只有会话仍有效（同字段同连接、未被外部变化撤销）时才补写；
+        // 不在此重新授予写入权限，避免把旧 partial 写进切换后的新字段。
+        if (!dictationSession.isActive(opSeq)) return
         val state = currentState
         if (state is KeyboardState.Listening) {
             val partial = state.partialText
@@ -918,7 +930,7 @@ class KeyboardActionHandler(
                         )
                     )
                 } catch (_: Throwable) { }
-                inputHelper.setStreamingPreview(ic, partial)
+                dictationSession.update(opSeq, ic, partial)
             }
         }
     }
@@ -927,7 +939,9 @@ class KeyboardActionHandler(
 
     override fun onAsrFinal(text: String, currentState: KeyboardState) {
         val hopStartedAt = SystemClock.elapsedRealtime()
+        val seq = opSeq
         scope.launch {
+            if (seq != opSeq) return@launch
             AsrCallLatencyProbe.log(
                 "t_final_hop",
                 mapOf("hop_ms" to (SystemClock.elapsedRealtime() - hopStartedAt).coerceAtLeast(0L))
@@ -938,7 +952,6 @@ class KeyboardActionHandler(
                 return@launch
             }
             // 捕获当前操作序列，用于在提交前判定是否已被新的操作序列取消
-            val seq = opSeq
             // 若已启动新一轮录音（当前仍为 Listening 且引擎在运行），忽略旧会话迟到的 onFinal
             val stateNow = this@KeyboardActionHandler.currentState
             if (asrManager.isRunning() && stateNow is KeyboardState.Listening) return@launch
@@ -964,10 +977,17 @@ class KeyboardActionHandler(
     }
 
     override fun onAsrPartial(text: String) {
+        // 在调度前捕获代次，避免迟到回调读取到已递增的新 opSeq 而写进新会话。
+        val seq = opSeq
         scope.launch {
+            if (seq != opSeq) return@launch
             when (val state = currentState) {
                 is KeyboardState.Listening -> {
                     // 更新中间结果
+                    val ic = getCurrentInputConnection()
+                    if (ic != null) {
+                        dictationSession.update(seq, ic, text)
+                    }
                     val newState = state.copy(partialText = text)
                     transitionToState(newState)
                 }
@@ -992,6 +1012,8 @@ class KeyboardActionHandler(
                 return@launch
             }
             // 先切换到 Idle，再显示错误，避免被 Idle 文案覆盖
+            // 错误终止本轮：清理未固化的 composing 预览，避免残留。
+            dictationSession.cancelRecording()
             transitionToIdle(keepMessage = true)
             uiListener?.onStatusMessage(message)
             uiListener?.onVibrate()
@@ -1225,6 +1247,7 @@ class KeyboardActionHandler(
 
     private fun markDropPendingRecognition() {
         dropPendingFinal = true
+        dictationSession.cancelRecording()
         val failStage = when (currentState) {
             is KeyboardState.Listening -> AsrHistoryStore.AsrHistoryFailStage.RECORDING
             else -> AsrHistoryStore.AsrHistoryFailStage.RECOGNITION
@@ -1274,9 +1297,88 @@ class KeyboardActionHandler(
             uiListener?.onHideRetryChip()
         } catch (_: Throwable) {}
         val state = KeyboardState.Listening()
+        beginDictationSession()
         transitionToState(state)
         asrManager.startRecording(state)
         uiListener?.onStatusMessage(context.getString(R.string.status_listening))
+    }
+
+    /** 开启会话级写入器；同字段同连接 restart 时保留归属，不重采锚点。 */
+    private fun beginDictationSession() {
+        dictationSession.begin(
+            generation = opSeq,
+            ic = getCurrentInputConnection(),
+            selectionStart = selectionStart,
+            selectionEnd = selectionEnd
+        )
+    }
+
+    private var selectionStart = -1
+    private var selectionEnd = -1
+    private var inputField: Triple<String?, Int?, Int?>? = null
+
+    /**
+     * 文件识别失败后的重试：同字段同连接且权限未被撤销时沿用当前会话代次；
+     * 因字段/连接/光标变化失效的会话不得借重试重新授权，重试仍可交付但不得写入。
+     */
+    private fun beginRetryDictationSession() {
+        if (dictationSession.isActive(opSeq)) return
+        dictationSession.resumeForRetry(generation = opSeq, ic = getCurrentInputConnection())
+    }
+
+    /** 处理宿主选区/composing 回调，识别自身更新与外部编辑位置变化。 */
+    fun onSelectionChanged(
+        newSelStart: Int,
+        newSelEnd: Int,
+        candidatesStart: Int,
+        candidatesEnd: Int
+    ) {
+        selectionStart = newSelStart
+        selectionEnd = newSelEnd
+        dictationSession.onSelectionChanged(
+            start = newSelStart,
+            end = newSelEnd,
+            composingStart = candidatesStart,
+            composingEnd = candidatesEnd
+        )
+    }
+
+    /** 切换字段或输入连接失效时撤销写入权限，迟到结果不得写入新字段。 */
+    fun onInputConnectionReset(reason: String) {
+        dictationSession.invalidate(reason)
+    }
+
+    /**
+     * 输入会话开始（新字段或同字段 restart）。
+     *
+     * restart 且输入连接未变时保留写入权限与锚点；否则撤销旧会话写入权限，
+     * 迟到的旧结果不得写入新字段，录音开始时再以新连接绑定锚点。
+     */
+    fun onStartInputSession(ic: InputConnection?, info: EditorInfo?, restarting: Boolean) {
+        val field = Triple(info?.packageName, info?.fieldId, info?.inputType)
+        val sameField = inputField == field
+        inputField = field
+        if (restarting && sameField && dictationSession.isSameConnection(ic)) return
+        selectionStart = info?.initialSelStart ?: -1
+        selectionEnd = info?.initialSelEnd ?: -1
+        dictationSession.invalidate("start_input")
+    }
+
+    fun hideCopyResultChip() {
+        sessionContext = sessionContext.copy(pendingCopyResult = null)
+        uiListener?.onHideRetryChip()
+    }
+
+    /** 键盘重新显示时恢复尚未处理的复制结果动作。 */
+    fun restorePendingCopyResultIfAny() {
+        val text = sessionContext.pendingCopyResult ?: return
+        uiListener?.onShowCopyResultChip(text)
+    }
+
+    private fun offerCopyResult(text: String) {
+        if (text.isEmpty()) return
+        sessionContext = sessionContext.copy(pendingCopyResult = text)
+        uiListener?.onShowCopyResultChip(text)
     }
 
     // 本地模型加载耗时统计
@@ -1296,8 +1398,8 @@ class KeyboardActionHandler(
         state: KeyboardState.Listening,
         seq: Long
     ) {
-        val ic = getCurrentInputConnection() ?: return
-        dictationUseCase.handleFinal(ic, text, state, seq)
+        // 即使当前拿不到 InputConnection，也必须完成后处理、历史与主动复制，不能直接丢弃结果。
+        dictationUseCase.handleFinal(getCurrentInputConnection(), text, state, seq)
     }
 
     private fun transitionToIdleWithTiming(showBackupUsedHint: Boolean = false) {

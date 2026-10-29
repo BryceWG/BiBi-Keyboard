@@ -38,6 +38,7 @@
   <string name="hint_need_permission">يلزم إذن الميكروفون للإدخال الصوتي</string>
   <string name="status_postproc">تلميع بالذكاء الاصطناعي: %1$s</string>
   <string name="action_revert_postprocess">التراجع عن التلميع بالذكاء الاصطناعي</string>
+  <string name="status_insert_failed_copy">تعذّر الإدراج؛ انقر لنسخ النتيجة</string>
 
   <string name="toggle_on">تشغيل</string>
   <string name="toggle_off">إيقاف</string>

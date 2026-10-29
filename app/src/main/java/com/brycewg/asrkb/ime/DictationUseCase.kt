@@ -18,6 +18,7 @@ internal class DictationUseCase(
     private val prefs: Prefs,
     private val asrManager: AsrSessionManager,
     private val inputHelper: InputConnectionHelper,
+    private val dictationSession: DictationTextSession,
     private val processingTimeoutController: ProcessingTimeoutController,
     private val postprocessPipeline: PostprocessPipeline,
     private val commitRecorder: AsrCommitRecorder,
@@ -31,15 +32,17 @@ internal class DictationUseCase(
     private val transitionToIdle: (keepMessage: Boolean) -> Unit,
     private val transitionToIdleWithTiming: (showBackupUsedHint: Boolean) -> Unit,
     private val scheduleProcessingTimeout: (audioMsOverride: Long?) -> Unit,
-    private val onPostprocessUndoAvailable: () -> Unit
+    private val onPostprocessUndoAvailable: () -> Unit,
+    private val onContinueSession: () -> Unit
 ) {
     suspend fun handleFinal(
-        ic: InputConnection,
+        ic: InputConnection?,
         text: String,
         state: KeyboardState.Listening,
         seq: Long
     ) {
         if (text.isBlank()) {
+            dictationSession.complete(seq, ic, "")
             transitionToIdle(true)
             uiListenerProvider()?.onStatusMessage(
                 context.getString(R.string.asr_error_empty_result)
@@ -57,7 +60,7 @@ internal class DictationUseCase(
     }
 
     private suspend fun handleWithPostprocess(
-        ic: InputConnection,
+        ic: InputConnection?,
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
@@ -73,6 +76,7 @@ internal class DictationUseCase(
             stableLen = state.committedStableLen,
             ai = true
         )
+        dictationSession.enterAi(seq)
         val selectingPrompt = prefs.promptAutoSelectEnabled
         transitionToState(
             KeyboardState.AiProcessing(
@@ -85,12 +89,12 @@ internal class DictationUseCase(
                 selectingPrompt = selectingPrompt
             )
         )
-        inputHelper.replaceStreamingPreview(ic, text)
+        dictationSession.update(seq, ic, text)
 
         val postprocessResult = postprocessPipeline.process(
-            ic = ic,
             text = text,
             isCancelled = { isCancelled(seq) },
+            onStreamingText = { typed -> dictationSession.update(seq, ic, typed) },
             onFinalReady = {
                 historyTiming?.timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
                 historyTiming?.timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.TEXT_DELIVERY)
@@ -140,24 +144,27 @@ internal class DictationUseCase(
         val aiPostStatus = postprocessResult.aiPostStatus
 
         if (finalOut.isBlank()) {
-            inputHelper.setComposingText(ic, "")
+            dictationSession.complete(seq, ic, "")
             archiveEmptyFilteredResult(historyTiming)
             return
         }
 
         val finishStartedAt = elapsedRealtimeMs()
-        val finishOk = inputHelper.finishComposingText(ic)
+        val delivery = dictationSession.complete(seq, ic, finalOut)
+        val delivered = delivery == DictationTextSession.Delivery.CONFIRMED_REPLACED ||
+            delivery == DictationTextSession.Delivery.REPAIRED
         logSolidifyTiming(
             "finish_composing",
             mapOf(
                 "durationMs" to (elapsedRealtimeMs() - finishStartedAt).coerceAtLeast(0L),
-                "ok" to finishOk,
+                "delivery" to delivery.name,
+                "delivered" to delivered,
                 "aiUsed" to aiUsed
             )
         )
 
         var autoEnterSent = false
-        if (finalOut.isNotEmpty() && consumeAutoEnterOnce()) {
+        if (delivered && finalOut.isNotEmpty() && consumeAutoEnterOnce()) {
             try {
                 inputHelper.sendEnter(ic, getCurrentEditorInfo())
                 autoEnterSent = true
@@ -166,39 +173,55 @@ internal class DictationUseCase(
             }
         }
 
-        updateSessionContext { prev ->
-            prev.copy(
-                lastAsrCommitText = finalOut,
-                lastPostprocCommit = if (finalOut.isNotEmpty() && finalOut != rawText) {
-                    PostprocCommit(finalOut, rawText)
-                } else {
-                    null
-                }
-            )
+        if (delivered) {
+            updateSessionContext { prev ->
+                prev.copy(
+                    lastAsrCommitText = finalOut,
+                    lastPostprocCommit = if (finalOut.isNotEmpty() && finalOut != rawText) {
+                        PostprocCommit(finalOut, rawText)
+                    } else {
+                        null
+                    }
+                )
+            }
         }
 
         uiListenerProvider()?.onVibrate()
-        notifyInputSolidifiedIfReady(finalOut)
-
-        if (asrManager.isRunning()) {
-            transitionToState(KeyboardState.Listening(lockedBySwipe = state.lockedBySwipe))
-        } else if (postprocFailed) {
-            // 回到 Idle 后再次设置错误提示，避免被 Idle 文案覆盖
-            transitionToIdle(false)
-            uiListenerProvider()?.onStatusMessage(
-                context.getString(R.string.status_llm_failed_used_raw)
-            )
-        } else if (!autoEnterSent && finalOut != rawText) {
-            transitionToIdle(true)
-            onPostprocessUndoAvailable()
-        } else {
-            val usedBackupResult =
-                (asrManager.getEngine() as? BackupAwareAsrEngine)
-                    ?.wasLastResultFromBackup() == true
-            transitionToState(KeyboardState.Processing)
-            scheduleProcessingTimeout(null)
-            transitionToIdleWithTiming(usedBackupResult)
+        if (delivered) {
+            notifyInputSolidifiedIfReady(finalOut)
+            updateSessionContext { prev -> prev.copy(pendingCopyResult = null) }
         }
+        when {
+            asrManager.isRunning() -> {
+                // 引擎仍在运行：为下一段重新开启会话写入器，保留同一会话代次。
+                onContinueSession()
+                transitionToState(KeyboardState.Listening(lockedBySwipe = state.lockedBySwipe))
+            }
+            !delivered -> {
+                // 写入失效：结果仍可完成，在键盘提供复制动作，不自动操作剪贴板。
+                transitionToIdle(true)
+            }
+            postprocFailed -> {
+                // 回到 Idle 后再次设置错误提示，避免被 Idle 文案覆盖
+                transitionToIdle(false)
+                uiListenerProvider()?.onStatusMessage(
+                    context.getString(R.string.status_llm_failed_used_raw)
+                )
+            }
+            !autoEnterSent && finalOut != rawText -> {
+                transitionToIdle(true)
+                onPostprocessUndoAvailable()
+            }
+            else -> {
+                val usedBackupResult =
+                    (asrManager.getEngine() as? BackupAwareAsrEngine)
+                        ?.wasLastResultFromBackup() == true
+                transitionToState(KeyboardState.Processing)
+                scheduleProcessingTimeout(null)
+                transitionToIdleWithTiming(usedBackupResult)
+            }
+        }
+        if (!delivered) offerCopyResult(finalOut)
         logSolidifyTiming("ui_state_ready", mapOf("aiUsed" to aiUsed, "mode" to "postprocess"))
         recordCommitAsync(
             text = finalOut,
@@ -213,7 +236,7 @@ internal class DictationUseCase(
     }
 
     private fun handleWithoutPostprocess(
-        ic: InputConnection,
+        ic: InputConnection?,
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
@@ -222,6 +245,7 @@ internal class DictationUseCase(
         val finalToCommit = com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text)
 
         if (finalToCommit.isBlank()) {
+            dictationSession.complete(seq, ic, "")
             historyTiming?.timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
             archiveEmptyFilteredResult(historyTiming)
             return
@@ -233,56 +257,29 @@ internal class DictationUseCase(
         historyTiming?.timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.TEXT_DELIVERY)
 
         val partial = state.partialText
-        if (!partial.isNullOrEmpty()) {
-            val remainderMode = finalToCommit.startsWith(partial)
-            logCommitPath(
-                mode = if (remainderMode) "remainder" else "rewrite",
-                seq = seq,
-                partial = partial,
-                finalText = finalToCommit,
-                stableLen = state.committedStableLen,
-                ai = false
-            )
-            inputHelper.finishComposingText(ic)
-            if (remainderMode) {
-                val remainder = finalToCommit.substring(partial.length)
-                if (remainder.isNotEmpty()) {
-                    inputHelper.commitText(ic, remainder)
-                }
-            } else {
-                inputHelper.deleteSurroundingText(ic, partial.length, 0)
-                inputHelper.commitText(ic, finalToCommit)
-            }
-        } else {
-            val committedStableLen = state.committedStableLen
-            val remainder = if (finalToCommit.length > committedStableLen) {
-                finalToCommit.substring(committedStableLen)
-            } else {
-                ""
-            }
-            logCommitPath(
-                mode = "stable_remainder",
-                seq = seq,
-                partial = null,
-                finalText = finalToCommit,
-                stableLen = committedStableLen,
-                ai = false,
-                extra = mapOf("remainderLen" to remainder.length)
-            )
-            inputHelper.finishComposingText(ic)
-            if (remainder.isNotEmpty()) {
-                inputHelper.commitText(ic, remainder)
+        val delivery = dictationSession.complete(seq, ic, finalToCommit)
+        val delivered = delivery == DictationTextSession.Delivery.CONFIRMED_REPLACED ||
+            delivery == DictationTextSession.Delivery.REPAIRED
+        logCommitPath(
+            mode = if (partial.isNullOrEmpty()) "stable_remainder" else "composing_replace",
+            seq = seq,
+            partial = partial,
+            finalText = finalToCommit,
+            stableLen = state.committedStableLen,
+            ai = false,
+            extra = mapOf("delivery" to delivery.name, "delivered" to delivered)
+        )
+
+        if (delivered) {
+            updateSessionContext { prev ->
+                prev.copy(
+                    lastAsrCommitText = finalToCommit,
+                    lastPostprocCommit = null
+                )
             }
         }
 
-        updateSessionContext { prev ->
-            prev.copy(
-                lastAsrCommitText = finalToCommit,
-                lastPostprocCommit = null
-            )
-        }
-
-        if (finalToCommit.isNotEmpty() && consumeAutoEnterOnce()) {
+        if (delivered && finalToCommit.isNotEmpty() && consumeAutoEnterOnce()) {
             try {
                 inputHelper.sendEnter(ic, getCurrentEditorInfo())
             } catch (t: Throwable) {
@@ -291,18 +288,30 @@ internal class DictationUseCase(
         }
 
         uiListenerProvider()?.onVibrate()
-        notifyInputSolidifiedIfReady(finalToCommit)
-
-        if (asrManager.isRunning()) {
-            transitionToState(KeyboardState.Listening(lockedBySwipe = state.lockedBySwipe))
-        } else {
-            val usedBackupResult =
-                (asrManager.getEngine() as? BackupAwareAsrEngine)
-                    ?.wasLastResultFromBackup() == true
-            transitionToState(KeyboardState.Processing)
-            scheduleProcessingTimeout(null)
-            transitionToIdleWithTiming(usedBackupResult)
+        if (delivered) {
+            notifyInputSolidifiedIfReady(finalToCommit)
+            updateSessionContext { prev -> prev.copy(pendingCopyResult = null) }
         }
+        when {
+            asrManager.isRunning() -> {
+                // 引擎仍在运行（畅说）：为下一段重新开启会话写入器，保留同一会话代次。
+                onContinueSession()
+                transitionToState(KeyboardState.Listening(lockedBySwipe = state.lockedBySwipe))
+            }
+            !delivered -> {
+                // 写入失效：结果仍可完成，在键盘提供复制动作，不自动操作剪贴板。
+                transitionToIdle(true)
+            }
+            else -> {
+                val usedBackupResult =
+                    (asrManager.getEngine() as? BackupAwareAsrEngine)
+                        ?.wasLastResultFromBackup() == true
+                transitionToState(KeyboardState.Processing)
+                scheduleProcessingTimeout(null)
+                transitionToIdleWithTiming(usedBackupResult)
+            }
+        }
+        if (!delivered) offerCopyResult(finalToCommit)
         logSolidifyTiming("ui_state_ready", mapOf("aiUsed" to false, "mode" to "simple"))
         recordCommitAsync(
             text = finalToCommit,
@@ -335,6 +344,14 @@ internal class DictationUseCase(
             return
         }
         uiListenerProvider()?.onDictationInputSolidified()
+    }
+
+    /** 写入失效时提供主动复制动作，只在用户点击时复制，不自动操作剪贴板。 */
+    private fun offerCopyResult(text: String) {
+        if (text.isEmpty()) return
+        // 结果持久保留在会话上下文中，键盘重新显示时可再次提供复制动作。
+        updateSessionContext { prev -> prev.copy(pendingCopyResult = text) }
+        uiListenerProvider()?.onShowCopyResultChip(text)
     }
 
     private fun recordCommitAsync(

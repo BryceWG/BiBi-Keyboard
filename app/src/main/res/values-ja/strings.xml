@@ -37,6 +37,7 @@
   <string name="hint_need_permission">音声入力にはマイク権限が必要です</string>
   <string name="status_postproc">AI校正：%1$s</string>
   <string name="action_revert_postprocess">AI校正を取り消す</string>
+  <string name="status_insert_failed_copy">書き込み失敗、タップで結果をコピー</string>
 
   <string name="toggle_on">ON</string>
   <string name="toggle_off">OFF</string>

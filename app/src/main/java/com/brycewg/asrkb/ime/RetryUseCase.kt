@@ -14,6 +14,7 @@ internal class RetryUseCase(
     private val transitionToState: (KeyboardState) -> Unit,
     private val transitionToIdle: () -> Unit,
     private val scheduleProcessingTimeout: () -> Unit,
+    private val beginRetrySession: () -> Unit,
     private val logTag: String
 ) {
     fun shouldOfferRetry(message: String): Boolean {
@@ -61,6 +62,7 @@ internal class RetryUseCase(
         transitionToState(KeyboardState.Processing)
         scheduleProcessingTimeout()
         uiListenerProvider()?.onStatusMessage(context.getString(R.string.status_recognizing))
+        beginRetrySession()
         val ok = try {
             asrManager.retryLastFileRecognition()
         } catch (t: Throwable) {

@@ -355,6 +355,8 @@ class AsrKeyboardService :
 
         // 识别中收起后可能仍在 Processing/AiProcessing：按真实状态刷新，避免面板停在 Idle
         uiRenderer?.render(actionHandler.getCurrentState())
+        // 若上次写入失效、结果仍待用户主动复制，重新显示时恢复该动作。
+        actionHandler.restorePendingCopyResultIfAny()
 
         // 自动启动录音（如果开启了设置）
         if (prefs.autoStartRecordingOnShow) {
@@ -391,6 +393,12 @@ class AsrKeyboardService :
             candidatesEnd
         )
         aiEditPanelController?.onSelectionChanged(newSelStart, newSelEnd)
+        actionHandler.onSelectionChanged(
+            newSelStart = newSelStart,
+            newSelEnd = newSelEnd,
+            candidatesStart = candidatesStart,
+            candidatesEnd = candidatesEnd
+        )
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -398,7 +406,11 @@ class AsrKeyboardService :
         layoutController?.onInputViewFinished()
         stopImeRecordingIfRunning()
         actionHandler.onInputViewHidden()
-        inputHelper.resetStreamingPreviewState("finish_input_view")
+        // 仅真正结束输入会话（finishingInput）时撤销写入权限；
+        // 单纯隐藏视图不等于连接失效，仍需保留 stop 后迟到终稿的交付。
+        if (finishingInput) {
+            actionHandler.onInputConnectionReset("finish_input")
+        }
         super.onFinishInputView(finishingInput)
         DebugLogManager.log("ime", "finish_input_view")
         // 停止剪贴板预览监听与默认节能下的自动同步
@@ -450,9 +462,8 @@ class AsrKeyboardService :
         inputHelper.diagHostPkg = attribute?.packageName.orEmpty()
         val ic = currentInputConnection
         // 同一输入框被宿主重启时保留预览归属，避免按已含 composing 的光标文本重采锚点。
-        if (!inputHelper.hasStreamingPreviewOwnershipFor(ic)) {
-            inputHelper.resetStreamingPreviewState("start_input")
-        }
+        // 新字段/新连接：撤销旧会话写入权限，随后录音开始时再以新连接绑定锚点。
+        actionHandler.onStartInputSession(ic, attribute, restarting)
 
         // 若正在录音，同步中间结果为 composing
         if (asrManager.isRunning()) {
@@ -501,6 +512,15 @@ class AsrKeyboardService :
 
     override fun onShowRetryChip(label: String) {
         uiRenderer?.showRetryChip(label)
+    }
+
+    override fun onFinishInput() {
+        actionHandler.onInputConnectionReset("finish_input")
+        super.onFinishInput()
+    }
+
+    override fun onShowCopyResultChip(text: String) {
+        uiRenderer?.showCopyResultChip(text)
     }
 
     override fun onHideRetryChip() {
@@ -604,7 +624,6 @@ class AsrKeyboardService :
             context = this,
             prefs = prefs,
             views = refs,
-            inputHelper = inputHelper,
             actionHandler = actionHandler,
             inputConnectionProvider = { currentInputConnection },
             performKeyHaptic = ::performKeyHaptic,

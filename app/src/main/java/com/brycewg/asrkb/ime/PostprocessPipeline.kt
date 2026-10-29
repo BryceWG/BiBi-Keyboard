@@ -2,7 +2,6 @@ package com.brycewg.asrkb.ime
 
 import android.content.Context
 import android.util.Log
-import android.view.inputmethod.InputConnection
 import com.brycewg.asrkb.asr.LlmPostProcessor
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.Prefs
@@ -18,7 +17,6 @@ internal class PostprocessPipeline(
     private val context: Context,
     private val scope: CoroutineScope,
     private val prefs: Prefs,
-    private val inputHelper: InputConnectionHelper,
     private val llmPostProcessor: LlmPostProcessor,
     private val logTag: String
 ) {
@@ -34,9 +32,9 @@ internal class PostprocessPipeline(
     )
 
     suspend fun process(
-        ic: InputConnection,
         text: String,
         isCancelled: () -> Boolean,
+        onStreamingText: (String) -> Unit,
         onFinalReady: () -> Unit,
         onPostprocFailed: () -> Unit,
         aiTimingObserver: AsrFinalFilters.AiPostprocessTimingObserver? = null,
@@ -68,7 +66,7 @@ internal class PostprocessPipeline(
                 scope = scope,
                 onEmit = emit@{ typed ->
                     if (isCancelled() || committed) return@emit
-                    inputHelper.setComposingText(ic, typed)
+                    onStreamingText(typed)
                 }
             )
         } else {
@@ -171,32 +169,14 @@ internal class PostprocessPipeline(
         committed = true
         val twLen = typewriter?.currentText()?.length ?: -1
         typewriter?.cancel()
-        val snapshot = if (DebugLogManager.isRecording()) {
-            StreamingPreviewDiag.editorSnapshot(ic)
-        } else {
-            emptyMap()
-        }
         logDiagBase(
             "ai_commit",
-            snapshot + mapOf(
+            mapOf(
                 "fp" to StreamingPreviewDiag.fingerprint(finalText),
                 "aiUsed" to aiUsed,
                 "twLen" to twLen,
                 "finalizedImmediately" to (typewriter != null && aiUsed),
                 "streamed" to StreamingPreviewDiag.fingerprint(lastStreamingText)
-            )
-        )
-        val writeStartedAt = elapsedRealtimeMs()
-        val writeOk = inputHelper.setComposingText(ic, finalText)
-        logTiming(
-            "final_composing_written",
-            timingData(
-                aiUsed = aiUsed,
-                extra = mapOf(
-                    "writeMs" to (elapsedRealtimeMs() - writeStartedAt).coerceAtLeast(0L),
-                    "ok" to writeOk,
-                    "len" to finalText.length
-                )
             )
         )
 
@@ -250,10 +230,4 @@ internal class PostprocessPipeline(
         aiUsed: Boolean,
         extra: Map<String, Any?> = emptyMap()
     ): Map<String, Any?> = mapOf("aiUsed" to aiUsed) + extra
-
-    private fun elapsedRealtimeMs(): Long = try {
-        android.os.SystemClock.elapsedRealtime()
-    } catch (_: Throwable) {
-        0L
-    }
 }

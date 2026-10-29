@@ -38,6 +38,7 @@
   <string name="hint_need_permission">Microphone permission is required for voice input</string>
   <string name="status_postproc">AI Polish: %1$s</string>
   <string name="action_revert_postprocess">Revert AI polish</string>
+  <string name="status_insert_failed_copy">Couldn\'t insert; tap to copy result</string>
 
   <string name="toggle_on">ON</string>
   <string name="toggle_off">OFF</string>

@@ -193,12 +193,27 @@ internal object StreamingPreviewDiag {
                 put("extractedLen", extractedText?.length ?: -1)
                 put("selStart", extracted?.selectionStart ?: -1)
                 put("selEnd", extracted?.selectionEnd ?: -1)
-                if (composing != null) {
-                    put("composingStart", composing.first)
-                    put("composingEnd", composing.second)
-                    put("composingLen", composing.second - composing.first)
-                } else {
-                    put("composingLen", if (extractedText == null) -1 else 0)
+                when {
+                    extractedText == null -> {
+                        // 未读到编辑器文本：composing 存在性未知，不能当成确认没有 composing。
+                        put("composingKnown", false)
+                        put("composingLen", -1)
+                    }
+                    composing != null -> {
+                        put("composingKnown", true)
+                        put("composingStart", composing.first)
+                        put("composingEnd", composing.second)
+                        put("composingLen", composing.second - composing.first)
+                    }
+                    extractedText !is Spanned -> {
+                        // 读到的文本不携带 span 信息：无法确认 composing 是否存在，仍按未知记录。
+                        put("composingKnown", false)
+                        put("composingLen", -1)
+                    }
+                    else -> {
+                        put("composingKnown", true)
+                        put("composingLen", 0)
+                    }
                 }
             }
         } catch (_: Throwable) {
@@ -206,6 +221,11 @@ internal object StreamingPreviewDiag {
         }
     }
 
+    /**
+     * 读取 composing 区间。
+     *
+     * 返回 null 表示未读到 spans（未知），与“确认没有 composing”区分开。
+     */
     private fun composingRange(text: CharSequence?): Pair<Int, Int>? {
         if (text !is Spanned) return null
         val spans = try {

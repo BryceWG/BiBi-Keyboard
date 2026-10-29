@@ -110,5 +110,7 @@ data class KeyboardSessionContext(
     val lastPostprocCommit: PostprocCommit? = null,
     val undoSnapshot: UndoSnapshot? = null,
     val lastRequestDurationMs: Long? = null,
-    val clipboardPreview: ClipboardPreview? = null
+    val clipboardPreview: ClipboardPreview? = null,
+    // 写入失效时待用户主动复制的结果；保留在会话上下文中，键盘重新显示后可再次展示。
+    val pendingCopyResult: String? = null
 )

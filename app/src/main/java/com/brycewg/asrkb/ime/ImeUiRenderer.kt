@@ -12,15 +12,12 @@ import android.widget.TextView
 import android.widget.Toast
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.store.debug.DebugLogManager
-import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
 import java.util.WeakHashMap
 
 internal class ImeUiRenderer(
     private val context: Context,
     private val prefs: Prefs,
     private val views: ImeViewRefs,
-    private val inputHelper: InputConnectionHelper,
     private val actionHandler: KeyboardActionHandler,
     private val inputConnectionProvider: () -> android.view.inputmethod.InputConnection?,
     private val performKeyHaptic: (View?) -> Unit,
@@ -44,7 +41,6 @@ internal class ImeUiRenderer(
     private var postprocessUndoTimeout: Runnable? = null
     private var lastRenderMode: RenderMode? = null
     private var forceNextStructuralRender: Boolean = true
-    private var lastPreviewWritten: String? = null
     private val imageResCache = WeakHashMap<android.widget.ImageView, Int>()
 
     fun forceStructuralRenderOnNextFrame() {
@@ -68,27 +64,6 @@ internal class ImeUiRenderer(
             showRecordingGesturesOverlay(state)
         } else if (state is KeyboardState.AiProcessing) {
             updateAiProcessingLabel(state)
-        }
-
-        // 更新中间结果到 composing
-        if (state is KeyboardState.Listening && state.partialText != null) {
-            inputConnectionProvider()?.let { ic ->
-                val sameText = lastPreviewWritten == state.partialText
-                if (sameText && DebugLogManager.isRecording()) {
-                    try {
-                        DebugLogManager.log(
-                            "ime",
-                            "preview_render",
-                            mapOf(
-                                "sameText" to true,
-                                "fp" to StreamingPreviewDiag.fingerprint(state.partialText)
-                            )
-                        )
-                    } catch (_: Throwable) { }
-                }
-                lastPreviewWritten = state.partialText
-                inputHelper.setStreamingPreview(ic, state.partialText)
-            }
         }
 
         updateAiEditInfoBar(state)
@@ -240,6 +215,33 @@ internal class ImeUiRenderer(
         }
     }
 
+    /**
+     * 写入失效时提供“复制结果”动作：仅在用户点击时复制，不自动操作剪贴板。
+     */
+    fun showCopyResultChip(text: String) {
+        if (text.isEmpty()) return
+        val tv = views.txtStatusText ?: return
+        setTextIfChanged(tv, context.getString(R.string.status_insert_failed_copy))
+        tv.background = null
+        tv.setPaddingRelative(0, 0, 0, 0)
+        setVisibilityIfChanged(views.txtStatusText, View.VISIBLE)
+        setVisibilityIfChanged(views.waveformView, View.GONE)
+        views.waveformView?.stop()
+        tv.maxLines = 1
+        tv.isSingleLine = true
+        tv.isClickable = true
+        tv.isFocusable = true
+        tv.setOnClickListener { v ->
+            performKeyHaptic(v)
+            val copied = copyTextToSystemClipboard("ASR result", text)
+            if (copied) {
+                Toast.makeText(context, context.getString(R.string.status_copied), Toast.LENGTH_SHORT)
+                    .show()
+            }
+            actionHandler.hideCopyResultChip()
+        }
+    }
+
     fun showPostprocessUndo(label: String) {
         val tv = views.txtStatusText ?: return
         postprocessUndoTimeout?.let { tv.removeCallbacks(it) }
@@ -355,15 +357,6 @@ internal class ImeUiRenderer(
 
         setMicButtons(selected = false, imageRes = R.drawable.microphone)
         setImageResourceIfChanged(views.btnPromptPicker, R.drawable.pencil_simple_line)
-        lastPreviewWritten = null
-        try {
-            DebugLogManager.log(
-                "ime",
-                "idle_finish_composing",
-                mapOf("icNull" to (inputConnectionProvider() == null))
-            )
-        } catch (_: Throwable) { }
-        inputConnectionProvider()?.let { inputHelper.finishComposingText(it) }
     }
 
     private fun updateUiListening(state: KeyboardState.Listening? = null) {

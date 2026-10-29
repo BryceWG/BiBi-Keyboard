@@ -3,13 +3,10 @@ package com.brycewg.asrkb.ime
 import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.store.debug.StreamingPreviewDiag
-import java.lang.ref.WeakReference
-
-private const val STREAMING_PREVIEW_ANCHOR_MAX = 128
-private const val STREAMING_PREVIEW_VERIFY_MAX = 10_000
 
 /**
  * InputConnection 辅助类：封装所有与 InputConnection 的交互，统一异常处理和日志记录。
@@ -18,14 +15,6 @@ private const val STREAMING_PREVIEW_VERIFY_MAX = 10_000
  * 为所有操作添加详细日志，以便在特定应用中功能静默失败时能够快速定位问题。
  */
 class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
-    private data class StreamingPreviewOwnership(
-        val inputConnection: WeakReference<InputConnection>,
-        val anchorBeforeCursor: String,
-        val text: String
-    )
-
-    private var streamingPreviewOwnership: StreamingPreviewOwnership? = null
-
     @Volatile
     var diagHostPkg: String = ""
 
@@ -62,7 +51,7 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
 
     /**
      * 设置普通组合文本。
-     * 需要由识别终态安全替换的 ASR 流式预览应使用 [setStreamingPreview]。
+     * 听写链路的写入统一走 [DictationTextSession]，此方法只提供基础编辑器操作。
      */
     fun setComposingText(
         ic: InputConnection?,
@@ -82,120 +71,6 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
         }
     }
 
-    /** 写入并记录 ASR 流式预览，供识别终态安全替换。 */
-    fun setStreamingPreview(ic: InputConnection?, text: CharSequence): Boolean {
-        if (ic == null) return setComposingText(null, text)
-        val previewText = text.toString()
-        val previous = streamingPreviewOwnership?.takeIf { it.inputConnection.get() === ic }
-        val prevPreview = previous?.text
-        val sameText = prevPreview == previewText
-        val anchor = previous?.anchorBeforeCursor
-            ?: captureStreamingPreviewAnchor(ic, previewText.length)
-        val success = setComposingText(ic, text)
-        val replacedExpected = anchor?.plus(previewText)
-            ?.takeIf { it.length <= STREAMING_PREVIEW_VERIFY_MAX }
-        val appendedText = previous?.text?.plus(previewText)
-        val appendedExpected = if (anchor != null && appendedText != null) {
-            (anchor + appendedText).takeIf { it.length <= STREAMING_PREVIEW_VERIFY_MAX }
-        } else {
-            null
-        }
-        val verifyLength = maxOf(replacedExpected?.length ?: 0, appendedExpected?.length ?: 0)
-        val actual = if (success && previewText.isNotEmpty() && verifyLength > 0) {
-            ic.getTextBeforeCursor(verifyLength, 0)?.toString()
-        } else {
-            null
-        }
-        val verify = when {
-            actual != null && actual == replacedExpected -> "replaced"
-            actual != null && actual == appendedExpected -> "appended"
-            else -> "unknown"
-        }
-        val ownedText = when (verify) {
-            "replaced" -> previewText
-            "appended" -> appendedText
-            else -> null
-        }
-        streamingPreviewOwnership = if (success && anchor != null && ownedText != null) {
-            StreamingPreviewOwnership(WeakReference(ic), anchor, ownedText)
-        } else {
-            null
-        }
-        logPreviewWrite(
-            ic = ic,
-            previewText = previewText,
-            prevPreview = prevPreview,
-            sameText = sameText,
-            verify = verify,
-            ownedText = ownedText,
-            success = success
-        )
-        return success
-    }
-
-    /**
-     * 仅在归属可确认时移除流式预览，再写入识别终态。
-     *
-     * 先结束 composing，再删除并重写，是为了替换被宿主静默固化为普通正文的流式预览。
-     */
-    fun replaceStreamingPreview(ic: InputConnection?, replacement: CharSequence): Boolean {
-        if (ic == null) return setComposingText(null, replacement)
-        val hadOwnership = streamingPreviewOwnership?.takeIf { it.inputConnection.get() === ic }
-        val ownership = hadOwnership?.takeIf { matchesOwnedPreview(ic, it) }
-        val ownedFp = ownership?.text?.let { StreamingPreviewDiag.fingerprint(it) }
-        streamingPreviewOwnership = null
-        if (ownership == null) {
-            val ok = setComposingText(ic, replacement)
-            logPreviewReplace(
-                ic = ic,
-                replacement = replacement.toString(),
-                path = "ownership_miss",
-                ok = ok,
-                ownedFp = hadOwnership?.text?.let { StreamingPreviewDiag.fingerprint(it) }
-            )
-            return ok
-        }
-
-        val removed = try {
-            ic.finishComposingText() && ic.deleteSurroundingText(ownership.text.length, 0)
-        } catch (e: Throwable) {
-            Log.e(tag, "replaceStreamingPreview failed to remove preview", e)
-            false
-        }
-        if (!removed) {
-            Log.w(tag, "replaceStreamingPreview could not remove owned preview; using composing replacement")
-            val ok = setComposingText(ic, replacement)
-            logPreviewReplace(
-                ic = ic,
-                replacement = replacement.toString(),
-                path = "delete_failed",
-                ok = ok,
-                ownedFp = ownedFp
-            )
-            return ok
-        }
-
-        if (setComposingText(ic, replacement)) {
-            logPreviewReplace(
-                ic = ic,
-                replacement = replacement.toString(),
-                path = "owned_delete",
-                ok = true,
-                ownedFp = ownedFp
-            )
-            return true
-        }
-        restoreStreamingPreview(ic, ownership)
-        logPreviewReplace(
-            ic = ic,
-            replacement = replacement.toString(),
-            path = "restore",
-            ok = false,
-            ownedFp = ownedFp
-        )
-        return false
-    }
-
     /**
      * 完成组合文本（将预览文本固化为最终提交）
      */
@@ -204,47 +79,19 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
             Log.w(tag, "finishComposingText: InputConnection is null")
             return false
         }
-        val ownedFp = streamingPreviewOwnership
-            ?.takeIf { it.inputConnection.get() === ic }
-            ?.text
-            ?.let { StreamingPreviewDiag.fingerprint(it) }
         return try {
             val ok = ic.finishComposingText()
             logCommitOrFinish(
                 event = "finish",
                 ic = ic,
-                text = streamingPreviewOwnership
-                    ?.takeIf { it.inputConnection.get() === ic }
-                    ?.text,
-                ok = ok,
-                extra = mapOf("owned" to ownedFp)
+                text = null,
+                ok = ok
             )
             ok
         } catch (e: Throwable) {
             Log.e(tag, "finishComposingText failed", e)
             false
-        } finally {
-            clearStreamingPreviewOwnership(ic)
         }
-    }
-
-    /** 当前输入连接是否仍持有可复用的流式预览归属。 */
-    fun hasStreamingPreviewOwnershipFor(ic: InputConnection?): Boolean {
-        if (ic == null) return false
-        return streamingPreviewOwnership?.inputConnection?.get() === ic
-    }
-
-    /** 清理输入会话结束后不可再复用的流式预览归属。 */
-    fun resetStreamingPreviewState(reason: String) {
-        val hadOwnership = streamingPreviewOwnership != null
-        streamingPreviewOwnership = null
-        logDiagBase(
-            "preview_ownership_reset",
-            diagBase() + mapOf(
-                "reason" to reason,
-                "hadOwnership" to hadOwnership
-            )
-        )
     }
 
     /**
@@ -263,43 +110,6 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
         } catch (e: Throwable) {
             Log.e(tag, "deleteSurroundingText failed: before=$beforeLength, after=$afterLength", e)
             false
-        }
-    }
-
-    private fun matchesOwnedPreview(
-        ic: InputConnection,
-        ownership: StreamingPreviewOwnership
-    ): Boolean {
-        val expected = ownership.anchorBeforeCursor + ownership.text
-        return ic.getTextBeforeCursor(expected.length, 0)?.toString() == expected
-    }
-
-    private fun captureStreamingPreviewAnchor(ic: InputConnection, previewLength: Int): String? {
-        val maxLength = minOf(
-            STREAMING_PREVIEW_ANCHOR_MAX,
-            STREAMING_PREVIEW_VERIFY_MAX - previewLength
-        )
-        if (maxLength <= 0) return null
-        return ic.getTextBeforeCursor(maxLength, 0)?.toString()
-    }
-
-    private fun restoreStreamingPreview(
-        ic: InputConnection,
-        ownership: StreamingPreviewOwnership
-    ) {
-        try {
-            if (!ic.setComposingText(ownership.text, 1)) return
-            if (matchesOwnedPreview(ic, ownership)) {
-                streamingPreviewOwnership = ownership
-            }
-        } catch (e: Throwable) {
-            Log.e(tag, "replaceStreamingPreview failed to restore preview", e)
-        }
-    }
-
-    private fun clearStreamingPreviewOwnership(ic: InputConnection) {
-        if (streamingPreviewOwnership?.inputConnection?.get() === ic) {
-            streamingPreviewOwnership = null
         }
     }
 
@@ -636,63 +446,6 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
         }
     }
 
-    private fun logPreviewWrite(
-        ic: InputConnection,
-        previewText: String,
-        prevPreview: String?,
-        sameText: Boolean,
-        verify: String,
-        ownedText: String?,
-        success: Boolean
-    ) {
-        val recording = DebugLogManager.isRecording()
-        if (!recording) return
-
-        val snapshot = if (verify == "unknown") {
-            StreamingPreviewDiag.editorSnapshot(ic)
-        } else {
-            emptyMap()
-        }
-        val composingLen = snapshot["composingLen"] as? Int
-        val mismatch = verify == "appended" || (verify == "unknown" && composingLen == 0)
-        val data = diagBase() + snapshot + StreamingPreviewDiag.shape(prevPreview, previewText) + mapOf(
-            "sameText" to sameText,
-            "verify" to verify,
-            "ok" to success,
-            "owned" to ownedText?.let { StreamingPreviewDiag.fingerprint(it) },
-            "ic" to ic.javaClass.simpleName
-        )
-        if (mismatch) {
-            logDiagBase("preview_host_mismatch", data)
-        }
-        logDiag("preview_write", data)
-        StreamingPreviewDiag.maybeWarnDup("insert", "preview_write", prevPreview, previewText, diagBase())
-    }
-
-    private fun logPreviewReplace(
-        ic: InputConnection,
-        replacement: String,
-        path: String,
-        ok: Boolean,
-        ownedFp: String?
-    ) {
-        val snapshot = if (DebugLogManager.isRecording()) {
-            StreamingPreviewDiag.editorSnapshot(ic)
-        } else {
-            emptyMap()
-        }
-        logDiagBase(
-            "preview_replace",
-            diagBase() + snapshot + mapOf(
-                "path" to path,
-                "ok" to ok,
-                "owned" to ownedFp,
-                "next" to StreamingPreviewDiag.fingerprint(replacement),
-                "ic" to ic.javaClass.simpleName
-            )
-        )
-    }
-
     private fun logCommitOrFinish(
         event: String,
         ic: InputConnection,
@@ -723,9 +476,19 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
         } catch (_: Throwable) { }
     }
 
-    private fun logDiagBase(event: String, data: Map<String, Any?> = emptyMap()) {
-        try {
-            DebugLogManager.logBase(category = "insert", event = event, data = data)
-        } catch (_: Throwable) { }
+    internal fun getSelection(ic: InputConnection): Pair<Int, Int>? = try {
+        val extracted = ic.getExtractedText(
+            ExtractedTextRequest().apply {
+                hintMaxChars = 1
+                hintMaxLines = 1
+            },
+            0
+        )
+        extracted?.takeIf { it.selectionStart >= 0 && it.selectionEnd >= 0 }?.let {
+            (it.startOffset + it.selectionStart) to (it.startOffset + it.selectionEnd)
+        }
+    } catch (e: Throwable) {
+        Log.w(tag, "getSelection failed", e)
+        null
     }
 }

@@ -36,6 +36,7 @@
   <string name="hint_need_permission">需要麥克風權限以進行語音輸入</string>
   <string name="status_postproc">AI 潤飾：%1$s</string>
   <string name="action_revert_postprocess">撤回潤飾</string>
+  <string name="status_insert_failed_copy">寫入失敗，點擊複製結果</string>
 
   <string name="toggle_on">開啟</string>
   <string name="toggle_off">關閉</string>

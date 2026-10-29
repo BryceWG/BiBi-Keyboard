@@ -36,6 +36,7 @@
   <string name="hint_need_permission">需要麦克风权限以进行语音输入</string>
   <string name="status_postproc">AI润色：%1$s</string>
   <string name="action_revert_postprocess">撤回润色</string>
+  <string name="status_insert_failed_copy">写入失败，点击复制结果</string>
 
   <string name="toggle_on">开启</string>
   <string name="toggle_off">关闭</string>
