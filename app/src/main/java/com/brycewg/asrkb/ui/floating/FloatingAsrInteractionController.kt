@@ -1276,6 +1276,13 @@ internal class FloatingAsrInteractionController(
                                 Log.e(tag, "Failed to unload Parakeet", e)
                             }
                         }
+                        if (old == AsrVendor.GigaAm && v != AsrVendor.GigaAm) {
+                            try {
+                                com.brycewg.asrkb.asr.unloadGigaAmRecognizer()
+                            } catch (e: Throwable) {
+                                Log.e(tag, "Failed to unload GigaAM", e)
+                            }
+                        }
                         if (old == AsrVendor.FireRedAsr && v != AsrVendor.FireRedAsr) {
                             try {
                                 com.brycewg.asrkb.asr.unloadFireRedAsrRecognizer()
@@ -1318,6 +1325,13 @@ internal class FloatingAsrInteractionController(
                                 com.brycewg.asrkb.asr.preloadParakeetIfConfigured(context, prefs)
                             } catch (e: Throwable) {
                                 Log.e(tag, "Failed to preload Parakeet", e)
+                            }
+                        }
+                        if (v == AsrVendor.GigaAm && prefs.gigaAmPreloadEnabled) {
+                            try {
+                                com.brycewg.asrkb.asr.preloadGigaAmIfConfigured(context, prefs)
+                            } catch (e: Throwable) {
+                                Log.e(tag, "Failed to preload GigaAM", e)
                             }
                         }
                         if (v == AsrVendor.FireRedAsr && prefs.frPreloadEnabled) {

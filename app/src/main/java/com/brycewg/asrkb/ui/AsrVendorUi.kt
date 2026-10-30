@@ -38,6 +38,7 @@ object AsrVendorUi {
         AsrVendorDisplayTag.PseudoStreaming -> AsrVendorTag.PseudoStreaming
         AsrVendorDisplayTag.Custom -> AsrVendorTag.Custom
         AsrVendorDisplayTag.ChineseDialect -> AsrVendorTag.ChineseDialect
+        AsrVendorDisplayTag.Russian -> AsrVendorTag.Russian
         AsrVendorDisplayTag.Accurate -> AsrVendorTag.Accurate
     }
 }

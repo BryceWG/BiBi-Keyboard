@@ -1,0 +1,29 @@
+<resources>
+    <!-- GigaAM local Russian ASR -->
+    <string name="vendor_giga_am">GigaAM</string>
+    <string name="label_giga_am_model_variant">إصدار النموذج</string>
+    <string name="giga_am_model_v3">GigaAM v3 للروسية (مع الترقيم)</string>
+    <string name="label_giga_am_threads">عدد مؤشرات الترابط (1-8)</string>
+    <string name="label_giga_am_preload">تحميل النموذج مسبقاً</string>
+    <string name="feature_giga_am_preload_off_desc">يُحمّل النموذج عند الحاجة فقط، وقد يتسبب ذلك في تأخير الاستخدام الأول.</string>
+    <string name="feature_giga_am_preload_on_desc">يُحمّل النموذج مسبقاً عند ظهور لوحة المفاتيح لتقليل تأخير الاستخدام الأول.</string>
+    <string name="label_giga_am_keep_alive">سياسة إلغاء تحميل النموذج</string>
+    <string name="btn_giga_am_download_model">تنزيل نموذج GigaAM v3</string>
+    <string name="btn_giga_am_import_model">استيراد نموذج GigaAM من ملف</string>
+    <string name="btn_giga_am_clear_model">مسح نموذج GigaAM المُنزّل</string>
+    <string name="giga_am_download_status_downloading">جارٍ تنزيل GigaAM… %1$d%%</string>
+    <string name="giga_am_download_status_extracting_progress">جارٍ استخراج GigaAM… %1$d%%</string>
+    <string name="giga_am_download_status_done">تم تثبيت نموذج GigaAM</string>
+    <string name="giga_am_download_status_failed">فشل تنزيل GigaAM أو استخراج ملفاته</string>
+    <string name="giga_am_download_started_in_bg">بدأ تنزيل GigaAM في الخلفية. راجع الإشعار لمتابعة التقدم.</string>
+    <string name="giga_am_import_started_in_bg">بدأ استيراد GigaAM في الخلفية. راجع الإشعار لمتابعة التقدم.</string>
+    <string name="giga_am_import_success">تم استيراد نموذج GigaAM بنجاح: %1$s</string>
+    <string name="giga_am_import_failed">فشل استيراد نموذج GigaAM: %1$s</string>
+    <string name="giga_am_clear_confirm_title">مسح نموذج GigaAM؟</string>
+    <string name="giga_am_clear_confirm_message">سيُحذف نموذج GigaAM المُنزّل، ويمكنك تنزيله مجدداً لاحقاً. هل تريد المتابعة؟</string>
+    <string name="giga_am_clear_done">تم مسح نموذج GigaAM</string>
+    <string name="giga_am_clear_failed">تعذر مسح نموذج GigaAM</string>
+    <string name="error_giga_am_model_missing">ملفات نموذج GigaAM v3 الروسي غير موجودة. نزّلها أو استوردها من إعدادات ASR.</string>
+    <string name="notif_giga_am_title_v3">نموذج GigaAM v3 الروسي للتعرف على الكلام</string>
+    <string name="asr_vendor_tag_russian">الروسية</string>
+</resources>

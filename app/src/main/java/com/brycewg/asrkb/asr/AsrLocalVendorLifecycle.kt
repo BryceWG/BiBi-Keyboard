@@ -108,6 +108,7 @@ internal object AsrLocalVendorLifecycles {
             funAsrNanoLifecycle(),
             qwen3AsrLifecycle(),
             parakeetLifecycle(),
+            gigaAmLifecycle(),
             fireRedAsrLifecycle(),
             xAsrLifecycle()
         )
@@ -229,10 +230,30 @@ private fun parakeetLifecycle(): AsrLocalVendorLifecycle = DefaultAsrLocalVendor
     unloadHook = ::unloadParakeetRecognizer,
     preparedHook = ::isParakeetPrepared,
     readyHook = {
-        val manager = ParakeetOnnxManager.getInstance()
-        manager.isPrepared() && !manager.isPreparing()
+        isParakeetPrepared()
     },
     modelStatusHook = ::checkParakeetModel
+)
+
+private fun gigaAmLifecycle(): AsrLocalVendorLifecycle = DefaultAsrLocalVendorLifecycle(
+    vendor = AsrVendor.GigaAm,
+    preloadHook = { request ->
+        preloadGigaAmIfConfigured(
+            request.context,
+            request.prefs,
+            request.onLoadStart,
+            request.onLoadDone,
+            request.suppressToastOnStart,
+            request.forImmediateUse
+        )
+    },
+    unloadHook = ::unloadGigaAmRecognizer,
+    preparedHook = ::isGigaAmPrepared,
+    readyHook = {
+        val manager = GigaAmOnnxManager.getInstance()
+        manager.isPrepared() && !manager.isPreparing()
+    },
+    modelStatusHook = ::checkGigaAmModel
 )
 
 private fun fireRedAsrLifecycle(): AsrLocalVendorLifecycle = DefaultAsrLocalVendorLifecycle(

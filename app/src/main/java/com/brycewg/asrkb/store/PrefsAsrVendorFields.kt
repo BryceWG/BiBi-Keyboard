@@ -179,6 +179,12 @@ internal object PrefsAsrVendorFields {
             VendorField.boolean(KEY_PK_PRELOAD_ENABLED, default = true, role = VendorFieldRole.LocalModel),
             VendorField.int(KEY_PK_KEEP_ALIVE_MINUTES, default = -1, role = VendorFieldRole.LocalModel)
         ),
+        AsrVendor.GigaAm to listOf(
+            VendorField.localModel(KEY_GIGA_AM_MODEL_VARIANT, default = "giga-v3"),
+            VendorField.int(KEY_GIGA_AM_NUM_THREADS, default = 3, range = 1..8, role = VendorFieldRole.LocalModel),
+            VendorField.boolean(KEY_GIGA_AM_PRELOAD_ENABLED, default = true, role = VendorFieldRole.LocalModel),
+            VendorField.int(KEY_GIGA_AM_KEEP_ALIVE_MINUTES, default = -1, role = VendorFieldRole.LocalModel)
+        ),
         // 本地 FireRedASR（sherpa-onnx）无需鉴权
         AsrVendor.FireRedAsr to emptyList(),
         // 本地 X-ASR（sherpa-onnx）无需鉴权

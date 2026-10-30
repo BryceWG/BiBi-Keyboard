@@ -48,6 +48,7 @@ internal data class LocalAsrPreloadFlags(
     val funAsrNano: Boolean,
     val qwen3Asr: Boolean,
     val parakeet: Boolean,
+    val gigaAm: Boolean = false,
     val fireRedAsr: Boolean,
     val xAsr: Boolean
 )
@@ -60,6 +61,7 @@ internal fun isLocalAsrPreloadEnabled(
     AsrVendor.FunAsrNano -> flags.funAsrNano
     AsrVendor.Qwen3Asr -> flags.qwen3Asr
     AsrVendor.Parakeet -> flags.parakeet
+    AsrVendor.GigaAm -> flags.gigaAm
     AsrVendor.FireRedAsr -> flags.fireRedAsr
     AsrVendor.XAsr -> flags.xAsr
     else -> false
@@ -1167,6 +1169,7 @@ class AsrKeyboardService :
         funAsrNano = fnPreloadEnabled,
         qwen3Asr = qwPreloadEnabled,
         parakeet = pkPreloadEnabled,
+        gigaAm = gigaAmPreloadEnabled,
         fireRedAsr = frPreloadEnabled,
         xAsr = xAsrPreloadEnabled
     )

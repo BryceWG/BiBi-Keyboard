@@ -42,6 +42,7 @@ internal enum class AsrVendorDisplayTag {
     PseudoStreaming,
     Custom,
     ChineseDialect,
+    Russian,
     Accurate
 }
 
@@ -261,10 +262,22 @@ internal object AsrVendorRegistry {
             capabilities = localFileCapabilities()
         ),
         descriptor(
+            vendor = AsrVendor.GigaAm,
+            legacyIds = setOf("gigaam"),
+            displayNameResId = R.string.vendor_giga_am,
+            pickerOrder = 16,
+            tags = listOf(
+                AsrVendorDisplayTag.Local,
+                AsrVendorDisplayTag.NonStreaming,
+                AsrVendorDisplayTag.Russian
+            ),
+            capabilities = localFileCapabilities()
+        ),
+        descriptor(
             vendor = AsrVendor.FireRedAsr,
             legacyIds = setOf("telespeech"),
             displayNameResId = R.string.vendor_firered_asr,
-            pickerOrder = 16,
+            pickerOrder = 17,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
@@ -276,7 +289,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.XAsr,
             legacyIds = setOf("x-asr", LEGACY_X_ASR_VENDOR_ID),
             displayNameResId = R.string.vendor_x_asr,
-            pickerOrder = 17,
+            pickerOrder = 18,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.Recommended,
@@ -288,7 +301,7 @@ internal object AsrVendorRegistry {
         descriptor(
             vendor = AsrVendor.Tencent,
             displayNameResId = R.string.vendor_tencent,
-            pickerOrder = 18,
+            pickerOrder = 19,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.Streaming,

@@ -1853,6 +1853,23 @@ class Prefs(context: Context) {
         get() = sp.getInt(KEY_PK_KEEP_ALIVE_MINUTES, -1)
         set(value) = sp.edit { putInt(KEY_PK_KEEP_ALIVE_MINUTES, value) }
 
+    // GigaAM（本地 ASR）
+    var gigaAmModelVariant: String
+        get() = sp.getString(KEY_GIGA_AM_MODEL_VARIANT, "giga-v3") ?: "giga-v3"
+        set(@Suppress("UNUSED_PARAMETER") value) = sp.edit { putString(KEY_GIGA_AM_MODEL_VARIANT, "giga-v3") }
+
+    var gigaAmNumThreads: Int
+        get() = sp.getInt(KEY_GIGA_AM_NUM_THREADS, 3).coerceIn(1, 8)
+        set(value) = sp.edit { putInt(KEY_GIGA_AM_NUM_THREADS, value.coerceIn(1, 8)) }
+
+    var gigaAmPreloadEnabled: Boolean
+        get() = sp.getBoolean(KEY_GIGA_AM_PRELOAD_ENABLED, true)
+        set(value) = sp.edit { putBoolean(KEY_GIGA_AM_PRELOAD_ENABLED, value) }
+
+    var gigaAmKeepAliveMinutes: Int
+        get() = sp.getInt(KEY_GIGA_AM_KEEP_ALIVE_MINUTES, -1)
+        set(value) = sp.edit { putInt(KEY_GIGA_AM_KEEP_ALIVE_MINUTES, value) }
+
     // FireRedASR（本地 ASR）
     var frModelVariant: String
         get() = sp.getString(KEY_FR_MODEL_VARIANT, "ctc-int8") ?: "ctc-int8"

@@ -211,6 +211,7 @@ fun AsrSettingsScreen(
         uiState.fnModelVariant,
         uiState.qwModelVariant,
         uiState.pkModelVariant,
+        uiState.gigaAmModelVariant,
         uiState.frModelVariant,
         uiState.xAsrModelVariant
     ) {

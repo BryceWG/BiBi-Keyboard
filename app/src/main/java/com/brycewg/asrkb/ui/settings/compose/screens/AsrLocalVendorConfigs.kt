@@ -86,6 +86,17 @@ internal fun CurrentLocalAsrVendorConfig(
             primaryGroupCount = primaryGroupCount
         )
 
+        AsrVendor.GigaAm -> GigaAmConfig(
+            uiMode = uiMode,
+            uiState = uiState,
+            localModelState = localModelState,
+            viewModel = viewModel,
+            onOpenGuide = onOpenGuide,
+            applySwitch = applySwitch,
+            primaryIndexOffset = primaryIndexOffset,
+            primaryGroupCount = primaryGroupCount
+        )
+
         AsrVendor.FireRedAsr -> FireRedAsrConfig(
             uiMode = uiMode,
             uiState = uiState,
@@ -475,6 +486,76 @@ private fun ParakeetConfig(
 }
 
 @Composable
+private fun GigaAmConfig(
+    uiMode: BibiUiMode,
+    uiState: AsrSettingsUiState,
+    localModelState: AsrLocalModelRouteState,
+    viewModel: AsrSettingsViewModel,
+    onOpenGuide: () -> Unit,
+    applySwitch: AsrExplainedSwitchApplier,
+    primaryIndexOffset: Int = 0,
+    primaryGroupCount: Int? = null
+) {
+    var itemIndex = primaryIndexOffset
+    val itemCount = primaryGroupCount ?: localAsrPrimaryItemCount(AsrVendor.GigaAm)
+    LocalModelVariantPreference(
+        uiMode = uiMode,
+        spec = GigaAmModelSpec,
+        uiState = uiState,
+        localModelState = localModelState,
+        index = itemIndex++,
+        count = itemCount,
+        onVariantChange = {
+            viewModel.updateGigaAmModelVariant(it)
+            localModelState.onRefresh()
+        }
+    )
+    AsrSliderPreference(
+        titleRes = R.string.label_giga_am_threads,
+        valueLabel = { it.toInt().toString() },
+        value = uiState.gigaAmNumThreads.toFloat(),
+        valueRange = 1f..8f,
+        steps = 6,
+        uiMode = uiMode,
+        index = itemIndex++,
+        count = itemCount,
+        onValueChange = { viewModel.updateGigaAmNumThreads(it.toInt()) }
+    )
+    AsrSwitchPreference(
+        id = "giga_am_preload",
+        titleRes = R.string.label_giga_am_preload,
+        checked = uiState.gigaAmPreloadEnabled,
+        index = itemIndex++,
+        count = itemCount,
+        onCheckedChange = { checked ->
+            applySwitch(
+                checked,
+                R.string.label_giga_am_preload,
+                R.string.feature_giga_am_preload_off_desc,
+                R.string.feature_giga_am_preload_on_desc,
+                uiState.gigaAmPreloadEnabled,
+                "giga_am_preload_explained",
+                viewModel::updateGigaAmPreload
+            )
+        }
+    )
+    KeepAlivePreference(
+        titleRes = R.string.label_giga_am_keep_alive,
+        selectedMinutes = uiState.gigaAmKeepAliveMinutes,
+        index = itemIndex,
+        count = itemCount,
+        onSelected = viewModel::updateGigaAmKeepAlive
+    )
+    LocalModelOperations(
+        uiMode = uiMode,
+        spec = GigaAmModelSpec,
+        uiState = uiState,
+        localModelState = localModelState,
+        onOpenGuide = onOpenGuide
+    )
+}
+
+@Composable
 private fun FireRedAsrConfig(
     uiMode: BibiUiMode,
     uiState: AsrSettingsUiState,
@@ -818,6 +899,7 @@ internal fun localAsrPrimaryItemCount(selectedVendor: AsrVendor): Int = when (se
     AsrVendor.FunAsrNano -> 7
     AsrVendor.Qwen3Asr -> 5
     AsrVendor.Parakeet -> 4
+    AsrVendor.GigaAm -> 4
     AsrVendor.FireRedAsr -> 6
     AsrVendor.XAsr -> 5
     else -> 0

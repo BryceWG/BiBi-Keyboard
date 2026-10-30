@@ -19,6 +19,7 @@ internal object AsrLocalModelCatalog {
             entry(AsrVendor.FunAsrNano, R.string.error_funasr_model_missing),
             entry(AsrVendor.Qwen3Asr, R.string.error_qwen3_asr_model_missing),
             entry(AsrVendor.Parakeet, R.string.error_parakeet_model_missing),
+            entry(AsrVendor.GigaAm, R.string.error_giga_am_model_missing),
             entry(AsrVendor.FireRedAsr, R.string.error_firered_asr_model_missing),
             entry(AsrVendor.XAsr, R.string.error_x_asr_model_missing)
         ).associateBy { it.vendor }

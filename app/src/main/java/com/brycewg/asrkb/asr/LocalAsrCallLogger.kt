@@ -137,6 +137,7 @@ internal object LocalAsrCallLogger {
             AsrVendor.FunAsrNano -> normalizeFunAsrNanoVariant(prefs.fnModelVariant)
             AsrVendor.Qwen3Asr -> normalizeQwen3AsrVariant(prefs.qwModelVariant)
             AsrVendor.Parakeet -> normalizeParakeetVariant(prefs.pkModelVariant)
+            AsrVendor.GigaAm -> normalizeGigaAmVariant(prefs.gigaAmModelVariant)
             AsrVendor.FireRedAsr -> prefs.frModelVariant
             AsrVendor.XAsr -> prefs.xAsrModelVariant
             else -> vendor.id
@@ -171,6 +172,10 @@ internal object LocalAsrCallLogger {
             AsrVendor.Parakeet -> {
                 parts += "threads=${prefs.pkNumThreads}"
                 parts += "keepAliveMinutes=${prefs.pkKeepAliveMinutes}"
+            }
+            AsrVendor.GigaAm -> {
+                parts += "threads=${prefs.gigaAmNumThreads}"
+                parts += "keepAliveMinutes=${prefs.gigaAmKeepAliveMinutes}"
             }
             AsrVendor.FireRedAsr -> {
                 parts += "threads=${prefs.frNumThreads}"

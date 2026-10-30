@@ -14,6 +14,7 @@ import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.LocalModelCheck
 import com.brycewg.asrkb.asr.LocalModelFileSpec
 import com.brycewg.asrkb.asr.LocalModelSpecs
+import com.brycewg.asrkb.asr.findGigaAmModelDir
 import com.brycewg.asrkb.asr.requireModelFilesCached
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.SettingsActivity
@@ -60,7 +61,7 @@ class ModelDownloadService : Service() {
         private const val EXTRA_URI = "uri"
         private const val EXTRA_VARIANT = "variant"
         private const val EXTRA_KEY = "key"
-        private const val EXTRA_MODEL_TYPE = "modelType" // sensevoice | funasr_nano | qwen3_asr | parakeet | x_asr | firered_asr | punctuation
+        private const val EXTRA_MODEL_TYPE = "modelType" // sensevoice | funasr_nano | qwen3_asr | parakeet | giga_am | x_asr | firered_asr | punctuation
 
         private fun buildDownloadKey(variant: String, modelType: String): DownloadKey {
             val sourceId = when (modelType) {
@@ -70,6 +71,7 @@ class ModelDownloadService : Service() {
                 "funasr_nano" -> "download_funasr_nano"
                 "qwen3_asr" -> "download_qwen3_asr"
                 "parakeet" -> "download_parakeet"
+                "giga_am" -> "download_giga_am"
                 else -> "download_sensevoice"
             }
             return DownloadKey(variant, sourceId)
@@ -285,6 +287,7 @@ class ModelDownloadService : Service() {
                 "funasr_nano" -> getString(R.string.fn_download_status_done)
                 "qwen3_asr" -> getString(R.string.qw_download_status_done)
                 "parakeet" -> getString(R.string.pk_download_status_done)
+                "giga_am" -> getString(R.string.giga_am_download_status_done)
                 else -> getString(R.string.sv_download_status_done)
             }
             notificationHandler.notifySuccess(doneText)
@@ -308,6 +311,7 @@ class ModelDownloadService : Service() {
                 modelType == "funasr_nano" -> getString(R.string.fn_download_status_failed)
                 modelType == "qwen3_asr" -> getString(R.string.qw_download_status_failed)
                 modelType == "parakeet" -> getString(R.string.pk_download_status_failed)
+                modelType == "giga_am" -> getString(R.string.giga_am_download_status_failed)
                 else -> getString(R.string.sv_download_status_failed)
             }
             // 用户取消：ACTION_CANCEL 已展示「已取消下载」，禁止被 OkHttp IOException 等覆盖成失败
@@ -378,6 +382,7 @@ class ModelDownloadService : Service() {
                     "funasr_nano" -> true
                     "qwen3_asr" -> true
                     "parakeet" -> true
+                    "giga_am" -> true
                     "x_asr" -> true
                     else -> false
                 }
@@ -395,6 +400,7 @@ class ModelDownloadService : Service() {
                         "qwen3_asr" -> prefs.qwModelVariant = detectedVariant
                         // Parakeet：v2/v3 两套模型
                         "parakeet" -> prefs.pkModelVariant = detectedVariant
+                        "giga_am" -> prefs.gigaAmModelVariant = detectedVariant
                         // FireRedASR：离线 CTC，int8/full 二选一，直接同步用户选择
                         "firered_asr" -> prefs.frModelVariant = detectedVariant
                         "x_asr" -> prefs.xAsrModelVariant = detectedVariant
@@ -423,6 +429,7 @@ class ModelDownloadService : Service() {
                 "funasr_nano" -> getString(R.string.fn_import_success, modelInfo)
                 "qwen3_asr" -> getString(R.string.qw_import_success, modelInfo)
                 "parakeet" -> getString(R.string.pk_import_success, modelInfo)
+                "giga_am" -> getString(R.string.giga_am_import_success, modelInfo)
                 "x_asr" -> getString(R.string.x_asr_import_success, modelInfo)
                 else -> getString(R.string.sv_import_success, modelInfo)
             }
@@ -435,6 +442,7 @@ class ModelDownloadService : Service() {
                 "funasr_nano" -> getString(R.string.fn_import_failed, errorMessage)
                 "qwen3_asr" -> getString(R.string.qw_import_failed, errorMessage)
                 "parakeet" -> getString(R.string.pk_import_failed, errorMessage)
+                "giga_am" -> getString(R.string.giga_am_import_failed, errorMessage)
                 "x_asr" -> getString(R.string.x_asr_import_failed, errorMessage)
                 else -> getString(R.string.sv_import_failed, errorMessage)
             }
@@ -510,6 +518,7 @@ class ModelDownloadService : Service() {
             n.contains("funasr-nano") -> "funasr_nano"
             n.contains("qwen3-asr") -> "qwen3_asr"
             n.contains("parakeet") -> "parakeet"
+            n.contains("giga-am") || n.contains("giga_am") || n.contains("gigaam") -> "giga_am"
             n.contains("sense-voice") || n.contains("sensevoice") -> "sensevoice"
             n.contains("punct-ct-transformer") || n.contains("punctuation") -> "punctuation"
             else -> null
@@ -542,6 +551,10 @@ class ModelDownloadService : Service() {
             // Parakeet
             "sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8" -> "parakeet" to "0.6b-v3-int8"
             "sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8" -> "parakeet" to "0.6b-v2-int8"
+
+            // GigaAM v3 Russian Nemo transducer with punctuation
+            "sherpa-onnx-nemo-transducer-punct-giga-am-v3-russian-2025-12-16" ->
+                "giga_am" to "giga-v3"
 
             "sherpa-onnx-streaming-x-asr-480ms-zh-en",
             "sherpa-onnx-streaming-x_asr-480ms-zh_en" -> "x_asr" to "x-asr-480ms"
@@ -594,6 +607,7 @@ class ModelDownloadService : Service() {
             }
             "Parakeet $versionName"
         }
+        "giga_am" -> "GigaAM v3 Russian"
         "firered_asr" -> "FireRedASR CTC (int8)"
         "x_asr" -> "X-ASR 480ms"
         "punctuation" -> {
@@ -704,6 +718,7 @@ class ModelDownloadService : Service() {
             "funasr_nano" -> File(base, "funasr_nano")
             "qwen3_asr" -> File(base, "qwen3_asr")
             "parakeet" -> File(base, "parakeet")
+            "giga_am" -> File(base, "giga_am")
             else -> File(base, "sensevoice")
         }
         val tmpDir =
@@ -748,6 +763,7 @@ class ModelDownloadService : Service() {
             "qwen3_asr" -> findQwen3AsrModelDir(tmpDir)
             // Parakeet 使用 Nemo transducer 文件组：encoder/decoder/joiner + tokens
             "parakeet" -> findParakeetModelDir(tmpDir)
+            "giga_am" -> findGigaAmModelDir(tmpDir)
             "x_asr" -> findXAsrInstallModelDir(tmpDir)
             else -> findModelDir(tmpDir)
         } ?: throw IllegalStateException("model dir not found")
@@ -778,6 +794,10 @@ class ModelDownloadService : Service() {
             "parakeet" -> {
                 val outRoot = File(base, "parakeet")
                 File(outRoot, com.brycewg.asrkb.asr.normalizeParakeetVariant(variant))
+            }
+            "giga_am" -> {
+                val outRoot = File(base, "giga_am")
+                File(outRoot, com.brycewg.asrkb.asr.normalizeGigaAmVariant(variant))
             }
             else -> {
                 val outRoot = File(base, "sensevoice")
@@ -920,6 +940,14 @@ class ModelDownloadService : Service() {
                     File(modelDir, "encoder.int8.onnx") to specs.encoder,
                     File(modelDir, "decoder.int8.onnx") to specs.decoder,
                     File(modelDir, "joiner.int8.onnx") to specs.joiner
+                )
+            }
+            "giga_am" -> {
+                requireInstalledFiles(
+                    File(modelDir, "tokens.txt") to LocalModelSpecs.GigaAm.tokens,
+                    File(modelDir, "encoder.int8.onnx") to LocalModelSpecs.GigaAm.encoder,
+                    File(modelDir, "decoder.onnx") to LocalModelSpecs.GigaAm.decoder,
+                    File(modelDir, "joiner.onnx") to LocalModelSpecs.GigaAm.joiner
                 )
             }
             else -> {
@@ -1371,6 +1399,7 @@ class NotificationHandler(
             "funasr_nano" -> context.getString(R.string.fn_download_status_downloading, progress)
             "qwen3_asr" -> context.getString(R.string.qw_download_status_downloading, progress)
             "parakeet" -> context.getString(R.string.pk_download_status_downloading, progress)
+            "giga_am" -> context.getString(R.string.giga_am_download_status_downloading, progress)
             else -> context.getString(R.string.sv_download_status_downloading, progress)
         }
         notifyProgress(
@@ -1413,6 +1442,10 @@ class NotificationHandler(
                 R.string.pk_download_status_extracting_progress,
                 progress
             )
+            "giga_am" -> context.getString(
+                R.string.giga_am_download_status_extracting_progress,
+                progress
+            )
             else -> context.getString(R.string.sv_download_status_extracting_progress, progress)
         }
         notifyProgress(
@@ -1453,6 +1486,10 @@ class NotificationHandler(
             )
             "parakeet" -> context.getString(
                 R.string.pk_download_status_extracting_progress,
+                progress
+            )
+            "giga_am" -> context.getString(
+                R.string.giga_am_download_status_extracting_progress,
                 progress
             )
             else -> context.getString(R.string.sv_download_status_extracting_progress, progress)
@@ -1593,6 +1630,7 @@ class NotificationHandler(
                 context.getString(R.string.notif_pk_title_06b_v3_int8)
             }
         }
+        "giga_am" -> context.getString(R.string.notif_giga_am_title_v3)
         else -> {
             when (variant) {
                 "small-full" -> context.getString(R.string.notif_model_title_small_full)

@@ -117,6 +117,11 @@ class AsrSettingsViewModel : ViewModel() {
             pkNumThreads = prefs.pkNumThreads,
             pkPreloadEnabled = prefs.pkPreloadEnabled,
             pkKeepAliveMinutes = prefs.pkKeepAliveMinutes,
+            // GigaAM settings
+            gigaAmModelVariant = prefs.gigaAmModelVariant,
+            gigaAmNumThreads = prefs.gigaAmNumThreads,
+            gigaAmPreloadEnabled = prefs.gigaAmPreloadEnabled,
+            gigaAmKeepAliveMinutes = prefs.gigaAmKeepAliveMinutes,
             // FireRedASR settings
             frModelVariant = prefs.frModelVariant,
             frNumThreads = prefs.frNumThreads,
@@ -171,6 +176,13 @@ class AsrSettingsViewModel : ViewModel() {
                 com.brycewg.asrkb.asr.unloadParakeetRecognizer()
             } catch (e: Throwable) {
                 Log.e(TAG, "Failed to unload Parakeet recognizer", e)
+            }
+        }
+        if (oldVendor == AsrVendor.GigaAm && vendor != AsrVendor.GigaAm) {
+            try {
+                com.brycewg.asrkb.asr.unloadGigaAmRecognizer()
+            } catch (e: Throwable) {
+                Log.e(TAG, "Failed to unload GigaAM recognizer", e)
             }
         }
         if (oldVendor == AsrVendor.FireRedAsr && vendor != AsrVendor.FireRedAsr) {
@@ -246,6 +258,15 @@ class AsrSettingsViewModel : ViewModel() {
                     )
                 } catch (e: Throwable) {
                     Log.e(TAG, "Failed to preload Parakeet model", e)
+                }
+            }
+        }
+        if (vendor == AsrVendor.GigaAm && prefs.gigaAmPreloadEnabled) {
+            viewModelScope.launch(Dispatchers.Default) {
+                try {
+                    com.brycewg.asrkb.asr.preloadGigaAmIfConfigured(appContext, prefs)
+                } catch (e: Throwable) {
+                    Log.e(TAG, "Failed to preload GigaAM model", e)
                 }
             }
         }
@@ -706,6 +727,38 @@ class AsrSettingsViewModel : ViewModel() {
         triggerPkPreloadIfEnabledAndActive("threads change")
     }
 
+    // ----- GigaAM -----
+    fun updateGigaAmModelVariant(variant: String) {
+        val normalized = com.brycewg.asrkb.asr.normalizeGigaAmVariant(variant)
+        prefs.gigaAmModelVariant = normalized
+        _uiState.value = _uiState.value.copy(gigaAmModelVariant = normalized)
+        com.brycewg.asrkb.asr.unloadGigaAmRecognizer()
+        triggerGigaAmPreloadIfEnabledAndActive("variant change")
+    }
+
+    fun updateGigaAmKeepAlive(minutes: Int) {
+        prefs.gigaAmKeepAliveMinutes = minutes
+        _uiState.value = _uiState.value.copy(gigaAmKeepAliveMinutes = minutes)
+    }
+
+    fun updateGigaAmNumThreads(v: Int) {
+        val value = v.coerceIn(1, 8)
+        prefs.gigaAmNumThreads = value
+        _uiState.value = _uiState.value.copy(gigaAmNumThreads = value)
+        com.brycewg.asrkb.asr.unloadGigaAmRecognizer()
+        triggerGigaAmPreloadIfEnabledAndActive("threads change")
+    }
+
+    fun updateGigaAmPreload(enabled: Boolean) {
+        prefs.gigaAmPreloadEnabled = enabled
+        _uiState.value = _uiState.value.copy(gigaAmPreloadEnabled = enabled)
+        if (enabled && prefs.asrVendor == AsrVendor.GigaAm) {
+            viewModelScope.launch(Dispatchers.Default) {
+                com.brycewg.asrkb.asr.preloadGigaAmIfConfigured(appContext, prefs)
+            }
+        }
+    }
+
     fun updatePkPreload(enabled: Boolean) {
         prefs.pkPreloadEnabled = enabled
         _uiState.value = _uiState.value.copy(pkPreloadEnabled = enabled)
@@ -795,6 +848,14 @@ class AsrSettingsViewModel : ViewModel() {
                 } catch (t: Throwable) {
                     Log.e(TAG, "Failed to preload Parakeet after $reason", t)
                 }
+            }
+        }
+    }
+
+    private fun triggerGigaAmPreloadIfEnabledAndActive(reason: String) {
+        if (prefs.gigaAmPreloadEnabled && prefs.asrVendor == AsrVendor.GigaAm) {
+            viewModelScope.launch(Dispatchers.Default) {
+                com.brycewg.asrkb.asr.preloadGigaAmIfConfigured(appContext, prefs)
             }
         }
     }
@@ -976,6 +1037,11 @@ data class AsrSettingsUiState(
     val pkNumThreads: Int = 3,
     val pkPreloadEnabled: Boolean = false,
     val pkKeepAliveMinutes: Int = -1,
+    // GigaAM settings
+    val gigaAmModelVariant: String = "giga-v3",
+    val gigaAmNumThreads: Int = 3,
+    val gigaAmPreloadEnabled: Boolean = false,
+    val gigaAmKeepAliveMinutes: Int = -1,
     // FireRedASR settings
     val frModelVariant: String = "ctc-int8",
     val frNumThreads: Int = 2,

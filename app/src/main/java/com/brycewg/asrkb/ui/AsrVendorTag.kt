@@ -49,6 +49,11 @@ enum class AsrVendorTag(
         bgColorResId = R.color.asr_tag_bg_cn_dialect,
         textColorResId = R.color.asr_tag_fg_cn_dialect
     ),
+    Russian(
+        labelResId = R.string.asr_vendor_tag_russian,
+        bgColorResId = R.color.asr_tag_bg_cn_dialect,
+        textColorResId = R.color.asr_tag_fg_cn_dialect
+    ),
     Accurate(
         labelResId = R.string.asr_vendor_tag_accurate,
         bgColorResId = R.color.asr_tag_bg_accurate,

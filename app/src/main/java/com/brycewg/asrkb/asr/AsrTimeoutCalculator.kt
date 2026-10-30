@@ -300,6 +300,7 @@ object AsrTimeoutCalculator {
         AsrVendor.FunAsrNano -> TimeoutProfile(minTimeoutMs = 15_000L, maxTimeoutMs = 90_000L)
         AsrVendor.Qwen3Asr -> TimeoutProfile(minTimeoutMs = 15_000L, maxTimeoutMs = 90_000L)
         AsrVendor.Parakeet -> TimeoutProfile(minTimeoutMs = 15_000L, maxTimeoutMs = 90_000L)
+        AsrVendor.GigaAm -> TimeoutProfile(minTimeoutMs = 15_000L, maxTimeoutMs = 90_000L)
 
         else -> TimeoutProfile(
             minTimeoutMs = DEFAULT_MIN_TIMEOUT_MS,

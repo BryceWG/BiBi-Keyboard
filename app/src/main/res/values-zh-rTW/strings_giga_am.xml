@@ -1,0 +1,29 @@
+<resources>
+    <!-- GigaAM 本機俄語 ASR -->
+    <string name="vendor_giga_am">GigaAM</string>
+    <string name="label_giga_am_model_variant">模型版本</string>
+    <string name="giga_am_model_v3">GigaAM v3 俄語（含標點）</string>
+    <string name="label_giga_am_threads">執行緒數（1-8）</string>
+    <string name="label_giga_am_preload">積極載入模型</string>
+    <string name="feature_giga_am_preload_off_desc">僅在需要時載入模型，首次使用可能會有延遲。</string>
+    <string name="feature_giga_am_preload_on_desc">鍵盤顯示時預先載入模型，減少首次使用延遲。</string>
+    <string name="label_giga_am_keep_alive">模型卸載策略</string>
+    <string name="btn_giga_am_download_model">下載 GigaAM v3 模型</string>
+    <string name="btn_giga_am_import_model">從本機檔案匯入 GigaAM 模型</string>
+    <string name="btn_giga_am_clear_model">清除已下載的 GigaAM 模型</string>
+    <string name="giga_am_download_status_downloading">正在下載 GigaAM… %1$d%%</string>
+    <string name="giga_am_download_status_extracting_progress">正在解壓縮 GigaAM… %1$d%%</string>
+    <string name="giga_am_download_status_done">GigaAM 模型已安裝</string>
+    <string name="giga_am_download_status_failed">GigaAM 下載或解壓縮失敗</string>
+    <string name="giga_am_download_started_in_bg">已在背景開始下載 GigaAM，請在通知中查看進度。</string>
+    <string name="giga_am_import_started_in_bg">已在背景開始匯入 GigaAM，請在通知中查看進度。</string>
+    <string name="giga_am_import_success">GigaAM 模型匯入成功：%1$s</string>
+    <string name="giga_am_import_failed">GigaAM 模型匯入失敗：%1$s</string>
+    <string name="giga_am_clear_confirm_title">清除 GigaAM 模型？</string>
+    <string name="giga_am_clear_confirm_message">這會刪除已下載的 GigaAM 模型檔案，之後可以重新下載。是否繼續？</string>
+    <string name="giga_am_clear_done">GigaAM 模型已清除</string>
+    <string name="giga_am_clear_failed">清除 GigaAM 模型失敗</string>
+    <string name="error_giga_am_model_missing">缺少 GigaAM v3 俄語模型檔案，請在 ASR 設定中下載或匯入。</string>
+    <string name="notif_giga_am_title_v3">GigaAM v3 俄語 ASR 模型</string>
+    <string name="asr_vendor_tag_russian">俄語</string>
+</resources>

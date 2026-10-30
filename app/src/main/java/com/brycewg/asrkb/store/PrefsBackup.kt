@@ -214,6 +214,11 @@ internal object PrefsBackup {
         o.put(KEY_X_ASR_KEEP_ALIVE_MINUTES, xAsrKeepAliveMinutes)
         o.put(KEY_X_ASR_PRELOAD_ENABLED, xAsrPreloadEnabled)
         o.put(KEY_X_ASR_USE_ITN, xAsrUseItn)
+        // GigaAM（本地 ASR）
+        o.put(KEY_GIGA_AM_MODEL_VARIANT, gigaAmModelVariant)
+        o.put(KEY_GIGA_AM_NUM_THREADS, gigaAmNumThreads)
+        o.put(KEY_GIGA_AM_PRELOAD_ENABLED, gigaAmPreloadEnabled)
+        o.put(KEY_GIGA_AM_KEEP_ALIVE_MINUTES, gigaAmKeepAliveMinutes)
         // SyncClipboard 配置
         o.put(KEY_SC_ENABLED, syncClipboardEnabled)
         o.put(KEY_SC_SERVER_BASE, syncClipboardServerBase)
@@ -644,6 +649,11 @@ internal object PrefsBackup {
             (optBool(KEY_X_ASR_USE_ITN) ?: optBool(LEGACY_KEY_X_ASR_USE_ITN))?.let {
                 xAsrUseItn = it
             }
+            // GigaAM（本地 ASR）
+            optString(KEY_GIGA_AM_MODEL_VARIANT)?.let { gigaAmModelVariant = it }
+            optInt(KEY_GIGA_AM_NUM_THREADS)?.let { gigaAmNumThreads = it.coerceIn(1, 8) }
+            optBool(KEY_GIGA_AM_PRELOAD_ENABLED)?.let { gigaAmPreloadEnabled = it }
+            optInt(KEY_GIGA_AM_KEEP_ALIVE_MINUTES)?.let { gigaAmKeepAliveMinutes = it }
             // SyncClipboard 配置
             optBool(KEY_SC_ENABLED)?.let { syncClipboardEnabled = it }
             optString(KEY_SC_SERVER_BASE)?.let { syncClipboardServerBase = it }

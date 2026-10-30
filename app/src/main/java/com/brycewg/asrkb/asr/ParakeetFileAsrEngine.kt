@@ -357,7 +357,9 @@ private fun parakeetSpecsForVariant(variant: String): ParakeetVariantSpecs = if 
     )
 }
 
-internal class ParakeetOnnxManager private constructor() : BaseSherpaOfflineRecognizerManager() {
+internal open class ParakeetOnnxManager protected constructor(
+    managerTag: String = "ParakeetOnnxManager"
+) : BaseSherpaOfflineRecognizerManager() {
 
     companion object {
         private const val TAG = "ParakeetOnnxManager"
@@ -370,7 +372,7 @@ internal class ParakeetOnnxManager private constructor() : BaseSherpaOfflineReco
         }
     }
 
-    protected override val tag: String = TAG
+    protected override val tag: String = managerTag
 
     @Volatile private var clsOfflineRecognizer: Class<*>? = null
 

@@ -628,6 +628,7 @@ class FloatingAsrService : Service() {
             AsrVendor.FunAsrNano -> prefs.fnPreloadEnabled
             AsrVendor.Qwen3Asr -> prefs.qwPreloadEnabled
             AsrVendor.Parakeet -> prefs.pkPreloadEnabled
+            AsrVendor.GigaAm -> prefs.gigaAmPreloadEnabled
             AsrVendor.FireRedAsr -> prefs.frPreloadEnabled
             AsrVendor.XAsr -> prefs.xAsrPreloadEnabled
             else -> false

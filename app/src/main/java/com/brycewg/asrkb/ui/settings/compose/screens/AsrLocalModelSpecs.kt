@@ -13,6 +13,7 @@ import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.LocalModelCheck
 import com.brycewg.asrkb.asr.SherpaPunctuationManager
 import com.brycewg.asrkb.asr.normalizeFunAsrNanoVariant
+import com.brycewg.asrkb.asr.normalizeGigaAmVariant
 import com.brycewg.asrkb.asr.normalizeParakeetVariant
 import com.brycewg.asrkb.asr.normalizeQwen3AsrVariant
 import com.brycewg.asrkb.store.Prefs
@@ -217,6 +218,38 @@ internal val ParakeetModelSpec = AsrLocalModelSpec(
     }
 )
 
+internal val GigaAmModelSpec = AsrLocalModelSpec(
+    key = "giga_am",
+    vendor = AsrVendor.GigaAm,
+    modelType = "giga_am",
+    importModelType = "giga_am",
+    variantLabelRes = R.string.label_giga_am_model_variant,
+    downloadButtonRes = R.string.btn_giga_am_download_model,
+    importButtonRes = R.string.btn_giga_am_import_model,
+    clearButtonRes = R.string.btn_giga_am_clear_model,
+    doneStatusRes = R.string.giga_am_download_status_done,
+    failedStatusRes = R.string.giga_am_download_status_failed,
+    downloadStartedRes = R.string.giga_am_download_started_in_bg,
+    importStartedRes = R.string.giga_am_import_started_in_bg,
+    clearTitleRes = R.string.giga_am_clear_confirm_title,
+    clearMessageRes = R.string.giga_am_clear_confirm_message,
+    clearDoneRes = R.string.giga_am_clear_done,
+    clearFailedRes = R.string.giga_am_clear_failed,
+    variants = listOf(AsrLocalChoice("giga-v3", R.string.giga_am_model_v3)),
+    currentVariant = { normalizeGigaAmVariant(it.gigaAmModelVariant) },
+    downloadUrl = {
+        "https://github.com/BryceWG/BiBi-Keyboard/releases/download/models/sherpa-onnx-nemo-transducer-punct-giga-am-v3-russian-2025-12-16.zip"
+    },
+    isReady = linkedAsrModelReady(AsrVendor.GigaAm),
+    checkStatus = linkedAsrModelStatus(AsrVendor.GigaAm),
+    clearInstalled = { context, _ ->
+        clearInstalledAsrLocalModel(AsrVendor.GigaAm, deleteInstalled = {
+            val base = context.getExternalFilesDir(null) ?: context.filesDir
+            File(base, "giga_am").deleteIfExists()
+        })
+    }
+)
+
 internal val FireRedAsrModelSpec = AsrLocalModelSpec(
     key = "firered_asr",
     vendor = AsrVendor.FireRedAsr,
@@ -319,6 +352,7 @@ internal val AllAsrLocalModelSpecs = listOf(
     FunAsrNanoModelSpec,
     Qwen3AsrModelSpec,
     ParakeetModelSpec,
+    GigaAmModelSpec,
     FireRedAsrModelSpec,
     XAsrModelSpec,
     PunctuationModelSpec

@@ -19,6 +19,7 @@ enum class AsrVendor(val id: String) {
     FunAsrNano("funasr_nano"),
     Qwen3Asr("qwen3_asr"),
     Parakeet("parakeet"),
+    GigaAm("giga_am"),
     FireRedAsr("firered_asr"),
     XAsr("x_asr"),
     MiMo("mimo"),

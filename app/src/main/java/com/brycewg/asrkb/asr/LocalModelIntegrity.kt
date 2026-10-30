@@ -248,6 +248,13 @@ internal object LocalModelSpecs {
         val v3Joiner = LocalModelFileSpec("joiner.int8.onnx", 6_355_277L, "3164c13fc2821009440d20fcb5fdc78bff28b4db2f8d0f0b329101719c0948b3")
     }
 
+    object GigaAm {
+        val tokens = LocalModelFileSpec("tokens.txt", 13_354L, "39abae20e692998290c574e606f11a9edef2902a1995463fcff63d1490cf22b7")
+        val encoder = LocalModelFileSpec("encoder.int8.onnx", 224_570_820L, "369f35a71bf288d3b8e0391fabd8dba5f2314088d440bca474056b7b4b6e66bf")
+        val decoder = LocalModelFileSpec("decoder.onnx", 4_600_132L, "38fc7475443ea2a26f63211ca350f73ac50fff824ab7a3876ee2bd610c53bbc4")
+        val joiner = LocalModelFileSpec("joiner.onnx", 2_712_896L, "602ff7017a93311aad34df1437c8d7f49911353c13d6eae7a6ee7b041339465c")
+    }
+
     object FireRedAsr {
         val tokens = LocalModelFileSpec("tokens.txt", 79_172L, "1bc613de2112d257e61a349c3e72d1b1a9cf19c33d3ca954197ad2171e5ea07b")
         val ctcModel = LocalModelFileSpec("model.int8.onnx", 775_861_420L, "ca3dbabd82170110cc0b343c2890866d449984bc9cd92b9a18371ff80a81bb99")

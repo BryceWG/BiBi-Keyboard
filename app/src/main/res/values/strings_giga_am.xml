@@ -1,0 +1,29 @@
+<resources>
+    <!-- GigaAM local Russian ASR -->
+    <string name="vendor_giga_am">GigaAM</string>
+    <string name="label_giga_am_model_variant">Model version</string>
+    <string name="giga_am_model_v3">GigaAM v3 Russian (punctuation)</string>
+    <string name="label_giga_am_threads">Threads (1-8)</string>
+    <string name="label_giga_am_preload">Aggressive model loading</string>
+    <string name="feature_giga_am_preload_off_desc">Loads the model only when needed, which may cause delay on first use.</string>
+    <string name="feature_giga_am_preload_on_desc">Preloads the model when the keyboard appears to reduce first-use latency.</string>
+    <string name="label_giga_am_keep_alive">Model unload policy</string>
+    <string name="btn_giga_am_download_model">Download GigaAM v3 model</string>
+    <string name="btn_giga_am_import_model">Import GigaAM model from file</string>
+    <string name="btn_giga_am_clear_model">Clear downloaded GigaAM model</string>
+    <string name="giga_am_download_status_downloading">Downloading GigaAM… %1$d%%</string>
+    <string name="giga_am_download_status_extracting_progress">Extracting GigaAM… %1$d%%</string>
+    <string name="giga_am_download_status_done">GigaAM model installed</string>
+    <string name="giga_am_download_status_failed">GigaAM download or extraction failed</string>
+    <string name="giga_am_download_started_in_bg">Started GigaAM background download. Check notification for progress.</string>
+    <string name="giga_am_import_started_in_bg">Started GigaAM background import. Check notification for progress.</string>
+    <string name="giga_am_import_success">GigaAM model imported successfully: %1$s</string>
+    <string name="giga_am_import_failed">GigaAM model import failed: %1$s</string>
+    <string name="giga_am_clear_confirm_title">Clear GigaAM model?</string>
+    <string name="giga_am_clear_confirm_message">This will delete the downloaded GigaAM model. You can download it again later. Continue?</string>
+    <string name="giga_am_clear_done">GigaAM model cleared</string>
+    <string name="giga_am_clear_failed">Failed to clear GigaAM model</string>
+    <string name="error_giga_am_model_missing">GigaAM v3 Russian model files are missing. Download or import them in ASR settings.</string>
+    <string name="notif_giga_am_title_v3">GigaAM v3 Russian ASR model</string>
+    <string name="asr_vendor_tag_russian">Russian</string>
+</resources>
