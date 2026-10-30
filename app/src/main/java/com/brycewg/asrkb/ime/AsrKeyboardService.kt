@@ -459,6 +459,17 @@ class AsrKeyboardService :
         return super.onKeyDown(keyCode, event)
     }
 
+    /**
+     * 始终评估为「应显示输入视图」。
+     *
+     * 系统在部分机型/ROM（如 OPPO ColorOS 17 + 折叠屏）上会把 Configuration 报告为
+     * keyboard=qwerty、hardKeyboardHidden=UNDEFINED。此时 InputMethodService 的默认实现
+     * （keyboard == KEYBOARD_NOKEYS || hardKeyboardHidden == HARKEYBOARDHIDDEN_YES）会返回 false，
+     * 导致 onShowInputRequested 直接返回 false，输入视图永远不会被创建——表现为「键盘完全不弹」。
+     * 本输入法以触摸/语音为主，硬键盘不应抑制软键盘，故强制返回 true。
+     */
+    override fun onEvaluateInputViewShown(): Boolean = true
+
     override fun onStartInput(attribute: EditorInfo?, restarting: Boolean) {
         super.onStartInput(attribute, restarting)
         inputHelper.diagHostPkg = attribute?.packageName.orEmpty()
