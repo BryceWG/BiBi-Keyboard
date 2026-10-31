@@ -456,6 +456,7 @@ private fun smartSections(
             SettingsEntry.Action(
                 id = "translation_settings",
                 titleRes = R.string.title_translation_settings,
+                summary = snapshot.translationSummary,
                 icon = Icons.Rounded.Translate,
                 onClick = { onPushRoute(BibiSettingsRoute.Translation) }
             ),
@@ -529,6 +530,7 @@ private data class SettingsHomeSnapshot(
     val floatingSummary: String,
     val asrSummary: String,
     val aiSummary: String,
+    val translationSummary: String,
     val autoUpdateCheckEnabled: Boolean
 ) {
     companion object {
@@ -538,6 +540,7 @@ private data class SettingsHomeSnapshot(
             floatingSummary = context.getString(R.string.home_summary_more_input_disabled),
             asrSummary = "",
             aiSummary = "",
+            translationSummary = "",
             autoUpdateCheckEnabled = false
         )
 
@@ -559,6 +562,15 @@ private data class SettingsHomeSnapshot(
                 ),
                 asrSummary = asrSummary(context, prefs),
                 aiSummary = aiSummary(context, prefs),
+                translationSummary = if (prefs.translationEnabled) {
+                    val vendor = com.brycewg.asrkb.translation.TranslationVendor.fromId(prefs.translationVendor)
+                    context.getString(
+                        R.string.translation_home_enabled,
+                        context.getString(if (vendor.offline) R.string.translation_foxlet_short else vendor.titleRes)
+                    )
+                } else {
+                    context.getString(R.string.translation_home_disabled)
+                },
                 autoUpdateCheckEnabled = prefs.autoUpdateCheckEnabled
             )
         }

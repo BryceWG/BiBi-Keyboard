@@ -42,4 +42,20 @@
     <string name="translation_keep_alive_always">Keep loaded</string>
     <string name="translation_manage_packages">Manage language packs</string>
     <string name="translation_delete_pack_action">Delete %1$s</string>
+    <string name="translation_microsoft">Microsoft Edge</string>
+    <string name="translation_tencent">Tencent Transmart</string>
+    <string name="translation_volcengine">Volcengine Translate</string>
+    <string name="translation_bilibili">Bilibili Index-Translate</string>
+    <string name="translation_google">Google Translate</string>
+    <string name="translation_auto_language">Auto-detect</string>
+    <string name="translation_online_notice">Translation sends text to the selected online service. No API key is required.</string>
+    <string name="translation_test">Test translation</string>
+    <string name="translation_test_running">Testing…</string>
+    <string name="translation_test_sample">Hello, world!</string>
+    <string name="translation_test_sample_chinese">你好，世界！</string>
+    <string name="translation_test_success">Translation succeeded · %1$d ms\n\nTest text:\n%2$s\n\nTranslation:\n%3$s</string>
+    <string name="translation_test_failed">Translation failed (%1$s). Check the network or language packs and retry.</string>
+    <string name="translation_home_enabled">Enabled · %1$s</string>
+    <string name="translation_home_disabled">Not enabled</string>
+    <string name="translation_foxlet_short">Foxlet</string>
 </resources>

@@ -17,7 +17,7 @@ internal object TranslationPreload {
 
     @Synchronized
     fun onRecordingStarted(context: Context, prefs: Prefs) {
-        if (!prefs.translationEnabled || !prefs.translationPreloadEnabled || !supportsFoxletTranslation()) return
+        if (prefs.translationVendor != "foxlet" || !prefs.translationEnabled || !prefs.translationPreloadEnabled || !supportsFoxletTranslation()) return
         if (job?.isActive == true) return
         val appContext = context.applicationContext
         val source = prefs.translationSourceLanguage

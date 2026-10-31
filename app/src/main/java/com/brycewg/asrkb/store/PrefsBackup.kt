@@ -93,6 +93,7 @@ internal object PrefsBackup {
         o.put(KEY_TRANSLATION_KEEP_ALIVE, translationKeepAliveMinutes)
         o.put(KEY_TRANSLATION_ENABLED, translationEnabled)
         o.put(KEY_TRANSLATION_VENDOR, translationVendor)
+        o.put(KEY_TRANSLATION_ONLINE_SOURCE, translationOnlineSourceLanguage)
         o.put(KEY_TRANSLATION_SOURCE, translationSourceLanguage)
         o.put(KEY_TRANSLATION_TARGET, translationTargetLanguage)
         o.put(KEY_POSTPROC_ENABLED, postProcessEnabled)
@@ -384,6 +385,7 @@ internal object PrefsBackup {
             optInt(KEY_TRANSLATION_KEEP_ALIVE)?.let { translationKeepAliveMinutes = it }
             optBool(KEY_TRANSLATION_ENABLED)?.let { translationEnabled = it }
             optString(KEY_TRANSLATION_VENDOR)?.let { translationVendor = it }
+            optString(KEY_TRANSLATION_ONLINE_SOURCE)?.let { translationOnlineSourceLanguage = it }
             optString(KEY_TRANSLATION_SOURCE)?.let { translationSourceLanguage = it }
             optString(KEY_TRANSLATION_TARGET)?.let { translationTargetLanguage = it }
             optBool(KEY_POSTPROC_ENABLED)?.let { postProcessEnabled = it }

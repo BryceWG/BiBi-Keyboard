@@ -42,4 +42,20 @@
     <string name="translation_keep_alive_always">常に保持</string>
     <string name="translation_manage_packages">言語パックを管理</string>
     <string name="translation_delete_pack_action">%1$s を削除</string>
+    <string name="translation_microsoft">Microsoft Edge 翻訳</string>
+    <string name="translation_tencent">Tencent Transmart</string>
+    <string name="translation_volcengine">Volcengine 翻訳</string>
+    <string name="translation_bilibili">Bilibili Index-Translate</string>
+    <string name="translation_google">Google 翻訳</string>
+    <string name="translation_auto_language">自動検出</string>
+    <string name="translation_online_notice">翻訳するテキストは選択したオンラインサービスに送信されます。API キーは不要です。</string>
+    <string name="translation_test">翻訳をテスト</string>
+    <string name="translation_test_running">テスト中…</string>
+    <string name="translation_test_sample">Hello, world!</string>
+    <string name="translation_test_sample_chinese">你好，世界！</string>
+    <string name="translation_test_success">テスト成功 · %1$d ミリ秒\n\nテスト文：\n%2$s\n\n訳文：\n%3$s</string>
+    <string name="translation_test_failed">テスト失敗（%1$s）。ネットワークまたは言語パックを確認してください。</string>
+    <string name="translation_home_enabled">有効 · %1$s</string>
+    <string name="translation_home_disabled">無効</string>
+    <string name="translation_foxlet_short">Foxlet</string>
 </resources>

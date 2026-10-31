@@ -21,31 +21,35 @@ internal object TranslationPipeline {
         prefs: Prefs,
         text: String,
         timing: com.brycewg.asrkb.store.AsrHistoryTimingRecorder? = null,
+        enabled: Boolean = prefs.translationEnabled,
         onTranslated: (com.brycewg.asrkb.store.TranslationRecord) -> Unit = {}
     ): String {
-        if (!prefs.translationEnabled || text.isBlank()) return text
+        if (!enabled || text.isBlank()) return text
+        val vendor = TranslationVendor.fromId(prefs.translationVendor)
+        val source = if (vendor.offline) prefs.translationSourceLanguage else prefs.translationOnlineSourceLanguage
+        val target = prefs.translationTargetLanguage
         val id = requests.incrementAndGet()
         val started = SystemClock.elapsedRealtime()
         val data = mapOf(
             "request" to id,
             "vendor" to prefs.translationVendor,
-            "source" to prefs.translationSourceLanguage,
-            "target" to prefs.translationTargetLanguage
+            "source" to source,
+            "target" to target
         )
         DebugLogManager.logBase("asr", "translation_start", data)
         timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
         timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.TEXT_DELIVERY)
         timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.TRANSLATION)
         try {
-            check(supportsFoxletTranslation()) { context.getString(R.string.translation_unsupported_device) }
-            check(prefs.translationVendor == "foxlet")
-            val output = withContext(Dispatchers.Default) {
-                val route = TranslationModelCatalog(context).route(
-                    prefs.translationSourceLanguage,
-                    prefs.translationTargetLanguage
-                )
-                check(route.isNotEmpty()) { context.getString(R.string.translation_choose_languages) }
-                FoxletTranslationService.translate(context, text, route)
+            val output = if (vendor.offline) {
+                check(supportsFoxletTranslation()) { context.getString(R.string.translation_unsupported_device) }
+                withContext(Dispatchers.Default) {
+                    val route = TranslationModelCatalog(context).route(source, target)
+                    check(route.isNotEmpty()) { context.getString(R.string.translation_choose_languages) }
+                    FoxletTranslationService.translate(context, text, route)
+                }
+            } else {
+                OnlineTranslationService.translate(vendor, text, source, target)
             }
             currentCoroutineContext().ensureActive()
             check(output.isNotBlank()) { context.getString(R.string.translation_empty_result) }
@@ -57,9 +61,9 @@ internal object TranslationPipeline {
             onTranslated(
                 com.brycewg.asrkb.store.TranslationRecord(
                     text,
-                    prefs.translationSourceLanguage,
-                    prefs.translationTargetLanguage,
-                    prefs.translationVendor,
+                    source,
+                    target,
+                    vendor.id,
                     SystemClock.elapsedRealtime() - started
                 )
             )

@@ -42,4 +42,20 @@
     <string name="translation_keep_alive_always">الاحتفاظ دائمًا</string>
     <string name="translation_manage_packages">إدارة حزم اللغات</string>
     <string name="translation_delete_pack_action">حذف %1$s</string>
+    <string name="translation_microsoft">ترجمة Microsoft Edge</string>
+    <string name="translation_tencent">ترجمة Tencent Transmart</string>
+    <string name="translation_volcengine">ترجمة Volcengine</string>
+    <string name="translation_bilibili">ترجمة Bilibili Index-Translate</string>
+    <string name="translation_google">ترجمة Google</string>
+    <string name="translation_auto_language">اكتشاف تلقائي</string>
+    <string name="translation_online_notice">يُرسل النص إلى خدمة الترجمة المختارة عبر الإنترنت. لا يلزم مفتاح API.</string>
+    <string name="translation_test">اختبار الترجمة</string>
+    <string name="translation_test_running">جارٍ الاختبار…</string>
+    <string name="translation_test_sample">Hello, world!</string>
+    <string name="translation_test_sample_chinese">你好，世界！</string>
+    <string name="translation_test_success">نجح الاختبار · %1$d مللي ثانية\n\nنص الاختبار:\n%2$s\n\nالترجمة:\n%3$s</string>
+    <string name="translation_test_failed">فشل الاختبار (%1$s). تحقق من الشبكة أو حزم اللغات وأعد المحاولة.</string>
+    <string name="translation_home_enabled">مفعلة · %1$s</string>
+    <string name="translation_home_disabled">غير مفعلة</string>
+    <string name="translation_foxlet_short">Foxlet</string>
 </resources>

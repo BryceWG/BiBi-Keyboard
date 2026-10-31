@@ -97,9 +97,13 @@ object SettingsSearchIndex {
             R.string.translation_packages,
             R.string.translation_preload,
             R.string.translation_keep_alive,
+            R.string.translation_test,
             R.string.translation_manage_packages
         ).forEach { title ->
             add(DeclarativeEntry(title, R.string.title_translation_settings, BibiSettingsRoute.Translation, keywords = listOf("Foxlet", "离线翻译", "translation")))
+        }
+        com.brycewg.asrkb.translation.TranslationVendor.entries.forEach { vendor ->
+            add(DeclarativeEntry(vendor.titleRes, R.string.title_translation_settings, BibiSettingsRoute.Translation, keywords = listOf("translation", "翻译")))
         }
         addInputEntries()
         addFloatingEntries()

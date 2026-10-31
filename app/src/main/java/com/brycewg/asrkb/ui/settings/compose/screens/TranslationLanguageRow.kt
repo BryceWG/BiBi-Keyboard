@@ -43,6 +43,7 @@ internal fun TranslationLanguageRow(
     target: String,
     enabled: Boolean,
     canSwap: Boolean,
+    groupCount: Int,
     onSwap: () -> Unit,
     onSourceClick: () -> Unit,
     onTargetClick: () -> Unit
@@ -88,7 +89,7 @@ internal fun TranslationLanguageRow(
         }
     }
     when (uiMode) {
-        BibiUiMode.Material -> SettingsMaterialItemSurface(index = 1, count = 4) { content() }
+        BibiUiMode.Material -> SettingsMaterialItemSurface(index = 1, count = groupCount) { content() }
         BibiUiMode.Miuix -> content()
     }
 }

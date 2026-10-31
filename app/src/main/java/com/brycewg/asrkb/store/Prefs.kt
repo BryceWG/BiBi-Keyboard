@@ -740,6 +740,7 @@ class Prefs(context: Context) {
         }
 
     var translationVendor: String by stringPref(KEY_TRANSLATION_VENDOR, "foxlet")
+    var translationOnlineSourceLanguage: String by stringPref(KEY_TRANSLATION_ONLINE_SOURCE, "auto")
     var translationSourceLanguage: String by stringPref(KEY_TRANSLATION_SOURCE, "zh-Hans")
     var translationTargetLanguage: String by stringPref(KEY_TRANSLATION_TARGET, "en")
 

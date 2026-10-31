@@ -42,4 +42,20 @@
     <string name="translation_keep_alive_always">始終保留</string>
     <string name="translation_manage_packages">管理語言套件</string>
     <string name="translation_delete_pack_action">刪除 %1$s</string>
+    <string name="translation_microsoft">微軟 Edge 翻譯</string>
+    <string name="translation_tencent">騰訊互動翻譯</string>
+    <string name="translation_volcengine">火山翻譯</string>
+    <string name="translation_bilibili">B站 Index-Translate</string>
+    <string name="translation_google">Google 翻譯</string>
+    <string name="translation_auto_language">自動偵測</string>
+    <string name="translation_online_notice">翻譯文字將傳送至所選線上服務，無需設定金鑰。</string>
+    <string name="translation_test">測試翻譯</string>
+    <string name="translation_test_running">正在測試…</string>
+    <string name="translation_test_sample">Hello, world!</string>
+    <string name="translation_test_sample_chinese">你好，世界！</string>
+    <string name="translation_test_success">測試成功 · %1$d 毫秒\n\n測試文字：\n%2$s\n\n譯文：\n%3$s</string>
+    <string name="translation_test_failed">測試失敗（%1$s），請檢查網路或語言套件後重試。</string>
+    <string name="translation_home_enabled">已開啟 · %1$s</string>
+    <string name="translation_home_disabled">未開啟</string>
+    <string name="translation_foxlet_short">Foxlet</string>
 </resources>
