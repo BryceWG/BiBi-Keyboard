@@ -42,7 +42,8 @@ internal class DictationUseCase(
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
-        polishPolicy: RecordingPolishPolicy = RecordingPolishPolicy.FollowSettings
+        polishPolicy: RecordingPolishPolicy = RecordingPolishPolicy.FollowSettings,
+        translationEnabled: Boolean = prefs.translationEnabled
     ) {
         if (text.isBlank()) {
             dictationSession.complete(seq, ic, "")
@@ -60,9 +61,9 @@ internal class DictationUseCase(
             (polishPolicy is RecordingPolishPolicy.UsePrompt || prefs.postProcessEnabled) &&
             prefs.hasLlmKeys()
         ) {
-            handleWithPostprocess(ic, text, state, seq, historyTiming, polishPolicy as? RecordingPolishPolicy.UsePrompt)
+            handleWithPostprocess(ic, text, state, seq, historyTiming, polishPolicy as? RecordingPolishPolicy.UsePrompt, translationEnabled)
         } else {
-            handleWithoutPostprocess(ic, text, state, seq, historyTiming)
+            handleWithoutPostprocess(ic, text, state, seq, historyTiming, translationEnabled)
         }
     }
 
@@ -72,7 +73,8 @@ internal class DictationUseCase(
         state: KeyboardState.Listening,
         seq: Long,
         historyTiming: AsrSessionManager.HistoryCommitContext?,
-        prompt: RecordingPolishPolicy.UsePrompt?
+        prompt: RecordingPolishPolicy.UsePrompt?,
+        translationEnabled: Boolean
     ) {
         if (isCancelled(seq)) return
 
@@ -152,8 +154,9 @@ internal class DictationUseCase(
 
         if (isCancelled(seq)) return
 
-        val finalOut = translateFinal(ic, seq, postprocessResult.finalText, historyTiming) ?: return
+        val finalOut = translateFinal(ic, seq, postprocessResult.finalText, historyTiming, translationEnabled) ?: return
         val rawText = postprocessResult.rawText
+        val undoText = translationRecord?.inputText ?: rawText
         val postprocFailed = postprocessResult.postprocFailed
         val aiUsed = postprocessResult.aiUsed
         val aiPostMs = postprocessResult.aiPostMs
@@ -193,8 +196,8 @@ internal class DictationUseCase(
             updateSessionContext { prev ->
                 prev.copy(
                     lastAsrCommitText = finalOut,
-                    lastPostprocCommit = if (finalOut.isNotEmpty() && finalOut != rawText) {
-                        PostprocCommit(finalOut, rawText)
+                    lastPostprocCommit = if (finalOut.isNotEmpty() && finalOut != undoText) {
+                        PostprocCommit(finalOut, undoText, translated = translationRecord != null)
                     } else {
                         null
                     }
@@ -217,14 +220,14 @@ internal class DictationUseCase(
                 // 写入失效：结果仍可完成，在键盘提供复制动作，不自动操作剪贴板。
                 transitionToIdle(true)
             }
-            postprocFailed -> {
+            postprocFailed && translationRecord == null -> {
                 // 回到 Idle 后再次设置错误提示，避免被 Idle 文案覆盖
                 transitionToIdle(false)
                 uiListenerProvider()?.onStatusMessage(
                     context.getString(R.string.status_llm_failed_used_raw)
                 )
             }
-            !autoEnterSent && finalOut != rawText -> {
+            !autoEnterSent && finalOut != undoText -> {
                 transitionToIdle(true)
                 onPostprocessUndoAvailable()
             }
@@ -256,10 +259,11 @@ internal class DictationUseCase(
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
-        historyTiming: AsrSessionManager.HistoryCommitContext?
+        historyTiming: AsrSessionManager.HistoryCommitContext?,
+        translationEnabled: Boolean
     ) {
         val processed = com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text)
-        val finalToCommit = translateFinal(ic, seq, processed, historyTiming) ?: return
+        val finalToCommit = translateFinal(ic, seq, processed, historyTiming, translationEnabled) ?: return
 
         if (finalToCommit.isBlank()) {
             dictationSession.complete(seq, ic, "")
@@ -291,14 +295,18 @@ internal class DictationUseCase(
             updateSessionContext { prev ->
                 prev.copy(
                     lastAsrCommitText = finalToCommit,
-                    lastPostprocCommit = null
+                    lastPostprocCommit = translationRecord?.takeIf { it.inputText != finalToCommit }?.let {
+                        PostprocCommit(finalToCommit, it.inputText, translated = true)
+                    }
                 )
             }
         }
 
+        var autoEnterSent = false
         if (delivered && finalToCommit.isNotEmpty() && consumeAutoEnterOnce()) {
             try {
                 inputHelper.sendEnter(ic, getCurrentEditorInfo())
+                autoEnterSent = true
             } catch (t: Throwable) {
                 Log.w(TAG, "sendEnter after final failed", t)
             }
@@ -318,6 +326,10 @@ internal class DictationUseCase(
             !delivered -> {
                 // 写入失效：结果仍可完成，在键盘提供复制动作，不自动操作剪贴板。
                 transitionToIdle(true)
+            }
+            !autoEnterSent && translationRecord?.let { it.inputText != finalToCommit } == true -> {
+                transitionToIdle(true)
+                onPostprocessUndoAvailable()
             }
             else -> {
                 val usedBackupResult =
@@ -342,14 +354,15 @@ internal class DictationUseCase(
         ic: InputConnection?,
         seq: Long,
         text: String,
-        historyTiming: AsrSessionManager.HistoryCommitContext?
+        historyTiming: AsrSessionManager.HistoryCommitContext?,
+        translationEnabled: Boolean
     ): String? {
-        if (!prefs.translationEnabled) return text
+        if (!translationEnabled) return text
         processingTimeoutController.cancel()
         transitionToState(KeyboardState.Processing)
         uiListenerProvider()?.onStatusMessage(context.getString(R.string.translation_processing))
         return try {
-            val translated = com.brycewg.asrkb.translation.TranslationPipeline.translate(context, prefs, text, historyTiming?.timing) { translationRecord = it }
+            val translated = com.brycewg.asrkb.translation.TranslationPipeline.translate(context, prefs, text, historyTiming?.timing, enabled = translationEnabled) { translationRecord = it }
             historyTiming?.timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
             historyTiming?.timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.TEXT_DELIVERY)
             if (isCancelled(seq)) null else translated

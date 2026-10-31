@@ -1680,6 +1680,7 @@ private val trayKeyOrder = listOf(
     "vendor_picker",
     "undo",
     "hide_keyboard",
+    "translation_toggle",
     "silence_autostop_toggle",
     "keep_screen_on_while_recording_toggle",
     "mic_tap_toggle",
@@ -1687,6 +1688,7 @@ private val trayKeyOrder = listOf(
     "duck_media_on_record_toggle",
     "gesture_cancel",
     "gesture_send",
+    RecordingLayoutButtons.TRANSLATE,
     RecordingLayoutButtons.SKIP_POLISH,
     RecordingLayoutButtons.PROMPT_POLISH
 )

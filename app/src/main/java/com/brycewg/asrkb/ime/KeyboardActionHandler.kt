@@ -74,6 +74,7 @@ class KeyboardActionHandler(
 
     // 操作序列号：用于取消在途处理（强制停止/新会话开始都会递增）
     private var opSeq: Long = 0L
+    private var translateThisRecording = false
     private var recordingPolishPolicy: RecordingPolishPolicy = RecordingPolishPolicy.FollowSettings
 
     private val undoManager = UndoManager(inputHelper = inputHelper, logTag = TAG, maxSnapshots = 3)
@@ -146,7 +147,12 @@ class KeyboardActionHandler(
             scheduleProcessingTimeout(audioMsOverride)
         },
         onPostprocessUndoAvailable = {
-            uiListener?.onShowPostprocessUndo(context.getString(R.string.action_revert_postprocess))
+            val label = if (sessionContext.lastPostprocCommit?.translated == true) {
+                R.string.action_revert_translation
+            } else {
+                R.string.action_revert_postprocess
+            }
+            uiListener?.onShowPostprocessUndo(context.getString(label))
         },
         onContinueSession = { dictationSession.continueAfterDelivery(getCurrentInputConnection()) }
     )
@@ -490,6 +496,13 @@ class KeyboardActionHandler(
         handleMicPressUp(autoEnterAfterFinal = true)
     }
 
+    internal fun handleRecordingTranslation() {
+        if (currentState !is KeyboardState.Listening) return
+        translateThisRecording = true
+        DebugLogManager.logBase("ime", "recording_translation_selected", mapOf("opSeq" to opSeq))
+        handleMicPressUp(autoEnterAfterFinal = false)
+    }
+
     internal fun handleRecordingPolish(policy: RecordingPolishPolicy) {
         if (currentState !is KeyboardState.Listening) return
         if (policy is RecordingPolishPolicy.UsePrompt) {
@@ -781,7 +794,11 @@ class KeyboardActionHandler(
         if (ic == null) return false
         val ok = revertLastPostprocessCommit(ic)
         if (!ok) {
-            uiListener?.onStatusMessage(context.getString(R.string.status_revert_postprocess_unavailable))
+            uiListener?.onStatusMessage(
+                context.getString(
+                    if (sessionContext.lastPostprocCommit?.translated == true) R.string.status_revert_translation_unavailable else R.string.status_revert_postprocess_unavailable
+                )
+            )
         }
         return ok
     }
@@ -794,7 +811,9 @@ class KeyboardActionHandler(
                 if (inputHelper.replaceText(ic, postprocCommit.processed, postprocCommit.raw)) {
                     sessionContext = sessionContext.copy(lastPostprocCommit = null)
                     uiListener?.onHidePostprocessUndo()
-                    uiListener?.onStatusMessage(context.getString(R.string.status_reverted_to_raw))
+                    uiListener?.onStatusMessage(
+                        context.getString(if (postprocCommit.translated) R.string.status_translation_reverted else R.string.status_reverted_to_raw)
+                    )
                     return true
                 }
             }
@@ -969,6 +988,7 @@ class KeyboardActionHandler(
         val hopStartedAt = SystemClock.elapsedRealtime()
         val seq = opSeq
         val polishPolicy = recordingPolishPolicy
+        val translationEnabled = translateThisRecording || prefs.translationEnabled
         scope.launch {
             if (seq != opSeq) return@launch
             AsrCallLatencyProbe.log(
@@ -989,17 +1009,17 @@ class KeyboardActionHandler(
                     aiEditUseCase.handleFinal(text, currentState, seq)
                 }
                 is KeyboardState.Listening -> {
-                    handleNormalDictationFinal(text, currentState, seq, polishPolicy)
+                    handleNormalDictationFinal(text, currentState, seq, polishPolicy, translationEnabled)
                 }
                 is KeyboardState.Processing, is KeyboardState.Idle -> {
                     // 允许在 Idle/Processing 状态接收最终结果（例如提前切回 Idle 的路径）
                     val synthetic = KeyboardState.Listening()
-                    handleNormalDictationFinal(text, synthetic, seq, polishPolicy)
+                    handleNormalDictationFinal(text, synthetic, seq, polishPolicy, translationEnabled)
                 }
                 else -> {
                     // 兜底按普通听写处理
                     val synthetic = KeyboardState.Listening()
-                    handleNormalDictationFinal(text, synthetic, seq, polishPolicy)
+                    handleNormalDictationFinal(text, synthetic, seq, polishPolicy, translationEnabled)
                 }
             }
         }
@@ -1306,6 +1326,7 @@ class KeyboardActionHandler(
     }
 
     private fun startNormalListening() {
+        translateThisRecording = false
         recordingPolishPolicy = RecordingPolishPolicy.FollowSettings
         // 开启新一轮录音：递增操作序列，取消在途处理
         opSeq++
@@ -1427,10 +1448,11 @@ class KeyboardActionHandler(
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
-        polishPolicy: RecordingPolishPolicy
+        polishPolicy: RecordingPolishPolicy,
+        translationEnabled: Boolean
     ) {
         // 即使当前拿不到 InputConnection，也必须完成后处理、历史与主动复制，不能直接丢弃结果。
-        dictationUseCase.handleFinal(getCurrentInputConnection(), text, state, seq, polishPolicy)
+        dictationUseCase.handleFinal(getCurrentInputConnection(), text, state, seq, polishPolicy, translationEnabled)
     }
 
     private fun transitionToIdleWithTiming(showBackupUsedHint: Boolean = false) {

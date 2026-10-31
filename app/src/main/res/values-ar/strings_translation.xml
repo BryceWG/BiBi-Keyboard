@@ -58,4 +58,11 @@
     <string name="translation_home_enabled">مفعلة · %1$s</string>
     <string name="translation_home_disabled">غير مفعلة</string>
     <string name="translation_foxlet_short">Foxlet</string>
+    <string name="ext_btn_translation">تبديل الترجمة</string>
+    <string name="keyboard_layout_recording_translate">ترجمة</string>
+    <string name="toast_translation_on">تم تفعيل الترجمة</string>
+    <string name="toast_translation_off">تم تعطيل الترجمة</string>
+    <string name="action_revert_translation">التراجع عن الترجمة</string>
+    <string name="status_revert_translation_unavailable">تعذر التراجع عن الترجمة</string>
+    <string name="status_translation_reverted">تم التراجع عن الترجمة</string>
 </resources>

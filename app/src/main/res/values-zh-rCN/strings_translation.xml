@@ -58,4 +58,11 @@
     <string name="translation_home_enabled">已开启 · %1$s</string>
     <string name="translation_home_disabled">未开启</string>
     <string name="translation_foxlet_short">Foxlet</string>
+    <string name="ext_btn_translation">翻译开关</string>
+    <string name="keyboard_layout_recording_translate">翻译</string>
+    <string name="toast_translation_on">已开启翻译</string>
+    <string name="toast_translation_off">已关闭翻译</string>
+    <string name="action_revert_translation">撤回翻译</string>
+    <string name="status_revert_translation_unavailable">无法撤回翻译</string>
+    <string name="status_translation_reverted">已撤回翻译</string>
 </resources>

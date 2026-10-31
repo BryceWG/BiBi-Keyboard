@@ -57,6 +57,7 @@ internal class ImeExtensionButtonsController(
     fun applyConfig() {
         updateSelectExtButtonsUi()
         updateDynamicSelectButtons()
+        updateTranslationExtButtonsUi()
         updateSilenceAutoStopExtButtonsUi()
         updateKeepScreenOnWhileRecordingExtButtonsUi()
         updateMicTapToggleExtButtonsUi()
@@ -225,6 +226,11 @@ internal class ImeExtensionButtonsController(
             }
         }
 
+        if (action == ExtensionButtonAction.TRANSLATION_TOGGLE &&
+            result == KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
+        ) {
+            updateTranslationExtButtonsUi()
+        }
         if (action == ExtensionButtonAction.SILENCE_AUTOSTOP_TOGGLE &&
             result == KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
         ) {
@@ -293,6 +299,12 @@ internal class ImeExtensionButtonsController(
         }
     }
 
+    private fun updateTranslationExtButtonsUi() {
+        updateDynamicToggleButtons(ExtensionButtonAction.TRANSLATION_TOGGLE) { enabled ->
+            if (enabled) R.drawable.translate_fill else R.drawable.translate
+        }
+    }
+
     private fun updateSilenceAutoStopExtButtonsUi() {
         updateDynamicToggleButtons(ExtensionButtonAction.SILENCE_AUTOSTOP_TOGGLE) { enabled ->
             if (enabled) R.drawable.hand_palm_fill else R.drawable.hand_palm
@@ -346,6 +358,7 @@ internal class ImeExtensionButtonsController(
         iconRes: (Boolean) -> Int
     ) {
         val enabled = when (action) {
+            ExtensionButtonAction.TRANSLATION_TOGGLE -> prefs.translationEnabled
             ExtensionButtonAction.SILENCE_AUTOSTOP_TOGGLE -> prefs.autoStopOnSilenceEnabled
             ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE -> prefs.keepScreenOnWhileRecording
             ExtensionButtonAction.MIC_TAP_TOGGLE -> prefs.micTapToggleEnabled

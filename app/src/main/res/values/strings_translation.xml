@@ -58,4 +58,11 @@
     <string name="translation_home_enabled">Enabled · %1$s</string>
     <string name="translation_home_disabled">Not enabled</string>
     <string name="translation_foxlet_short">Foxlet</string>
+    <string name="ext_btn_translation">Translation</string>
+    <string name="keyboard_layout_recording_translate">Translate</string>
+    <string name="toast_translation_on">Translation enabled</string>
+    <string name="toast_translation_off">Translation disabled</string>
+    <string name="action_revert_translation">Undo translation</string>
+    <string name="status_revert_translation_unavailable">Unable to undo translation</string>
+    <string name="status_translation_reverted">Translation undone</string>
 </resources>

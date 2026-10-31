@@ -83,9 +83,14 @@ enum class ExtensionButtonAction(val id: String, val titleResId: Int, val iconRe
         iconResId = R.drawable.caret_circle_down_toggle
     ),
 
-    /**
-     * 录音判停开关（无人说话自动停止录音）
-     */
+    /** 全局翻译开关，与翻译设置保持一致。 */
+    TRANSLATION_TOGGLE(
+        id = "translation_toggle",
+        titleResId = R.string.ext_btn_translation,
+        iconResId = R.drawable.translate
+    ),
+
+    /** 录音判停开关（无人说话自动停止录音）。 */
     SILENCE_AUTOSTOP_TOGGLE(
         id = "silence_autostop_toggle",
         titleResId = R.string.ext_btn_silence_autostop,

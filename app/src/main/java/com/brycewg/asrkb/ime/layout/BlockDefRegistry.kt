@@ -67,6 +67,7 @@ class BlockDefRegistry private constructor(
         private fun recordingDefs(): List<BlockDef> = listOf(
             fixed("gesture_cancel", R.string.label_recording_gesture_cancel, null, R.id.btnGestureCancel, standardSizes(), "2x2", viewKind = ButtonViewKind.Gesture),
             fixed("gesture_send", R.string.label_recording_gesture_send, null, R.id.btnGestureSend, standardSizes(), "2x2", viewKind = ButtonViewKind.Gesture),
+            dynamic(RecordingLayoutButtons.TRANSLATE, R.string.keyboard_layout_recording_translate, null, standardSizes(), "2x2", viewKind = ButtonViewKind.Gesture),
             dynamic(RecordingLayoutButtons.SKIP_POLISH, R.string.keyboard_layout_skip_polish, null, standardSizes(), "2x2", viewKind = ButtonViewKind.Gesture),
             dynamic(RecordingLayoutButtons.PROMPT_POLISH, R.string.keyboard_layout_prompt_polish, null, standardSizes(), "2x2", viewKind = ButtonViewKind.Gesture).copy(maxInstances = Int.MAX_VALUE)
         )

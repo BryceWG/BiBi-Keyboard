@@ -88,6 +88,7 @@ internal class MicGestureController(
         val row = views.rowRecordingGestures as? ViewGroup ?: return emptyList()
         return (0 until row.childCount).map(row::getChildAt).filter {
             KeyboardLayoutViewTags.defIdOf(it) in setOf(
+                RecordingLayoutButtons.TRANSLATE,
                 RecordingLayoutButtons.SKIP_POLISH,
                 RecordingLayoutButtons.PROMPT_POLISH
             )
@@ -96,6 +97,10 @@ internal class MicGestureController(
 
     private fun applyPolishButton(view: View) {
         val block = KeyboardLayoutViewTags.instanceOf(view) ?: return
+        if (block.defId == RecordingLayoutButtons.TRANSLATE) {
+            actionHandler.handleRecordingTranslation()
+            return
+        }
         val policy = when (block.defId) {
             RecordingLayoutButtons.SKIP_POLISH -> RecordingPolishPolicy.Skip
             RecordingLayoutButtons.PROMPT_POLISH -> {

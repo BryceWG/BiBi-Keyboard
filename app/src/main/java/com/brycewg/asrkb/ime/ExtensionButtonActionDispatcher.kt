@@ -38,6 +38,7 @@ internal class ExtensionButtonActionDispatcher(
         ExtensionButtonAction.MOVE_END -> moveEnd(ic)
         ExtensionButtonAction.NUMPAD -> KeyboardActionHandler.ExtensionButtonActionResult.NEED_SHOW_NUMPAD
         ExtensionButtonAction.CLIPBOARD -> KeyboardActionHandler.ExtensionButtonActionResult.NEED_SHOW_CLIPBOARD
+        ExtensionButtonAction.TRANSLATION_TOGGLE -> toggleTranslation()
         ExtensionButtonAction.SILENCE_AUTOSTOP_TOGGLE -> toggleSilenceAutoStop()
         ExtensionButtonAction.KEEP_SCREEN_ON_WHILE_RECORDING_TOGGLE -> toggleKeepScreenOnWhileRecording()
         ExtensionButtonAction.MIC_TAP_TOGGLE -> toggleMicTapMode()
@@ -130,6 +131,15 @@ internal class ExtensionButtonActionDispatcher(
             Log.w(logTag, "moveToPunctuation failed: direction=$direction", t)
             KeyboardActionHandler.ExtensionButtonActionResult.FAILED
         }
+    }
+
+    private fun toggleTranslation(): KeyboardActionHandler.ExtensionButtonActionResult {
+        val enabled = !prefs.translationEnabled
+        prefs.translationEnabled = enabled
+        uiListenerProvider()?.onStatusMessage(
+            context.getString(if (enabled) R.string.toast_translation_on else R.string.toast_translation_off)
+        )
+        return KeyboardActionHandler.ExtensionButtonActionResult.SUCCESS
     }
 
     private fun toggleSilenceAutoStop(): KeyboardActionHandler.ExtensionButtonActionResult {

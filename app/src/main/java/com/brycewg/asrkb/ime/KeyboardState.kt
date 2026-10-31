@@ -82,7 +82,7 @@ data class UndoSnapshot(val beforeCursor: CharSequence, val afterCursor: CharSeq
 /**
  * AI 后处理提交记录：记录原始识别结果和 AI 优化后的结果，用于撤销
  */
-data class PostprocCommit(val processed: String, val raw: String)
+data class PostprocCommit(val processed: String, val raw: String, val translated: Boolean = false)
 
 /**
  * 剪贴板预览类型：区分文本与文件。

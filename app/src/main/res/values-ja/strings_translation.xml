@@ -58,4 +58,11 @@
     <string name="translation_home_enabled">有効 · %1$s</string>
     <string name="translation_home_disabled">無効</string>
     <string name="translation_foxlet_short">Foxlet</string>
+    <string name="ext_btn_translation">翻訳の切り替え</string>
+    <string name="keyboard_layout_recording_translate">翻訳</string>
+    <string name="toast_translation_on">翻訳を有効にしました</string>
+    <string name="toast_translation_off">翻訳を無効にしました</string>
+    <string name="action_revert_translation">翻訳を元に戻す</string>
+    <string name="status_revert_translation_unavailable">翻訳を元に戻せません</string>
+    <string name="status_translation_reverted">翻訳を元に戻しました</string>
 </resources>
