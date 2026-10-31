@@ -549,4 +549,10 @@
   <string name="recording_test_error_ai">AI 處理失敗：%1$s</string>
   <string name="toast_ime_bridge_protocol_mismatch">輸入法橋接模組與說點啥版本不相容，請更新模組或應用程式。</string>
   <string name="toast_ime_bridge_connection_failed">無法連線輸入法橋接模組，請確認已在 LSPosed 中啟用模組並勾選目前輸入法。</string>
+  <string name="keyboard_layout_skip_polish">跳過潤色</string>
+  <string name="keyboard_layout_prompt_polish">指定 Prompt 潤色</string>
+  <string name="keyboard_layout_configure_prompt">編輯</string>
+  <string name="keyboard_layout_prompt_hint">選擇既有潤色 Prompt，按鈕會跟隨該預設的修改。</string>
+  <string name="keyboard_layout_prompt_required">請為此按鈕選擇既有潤色 Prompt，原預設可能已被刪除。</string>
+  <string name="keyboard_layout_add">新增</string>
 </resources>

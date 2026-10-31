@@ -160,7 +160,12 @@ class AsrKeyboardService :
             prefs = prefs,
             themeStyler = themeStyler,
             windowProvider = { window?.window },
-            viewRefsProvider = { viewRefs }
+            viewRefsProvider = { viewRefs },
+            onLayoutApplied = {
+                extensionButtonsController?.bindListeners()
+                extensionButtonsController?.applyConfig()
+                micGestureController?.bindOverlayButtons()
+            }
         )
 
         // 初始化组件

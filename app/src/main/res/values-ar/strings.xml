@@ -551,4 +551,10 @@
   <string name="recording_test_error_ai">فشلت معالجة الذكاء الاصطناعي: %1$s</string>
   <string name="toast_ime_bridge_protocol_mismatch">وحدة جسر طريقة الإدخال غير متوافقة مع BiBi Keyboard. حدّث الوحدة أو التطبيق.</string>
   <string name="toast_ime_bridge_connection_failed">تعذر الاتصال بوحدة جسر طريقة الإدخال. تأكد من تفعيلها واختيار طريقة الإدخال الحالية في LSPosed.</string>
+  <string name="keyboard_layout_skip_polish">تخطي التنقيح</string>
+  <string name="keyboard_layout_prompt_polish">تنقيح بموجّه محدد</string>
+  <string name="keyboard_layout_configure_prompt">تعديل</string>
+  <string name="keyboard_layout_prompt_hint">اختر موجّه تنقيح موجوداً. يتبع هذا الزر التغييرات على الإعداد المحدد.</string>
+  <string name="keyboard_layout_prompt_required">اختر موجّه تنقيح موجوداً لهذا الزر؛ ربما تم حذف الإعداد المحدد.</string>
+  <string name="keyboard_layout_add">إضافة</string>
 </resources>

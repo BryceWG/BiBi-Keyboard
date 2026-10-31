@@ -551,4 +551,10 @@
   <string name="recording_test_error_ai">AI processing failed: %1$s</string>
   <string name="toast_ime_bridge_protocol_mismatch">The IME Bridge module is incompatible with BiBi Keyboard. Update the module or app.</string>
   <string name="toast_ime_bridge_connection_failed">Unable to connect to the IME Bridge module. Check that it is enabled and the current input method is selected in LSPosed.</string>
+  <string name="keyboard_layout_skip_polish">Skip polish</string>
+  <string name="keyboard_layout_prompt_polish">Polish with prompt</string>
+  <string name="keyboard_layout_configure_prompt">Edit</string>
+  <string name="keyboard_layout_prompt_hint">Select an existing polish prompt. This button follows changes to that preset.</string>
+  <string name="keyboard_layout_prompt_required">Select an existing polish prompt for this button; the selected preset may have been deleted.</string>
+  <string name="keyboard_layout_add">Add</string>
 </resources>

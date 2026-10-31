@@ -29,7 +29,8 @@ internal class ImeLayoutController(
     private val prefs: Prefs,
     private val themeStyler: ImeThemeStyler,
     private val windowProvider: () -> Window?,
-    private val viewRefsProvider: () -> ImeViewRefs?
+    private val viewRefsProvider: () -> ImeViewRefs?,
+    private val onLayoutApplied: () -> Unit
 ) {
     private val floatingKeyboardController = ImeFloatingKeyboardController(
         prefs = prefs,
@@ -277,6 +278,7 @@ internal class ImeLayoutController(
         if (KeyboardLayoutRuntimeApplier.applyAll(root, currentLayoutBundle(), scale)) {
             layoutChanged = true
         }
+        onLayoutApplied()
 
         run {
             val panel: View? = refs?.layoutNumpadPanel ?: root.findViewById(R.id.layoutNumpadPanel)

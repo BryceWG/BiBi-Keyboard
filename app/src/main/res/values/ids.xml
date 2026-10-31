@@ -58,6 +58,8 @@
     <item name="keyboardContentPanel" type="id" />
     <item name="keyboardFloatingPanel" type="id" />
     <item name="keyboardLayoutCanvas" type="id" />
+    <item name="keyboardLayoutBlockIndexTag" type="id" />
+    <item name="keyboardLayoutBlockInstanceTag" type="id" />
     <item name="keyboardLayoutBlockDefTag" type="id" />
     <item name="keyboardLayoutBlockDynamicTag" type="id" />
     <item name="keyboardLayoutBlockPanelTag" type="id" />

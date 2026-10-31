@@ -7,6 +7,9 @@ package com.brycewg.asrkb.ime
 
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
+import com.brycewg.asrkb.ime.layout.KeyboardLayoutViewTags
+import com.brycewg.asrkb.ime.layout.RecordingLayoutButtons
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 
@@ -26,10 +29,12 @@ internal class MicGestureController(
         None,
         PendingCancel,
         PendingSend,
-        PendingLock
+        PendingLock,
+        PendingPolish
     }
 
     private var state: GestureState = GestureState.None
+    private var pendingPolishButton: View? = null
 
     fun bindMicButton() {
         bindMicButton(views.btnMic)
@@ -79,7 +84,41 @@ internal class MicGestureController(
         }
     }
 
+    private fun polishButtons(): List<View> {
+        val row = views.rowRecordingGestures as? ViewGroup ?: return emptyList()
+        return (0 until row.childCount).map(row::getChildAt).filter {
+            KeyboardLayoutViewTags.defIdOf(it) in setOf(
+                RecordingLayoutButtons.SKIP_POLISH,
+                RecordingLayoutButtons.PROMPT_POLISH
+            )
+        }
+    }
+
+    private fun applyPolishButton(view: View) {
+        val block = KeyboardLayoutViewTags.instanceOf(view) ?: return
+        val policy = when (block.defId) {
+            RecordingLayoutButtons.SKIP_POLISH -> RecordingPolishPolicy.Skip
+            RecordingLayoutButtons.PROMPT_POLISH -> {
+                val preset = prefs.getPromptPresets().firstOrNull {
+                    it.id == block.config[RecordingLayoutButtons.PROMPT_ID]
+                }
+                RecordingPolishPolicy.UsePrompt(
+                    title = preset?.title.orEmpty(),
+                    content = preset?.content.orEmpty()
+                )
+            }
+            else -> return
+        }
+        actionHandler.handleRecordingPolish(policy)
+    }
+
     fun bindOverlayButtons() {
+        polishButtons().forEach { button ->
+            button.setOnClickListener { v ->
+                performKeyHaptic(v)
+                applyPolishButton(v)
+            }
+        }
         views.btnGestureCancel?.setOnClickListener { v ->
             performKeyHaptic(v)
             actionHandler.handleMicGestureCancel()
@@ -91,6 +130,7 @@ internal class MicGestureController(
     }
 
     fun resetPressedState() {
+        pendingPolishButton = null
         state = GestureState.None
         updatePressedState(GestureState.None)
     }
@@ -186,7 +226,11 @@ internal class MicGestureController(
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
+                val polishButton = polishButtons().firstOrNull {
+                    isPointInsideView(event.rawX, event.rawY, it)
+                }
                 val target = when {
+                    polishButton != null -> GestureState.PendingPolish
                     isPointInsideView(
                         event.rawX,
                         event.rawY,
@@ -204,7 +248,8 @@ internal class MicGestureController(
                     ) -> GestureState.PendingLock
                     else -> GestureState.None
                 }
-                if (target != state) {
+                if (target != state || polishButton != pendingPolishButton) {
+                    pendingPolishButton = polishButton
                     state = target
                     updatePressedState(target)
                 }
@@ -212,9 +257,15 @@ internal class MicGestureController(
             }
             MotionEvent.ACTION_UP -> {
                 val curr = state
+                val polishButton = pendingPolishButton
+                pendingPolishButton = null
                 state = GestureState.None
                 updatePressedState(GestureState.None)
                 when (curr) {
+                    GestureState.PendingPolish -> {
+                        polishButton?.performClick()
+                        return true
+                    }
                     GestureState.PendingCancel -> {
                         performKeyHaptic(v)
                         actionHandler.handleMicGestureCancel()
@@ -314,6 +365,9 @@ internal class MicGestureController(
     }
 
     private fun updatePressedState(state: GestureState) {
+        polishButtons().forEach {
+            it.isPressed = state == GestureState.PendingPolish && it == pendingPolishButton
+        }
         views.btnGestureCancel?.isPressed = state == GestureState.PendingCancel
         views.btnGestureSend?.isPressed = state == GestureState.PendingSend
         views.btnExtCenter2?.isPressed = state == GestureState.PendingLock

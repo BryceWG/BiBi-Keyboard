@@ -12,6 +12,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.ime.ImeKeyboardViewFactory
 
@@ -65,13 +66,23 @@ object KeyboardLayoutRuntimeApplier {
         changed = resetFrameTopMargin(frame) || changed
 
         val placedViewIds = mutableSetOf<Int>()
-        layout.blocks.forEach { block ->
-            val def = registry.get(layout.panel, block.defId) ?: registry.get(block.defId) ?: return@forEach
+        val placedDynamicViews = mutableSetOf<View>()
+        layout.blocks.forEachIndexed { index, block ->
+            val def = registry.get(layout.panel, block.defId) ?: registry.get(block.defId) ?: return@forEachIndexed
             val view = extraViews[block.defId]
                 ?: def.viewId?.let(root::findViewById)
-                ?: findDynamicBlockView(frame, layout.panel, block.defId)
+                ?: findDynamicBlockView(frame, layout.panel, block.defId, index)
                 ?: createDynamicBlockView(frame, layout.panel, def)
-                ?: return@forEach
+                ?: return@forEachIndexed
+            KeyboardLayoutViewTags.markInstance(view, index, block)
+            if (KeyboardLayoutViewTags.isDynamicBlockView(view)) placedDynamicViews.add(view)
+            if (block.defId == RecordingLayoutButtons.PROMPT_POLISH && view is TextView) {
+                val title = com.brycewg.asrkb.store.Prefs(view.context).getPromptPresets()
+                    .firstOrNull { it.id == block.config[RecordingLayoutButtons.PROMPT_ID] }
+                    ?.title ?: view.context.getString(R.string.keyboard_layout_prompt_required)
+                view.text = title
+                view.contentDescription = title
+            }
             val placement = block.placement.snapped()
             val left = (placement.col * cellWidth).toInt() + margin / 2
             val top = (placement.row * cellHeight).toInt() + margin / 2
@@ -101,7 +112,7 @@ object KeyboardLayoutRuntimeApplier {
                 root.findViewById<View>(id)?.visibility = View.GONE
             }
         }
-        hideUnplacedDynamicBlockViews(frame, layout)
+        hideUnplacedDynamicBlockViews(frame, layout.panel, placedDynamicViews)
         return changed
     }
 
@@ -277,11 +288,12 @@ object KeyboardLayoutRuntimeApplier {
 
     private fun dp(view: View, value: Float): Int = (value * view.resources.displayMetrics.density + 0.5f).toInt()
 
-    private fun findDynamicBlockView(frame: FrameLayout, panel: KeyboardLayoutPanel, defId: String): View? {
+    private fun findDynamicBlockView(frame: FrameLayout, panel: KeyboardLayoutPanel, defId: String, index: Int): View? {
         for (i in 0 until frame.childCount) {
             val child = frame.getChildAt(i)
             if (KeyboardLayoutViewTags.panelOf(child) == panel &&
                 KeyboardLayoutViewTags.defIdOf(child) == defId &&
+                (KeyboardLayoutViewTags.indexOf(child) == index || KeyboardLayoutViewTags.indexOf(child) == null) &&
                 KeyboardLayoutViewTags.isDynamicBlockView(child)
             ) {
                 return child
@@ -295,13 +307,12 @@ object KeyboardLayoutRuntimeApplier {
         return ImeKeyboardViewFactory.createLayoutBlockButton(frame.context, panel, def).also { frame.addView(it) }
     }
 
-    private fun hideUnplacedDynamicBlockViews(frame: FrameLayout, layout: KeyboardLayout) {
-        val placedDefIds = layout.blocks.map { it.defId }.toSet()
+    private fun hideUnplacedDynamicBlockViews(frame: FrameLayout, panel: KeyboardLayoutPanel, placedViews: Set<View>) {
         for (i in 0 until frame.childCount) {
             val child = frame.getChildAt(i)
-            if (KeyboardLayoutViewTags.panelOf(child) == layout.panel &&
+            if (KeyboardLayoutViewTags.panelOf(child) == panel &&
                 KeyboardLayoutViewTags.isDynamicBlockView(child) &&
-                KeyboardLayoutViewTags.defIdOf(child) !in placedDefIds
+                child !in placedViews
             ) {
                 child.visibility = View.GONE
             }

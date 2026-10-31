@@ -15,6 +15,15 @@ internal object KeyboardLayoutViewTags {
         view.setTag(R.id.keyboardLayoutBlockDynamicTag, dynamic)
     }
 
+    fun markInstance(view: View, index: Int, block: BlockInstance) {
+        view.setTag(R.id.keyboardLayoutBlockIndexTag, index)
+        view.setTag(R.id.keyboardLayoutBlockInstanceTag, block)
+    }
+
+    fun indexOf(view: View): Int? = view.getTag(R.id.keyboardLayoutBlockIndexTag) as? Int
+
+    fun instanceOf(view: View): BlockInstance? = view.getTag(R.id.keyboardLayoutBlockInstanceTag) as? BlockInstance
+
     fun panelOf(view: View): KeyboardLayoutPanel? = KeyboardLayoutPanel.values().firstOrNull {
         view.getTag(R.id.keyboardLayoutBlockPanelTag) == it.id
     }

@@ -39,7 +39,8 @@ internal class DictationUseCase(
         ic: InputConnection?,
         text: String,
         state: KeyboardState.Listening,
-        seq: Long
+        seq: Long,
+        polishPolicy: RecordingPolishPolicy = RecordingPolishPolicy.FollowSettings
     ) {
         if (text.isBlank()) {
             dictationSession.complete(seq, ic, "")
@@ -52,8 +53,11 @@ internal class DictationUseCase(
         }
         val historyTiming = asrManager.acquireNextHistoryCommitContext()
         historyTiming?.timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
-        if (prefs.postProcessEnabled && prefs.hasLlmKeys()) {
-            handleWithPostprocess(ic, text, state, seq, historyTiming)
+        if (polishPolicy != RecordingPolishPolicy.Skip &&
+            (polishPolicy is RecordingPolishPolicy.UsePrompt || prefs.postProcessEnabled) &&
+            prefs.hasLlmKeys()
+        ) {
+            handleWithPostprocess(ic, text, state, seq, historyTiming, polishPolicy as? RecordingPolishPolicy.UsePrompt)
         } else {
             handleWithoutPostprocess(ic, text, state, seq, historyTiming)
         }
@@ -64,7 +68,8 @@ internal class DictationUseCase(
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
-        historyTiming: AsrSessionManager.HistoryCommitContext?
+        historyTiming: AsrSessionManager.HistoryCommitContext?,
+        prompt: RecordingPolishPolicy.UsePrompt?
     ) {
         if (isCancelled(seq)) return
 
@@ -77,14 +82,14 @@ internal class DictationUseCase(
             ai = true
         )
         dictationSession.enterAi(seq)
-        val selectingPrompt = prefs.promptAutoSelectEnabled
+        val selectingPrompt = prompt == null && prefs.promptAutoSelectEnabled
         transitionToState(
             KeyboardState.AiProcessing(
                 rawText = text,
                 promptTitle = if (selectingPrompt) {
                     null
                 } else {
-                    prefs.activePromptTitle.takeIf { it.isNotBlank() }
+                    prompt?.title ?: prefs.activePromptTitle.takeIf { it.isNotBlank() }
                 },
                 selectingPrompt = selectingPrompt
             )
@@ -130,8 +135,16 @@ internal class DictationUseCase(
             },
             // 首次语音识别属于自动流程，允许按开关自动选择预设。
             promptSelectionMode =
-            com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED,
-            onPolishPrompt = updateAiProcessingPrompt
+            if (prompt == null) {
+                com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.AUTO_IF_ENABLED
+            } else {
+                com.brycewg.asrkb.util.AsrFinalFilters.PromptSelectionMode.DISABLED
+            },
+            promptOverride = prompt?.content,
+            forceAi = prompt != null,
+            onPolishPrompt = { selecting, title ->
+                updateAiProcessingPrompt(selecting, prompt?.title ?: title)
+            }
         ) ?: return
 
         if (isCancelled(seq)) return

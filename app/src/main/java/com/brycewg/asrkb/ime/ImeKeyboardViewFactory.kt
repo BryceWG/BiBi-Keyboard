@@ -255,6 +255,7 @@ internal object ImeKeyboardViewFactory {
             )
         }
         BlockDefRegistry.default.defsFor(KeyboardLayoutPanel.Recording)
+            .filter { it.viewId != null }
             .forEach { row.addFrameChild(createButtonFromDef(context, it)) }
         return row
     }
@@ -510,6 +511,7 @@ internal object ImeKeyboardViewFactory {
         val dynamic = def.viewId == null
         KeyboardLayoutViewTags.markBlockView(view, panel, def, dynamic)
         if (dynamic) {
+            view.applyDynamicLayoutKeyTheme(BibiViewThemes.resolve(context, Prefs(context)))
             view.visibility = View.GONE
         }
         return view

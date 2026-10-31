@@ -40,7 +40,9 @@ internal class PostprocessPipeline(
         aiTimingObserver: AsrFinalFilters.AiPostprocessTimingObserver? = null,
         promptSelectionMode: AsrFinalFilters.PromptSelectionMode =
             AsrFinalFilters.PromptSelectionMode.DISABLED,
-        onPolishPrompt: ((selecting: Boolean, title: String?) -> Unit)? = null
+        onPolishPrompt: ((selecting: Boolean, title: String?) -> Unit)? = null,
+        promptOverride: String? = null,
+        forceAi: Boolean = false
     ): Result? {
         val rawText = try {
             if (AsrFinalFilters.shouldTrimTrailingPunctAndEmoji(prefs, text)) {
@@ -99,6 +101,8 @@ internal class PostprocessPipeline(
                 text,
                 llmPostProcessor,
                 onStreamingUpdate = onStreamingUpdate,
+                promptOverride = promptOverride,
+                forceAi = forceAi,
                 aiTimingObserver = aiTimingObserver,
                 promptSelectionMode = promptSelectionMode,
                 isCancelled = isCancelled,

@@ -337,7 +337,7 @@ object KeyboardLayoutStore {
         return null
     }
 
-    private val recordingGestureDefIds = setOf("gesture_cancel", "gesture_send")
+    private val recordingGestureDefIds = RecordingLayoutButtons.defIds
 
     private val LEGACY_DEF_IDS = mapOf(
         "ext_copy_last_asr" to BlockDefRegistry.extensionDefId(ExtensionButtonAction.ASR_HISTORY)

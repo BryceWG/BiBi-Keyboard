@@ -87,6 +87,7 @@ import com.brycewg.asrkb.ime.layout.KeyboardLayout
 import com.brycewg.asrkb.ime.layout.KeyboardLayoutBundle
 import com.brycewg.asrkb.ime.layout.KeyboardLayoutPanel
 import com.brycewg.asrkb.ime.layout.KeyboardLayoutStore
+import com.brycewg.asrkb.ime.layout.RecordingLayoutButtons
 import com.brycewg.asrkb.ime.layout.validateLayout
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.settings.compose.components.MaterialSettingsAlertDialog
@@ -134,6 +135,8 @@ internal fun KeyboardLayoutEditorScreen(
     var panel by remember { mutableStateOf(KeyboardLayoutPanel.Main) }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
     var showJson by remember { mutableStateOf(false) }
+    var promptBlock by remember { mutableStateOf<BlockInstance?>(null) }
+    var promptBlockIndex by remember { mutableStateOf<Int?>(null) }
     var jsonText by remember(bundle) { mutableStateOf(KeyboardLayoutStore.encodeBundle(bundle)) }
     var messageDialog by remember { mutableStateOf<SettingsMessageDialogState?>(null) }
 
@@ -170,6 +173,14 @@ internal fun KeyboardLayoutEditorScreen(
     }
 
     fun saveLayout() {
+        val hasUnconfiguredPrompt = bundle.recording.blocks.any { block ->
+            block.defId == RecordingLayoutButtons.PROMPT_POLISH &&
+                prefs.getPromptPresets().none { it.id == block.config[RecordingLayoutButtons.PROMPT_ID] }
+        }
+        if (hasUnconfiguredPrompt) {
+            showMessage(context.getString(R.string.keyboard_layout_prompt_required))
+            return
+        }
         val errors = listOf(bundle.main, bundle.aiEdit, bundle.recording)
             .flatMap { validateLayout(it, registry) }
         if (errors.isNotEmpty()) {
@@ -287,9 +298,15 @@ internal fun KeyboardLayoutEditorScreen(
                         floatingBarInset = if (selectedBlock != null && selectedDef != null) 72.dp else 0.dp,
                         modifier = Modifier.fillMaxSize(),
                         onAdd = { def ->
-                            updateLayout { current ->
-                                val placement = findFreePlacement(current, def) ?: return@updateLayout current
-                                current.copy(blocks = current.blocks + BlockInstance(def.id, placement))
+                            val placement = findFreePlacement(layout, def)
+                            if (placement != null) {
+                                val block = BlockInstance(def.id, placement)
+                                if (def.id == RecordingLayoutButtons.PROMPT_POLISH) {
+                                    promptBlockIndex = null
+                                    promptBlock = block
+                                } else {
+                                    updateLayout { it.copy(blocks = it.blocks + block) }
+                                }
                             }
                         }
                     )
@@ -322,6 +339,10 @@ internal fun KeyboardLayoutEditorScreen(
                                     )
                                 }
                             }
+                        },
+                        onConfigure = {
+                            promptBlockIndex = selectedIndexValue
+                            promptBlock = selectedBlock
                         },
                         onDelete = {
                             if (!selectedDef.required) {
@@ -356,6 +377,30 @@ internal fun KeyboardLayoutEditorScreen(
                 }
             },
             onCopy = { copyJsonToClipboard(jsonText) }
+        )
+    }
+
+    promptBlock?.let { block ->
+        RecordingPromptButtonDialog(
+            uiMode = uiMode,
+            initialConfig = block.config,
+            isAdding = promptBlockIndex == null,
+            onDismiss = { promptBlock = null },
+            onSave = { config ->
+                val index = promptBlockIndex
+                updateLayout { current ->
+                    val configured = block.copy(config = config)
+                    current.copy(
+                        blocks = if (index == null) {
+                            current.blocks + configured
+                        } else {
+                            current.blocks.toMutableList().also { it[index] = configured }
+                        }
+                    )
+                }
+                selectedIndex = index ?: bundle.recording.blocks.lastIndex
+                promptBlock = null
+            }
         )
     }
 
@@ -960,6 +1005,7 @@ private fun KeyboardLayoutGrid(
             KeyboardLayoutBlockChip(
                 uiMode = uiMode,
                 def = def,
+                title = block.recordingPromptTitle(LocalContext.current),
                 selected = selected,
                 modifier = Modifier
                     .offset {
@@ -1036,6 +1082,7 @@ private fun KeyboardLayoutGrid(
             KeyboardLayoutBlockChip(
                 uiMode = uiMode,
                 def = def,
+                title = block.recordingPromptTitle(LocalContext.current),
                 selected = true,
                 invalid = !preview.valid,
                 ghost = true,
@@ -1102,6 +1149,7 @@ private fun KeyboardLayoutBlockChip(
     selected: Boolean,
     invalid: Boolean = false,
     ghost: Boolean = false,
+    title: String? = null,
     modifier: Modifier
 ) {
     val bg = when (uiMode) {
@@ -1165,7 +1213,7 @@ private fun KeyboardLayoutBlockChip(
         }
         KeyboardLayoutMarqueeText(
             uiMode = uiMode,
-            text = stringResource(def.labelRes),
+            text = title ?: stringResource(def.labelRes),
             modifier = Modifier.fillMaxWidth(),
             color = fg,
             materialStyle = MaterialTheme.typography.labelSmall,
@@ -1183,6 +1231,7 @@ private fun KeyboardLayoutFloatingSelectionBar(
     sizes: List<BlockSize>,
     modifier: Modifier = Modifier,
     onSizeSelected: (BlockSize) -> Unit,
+    onConfigure: () -> Unit,
     onDelete: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1205,12 +1254,21 @@ private fun KeyboardLayoutFloatingSelectionBar(
                 entry = SettingsEntry.Dropdown(
                     id = "keyboard_layout_selected_size",
                     titleRes = def.labelRes,
+                    title = block.recordingPromptTitle(LocalContext.current),
                     options = options.map { size -> DropdownOption(size.toString(), size.toString()) },
                     selectedOptionId = currentSize.toString(),
                     onSelectedOptionChange = { id ->
                         options.firstOrNull { it.toString() == id }?.let(onSizeSelected)
                     }
                 )
+            )
+        }
+        if (def.id == RecordingLayoutButtons.PROMPT_POLISH) {
+            KeyboardLayoutNeutralAction(
+                uiMode = uiMode,
+                text = stringResource(R.string.keyboard_layout_configure_prompt),
+                modifier = Modifier.width(72.dp),
+                onClick = onConfigure
             )
         }
         KeyboardLayoutDeleteIconButton(
@@ -1563,7 +1621,7 @@ private fun BlockDefRegistry.targetTrayDef(panel: KeyboardLayoutPanel, displayDe
     )
     .firstOrNull()
 
-private fun BlockDef.isRecordingGesture(): Boolean = id == "gesture_cancel" || id == "gesture_send"
+private fun BlockDef.isRecordingGesture(): Boolean = id in RecordingLayoutButtons.defIds
 
 private fun BlockDef.isTrayVisibleIn(panel: KeyboardLayoutPanel): Boolean = when {
     isRecordingGesture() -> false
@@ -1628,7 +1686,9 @@ private val trayKeyOrder = listOf(
     "auto_enter_after_asr_toggle",
     "duck_media_on_record_toggle",
     "gesture_cancel",
-    "gesture_send"
+    "gesture_send",
+    RecordingLayoutButtons.SKIP_POLISH,
+    RecordingLayoutButtons.PROMPT_POLISH
 )
 
 private inline fun <T> Iterable<T>.anyIndexed(predicate: (Int, T) -> Boolean): Boolean {
@@ -1641,4 +1701,11 @@ private inline fun <T> Iterable<T>.anyIndexed(predicate: (Int, T) -> Boolean): B
 private fun copyToSystemClipboard(context: Context, text: String) {
     val manager = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager ?: return
     manager.setPrimaryClip(ClipData.newPlainText("keyboard-layout", text))
+}
+
+private fun BlockInstance.recordingPromptTitle(context: Context): String? {
+    if (defId != RecordingLayoutButtons.PROMPT_POLISH) return null
+    return Prefs(context).getPromptPresets()
+        .firstOrNull { it.id == config[RecordingLayoutButtons.PROMPT_ID] }
+        ?.title ?: context.getString(R.string.keyboard_layout_prompt_required)
 }

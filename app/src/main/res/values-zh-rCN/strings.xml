@@ -549,4 +549,10 @@
   <string name="recording_test_error_ai">AI 处理失败：%1$s</string>
   <string name="toast_ime_bridge_protocol_mismatch">输入法桥接模块与说点啥版本不兼容，请更新模块或应用。</string>
   <string name="toast_ime_bridge_connection_failed">无法连接输入法桥接模块，请确认已在 LSPosed 中启用模块并勾选当前输入法。</string>
+  <string name="keyboard_layout_skip_polish">跳过润色</string>
+  <string name="keyboard_layout_prompt_polish">指定 Prompt 润色</string>
+  <string name="keyboard_layout_configure_prompt">编辑</string>
+  <string name="keyboard_layout_prompt_hint">选择已有润色 Prompt，按钮会跟随该预设的修改。</string>
+  <string name="keyboard_layout_prompt_required">请为此按钮选择已有润色 Prompt，原预设可能已被删除。</string>
+  <string name="keyboard_layout_add">添加</string>
 </resources>

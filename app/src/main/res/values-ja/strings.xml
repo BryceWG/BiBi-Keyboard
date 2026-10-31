@@ -550,4 +550,10 @@
   <string name="recording_test_error_ai">AI処理に失敗しました：%1$s</string>
   <string name="toast_ime_bridge_protocol_mismatch">IME ブリッジモジュールと BiBi Keyboard のバージョンに互換性がありません。モジュールまたはアプリを更新してください。</string>
   <string name="toast_ime_bridge_connection_failed">IME ブリッジモジュールに接続できません。LSPosed でモジュールを有効にし、現在の入力方式を選択していることを確認してください。</string>
+  <string name="keyboard_layout_skip_polish">推敲をスキップ</string>
+  <string name="keyboard_layout_prompt_polish">指定プロンプトで推敲</string>
+  <string name="keyboard_layout_configure_prompt">編集</string>
+  <string name="keyboard_layout_prompt_hint">既存の推敲プロンプトを選択します。プリセットの変更はこのボタンにも反映されます。</string>
+  <string name="keyboard_layout_prompt_required">既存の推敲プロンプトを選択してください。選択済みのプリセットは削除された可能性があります。</string>
+  <string name="keyboard_layout_add">追加</string>
 </resources>

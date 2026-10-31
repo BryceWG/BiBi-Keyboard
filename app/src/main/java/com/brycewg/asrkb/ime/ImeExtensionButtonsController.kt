@@ -78,6 +78,7 @@ internal class ImeExtensionButtonsController(
 
     private fun bindDynamicLayoutActionButton(view: View) {
         val panel = KeyboardLayoutViewTags.panelOf(view) ?: return
+        if (panel == KeyboardLayoutPanel.Recording) return
         val defId = KeyboardLayoutViewTags.defIdOf(view) ?: return
         val def = BlockDefRegistry.default.get(panel, defId) ?: BlockDefRegistry.default.get(defId) ?: return
         def.extensionActionId

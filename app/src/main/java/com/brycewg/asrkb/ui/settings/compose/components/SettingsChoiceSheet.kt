@@ -46,6 +46,7 @@ import com.brycewg.asrkb.ui.settings.compose.core.LocalBibiSettingsDark
 import com.brycewg.asrkb.ui.settings.compose.core.LocalSettingsHapticTap
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.settings.compose.core.settingsSegmentedItemShape
+import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.RadioButtonLocation
@@ -242,14 +243,14 @@ private fun ChoiceSheetList(
                 items = group.items,
                 key = { _, item -> item.originalIndex }
             ) { index, item ->
-                ChoiceItemRow(
+                SettingsChoiceItemRow(
                     item = item,
                     selected = item.originalIndex == state.selectedIndex,
                     uiMode = uiMode,
                     index = index,
                     count = group.items.size,
                     onClick = {
-                        if (selectionHandled) return@ChoiceItemRow
+                        if (selectionHandled) return@SettingsChoiceItemRow
                         selectionHandled = true
                         hapticTap()
                         onDismiss { state.onSelected(item.originalIndex) }
@@ -286,12 +287,13 @@ private fun ChoiceGroupHeader(label: String, uiMode: BibiUiMode) {
 }
 
 @Composable
-private fun ChoiceItemRow(
+internal fun SettingsChoiceItemRow(
     item: SettingsChoiceItem,
     selected: Boolean,
     uiMode: BibiUiMode,
     index: Int,
     count: Int,
+    miuixInsideMargin: PaddingValues = BasicComponentDefaults.InsideMargin,
     onClick: () -> Unit
 ) {
     when (uiMode) {
@@ -333,6 +335,7 @@ private fun ChoiceItemRow(
 
         BibiUiMode.Miuix -> RadioButtonPreference(
             title = item.title,
+            insideMargin = miuixInsideMargin,
             selected = selected,
             onClick = onClick,
             radioButtonLocation = RadioButtonLocation.End,

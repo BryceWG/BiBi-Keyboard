@@ -74,6 +74,7 @@ class KeyboardActionHandler(
 
     // 操作序列号：用于取消在途处理（强制停止/新会话开始都会递增）
     private var opSeq: Long = 0L
+    private var recordingPolishPolicy: RecordingPolishPolicy = RecordingPolishPolicy.FollowSettings
 
     private val undoManager = UndoManager(inputHelper = inputHelper, logTag = TAG, maxSnapshots = 3)
 
@@ -487,6 +488,33 @@ class KeyboardActionHandler(
     fun handleMicGestureSend() {
         if (currentState !is KeyboardState.Listening) return
         handleMicPressUp(autoEnterAfterFinal = true)
+    }
+
+    internal fun handleRecordingPolish(policy: RecordingPolishPolicy) {
+        if (currentState !is KeyboardState.Listening) return
+        if (policy is RecordingPolishPolicy.UsePrompt) {
+            val error = when {
+                policy.title.isBlank() || policy.content.isBlank() -> R.string.keyboard_layout_prompt_required
+                !prefs.hasLlmKeys() -> R.string.hint_need_llm_keys
+                else -> null
+            }
+            if (error != null) {
+                // 松手后不能继续保留长按抑制；锁定录音以保留音频，等待用户选择下一动作。
+                if (micHoldActive) handleMicSwipeLock()
+                uiListener?.onStatusMessage(context.getString(error))
+                return
+            }
+        }
+        recordingPolishPolicy = policy
+        DebugLogManager.logBase(
+            category = "ime",
+            event = "recording_polish_selected",
+            data = mapOf(
+                "mode" to if (policy is RecordingPolishPolicy.UsePrompt) "prompt" else "skip",
+                "opSeq" to opSeq
+            )
+        )
+        handleMicPressUp(autoEnterAfterFinal = false)
     }
 
     fun handleLockedMicTap() {
@@ -940,6 +968,7 @@ class KeyboardActionHandler(
     override fun onAsrFinal(text: String, currentState: KeyboardState) {
         val hopStartedAt = SystemClock.elapsedRealtime()
         val seq = opSeq
+        val polishPolicy = recordingPolishPolicy
         scope.launch {
             if (seq != opSeq) return@launch
             AsrCallLatencyProbe.log(
@@ -960,17 +989,17 @@ class KeyboardActionHandler(
                     aiEditUseCase.handleFinal(text, currentState, seq)
                 }
                 is KeyboardState.Listening -> {
-                    handleNormalDictationFinal(text, currentState, seq)
+                    handleNormalDictationFinal(text, currentState, seq, polishPolicy)
                 }
                 is KeyboardState.Processing, is KeyboardState.Idle -> {
                     // 允许在 Idle/Processing 状态接收最终结果（例如提前切回 Idle 的路径）
                     val synthetic = KeyboardState.Listening()
-                    handleNormalDictationFinal(text, synthetic, seq)
+                    handleNormalDictationFinal(text, synthetic, seq, polishPolicy)
                 }
                 else -> {
                     // 兜底按普通听写处理
                     val synthetic = KeyboardState.Listening()
-                    handleNormalDictationFinal(text, synthetic, seq)
+                    handleNormalDictationFinal(text, synthetic, seq, polishPolicy)
                 }
             }
         }
@@ -1277,6 +1306,7 @@ class KeyboardActionHandler(
     }
 
     private fun startNormalListening() {
+        recordingPolishPolicy = RecordingPolishPolicy.FollowSettings
         // 开启新一轮录音：递增操作序列，取消在途处理
         opSeq++
         inputHelper.diagSession = opSeq
@@ -1396,10 +1426,11 @@ class KeyboardActionHandler(
     private suspend fun handleNormalDictationFinal(
         text: String,
         state: KeyboardState.Listening,
-        seq: Long
+        seq: Long,
+        polishPolicy: RecordingPolishPolicy
     ) {
         // 即使当前拿不到 InputConnection，也必须完成后处理、历史与主动复制，不能直接丢弃结果。
-        dictationUseCase.handleFinal(getCurrentInputConnection(), text, state, seq)
+        dictationUseCase.handleFinal(getCurrentInputConnection(), text, state, seq, polishPolicy)
     }
 
     private fun transitionToIdleWithTiming(showBackupUsedHint: Boolean = false) {
