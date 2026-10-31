@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_translation_settings">翻訳設定</string>
+    <string name="label_translation_enabled">翻訳を有効にする</string>
+    <string name="translation_feature">翻訳</string>
+    <string name="translation_service_config">サービス設定</string>
+    <string name="translation_vendor">サービス</string>
+    <string name="translation_foxlet">Foxlet オフライン翻訳</string>
+    <string name="translation_source_language">入力言語</string>
+    <string name="translation_target_language">翻訳先の言語</string>
+    <string name="translation_packages">言語パック</string>
+    <string name="translation_download_packages">言語パックをダウンロード</string>
+    <string name="translation_delete_packages">言語パックを削除</string>
+    <string name="translation_cancel_download">ダウンロードを中止</string>
+    <string name="translation_swap">言語を入れ替え</string>
+    <string name="translation_ready">言語パックの準備完了</string>
+    <string name="translation_checking">言語パックを確認中…</string>
+    <string name="translation_required_download">%1$d 個の言語パックが必要 · %2$d MB</string>
+    <string name="translation_download_progress">ダウンロード中 · %1$d%%</string>
+    <string name="translation_downloading">言語パックをダウンロード中</string>
+    <string name="translation_download_failed">ダウンロードに失敗しました。再試行してください</string>
+    <string name="translation_model_error">言語パックを読み取れません</string>
+    <string name="translation_delete_failed">言語パックを削除できません</string>
+    <string name="translation_delete_confirm">この翻訳方向の言語パックを削除しますか？他の翻訳方向でも使われている場合があります。</string>
+    <string name="translation_processing">翻訳中…</string>
+    <string name="translation_failed">翻訳に失敗しました。言語パックを確認して再試行してください</string>
+    <string name="translation_empty_result">翻訳結果が空です</string>
+    <string name="translation_choose_languages">入力言語と翻訳先の言語を選択してください</string>
+    <string name="translation_unsupported_device">Foxlet には Android 9 以降と 64 ビット ARM 端末が必要です。</string>
+    <string name="translation_feature_off">音声入力の後処理結果を翻訳せずに入力します。</string>
+    <string name="translation_feature_on">音声認識後、AIによる推敲（使用する場合）、翻訳、末尾の句読点の削除などの最終処理の順に実行します。</string>
+    <string name="translation_input_text">翻訳前のテキスト</string>
+    <string name="translation_preload">モデルを事前に読み込む</string>
+    <string name="translation_preload_off">翻訳開始時にモデルを読み込みます。</string>
+    <string name="translation_preload_on">翻訳が有効な場合、録音開始時に必要なモデルを読み込みます。</string>
+    <string name="translation_keep_alive">モデルの解放ポリシー</string>
+    <string name="translation_keep_alive_immediate">保持しない（翻訳後すぐに解放）</string>
+    <string name="translation_downloaded_packages">ダウンロード済み言語パック</string>
+    <string name="translation_no_packages">言語パックは未ダウンロードです</string>
+    <string name="translation_pack_details">%1$d MB · バージョン %2$s</string>
+    <string name="translation_delete_one_confirm">%1$s を削除しますか？他の翻訳方向でも使用される場合があります。</string>
+    <string name="translation_keep_alive_always">常に保持</string>
+    <string name="translation_manage_packages">言語パックを管理</string>
+    <string name="translation_delete_pack_action">%1$s を削除</string>
+</resources>

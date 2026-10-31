@@ -89,6 +89,12 @@ internal object PrefsBackup {
         o.put(KEY_FLOATING_KEEP_ALIVE_ENABLED, floatingKeepAliveEnabled)
         o.put(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED, floatingKeepAlivePrivilegedEnabled)
 
+        o.put(KEY_TRANSLATION_PRELOAD, translationPreloadEnabled)
+        o.put(KEY_TRANSLATION_KEEP_ALIVE, translationKeepAliveMinutes)
+        o.put(KEY_TRANSLATION_ENABLED, translationEnabled)
+        o.put(KEY_TRANSLATION_VENDOR, translationVendor)
+        o.put(KEY_TRANSLATION_SOURCE, translationSourceLanguage)
+        o.put(KEY_TRANSLATION_TARGET, translationTargetLanguage)
         o.put(KEY_POSTPROC_ENABLED, postProcessEnabled)
         o.put(KEY_POSTPROC_TYPEWRITER_ENABLED, postprocTypewriterEnabled)
         o.put(KEY_AI_EDIT_DEFAULT_TO_LAST_ASR, aiEditDefaultToLastAsr)
@@ -374,6 +380,12 @@ internal object PrefsBackup {
             optString(KEY_SETTINGS_UI_MODE)?.let { settingsUiMode = it }
             optString(KEY_SETTINGS_THEME_MODE)?.let { settingsThemeMode = it }
             optBool(KEY_AUTO_UPDATE_CHECK_ENABLED)?.let { autoUpdateCheckEnabled = it }
+            optBool(KEY_TRANSLATION_PRELOAD)?.let { translationPreloadEnabled = it }
+            optInt(KEY_TRANSLATION_KEEP_ALIVE)?.let { translationKeepAliveMinutes = it }
+            optBool(KEY_TRANSLATION_ENABLED)?.let { translationEnabled = it }
+            optString(KEY_TRANSLATION_VENDOR)?.let { translationVendor = it }
+            optString(KEY_TRANSLATION_SOURCE)?.let { translationSourceLanguage = it }
+            optString(KEY_TRANSLATION_TARGET)?.let { translationTargetLanguage = it }
             optBool(KEY_POSTPROC_ENABLED)?.let { postProcessEnabled = it }
             optBool(KEY_POSTPROC_TYPEWRITER_ENABLED)?.let { postprocTypewriterEnabled = it }
             optBool(KEY_HEADSET_MIC_PRIORITY_ENABLED)?.let { headsetMicPriorityEnabled = it }

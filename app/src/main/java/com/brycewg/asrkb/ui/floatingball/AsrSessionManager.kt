@@ -120,6 +120,8 @@ class AsrSessionManager(
     private var lastAiPostMs: Long = 0L
     private var lastAiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE
     private var lastLlmVendorId: String? = null
+    var lastTranslation: com.brycewg.asrkb.store.TranslationRecord? = null
+        private set
     private var lastPromptSelection: PromptSelectionStatus? = null
 
     // 统计/历史：最近一次最终结果的实际供应商（备用引擎场景下不再固定记录 prefs.asrVendor）
@@ -398,6 +400,7 @@ class AsrSessionManager(
             historyAudioCapture?.bind(engine as? SessionAudioSourceOwner)
             AsrConnectionWarmer.warmForImmediateUse(context, prefs)
             LlmConnectionWarmer.warmForImmediateUse(prefs)
+            com.brycewg.asrkb.translation.TranslationPreload.onRecordingStarted(context, prefs)
             preloadLocalAsrForImmediateUse(context, prefs)
             ContinuousCaptureCoordinator.beginSession(sessionToken)
             engine.start()
@@ -991,6 +994,33 @@ class AsrSessionManager(
                 lastPromptSelection = null
             }
             if (!isSessionActive(sessionToken)) return@launch
+            lastTranslation = null
+            if (prefs.translationEnabled) {
+                processingTimeoutJob?.cancel()
+                listener.onSessionStateChanged(FloatingBallState.Processing)
+                try {
+                    finalText = com.brycewg.asrkb.translation.TranslationPipeline.translate(context, prefs, finalText, completedHistoryTiming) { lastTranslation = it }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    archiveHistoryFailure(
+                        status = AsrHistoryStore.AsrHistoryStatus.FAILED,
+                        failStage = AsrHistoryStore.AsrHistoryFailStage.TRANSLATION,
+                        failReasonCode = "translation_failed",
+                        capture = null,
+                        recordId = completedHistoryRecordId,
+                        audioAlreadySaved = true,
+                        rawText = text,
+                        timingTrace = completedHistoryTiming?.complete(completed = false)
+                    )
+                    completedHistoryRecordId = null
+                    completedHistoryRawText = null
+                    completedHistoryTiming = null
+                    onError(sessionToken, context.getString(com.brycewg.asrkb.R.string.translation_failed))
+                    return@launch
+                }
+                if (!isSessionActive(sessionToken)) return@launch
+            }
 
             // 更新状态
             val engineStillRunning = asrEngine?.isRunning == true

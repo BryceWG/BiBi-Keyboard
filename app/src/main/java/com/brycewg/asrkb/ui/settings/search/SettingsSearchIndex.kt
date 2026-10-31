@@ -88,6 +88,19 @@ object SettingsSearchIndex {
         add(DeclarativeEntry(R.string.about_title, R.string.settings_title, BibiSettingsRoute.About))
         add(DeclarativeEntry(R.string.about_stats_title, R.string.about_stats_title, BibiSettingsRoute.UsageStats))
 
+        listOf(
+            R.string.title_translation_settings,
+            R.string.label_translation_enabled,
+            R.string.translation_vendor,
+            R.string.translation_source_language,
+            R.string.translation_target_language,
+            R.string.translation_packages,
+            R.string.translation_preload,
+            R.string.translation_keep_alive,
+            R.string.translation_manage_packages
+        ).forEach { title ->
+            add(DeclarativeEntry(title, R.string.title_translation_settings, BibiSettingsRoute.Translation, keywords = listOf("Foxlet", "离线翻译", "translation")))
+        }
         addInputEntries()
         addFloatingEntries()
         addAsrEntries()

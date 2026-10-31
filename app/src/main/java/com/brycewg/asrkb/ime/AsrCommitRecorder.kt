@@ -45,7 +45,8 @@ internal class AsrCommitRecorder(
         val totalElapsedMs: Long,
         val procMs: Long,
         val vendor: AsrVendor,
-        val timingTrace: AsrHistoryTimingTrace?
+        val timingTrace: AsrHistoryTimingTrace?,
+        val translation: com.brycewg.asrkb.store.TranslationRecord?
     )
 
     private val recordLock = Any()
@@ -59,7 +60,8 @@ internal class AsrCommitRecorder(
         aiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE,
         llmVendorId: String? = null,
         promptSelection: PromptSelectionStatus? = null,
-        historyTiming: AsrSessionManager.HistoryCommitContext? = null
+        historyTiming: AsrSessionManager.HistoryCommitContext? = null,
+        translation: com.brycewg.asrkb.store.TranslationRecord? = null
     ): PreparedCommit {
         val chars = try {
             TextSanitizer.countEffectiveChars(text)
@@ -107,7 +109,8 @@ internal class AsrCommitRecorder(
             totalElapsedMs = timingTrace?.totalElapsedMs ?: totalElapsedMs,
             procMs = procMs,
             vendor = vendor,
-            timingTrace = timingTrace
+            timingTrace = timingTrace,
+            translation = translation
         )
         logTiming(
             "snapshot_prepared",
@@ -214,6 +217,7 @@ internal class AsrCommitRecorder(
                         aiPostStatus = prepared.aiPostStatus,
                         llmVendorId = prepared.llmVendorId,
                         promptSelection = prepared.promptSelection,
+                        translation = prepared.translation,
                         charCount = prepared.chars,
                         timingTrace = prepared.timingTrace
                     )

@@ -23,7 +23,7 @@ internal class AsrHistoryDatabase private constructor(
     companion object {
         private const val TAG = "AsrHistoryDatabase"
         private const val DB_NAME = "asr_history.db"
-        private const val DB_VERSION = 2
+        private const val DB_VERSION = 3
 
         const val TABLE = "asr_history"
         const val COL_ID = "id"
@@ -45,6 +45,7 @@ internal class AsrHistoryDatabase private constructor(
         const val COL_FAIL_REASON_CODE = "fail_reason_code"
         const val COL_TIMING_TRACE = "timing_trace"
         const val COL_PROMPT_SELECTION = "prompt_selection"
+        const val COL_TRANSLATION = "translation"
 
         @Volatile
         private var instance: AsrHistoryDatabase? = null
@@ -55,6 +56,9 @@ internal class AsrHistoryDatabase private constructor(
 
         /** 版本升级实现（拆出便于单测直接验证 v1 → v2 的列迁移）。 */
         internal fun applyUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+            if (oldVersion < 3) {
+                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $COL_TRANSLATION TEXT")
+            }
             if (oldVersion < 2) {
                 // v2：自动选择提示词的结果快照，旧记录保持 NULL（视为未使用）。
                 addColumnIfMissing(db, COL_PROMPT_SELECTION, "TEXT")
@@ -118,6 +122,7 @@ internal class AsrHistoryDatabase private constructor(
                 $COL_FAIL_STAGE TEXT NOT NULL DEFAULT 'NONE',
                 $COL_FAIL_REASON_CODE TEXT,
                 $COL_TIMING_TRACE TEXT,
+                $COL_TRANSLATION TEXT,
                 $COL_PROMPT_SELECTION TEXT
             )
             """.trimIndent()
@@ -261,6 +266,7 @@ internal class AsrHistoryDatabase private constructor(
         put(COL_STATUS, record.status.name)
         put(COL_FAIL_STAGE, record.failStage.name)
         putNullable(COL_FAIL_REASON_CODE, record.failReasonCode)
+        putNullable(COL_TRANSLATION, record.translation?.let { json.encodeToString(it) })
         putNullable(COL_TIMING_TRACE, record.timingTrace?.let { json.encodeToString(it) })
         putNullable(
             COL_PROMPT_SELECTION,
@@ -311,6 +317,7 @@ internal class AsrHistoryDatabase private constructor(
                 null
             }
         },
+        translation = cursor.optionalString(COL_TRANSLATION)?.let { json.decodeFromString<TranslationRecord>(it) },
         promptSelection = cursor.optionalString(COL_PROMPT_SELECTION)?.let { raw ->
             try {
                 json.decodeFromString<PromptSelectionStatus>(raw)

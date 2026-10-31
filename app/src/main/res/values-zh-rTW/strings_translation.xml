@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_translation_settings">翻譯設定</string>
+    <string name="label_translation_enabled">啟用翻譯</string>
+    <string name="translation_feature">翻譯</string>
+    <string name="translation_service_config">服務商設定</string>
+    <string name="translation_vendor">服務商</string>
+    <string name="translation_foxlet">Foxlet 離線翻譯</string>
+    <string name="translation_source_language">輸入語言</string>
+    <string name="translation_target_language">目標語言</string>
+    <string name="translation_packages">語言套件</string>
+    <string name="translation_download_packages">下載語言套件</string>
+    <string name="translation_delete_packages">刪除語言套件</string>
+    <string name="translation_cancel_download">取消下載</string>
+    <string name="translation_swap">交換語言</string>
+    <string name="translation_ready">語言套件已就緒</string>
+    <string name="translation_checking">正在檢查語言套件…</string>
+    <string name="translation_required_download">需下載 %1$d 個語言套件 · %2$d MB</string>
+    <string name="translation_download_progress">正在下載 · %1$d%%</string>
+    <string name="translation_downloading">正在下載語言套件</string>
+    <string name="translation_download_failed">語言套件下載失敗，請點選重試</string>
+    <string name="translation_model_error">無法讀取語言套件</string>
+    <string name="translation_delete_failed">語言套件刪除失敗</string>
+    <string name="translation_delete_confirm">刪除目前方向的語言套件？其他翻譯方向可能也在使用這些套件。</string>
+    <string name="translation_processing">正在翻譯…</string>
+    <string name="translation_failed">翻譯失敗，請檢查語言套件後重試</string>
+    <string name="translation_empty_result">翻譯未傳回文字</string>
+    <string name="translation_choose_languages">請選擇輸入語言和目標語言</string>
+    <string name="translation_unsupported_device">Foxlet 需要 Android 9 以上版本和 64 位元 ARM 裝置。</string>
+    <string name="translation_feature_off">語音輸入保留後處理結果，不進行翻譯。</string>
+    <string name="translation_feature_on">語音辨識後，先潤飾（若有），再翻譯，最後進行移除結尾標點等文字處理。</string>
+    <string name="translation_input_text">翻譯前文字</string>
+    <string name="translation_preload">積極載入模型</string>
+    <string name="translation_preload_off">開始翻譯時再載入模型。</string>
+    <string name="translation_preload_on">翻譯功能開啟時，在開始錄音時提前載入所需模型。</string>
+    <string name="translation_keep_alive">模型卸載策略</string>
+    <string name="translation_keep_alive_immediate">不保留（翻譯後立即卸載）</string>
+    <string name="translation_downloaded_packages">已下載語言套件</string>
+    <string name="translation_no_packages">尚未下載語言套件</string>
+    <string name="translation_pack_details">%1$d MB · 版本 %2$s</string>
+    <string name="translation_delete_one_confirm">刪除 %1$s？其他翻譯方向可能也在使用此語言套件。</string>
+    <string name="translation_keep_alive_always">始終保留</string>
+    <string name="translation_manage_packages">管理語言套件</string>
+    <string name="translation_delete_pack_action">刪除 %1$s</string>
+</resources>

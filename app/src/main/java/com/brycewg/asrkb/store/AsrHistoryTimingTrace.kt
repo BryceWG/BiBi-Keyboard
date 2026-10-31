@@ -25,6 +25,7 @@ enum class AsrHistoryTimingStage {
     /** 自动选择提示词（分类）阶段；仅在真正发起分类请求时出现。 */
     PROMPT_SELECTION,
     AI_POSTPROCESS,
+    TRANSLATION,
     TEXT_DELIVERY
 }
 

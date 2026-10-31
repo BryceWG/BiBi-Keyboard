@@ -1,0 +1,39 @@
+--- a/foxlet/src/main/kotlin/io/github/yinvoker/foxlet/Foxlet.kt
++++ b/foxlet/src/main/kotlin/io/github/yinvoker/foxlet/Foxlet.kt
+@@ -92,6 +92,11 @@
+     private val lifecycle: ClientLifecycle,
+     private val backend: TranslationBackend,
+ ) {
++    /** Load a model without translating placeholder text. Added by BiBi Keyboard. */
++    suspend fun preload(model: LocalModel) = lifecycle.run {
++        translation(model) { backend.preload(model.modelFiles()) }
++    }
++
+     suspend fun translate(text: String, model: LocalModel, format: TextFormat = TextFormat.Plain): String =
+         translate(listOf(text), model, format).single()
+ 
+@@ -154,6 +159,7 @@
+ }
+ 
+ internal interface TranslationBackend {
++    suspend fun preload(model: ModelFiles)
+     suspend fun translate(texts: List<String>, model: ModelFiles, html: Boolean = false): List<String>
+     suspend fun translatePivot(texts: List<String>, first: ModelFiles, second: ModelFiles, html: Boolean = false): List<String>
+     suspend fun state(): TranslatorState
+--- a/foxlet/src/main/kotlin/io/github/yinvoker/foxlet/NativeEngine.kt
++++ b/foxlet/src/main/kotlin/io/github/yinvoker/foxlet/NativeEngine.kt
+@@ -191,6 +191,14 @@
+         } finally { if (interrupted) Thread.currentThread().interrupt() }
+     }
+ 
++    override suspend fun preload(model: ModelFiles) = withContext(dispatcher) {
++        checkOpen()
++        val key = keyOf(model)
++        acquire(model, key)
++        sweeper.touch(key)
++        sweeper.rearm()
++    }
++
+     override suspend fun state(): TranslatorState = withContext(dispatcher) {
+         checkOpen()
+         TranslatorState(models.size, unconfirmedReleases.size)

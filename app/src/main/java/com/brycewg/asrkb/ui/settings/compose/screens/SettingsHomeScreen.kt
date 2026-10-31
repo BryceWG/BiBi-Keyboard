@@ -36,6 +36,7 @@ import androidx.compose.material.icons.rounded.RocketLaunch
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.TextFields
 import androidx.compose.material.icons.rounded.TouchApp
+import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.WorkspacePremium
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -451,6 +452,12 @@ private fun smartSections(
                 summary = snapshot.aiSummary,
                 icon = Icons.Rounded.AutoAwesome,
                 onClick = { onPushRoute(BibiSettingsRoute.Ai) }
+            ),
+            SettingsEntry.Action(
+                id = "translation_settings",
+                titleRes = R.string.title_translation_settings,
+                icon = Icons.Rounded.Translate,
+                onClick = { onPushRoute(BibiSettingsRoute.Translation) }
             ),
             SettingsEntry.Action(
                 id = "asr_history",

@@ -152,6 +152,8 @@ class SettingsActionController(
             append("=".repeat(80))
             append("\n\n")
             append(activity.readAssetFile("licenses/TenVAD-LICENSE"))
+            append("\n\n")
+            append(activity.readAssetFile("licenses/Foxlet-LICENSE"))
         }
     } catch (e: Throwable) {
         Log.e(TAG, "Failed to build licenses text", e)

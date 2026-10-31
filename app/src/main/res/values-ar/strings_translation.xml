@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_translation_settings">إعدادات الترجمة</string>
+    <string name="label_translation_enabled">تفعيل الترجمة</string>
+    <string name="translation_feature">الترجمة</string>
+    <string name="translation_service_config">إعدادات الخدمة</string>
+    <string name="translation_vendor">الخدمة</string>
+    <string name="translation_foxlet">ترجمة Foxlet دون اتصال</string>
+    <string name="translation_source_language">لغة الإدخال</string>
+    <string name="translation_target_language">اللغة الهدف</string>
+    <string name="translation_packages">حزم اللغات</string>
+    <string name="translation_download_packages">تنزيل حزم اللغات</string>
+    <string name="translation_delete_packages">حذف حزم اللغات</string>
+    <string name="translation_cancel_download">إلغاء التنزيل</string>
+    <string name="translation_swap">تبديل اللغتين</string>
+    <string name="translation_ready">حزم اللغات جاهزة</string>
+    <string name="translation_checking">جارٍ فحص حزم اللغات…</string>
+    <string name="translation_required_download">يلزم تنزيل %1$d حزم · %2$d ميغابايت</string>
+    <string name="translation_download_progress">جارٍ التنزيل · %1$d%%</string>
+    <string name="translation_downloading">جارٍ تنزيل حزم اللغات</string>
+    <string name="translation_download_failed">فشل تنزيل حزم اللغات. أعد المحاولة.</string>
+    <string name="translation_model_error">تعذرت قراءة حزم اللغات</string>
+    <string name="translation_delete_failed">تعذر حذف حزم اللغات</string>
+    <string name="translation_delete_confirm">هل تريد حذف حزم هذا الاتجاه؟ قد تستخدمها اتجاهات ترجمة أخرى.</string>
+    <string name="translation_processing">جارٍ الترجمة…</string>
+    <string name="translation_failed">فشلت الترجمة. تحقق من حزم اللغات وأعد المحاولة.</string>
+    <string name="translation_empty_result">لم تُرجع الترجمة نصًا</string>
+    <string name="translation_choose_languages">اختر لغة الإدخال واللغة الهدف</string>
+    <string name="translation_unsupported_device">يتطلب Foxlet نظام Android 9 أو أحدث وجهاز ARM بمعمارية 64 بت.</string>
+    <string name="translation_feature_off">يحتفظ الإدخال الصوتي بالنص المعالج دون ترجمته.</string>
+    <string name="translation_feature_on">بعد التعرف على الكلام، يُحسّن النص بالذكاء الاصطناعي إن استُخدم، ثم يُترجم، ثم تُطبّق المعالجة النهائية مثل إزالة علامات الترقيم الختامية.</string>
+    <string name="translation_input_text">النص قبل الترجمة</string>
+    <string name="translation_preload">تحميل النماذج مسبقًا</string>
+    <string name="translation_preload_off">تحميل نماذج الترجمة عند بدء الترجمة.</string>
+    <string name="translation_preload_on">عندما تكون الترجمة مفعلة، تُحمّل النماذج المطلوبة عند بدء التسجيل.</string>
+    <string name="translation_keep_alive">سياسة إلغاء تحميل النماذج</string>
+    <string name="translation_keep_alive_immediate">عدم الاحتفاظ (إلغاء التحميل بعد الترجمة)</string>
+    <string name="translation_downloaded_packages">حزم اللغات المنزلة</string>
+    <string name="translation_no_packages">لم تُنزّل أي حزم لغات</string>
+    <string name="translation_pack_details">%1$d ميغابايت · الإصدار %2$s</string>
+    <string name="translation_delete_one_confirm">هل تريد حذف %1$s؟ قد تستخدم اتجاهات ترجمة أخرى هذه الحزمة.</string>
+    <string name="translation_keep_alive_always">الاحتفاظ دائمًا</string>
+    <string name="translation_manage_packages">إدارة حزم اللغات</string>
+    <string name="translation_delete_pack_action">حذف %1$s</string>
+</resources>

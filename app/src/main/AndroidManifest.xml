@@ -40,6 +40,9 @@
     <!-- Shizuku 权限：用于在已授权时以 shell 身份执行部分系统命令 -->
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
 
+    <!-- Foxlet is entered only on Android 9+ ARM64; the host retains Android 8 support. -->
+    <uses-sdk tools:overrideLibrary="io.github.yinvoker.foxlet" />
+
     <application
         android:name=".App"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -183,6 +186,10 @@
             android:exported="false" />
 
         <!-- 模型下载/解压前台服务（支持并发任务） -->
+        <service
+            android:name=".translation.TranslationDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <service
             android:name=".ui.settings.asr.ModelDownloadService"
             android:exported="false"

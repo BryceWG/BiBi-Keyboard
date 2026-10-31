@@ -412,6 +412,7 @@ internal class ExternalSpeechSession(
                 historyAudioCapture.takeUnless { pushPcmInput }
             AsrConnectionWarmer.warmForImmediateUse(context, prefs)
             LlmConnectionWarmer.warmForImmediateUse(prefs)
+            com.brycewg.asrkb.translation.TranslationPreload.onRecordingStarted(context, prefs)
             preloadLocalAsrForImmediateUse(context, prefs)
             startedEngine.start()
         }
@@ -526,13 +527,13 @@ internal class ExternalSpeechSession(
         ) {
             false
         }
-        if (doAi) {
+        if (doAi || prefs.translationEnabled) {
             if (!hasAsrPartial && text.isNotEmpty()) {
                 hasAsrPartial = true
                 safe { callbacks.onPartial(id, text) }
             }
             // 执行带 AI 的完整后处理链（IO 在线程内切换）
-            CoroutineScope(Dispatchers.Main).launch {
+            sessionScope.launch(Dispatchers.Main) {
                 if (canceled) return@launch
                 val typewriterEnabled = try {
                     prefs.postprocTypewriterEnabled
@@ -595,7 +596,8 @@ internal class ExternalSpeechSession(
                 var aiPostStatus = com.brycewg.asrkb.store.AsrHistoryStore.AiPostStatus.NONE
                 var llmVendorId: String? = null
                 var promptSelection: com.brycewg.asrkb.store.PromptSelectionStatus? = null
-                val out = try {
+                var translation: com.brycewg.asrkb.store.TranslationRecord? = null
+                var out = try {
                     val res = com.brycewg.asrkb.util.AsrFinalFilters.applyWithAi(
                         context,
                         prefs,
@@ -698,6 +700,24 @@ internal class ExternalSpeechSession(
                     typewriter?.cancel()
                 }
                 if (canceled) return@launch
+                try {
+                    out = com.brycewg.asrkb.translation.TranslationPipeline.translate(context, prefs, out, historyTiming) { translation = it }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    archiveHistoryFailure(
+                        status = AsrHistoryStore.AsrHistoryStatus.FAILED,
+                        failStage = AsrHistoryStore.AsrHistoryFailStage.TRANSLATION,
+                        failReasonCode = "translation_failed",
+                        rawText = text,
+                        audioAlreadySaved = true
+                    )
+                    safe { callbacks.onError(id, 500, context.getString(com.brycewg.asrkb.R.string.translation_failed)) }
+                    safe { callbacks.onState(id, STATE_IDLE, "translation_error") }
+                    callbacks.onSessionDone(id)
+                    return@launch
+                }
+                if (canceled) return@launch
                 transitionPostprocessToDelivery()
                 // 记录使用统计与识别历史（来源标记为 external；尊重开关）
                 try {
@@ -754,7 +774,8 @@ internal class ExternalSpeechSession(
                                 aiPostMs = aiPostMs,
                                 aiPostStatus = aiPostStatus,
                                 llmVendorId = llmVendorId,
-                                promptSelection = promptSelection
+                                promptSelection = promptSelection,
+                                translation = translation
                             )
                         }
                     }
@@ -1005,7 +1026,8 @@ internal class ExternalSpeechSession(
         aiPostMs: Long = 0L,
         aiPostStatus: AsrHistoryStore.AiPostStatus = AsrHistoryStore.AiPostStatus.NONE,
         llmVendorId: String? = null,
-        promptSelection: PromptSelectionStatus? = null
+        promptSelection: PromptSelectionStatus? = null,
+        translation: com.brycewg.asrkb.store.TranslationRecord? = null
     ) {
         val timingTrace = takeSuccessfulTimingTrace()
         val record = AsrHistoryStore.AsrHistoryRecord(
@@ -1024,7 +1046,8 @@ internal class ExternalSpeechSession(
             llmVendorId = llmVendorId,
             charCount = chars,
             timingTrace = timingTrace,
-            promptSelection = promptSelection
+            promptSelection = promptSelection,
+            translation = translation
         )
         val retention = prefs.audioHistoryRetentionCount
         sessionScope.launch(Dispatchers.IO) {

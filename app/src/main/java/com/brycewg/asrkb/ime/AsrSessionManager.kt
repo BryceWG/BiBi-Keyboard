@@ -520,6 +520,7 @@ class AsrSessionManager(
         LlmConnectionWarmer.warmForImmediateUse(prefs)
         // 本地模型在录音开始时后台预热，让加载耗时尽量与录音阶段重叠。
         try {
+            com.brycewg.asrkb.translation.TranslationPreload.onRecordingStarted(context, prefs)
             preloadLocalAsrForImmediateUse(
                 context = context,
                 prefs = prefs,

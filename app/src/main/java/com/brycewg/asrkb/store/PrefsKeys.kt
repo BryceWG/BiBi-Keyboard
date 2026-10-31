@@ -11,6 +11,12 @@ package com.brycewg.asrkb.store
  * - 仅供本模块内部使用（`internal`），避免在业务代码里散落硬编码字符串。
  * - Key 文本保持不变，保证备份/迁移/兼容逻辑稳定。
  */
+internal const val KEY_TRANSLATION_PRELOAD = "translation_preload"
+internal const val KEY_TRANSLATION_KEEP_ALIVE = "translation_keep_alive_minutes"
+internal const val KEY_TRANSLATION_ENABLED = "translation_enabled"
+internal const val KEY_TRANSLATION_VENDOR = "translation_vendor"
+internal const val KEY_TRANSLATION_SOURCE = "translation_source_language"
+internal const val KEY_TRANSLATION_TARGET = "translation_target_language"
 internal const val KEY_APP_KEY = "app_key"
 internal const val KEY_ACCESS_KEY = "access_key"
 internal const val KEY_TRIM_FINAL_TRAILING_PUNCT = "trim_final_trailing_punct"

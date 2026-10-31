@@ -200,6 +200,11 @@ private fun SettingsRouteContent(
             actions = actions
         )
 
+        BibiSettingsRoute.Translation -> TranslationSettingsScreen(
+            uiMode = uiState.uiMode,
+            onBack = { onPopRoute() }
+        )
+
         BibiSettingsRoute.Ai -> AiSettingsScreen(
             uiMode = uiState.uiMode,
             onBack = { onPopRoute() },

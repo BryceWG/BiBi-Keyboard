@@ -20,6 +20,9 @@ internal object AsrHistoryFailDisplay {
     fun format(context: Context, record: AsrHistoryStore.AsrHistoryRecord): String {
         if (!record.isUnsuccessful) return ""
         val localized = LocaleHelper.wrap(context)
+        if (record.failStage == AsrHistoryStore.AsrHistoryFailStage.TRANSLATION) {
+            return localized.getString(R.string.translation_failed)
+        }
         val recording = record.failStage == AsrHistoryStore.AsrHistoryFailStage.RECORDING
         if (record.status == AsrHistoryStore.AsrHistoryStatus.CANCELLED) {
             return if (recording) {

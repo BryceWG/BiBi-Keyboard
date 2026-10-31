@@ -721,6 +721,28 @@ class Prefs(context: Context) {
         set(value) = sp.edit { putBoolean(KEY_IME_BRIDGE_PCM_RECORDING_ENABLED, value) }
 
     // LLM后处理设置（旧版单一字段；当存在多配置且已选择活动项时仅作回退）
+    var translationPreloadEnabled: Boolean
+        get() = sp.getBoolean(KEY_TRANSLATION_PRELOAD, false)
+        set(value) {
+            sp.edit { putBoolean(KEY_TRANSLATION_PRELOAD, value) }
+        }
+
+    var translationKeepAliveMinutes: Int
+        get() = sp.getInt(KEY_TRANSLATION_KEEP_ALIVE, 5)
+        set(value) {
+            sp.edit { putInt(KEY_TRANSLATION_KEEP_ALIVE, value) }
+        }
+
+    var translationEnabled: Boolean
+        get() = sp.getBoolean(KEY_TRANSLATION_ENABLED, false)
+        set(value) {
+            sp.edit { putBoolean(KEY_TRANSLATION_ENABLED, value) }
+        }
+
+    var translationVendor: String by stringPref(KEY_TRANSLATION_VENDOR, "foxlet")
+    var translationSourceLanguage: String by stringPref(KEY_TRANSLATION_SOURCE, "zh-Hans")
+    var translationTargetLanguage: String by stringPref(KEY_TRANSLATION_TARGET, "en")
+
     var postProcessEnabled: Boolean
         get() = sp.getBoolean(KEY_POSTPROC_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_POSTPROC_ENABLED, value) }

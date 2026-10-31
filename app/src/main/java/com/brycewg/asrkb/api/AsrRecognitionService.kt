@@ -335,6 +335,7 @@ class AsrRecognitionService : RecognitionService() {
             engine?.let { startedEngine ->
                 AsrConnectionWarmer.warmForImmediateUse(this@AsrRecognitionService, prefs)
                 LlmConnectionWarmer.warmForImmediateUse(prefs)
+                com.brycewg.asrkb.translation.TranslationPreload.onRecordingStarted(this@AsrRecognitionService, prefs)
                 preloadLocalAsrForImmediateUse(this@AsrRecognitionService, prefs)
                 startedEngine.start()
             }
@@ -395,7 +396,7 @@ class AsrRecognitionService : RecognitionService() {
 
             serviceScope.launch {
                 if (canceled || finished) return@launch
-                val processedText = if (doAi) {
+                var processedText = if (doAi) {
                     val allowPartial = config.partialResults
                     val typewriterEnabled =
                         allowPartial &&
@@ -549,6 +550,17 @@ class AsrRecognitionService : RecognitionService() {
                     }
                 }
 
+                if (canceled || finished) return@launch
+                try {
+                    processedText = com.brycewg.asrkb.translation.TranslationPipeline.translate(this@AsrRecognitionService, prefs, processedText)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    callback.error(SpeechRecognizer.ERROR_CLIENT)
+                    finished = true
+                    if (currentSession === this@RecognitionSession) currentSession = null
+                    return@launch
+                }
                 if (canceled || finished) return@launch
 
                 // 构建结果 Bundle

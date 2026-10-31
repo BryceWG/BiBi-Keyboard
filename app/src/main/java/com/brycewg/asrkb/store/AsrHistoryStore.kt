@@ -62,7 +62,8 @@ class AsrHistoryStore(context: Context) {
     enum class AsrHistoryFailStage {
         NONE,
         RECORDING,
-        RECOGNITION
+        RECOGNITION,
+        TRANSLATION
     }
 
     @Serializable
@@ -97,7 +98,8 @@ class AsrHistoryStore(context: Context) {
         // 阶段耗时轨迹。旧版本创建的记录没有该字段。
         val timingTrace: AsrHistoryTimingTrace? = null,
         // 自动选择提示词的结果快照。旧记录与未启用自动选择的记录为 null。
-        val promptSelection: PromptSelectionStatus? = null
+        val promptSelection: PromptSelectionStatus? = null,
+        val translation: TranslationRecord? = null
     ) {
         val isUnsuccessful: Boolean
             get() = status != AsrHistoryStatus.SUCCESS

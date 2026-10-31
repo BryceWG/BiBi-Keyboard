@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_translation_settings">翻译设置</string>
+    <string name="label_translation_enabled">启用翻译</string>
+    <string name="translation_feature">翻译</string>
+    <string name="translation_service_config">服务商配置</string>
+    <string name="translation_vendor">服务商</string>
+    <string name="translation_foxlet">Foxlet 离线翻译</string>
+    <string name="translation_source_language">输入语言</string>
+    <string name="translation_target_language">目标语言</string>
+    <string name="translation_packages">语言包</string>
+    <string name="translation_download_packages">下载语言包</string>
+    <string name="translation_delete_packages">删除语言包</string>
+    <string name="translation_cancel_download">取消下载</string>
+    <string name="translation_swap">交换语言</string>
+    <string name="translation_ready">语言包已就绪</string>
+    <string name="translation_checking">正在检查语言包…</string>
+    <string name="translation_required_download">需下载 %1$d 个语言包 · %2$d MB</string>
+    <string name="translation_download_progress">正在下载 · %1$d%%</string>
+    <string name="translation_downloading">正在下载语言包</string>
+    <string name="translation_download_failed">语言包下载失败，请点击重试</string>
+    <string name="translation_model_error">无法读取语言包</string>
+    <string name="translation_delete_failed">语言包删除失败</string>
+    <string name="translation_delete_confirm">删除当前方向的语言包？其他翻译方向可能也在使用这些语言包。</string>
+    <string name="translation_processing">正在翻译…</string>
+    <string name="translation_failed">翻译失败，请检查语言包后重试</string>
+    <string name="translation_empty_result">翻译未返回文本</string>
+    <string name="translation_choose_languages">请选择输入语言和目标语言</string>
+    <string name="translation_unsupported_device">Foxlet 需要 Android 9 及以上版本和 64 位 ARM 设备。</string>
+    <string name="translation_feature_off">语音输入保留后处理结果，不进行翻译。</string>
+    <string name="translation_feature_on">语音识别后，先润色（若有），再翻译，最后进行去尾标点等文本处理。</string>
+    <string name="translation_input_text">翻译前文本</string>
+    <string name="translation_preload">积极加载模型</string>
+    <string name="translation_preload_off">开始翻译时再加载模型。</string>
+    <string name="translation_preload_on">翻译功能开启时，在开始录音时提前加载所需模型。</string>
+    <string name="translation_keep_alive">模型卸载策略</string>
+    <string name="translation_keep_alive_immediate">不保留（翻译后立即卸载）</string>
+    <string name="translation_downloaded_packages">已下载语言包</string>
+    <string name="translation_no_packages">尚未下载语言包</string>
+    <string name="translation_pack_details">%1$d MB · 版本 %2$s</string>
+    <string name="translation_delete_one_confirm">删除 %1$s？其他翻译方向可能也在使用此语言包。</string>
+    <string name="translation_keep_alive_always">始终保留</string>
+    <string name="translation_manage_packages">管理语言包</string>
+    <string name="translation_delete_pack_action">删除 %1$s</string>
+</resources>

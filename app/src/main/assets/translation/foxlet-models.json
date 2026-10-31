@@ -1,0 +1,3008 @@
+{
+ "_comment": "Mozilla Firefox translation models (MPL-2.0), latest release version per direction, as published via Firefox Remote Settings. Snapshot date: 2026-09-12.",
+ "models": [
+  {
+   "from": "af",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.afen.s2t.bin",
+     "size": 4082680,
+     "sha256": "c1df823cdd116180ecb8c22b3a76e8f6cb7d0eb9df55363fa2f826e5c194134e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143425--ecb42e11-64df-4f45-9416-d328a21cc8f9--359df2ae-3ec2-4d87-9e1d-6aaa1741cd16.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.afen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "d43baa7ab565a6cdc2bc230a4ab6fcaf7b4a871e53e42cc7128e55871ef36086",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143421--c2855f70-93d8-425e-a3de-75076ae8f8fe--bb7dcf31-5fc2-42ca-9d23-02185b3983ea.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.afen.spm",
+     "size": 809319,
+     "sha256": "b103314260d3979df36ad51a51095d81f5b306619a2543451617959822edacda",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143423--f2e6306f-edb5-4437-9b5e-b39058031644--62d1c1fc-9f29-4728-af8b-952b6357ef20.spm"
+    }
+   ]
+  },
+  {
+   "from": "ar",
+   "to": "en",
+   "version": "2.2",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.aren.s2t.bin",
+     "size": 4627200,
+     "sha256": "4b45f14dbea40d368093a13563fc1ca48457ee70c1291c82b206f3baff210081",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/856e509e-56c6-4b05-ab20-acd66650eaf0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.aren.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "7b7af0282dc5f4d8805b9a298c2fa828967e3f09ca10f1942ebeea0b2cfc12fa",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d66f948a-452f-45d4-adc1-e9cb9acb8766.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.aren.spm",
+     "size": 860035,
+     "sha256": "51b4ee3f828d10015464523d0b4f5a6c086b0b2a9bde716a581001cf6c260366",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2dc6ab68-1f3e-4149-9c7c-d3dc1e6f70c3.spm"
+    }
+   ]
+  },
+  {
+   "from": "bg",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.bgen.s2t.bin",
+     "size": 4355920,
+     "sha256": "e661dfdd88aa9ff9606f237a60c910d97c2e710960199589579f628c5d8aa899",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/bb8b98f9-8067-442f-ae1c-d21a7182bc4d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.bgen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "78f7e6e1435cc2d4a29cf597f493187fe29ddb9ce9d3766c287e2e6d37052d01",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/97fce537-11f0-4af5-a558-c314c9d25d09.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.bgen.spm",
+     "size": 922482,
+     "sha256": "4bafad5fcc0e771ed82233d1e99d69dcb96487b430702f7e688615c8a61f3df4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/747b9ae8-c42c-41a5-913c-704fde180308.spm"
+    }
+   ]
+  },
+  {
+   "from": "bn",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.bnen.s2t.bin",
+     "size": 4793596,
+     "sha256": "aea901a6bd8722962551c0349b8570af684444028b62bbff465be9931e6e9800",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/884d5a04-b0ff-4dc0-ba3d-efc1c57d1765.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.bnen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "14c1d9e92918e8d04cb0ed351ae386c3b5d5c62a6dc601d9515f4c7e6c2a3a56",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6c82adc9-494b-4224-89c5-ef33c10ea569.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.bnen.spm",
+     "size": 981300,
+     "sha256": "8a6a4de992ccd47bae4227ec6420866374137d6cc88ed6e8b2f16b36322a9d37",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/06c324a2-85e3-40ac-a03c-77cdb486a19c.spm"
+    }
+   ]
+  },
+  {
+   "from": "bs",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.bsen.s2t.bin",
+     "size": 5155408,
+     "sha256": "dccff06320cb87aaa6f93c246038b453d0d0c6f47fa3acd1162f104ac6a2c43f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192433--2f4eb0c1-96df-44d5-b7f3-ec52d6d3d2f2--a1272b36-31bd-41d8-8159-994ef0f705e0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.bsen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "744c61ec0b987c44717f192fcebda7c2a1ac34f5cbfb56672771d28ff79c82c7",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192428--78c62de4-11e5-438b-a1a9-9c0b4eb33192--d7ef50a6-9c81-40dd-be96-e5411313a545.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.bsen.spm",
+     "size": 817335,
+     "sha256": "320561e2cef014a6d626a64822add3a387c91f609f23ea3b7f421d194075c14c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192430--9d59f62b-d702-494e-a121-1c7c11d4345b--7a64c16b-712c-486f-88f2-58d9eb870dae.spm"
+    }
+   ]
+  },
+  {
+   "from": "ca",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.caen.s2t.bin",
+     "size": 4359552,
+     "sha256": "74880047539925630601d61aa6c29a0672046236ca6cf33eeaf6f6f6690e914e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/99f40b15-343d-4210-887a-7c4388156868.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.caen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "b7f9c70823052f60c257eb1c4eff893abea3648aa9d1c23c8774e1e5ef061434",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/4b691a87-59f0-46e1-b609-fb6d687199f2.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.caen.spm",
+     "size": 810273,
+     "sha256": "6d22da90905873c2793d0805e34e5c27901b16e7e7a7a427696696f67dfe1f0e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2a2ebc69-f213-4c69-8721-80ef9e6bc2e9.spm"
+    }
+   ]
+  },
+  {
+   "from": "cs",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.csen.s2t.bin",
+     "size": 4990588,
+     "sha256": "eba6bd9575251525f1941640ea0b6527a06e72a46421579eafea04d635ee20a8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5041825d-9867-42aa-a7ed-633b23912956.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.csen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "c815273b31074492eaab0ccd78d33d7ac16f94088707ab2492abaedcb9ee0b75",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/23af171d-0de1-4d96-a495-c9aa5a0b503d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.csen.spm",
+     "size": 815154,
+     "sha256": "ee4b8ce15c8e1237c5f7a2d04741341beb0a5d5c09820f7ec08f13ee2b212755",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/862ea69e-6c5e-4a6f-91a4-16d797f8c8aa.spm"
+    }
+   ]
+  },
+  {
+   "from": "da",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.daen.s2t.bin",
+     "size": 4489412,
+     "sha256": "e5f50fba646e0d3cedf2957575aa84c3bdca6798ce32ccd63c956fc043d774a3",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f5eb2acc-9170-4ad6-9251-019dc107692a.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.daen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "2c1ace24220c905404bbb1de14bfeda8a391ef8d6c56f3b193a9d3e340d99b12",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/80b27539-da6a-4e69-90b5-138975866a2d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.daen.spm",
+     "size": 796018,
+     "sha256": "b9392fcd9c53b802628d33a160f6eb52ca3d25a07ec9e015ab93b6bd5c7e8033",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/492756d4-6932-4465-9ebf-dd402fb2e487.spm"
+    }
+   ]
+  },
+  {
+   "from": "de",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.deen.s2t.bin",
+     "size": 4945796,
+     "sha256": "113b98460468360cca68c042e1cddf49c4e1931cbb975ed04349c9a3bd607010",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d0e4efcb-6145-43db-a69e-568904cc2925.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.deen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "3e6f7c2c2425d10824797270b382bee718ff34af2cab9308841c82ca46dc6f20",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f44b1b1b-9df6-4ece-971e-0e5ce96fae54.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.deen.spm",
+     "size": 810073,
+     "sha256": "69f730becafa48e3bb2c244eab66456877c08959a02f2bd5519b5a3088b62f9c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8ad4d93e-21e6-4862-81d5-c1c3a7d0767b.spm"
+    }
+   ]
+  },
+  {
+   "from": "el",
+   "to": "en",
+   "version": "1.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.elen.s2t.bin",
+     "size": 4295860,
+     "sha256": "2c969b069b3d230feddd17db2d74eb658a9b33b960d2d40adbca5496c9784e85",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2a3b9057-540f-480b-934f-60e0833f0b87.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.elen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "0a43c3716156061494d995d0c88113e789f8d919e0c88a15bc1ad360e0482a8c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/027aaa60-3ef8-437d-a9d2-fb6b801e72a4.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.elen.spm",
+     "size": 894960,
+     "sha256": "e1a1298cc2cf3968f3d7cc3b36bc463a4e1bf154272e8fb2f15142b54edc4349",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/423d004f-9f48-46a0-b320-1d8456cbdc63.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "af",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enaf.s2t.bin",
+     "size": 3193340,
+     "sha256": "591e3465c6e5e8920e911cae36e1d92c61abe92b2d5ef9bf2f1d8b5825bba20f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143334--a5b4cc20-b5f5-4af7-aaf2-604612bdf57e--9c2f64d1-8eb1-4dd3-96d1-aff79842bc26.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enaf.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "afc1dcb25774e61f513fe722e037744a18c23063ba799bb01f5cdec5cc79b502",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143343--ff4582bd-2cc8-4b84-856c-c34434d8c376--bf1692b0-711d-4a8f-a4bb-6dbbf570312c.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enaf.spm",
+     "size": 809195,
+     "sha256": "8d19c43df2142696227eb3462c6693bbc8c62cbd47b9a7372f86df2698864438",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143345--ec36146d-a3db-4fea-a08f-b9af89bd9789--2a0374f0-4539-4477-ad1e-642dc951f217.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ar",
+   "version": "2.2",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enar.s2t.bin",
+     "size": 3139692,
+     "sha256": "2b7194817c5dd9225ca90c0d908cc92e1d6d1f45625781a5feb037ac568d6a61",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d821aec4-485b-4747-b643-6e63cda5117d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enar.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "ae659d7045fc2e5d6ba50583586a5d94ee4358d92c019847e37b57a0e627faa8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e282aa49-a77e-466e-b1b7-f98f34a9ea58.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enar.spm",
+     "size": 863591,
+     "sha256": "8d93c54aa5e2044c416ec680b5ff9af0227bd698521666e8b1a1ea1b041fbae8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/793d9667-7929-4375-855d-96bbed2f113d.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "az",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enaz.s2t.bin",
+     "size": 3332384,
+     "sha256": "f87f5de2674cf48562df60843a658e0000bedfd75aa8ffa5e251e2cb1321f255",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8b7460cc-c1d2-47cb-8fd0-884d7f16d6b0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enaz.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "9c87aa09ff4f81c320993fe412624ca3584fe9ccf5371247d64f1117dffcf168",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/caf9be8c-0650-4f5d-b353-1e20817c91db.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enaz.spm",
+     "size": 835729,
+     "sha256": "afc1f4d7d20cd04addd3bc605acfdb83afbf62fb76d1a6bbc94cf42bf0286108",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c4842ab3-371d-4752-8d8c-9a54ed6944f7.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "bg",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enbg.s2t.bin",
+     "size": 3075948,
+     "sha256": "93d4ca4412db269cc4164cbfa04c08edd0f65690c8264d6215a0522d4a13ec1a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/934075f0-9235-4921-964c-3de9d19d904b.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enbg.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "e2b30db98ac6706efc893067a74e51f36f015a8f820fe8a4f0f5052fa6a22f30",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d6370002-bed8-4add-bf86-50f1ab67e6d6.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enbg.spm",
+     "size": 922482,
+     "sha256": "4bafad5fcc0e771ed82233d1e99d69dcb96487b430702f7e688615c8a61f3df4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a8ce512a-c98e-4ec3-83f4-10b1b91c75c2.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "bn",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enbn.s2t.bin",
+     "size": 3207488,
+     "sha256": "74ad4234a0a9cf57b21d99b34fefc14f7c731d7e76da7940eb0155c13a234b5e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e9b2433f-8399-4384-a6e6-6fd503486072.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enbn.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "b63c8d5f8fdc1fcb8bbb2d20c751faab94af67ee1822427665119c93a11f6596",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/9a2075cf-632f-4ecb-80ab-3d35a0e400d3.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enbn.spm",
+     "size": 981226,
+     "sha256": "8895bebb290adc2a5ef46710d81be13d341883a8c6c233e0c060f968df0deef4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/63327f5f-9489-4757-a90a-a0f2b43f78e1.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "bs",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enbs.s2t.bin",
+     "size": 3214628,
+     "sha256": "6847523f4d5df9425cda606e73f404c07e19452dac7659bdcc92743c46cba3c0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192529--bc21738d-bea2-4e66-bc44-e61cdf5e396d--0682af00-d069-4865-a5fc-e4871dec96b6.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enbs.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "27575113fffad6c45a0bad36bd1823c4f319ed30f65ec134815b67bdae0d9f8d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192526--41a84edd-7e70-4a36-ba50-0f544acfb51d--f2daa80a-0ee1-4e4e-956f-f89b512c8e2a.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enbs.spm",
+     "size": 823444,
+     "sha256": "dfed9c3e08e85a22feac7748a20fa981dca94f358115af2f45d704b9cc944cc8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192531--fa88b6e0-55a7-4b12-b71e-5c1c6f29d23a--c3539411-be49-4b90-a2ac-79db102c8bc0.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ca",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enca.s2t.bin",
+     "size": 4344092,
+     "sha256": "8f2151a7fb75454f5167a8df8758ec02ab02c0302893851bad7caa6b729822fb",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d2065bc0-e4bf-4810-a0cf-a0cd1163b3c0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enca.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "735881c99ff303e55eb2e92a3b86762523d5dd1a4797b2574b851062051426ee",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/deeec29e-faaa-4273-bef6-2827edf193f6.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enca.spm",
+     "size": 810653,
+     "sha256": "64ebcb5f6cb5a954ced615e48a44a85e77a644e4910544014b299b8ee0fa1b1f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6f3f4782-5c23-4f61-bcd5-3234441c59e6.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "cs",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.encs.s2t.bin",
+     "size": 3572436,
+     "sha256": "699b9b59fe3acbcddf831380024b2e139f2cbe225dce96d59ade2b159318f58b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0b6ddbc2-b4cc-45a9-b2db-fe9369ad2064.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.encs.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "1d7855f91c3e2b8ef79fbea62707d46ceb8a1ad01834ef6dd500f32a7006cc2c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6dc79644-4994-4816-8d12-418b11df69ff.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.encs.spm",
+     "size": 815154,
+     "sha256": "ee4b8ce15c8e1237c5f7a2d04741341beb0a5d5c09820f7ec08f13ee2b212755",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/008ef5e3-4ba0-4d97-9dd6-5898c7348e28.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "da",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enda.s2t.bin",
+     "size": 3864788,
+     "sha256": "d183786cae59a5df06d5b00c58e3ec2a5791d302240a65540fc6a1da2b66eada",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3ef0b3ec-7989-47b3-affb-7098159745a0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enda.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "0157ed1162dd5a7a0fc6a3cc86014ec21cb47a8febf77164df24d8921270bb29",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b832f3bb-5961-4c78-93de-509b9c750abe.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enda.spm",
+     "size": 795349,
+     "sha256": "b06349522bf053e4a6f01efc4d1450e4fe35717a938a82831988c087229c9619",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8dbcff2f-5e41-4163-adc5-5e5caea9b675.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "de",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ende.s2t.bin",
+     "size": 4347672,
+     "sha256": "7ed39f1cffbd68a27ddf05bbfe068de2060f1d7e69f1a20e27ae923551dd7393",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/bc072b1a-7749-43f7-9fe0-34a6dff10c4a.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ende.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "8df29d9494d19f47fd5d97c6a73474c6f657e9f81c1a607c431d02befdf3810f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/23db71e7-b6d9-45eb-a47d-0290d7d8ef63.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ende.spm",
+     "size": 810073,
+     "sha256": "69f730becafa48e3bb2c244eab66456877c08959a02f2bd5519b5a3088b62f9c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/261225ea-5a52-455b-981c-7d09c6e6da3c.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "el",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enel.s2t.bin",
+     "size": 2856724,
+     "sha256": "c2acd9241eb8a1e5b13a43efa5723628839d6e3b3dc7b93e2f20990a6ab81e24",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/73568803-85e3-423a-8fb8-7f755a6ffed2.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enel.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "724b358d399c6b23444de36d76e9e2630c7024c29d9e617323b820a11631535a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/26dead91-e46c-442c-85d0-a6fe13fad55a.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enel.spm",
+     "size": 896168,
+     "sha256": "0ffc5569d7f400f03539c5fc3e28ff35f1d0381eba0ec866c44aef0c26f3ce5e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/79a76f88-a4c4-4b1d-b726-15c6a60bebcc.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "es",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enes.s2t.bin",
+     "size": 4198436,
+     "sha256": "7d51237c0a07027dcd61643cfbbb0f8c48597d19907ef53d2cae9d6bec2cf25c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/1834a61e-0331-4c4a-bbc0-dda02afa8188.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enes.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "3b1c399511c01c84c36fae5c0524df44096288efdc8236e182b5c97d7ad2244c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a4ba0e94-16de-4058-9a44-5bbbbb3c8640.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enes.spm",
+     "size": 816054,
+     "sha256": "5ae254fa9b15aa182e70fd2a6186b1333c63a29a48043a9224c6aa4fcac058ad",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/170634fd-511a-4a28-b723-0a1025c67feb.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "et",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enet.s2t.bin",
+     "size": 3488368,
+     "sha256": "259c60582f49449c226a6e5a369481c68322013f367e459e54c595686c05d4d8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/074d0851-cd04-4494-8037-ac14bab5663c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enet.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "36bdc87f8d500861a5d286ebd3ea58df530da87e31b8a233f5e9c46c300c281d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/4c2378de-a52b-4773-9f1a-73ca396520e1.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enet.spm",
+     "size": 817574,
+     "sha256": "89a3deea4ae7d674fb46a4dae39135dd4dfaac9786f2868d0b5bc5c0aca2ef83",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/957b94c4-d106-40b7-b4e2-176f2a923d32.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "eu",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.eneu.s2t.bin",
+     "size": 3149580,
+     "sha256": "a6a856a89acc6bbf970b6c5e51fe705bee6fe2b8007a3c31ae54ca2c6fd69aad",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192543--c0d951c2-820d-42f1-9654-cd6318e04e81--c53edb46-65e3-4743-8dd0-987508c9b0d8.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.eneu.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "f28d03817b718806c9262e3d76960efb8cbd04d0721307c8e23edcae9364150a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192556--eab96ef5-5666-40b0-a384-68f0a8f364e2--31f6154b-707f-430a-9cfe-0084c1b6ad99.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.eneu.spm",
+     "size": 820820,
+     "sha256": "d0cbd7a04e20c3a45bcf29260967db26a97c4787c03a9d867df0465bc104cec2",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192546--5f7809e6-5fdf-4f00-8540-6bf4060a8340--06a3091e-196c-429c-86a9-1f2151e9164e.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "fa",
+   "version": "1.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enfa.s2t.bin",
+     "size": 3631332,
+     "sha256": "8542e7fb2bfa3a11b89f8392b8adb0dbbf863cd34569488b7c4535a91c3ae6b4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8ec72d9b-f5b6-40bd-a23d-cedb2c757e92.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enfa.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "456ad3952bcc59d208c76baba4dcef340ee4239416bd760d6fec27f9a16228f8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8e412aee-68b4-46cd-aa00-1e7357db24c1.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enfa.spm",
+     "size": 843133,
+     "sha256": "6435d3d9d766159fe192ab90892540b438ad7adb7ab4ea4049f68d0b4cdea3bd",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/203a10f4-6885-49c2-89e3-e7a4f3e3e738.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "fi",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enfi.s2t.bin",
+     "size": 3490092,
+     "sha256": "26e95a87f87e4b0fa9a35524cf9fea691204504453877ba4ac81ccc66af1488c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a32029c0-5216-49a3-ba89-8f48c29e7188.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enfi.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "88b0caa4cc6980d632801cb2b1950748f1dc43ad2ac83678917ad86c720b5cdd",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b23aac5b-1f93-407d-be1a-aff19bcd86b4.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enfi.spm",
+     "size": 818770,
+     "sha256": "6a866911427f2916609ae89c7f2f04a78de3fdd8aa183039ecba986635d4f246",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f98de766-1b61-4245-83f3-0d300232ebe4.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "fr",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enfr.s2t.bin",
+     "size": 4372936,
+     "sha256": "2585ed98d3af0bc949865aedeb390493d591f56870814376e73e4144c41ed059",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/293d1823-ff05-48c9-837b-cff8fd33f197.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enfr.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "6322e296d4fecfe395a8d5723da4ec37ecbe6d7613bb1dfcf4b28e2a47498b68",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e0d7f3ee-163a-4b0a-8e44-8b208b39477d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enfr.spm",
+     "size": 814404,
+     "sha256": "783abf3abe075afdf8d85d233994bef2c3a064e935ab1bed946820aff6ac002a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c7c1bcf3-71f6-425a-a6ed-403bd9a0a759.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "gl",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.engl.s2t.bin",
+     "size": 3007680,
+     "sha256": "28621d3797a945ca0112c872640686586e77957b5421b0ef95886806b09d8874",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603153847--5503a4ee-15d9-4cc0-ab84-33de89e97ab1--910f6134-7bea-4a7e-beab-00bc391e7ebd.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.engl.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "bec08e5408932c3813ccfb565ab7003d334dd6ca148c9d2bd074e17b8c0be1b1",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603153845--3408c3e9-a4a9-4eb6-b791-e8bb0dde1d51--9d656b6e-0c5e-43a7-8cc3-367c0befe133.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.engl.spm",
+     "size": 827026,
+     "sha256": "da044600f961c4c977e747cc9fb8afd4c05829629033d344a575a93807ea1cba",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603153833--30d1a7a7-1b42-43a2-8df8-0accf391ff1b--88306c26-9356-4156-827b-4efd76343d52.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "gu",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.engu.s2t.bin",
+     "size": 3179500,
+     "sha256": "5699d5f0f6265766c57e8e860596091d16a7ea68e9e181a3310b8b52d79f8b5e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5b0e3636-9bdd-4997-9a67-7eb67308e22d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.engu.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "0f2c8bc7f13ecb9b89459e8fd9af6d8736e0f6b1c8f8a80f747fcdc030d0a588",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a2576987-0797-4a60-a266-5f155d067135.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.engu.spm",
+     "size": 965095,
+     "sha256": "74ce11b041bfc527eedded78594498419c781c81a3fcb3384a3485af70cc2325",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/1aca3a35-aa44-4893-a1da-355b5a4108bf.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "he",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enhe.s2t.bin",
+     "size": 3066048,
+     "sha256": "8795f4c5e19b4a196c9ed394c275a28a09e5ddbbf47ae16faa4446bf2b8bc7d9",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/31eb1832-fdd0-41f2-91f6-355866dd4232.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enhe.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "e37ac6e6f131704c85deb94a657aa20afbb44db2879f44aec9c33a34f4467587",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/507ad0e2-1a10-419f-867c-04bb09c4566b.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enhe.spm",
+     "size": 845017,
+     "sha256": "672b334afa84011200fdaee02c2fc7810910c35ae9ea7619be073c851703ce9e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/bf209be5-23fb-476e-91dc-ad902de664a1.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "hi",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enhi.s2t.bin",
+     "size": 3504820,
+     "sha256": "b473f6fe41cdb7c1dbeeb714fc50314feab77b0af2b2da6f7830ee14492dd847",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e69b3f71-49b1-4e61-83f5-2abf46666476.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enhi.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "18682fa6aa1c1b2f78a6fcbcb354755094d623e65436ef7821720c5213e11a49",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/32ad63e2-0283-4c87-8fa8-d843c322c87b.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enhi.spm",
+     "size": 925360,
+     "sha256": "8017cbf812bae400794c424699b89de90db06ac7a4ca67a420013a9f68b270c1",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5d4cb145-1f61-4913-973f-d7643c06b917.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "hr",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enhr.s2t.bin",
+     "size": 3319896,
+     "sha256": "b811d67aca11e12e6bd956c1b4a1e74c6162d71e9ac259bfff415fbb90c3f666",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/9d7acc73-dba2-4d5e-9e6b-3b58a6ef6a27.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enhr.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "29ba32235778da3e38cfeb0d7f36eaf8dc37c961ff8651d86f7cae7e29e97d88",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/08947d77-90d5-40ef-a896-560e7cf3c0c7.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enhr.spm",
+     "size": 796935,
+     "sha256": "7b75fe5ee12743c787a393489d8810adc3ca6cefe0142e8993227dd125d224b3",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/15b77cc4-84ff-47c2-b54c-6075910ef1ce.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "hu",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enhu.s2t.bin",
+     "size": 3419024,
+     "sha256": "b1c9763567bfa24082fee43a9c4cc05b8ceada949fa52f6686b11f70ce481238",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143554--213b291c-d628-4fed-a285-0331287508ef--ed861d94-a183-4994-9db7-32eb890e797d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enhu.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "0c42f56edca74b3f732a74c64553c47d0005b50cf095f43024601985fab5d461",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143551--daed5bc9-2f4d-42c9-9762-4fbedec7ca80--a6957748-3ebd-4d43-82c0-ab7e7ad3e67d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enhu.spm",
+     "size": 832855,
+     "sha256": "8c3038afc15c5a3f7bb3c6fc4c4962907632b6f6d0ce7444974504bef19ef57b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143546--2ab0221b-e8b4-4784-a6bd-ee4ae4344c35--d6f29656-f614-49c1-ad8d-75076a588832.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "id",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enid.s2t.bin",
+     "size": 3515428,
+     "sha256": "d37f72bcab6e7bc52fd223350f95521b5810bb2486a97275f86077988fced3f4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a9610c56-2593-4513-b4ac-954276327788.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enid.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "f81f13eef703a4e0650ffc3138a0f4bab7b6c8bfd173ef1b7bda68d16b8bc7e8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0d494914-73de-49af-804a-a4bd443f0554.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enid.spm",
+     "size": 773211,
+     "sha256": "61bc7db24d3b6de638a02a280580a273fe0c942ecbe8a8204b2f81978211db22",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6c49d51b-167b-4bdc-aab8-2abe32105529.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "is",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enis.s2t.bin",
+     "size": 3837564,
+     "sha256": "4927d2bed702141b4ddd8a5e7034b27fb17312fdb7e3cc5f455ccf2e2f6670e0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f166d353-90b1-4ae7-adc7-c4fdc44744a5.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enis.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "459626236a49158aa555facd23e5f594e2f8416f4ebad32e0548af94c5b1ae0c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6fc94b8f-3dfd-4c2c-8d11-df3d07e0cfba.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enis.spm",
+     "size": 809991,
+     "sha256": "61b2ea10edbe4cc61e36c833cacc2f55778ed9ca860cd382729060634d4b0adb",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8e36da15-fa26-4ae3-a661-e6f5f92e8ff4.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "it",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enit.s2t.bin",
+     "size": 4133192,
+     "sha256": "8b21914804625b2777dae7fdb636eb78f02a3eb8b7bceaa50f29ac740961da93",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3730ff60-2291-4c87-888d-2dc4593b20db.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enit.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "248f47568788ecc351da7e5e07064d4153b4f71e011364ae2c931ffeec4d1cc2",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/29ae0d70-5e37-49e8-8da6-3e2c58da61d1.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enit.spm",
+     "size": 812724,
+     "sha256": "3ef0211d4ae6db21440892f180f2019fe2bfc110a330ffa9d2eca9665e4f2bc5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d9d5ffa9-b919-4491-9ab6-3dec34459768.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ja",
+   "version": "2.3",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enja.s2t.bin",
+     "size": 4128360,
+     "sha256": "edfb7eb47b98a2689b804ab3614c31b24f1257aa54b1154da3d85e1ae8152d9f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/87258444-8fac-4d3c-a175-9275e9d10ffa.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enja.intgemm.alphas.bin",
+     "size": 43849787,
+     "sha256": "59ae659f9bb63e4f81f474fe3c03d3f4499434b5f9e779fab7c12a45f31fd562",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/4e19636e-4644-4072-8a05-9ef695d4a3ae.bin"
+    },
+    {
+     "type": "srcvocab",
+     "name": "srcvocab.enja.spm",
+     "size": 796275,
+     "sha256": "970c98d174fc01e0339fbabbf45af36a4be3f26f819ec1a5ea1189f71e091889",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/cdea5422-fe0d-4941-a653-ca090423e8f8.spm"
+    },
+    {
+     "type": "trgvocab",
+     "name": "trgvocab.enja.spm",
+     "size": 827144,
+     "sha256": "3b3d9f8f3a034d98d0a476f1794fa79c01e4e98a967ceb6777a66ba2d03ec1e1",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5c1a663f-5736-4100-b681-c6737fe79cb5.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "kn",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enkn.s2t.bin",
+     "size": 2808304,
+     "sha256": "94b660f37c9c29a904b48498a7202846faaeef16f30668f356336c29cefc0f63",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a77bf1a9-68fc-4331-8b9d-9cb918ff0e8b.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enkn.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "17a5ddc86e24f62c04aa15272930275812b5c1674bec50a877528680d5834d2d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5f0a491a-4a14-4591-b1a6-0a442f4e5ad5.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enkn.spm",
+     "size": 1065180,
+     "sha256": "1d41f1f6b67a8c29fa3aabbc7758b766bdd9acdbeec7d1277ab60c8e492c8b7a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5999f7f2-21e7-439e-bf95-f8a1926ea499.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ko",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enko.s2t.bin",
+     "size": 6449612,
+     "sha256": "96efba97d4bb93ab362e5569bea0f115184d2f68d63b67305ee663c18e32fbeb",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/85738400-bea4-4284-ba4c-e47e465f5331.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enko.intgemm.alphas.bin",
+     "size": 43849787,
+     "sha256": "ffe5ef2ce3f2e944055e35310bab186f6a70d533a0ee4394adf716a0e383afbb",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/29e88605-8576-4a8e-be94-a5ebb4a738f7.bin"
+    },
+    {
+     "type": "srcvocab",
+     "name": "srcvocab.enko.spm",
+     "size": 791280,
+     "sha256": "8d4e3141868efd410eb86c2b60d41aa6bc6b46e4c4b2c0b85e3792493c69d802",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3d9dfbda-cd4f-445e-a69b-19e21e071385.spm"
+    },
+    {
+     "type": "trgvocab",
+     "name": "trgvocab.enko.spm",
+     "size": 815353,
+     "sha256": "2ece21b28dd7022d36127d17423a74dabf544787dfc1cf614f7b565f93a4a1d3",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/bef3bc40-bc91-4739-981d-c82a9d22fd31.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "lt",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enlt.s2t.bin",
+     "size": 3421640,
+     "sha256": "5972c834218c7beea241dc8fe77c2e577a8d8b4eb3d3dc286d10ad890c64d374",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20a0b36e-ed89-40fd-be51-b1badb85100c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enlt.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "d27c676d9d761c2abfffec83956e32b2923f3f745b56acdbd84c49d888cdc94e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/15cfcaf2-881d-4b3e-94de-7b508c001c7e.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enlt.spm",
+     "size": 806827,
+     "sha256": "5d38fe70ff4a50368af756b715b69519c9ee064c27cbceeabc90d4e1a10f25a8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/72ab709b-d7ed-432e-9104-4424bbd2da2e.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "lv",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enlv.s2t.bin",
+     "size": 3359096,
+     "sha256": "d54b9bc278558444c5c25df5ae7339b73eee55cf79705f19fec672b6d55d959c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a53e1550-53ca-42ed-9c43-a9938ff1d16c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enlv.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "715f9f444dffa0b39e71955c28bffd30afa4cc8300a192ec8fabb766cc5ba11d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/658c63b1-d9b4-45dc-b250-47f9c33c8455.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enlv.spm",
+     "size": 816287,
+     "sha256": "63146b49ce46ba1283b6956e38efdd4899d1a409cad9d2b6a06cbd4e32ca0808",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/da291a80-d6f6-4511-a5ed-1c78f27e2650.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ml",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enml.s2t.bin",
+     "size": 2532960,
+     "sha256": "4a37286742244a130548b79823c9707bc0e56f373361e2cb56402f82e862c2b0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2de144bc-7239-482c-9df0-f5c3135a7e6d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enml.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "c461749c8315f6417104cf4df32e5063e86cb101203f9629512294c1c8ab5337",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/061d2693-671d-448f-87a7-7fe7c2332180.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enml.spm",
+     "size": 1109000,
+     "sha256": "8282614894087e4ffab325cbdb3aeeba35677f770ef8f253c189b392fe1f4d52",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8bd87d61-2179-402f-b6c4-314a3e750812.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "mr",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enmr.s2t.bin",
+     "size": 2731352,
+     "sha256": "5f343589941c5445e9c27ee2d5329b6da65867590a4df79c09532aeef379bca9",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134731--2fae9b1a-4df4-479a-98b9-714e86c3847e--a7a45cf5-8b2a-4bea-9dfc-d6e85af5fad8.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enmr.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "1520f77c2f1c703b6148e4452b376ac28aec1e63c467eedec8a986864827ce8c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134729--07838b7f-0536-4c3f-8315-d68b59e31267--2df02735-8195-4429-8849-e0b52b633b74.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enmr.spm",
+     "size": 1009700,
+     "sha256": "f71f279069e19a9a9317fd4fcbdffa6b2c621ee6fcaa369a92046fb7fb572735",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134722--c5f546d6-9229-457d-aed8-2d36f9abc6d0--2605c853-2e7d-4ea1-88fb-ed24c86c1117.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ms",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enms.s2t.bin",
+     "size": 3936428,
+     "sha256": "be8fec4866c9ed2cf669adaea2e259c4c22f34838032eb0ee117c10fcb968c4c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2db20d9c-6a6c-4d0a-b909-1763b402e064.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enms.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "3d6961462ffa711413d513624d7e6399b3560c2b0994daa73b0a45699e657af8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c389f1da-0c97-47d5-adc3-6ceaa0c4af07.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enms.spm",
+     "size": 802440,
+     "sha256": "c1f182330fb8c80778da36dd6e5bde59464db2390f623ea62817081cc759695a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/136a7b29-aea9-483d-b96d-2683a55ecdb3.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "nb",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ennb.s2t.bin",
+     "size": 4234572,
+     "sha256": "0780a1659ef460864ba92da6d58ca6f9056fb8ec8be507c189aeb25ce23e429f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192641--2b4cba8d-58c6-4a21-8352-9b041654d010--02a468ad-759c-40b0-ba2e-ef68bd2bfd3d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ennb.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "78429eb7f544361061c9d9ec2f0872adf30b76e4c9ef3dbaab1210a0f2aa19b5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192648--58c9706b-c41c-4717-813b-a1140166c93c--2253e5e8-c1f4-4bed-8046-4054e5315ba3.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ennb.spm",
+     "size": 802190,
+     "sha256": "cad75f2c3eccb9545b571ca32f235e6ffaae6d8a77bfa808cf8068948c421f10",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192642--b1c57385-f3cf-4e06-a95c-3fa639f9bdcb--0f8e2778-c18e-47ac-9d85-21d991acc7c4.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "nl",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ennl.s2t.bin",
+     "size": 4030624,
+     "sha256": "bb4922718f8ca6d746ad090c0a88110a664dc050ee3f311bce33698b4e1679e9",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c1f02d64-5e29-4181-b85a-0f70a9ac1c70.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ennl.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "7e8402da61972dc2fdcf7147c7f1e12f7916a6d9349514ee7a731288357575a9",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f0f9326d-b77a-4c9f-92ac-2c9bc62e16bc.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ennl.spm",
+     "size": 807708,
+     "sha256": "c09588ca5662b230ed65bd39a07f58d9f7dd21c3a19e4aeb1bff39bf3b297c56",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/aea15ce7-3431-4186-b922-29b3f5d687ee.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "pl",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enpl.s2t.bin",
+     "size": 3540052,
+     "sha256": "d7d7b364673f633763c9f8f2e8ee9c7a184e92f4086e8b84abe870a2a8dbe5d5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/12451e17-4901-4327-b78d-903e9ff7529d.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enpl.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "b0b59716bcc8f46b8dc6ab5c32a2732acaad42a5a6d9ae9b472526a1bb0d71d4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/640bd7ef-a977-417f-903c-00b5217cb7de.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enpl.spm",
+     "size": 821612,
+     "sha256": "2000f182efa8ce5f69bc3f9e574666b5bc2c0af684eedd32f69d15aa9021ea85",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/dd8a3019-bd2f-405e-b95d-0cce7a29be2d.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "pt",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enpt.s2t.bin",
+     "size": 3970340,
+     "sha256": "ccb4c31c9e1899d77a200e71a86958e6ef6c8649627d0bbf3f873b57d9f236bd",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c4192576-e76a-4edc-9346-1f90af10f6ae.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enpt.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "07892fd2544ee79dcb643615d8f2debb9793fae16842e87c328e27a3dd26a770",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/357d1004-e004-4f93-bbb5-b6b90641e9b4.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enpt.spm",
+     "size": 816726,
+     "sha256": "d9f46182823d5bbc84201252b2dfcac28f63e561f0ec827ed858f241864c9def",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e5688e52-a5c1-458b-9dbb-459fdcec0b7d.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ro",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enro.s2t.bin",
+     "size": 3739880,
+     "sha256": "508bce64a8bc906a99043ad2f4855b4662e06f8827c1c6a75ab83181b4f17f81",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0b9db082-327d-4ab0-bad6-17e7631ec163.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enro.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "aa98c415e5beb1c5ee2f7d2508a3bbba949be223d7d9e5e1788ad0ae8598dda5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f12620b2-d705-4d7a-82e0-e16f0aa29d74.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enro.spm",
+     "size": 801522,
+     "sha256": "d89eedf6cbbcb30d7ed4b0b092189196ac2b010ec0c3ede33a6676b17ea1c95e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/41f055b0-76a8-4dae-a18c-44d8c1293bf0.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ru",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enru.s2t.bin",
+     "size": 2774540,
+     "sha256": "4d91839726b960e70b6d05c53d0cffd16262832b1c0e1ea99d66f412dcc6a239",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e88cc45c-0e0b-45d3-a957-8d1ba3a9b5aa.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enru.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "184cb5cda528eeefc0f75f5d0035d787b71d74af135e3c5608d01ae02ecfb920",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/db6b48bb-b563-4ea1-bbf4-b033fa9cc482.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enru.spm",
+     "size": 904455,
+     "sha256": "56ee63e14e8cb926c394242adc3ed7cc602644c3d33058cff2ce2959d52a6258",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/568807dd-9620-4c4d-a0b5-d651d64c0ab0.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "sk",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ensk.s2t.bin",
+     "size": 3356348,
+     "sha256": "f3d1aec4ee5246d6a6ee5dc7ed4c6b18f6071c7baca69bf1344aef675b95515d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f6894c37-5ceb-4f57-82f3-9fa8ece22eaa.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ensk.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "e33af359fd58c8958104b1b74b3ea302800ccba2f125c1629e09d7f9dd9a3804",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/12877c48-8898-4f14-bae8-ef4cf35a54c8.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ensk.spm",
+     "size": 808888,
+     "sha256": "cfa6a9e601d74686b117f041eb1ad9de94c34219110b67367d570a9e27026a46",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/eabd7f47-1ca3-45a4-b04d-45b9a3e05ec0.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "sl",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ensl.s2t.bin",
+     "size": 3428300,
+     "sha256": "2190798297bc12505f917189defcf451ab5bd2e815bc05df244dc291dc2ae63b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2f02539c-c552-41ba-8ccc-a2c10372226f.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ensl.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "a34fc5cc2f52733f64e37f8512cf1ddc4723c08a7a1a59d01fc2b6e641fc2280",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/610871e1-4cd4-4100-a755-a95b2d0a9d77.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ensl.spm",
+     "size": 803212,
+     "sha256": "7cd295383c46824c05a05db76b543d3595f2516537dd22b77190a45c8919224d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/9e2de2b5-cfd8-4a7a-bb2b-59300824e168.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "sr",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ensr.s2t.bin",
+     "size": 2542096,
+     "sha256": "b2ae22b4d7bc4295d25b8a55559ebbdbd8f728bc8de5c3d6f110bd44ce7d8962",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192721--e24992f7-ee9c-4966-9a9e-01f432e76323--7568705b-d3b5-490c-b77f-bca96d59cf48.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ensr.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "d26e1c5a01f917c38ccda17d1bf116024ac4d988105e1bbf70bc5e8f9191c57a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192734--a80412e9-fa33-4c4d-9bd8-b3a1f5896acc--78cdbec0-371c-4284-89de-8742beda6c85.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ensr.spm",
+     "size": 922599,
+     "sha256": "7f54ba1554b7b1a89299a0ec5950535432f062b50a5f8c9bcd664a2444fa882a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192736--6dc4626d-ca16-4fb5-a935-28e13eee3f98--a66e2d92-458c-4afd-9e46-3a64050e0f24.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "sv",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ensv.s2t.bin",
+     "size": 3948180,
+     "sha256": "5761c39887a0e0cd3dd38d22cadc31cecd2a43b0514c4bba96b426736e7fd72d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8ef77dbe-f4c7-40ac-ba1c-7bc13492b853.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ensv.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "65ea0db8e658435846f297384face62dbf1804cfc92de8388b0e368e6ecc25a7",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/15a011f5-97aa-4153-acdb-b3235bb27e77.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ensv.spm",
+     "size": 793868,
+     "sha256": "ff7e366ff4228107e58d76ca348e7dea2eb325452363d68e0047e97fb483e40e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/080a36dd-80d7-442e-a682-ffc7c581b979.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ta",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enta.s2t.bin",
+     "size": 2746824,
+     "sha256": "3a40b2175a114f3ca0ee5501c12e9636ef46f282304b041001f282baf4a5bc6f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260715140524--f9961af7-9710-4cba-a799-a3f08d8ebbaf--68c57263-7c4c-45d7-8668-a429b259b926.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enta.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "83266ea604611756d1c3c358d7bed1fdf79a646c1f701b42c1db501c237c0f3b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260715140532--7019230f-6fcc-43eb-b800-ef36471354ae--0cee705e-78e5-4065-a867-f97fc24c0fea.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enta.spm",
+     "size": 1097357,
+     "sha256": "c4fd3cbcec4e7c8a80b7c0656092fb482b9f266b1e8c6cb171f81af394f0f899",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260715140526--b4aaebba-4117-45f2-8acd-45a665cb0308--df414eec-8420-499b-94af-efc2a97a648c.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "te",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ente.s2t.bin",
+     "size": 2832156,
+     "sha256": "ea44d146f6b4614586654d91d7b677ee617e2367be2eccd72e81aa0fa359b92c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/765d3164-3fe7-4a90-add7-358e799097e4.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ente.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "a3fee2fcd39df975da28666c536adff60147dce59062fca6097bb42fb2a52500",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ed071e54-c2ea-4f38-bbcc-1d6908c50b78.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ente.spm",
+     "size": 1056424,
+     "sha256": "41d0828d103a07e0608c604102ba4418fcb06e82b3742c1abc6d3ec343673e93",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2856b6b5-b3ef-4032-b2b3-f8923450de91.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "th",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enth.s2t.bin",
+     "size": 3016612,
+     "sha256": "6961ce07f38e6c113a70855706aa7cad4cc828f986d1751c33f14699f885a2e8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192813--1deee5a6-eaef-4499-9443-20093491c48e--6300f5fe-62db-4288-8c14-7f1cee1b6a97.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enth.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "80e326097655fca75f841130da3338a849aa245374e1616448bcf37b9523a05a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192810--5cccab3e-c1fb-4de9-b2a1-607dc2280cb2--f3cb18dc-47f6-4ad8-bede-9319e0e6c88c.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enth.spm",
+     "size": 993517,
+     "sha256": "5deff7093d558768f8c22406449202e27595f023cc383a2b66beed240ed46443",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192803--a787bf34-c470-405e-a69c-83fa1f38afe4--bf006223-e68d-4785-b86a-040edbb6a6a4.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "tr",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.entr.s2t.bin",
+     "size": 3261300,
+     "sha256": "3aba0be842bd4c192659c781e6fdce8eb9b2b1fff29a40d22f75da369d59f46f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ed96fb89-d560-415b-9391-e5dc8edd13fa.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.entr.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "ea3cd4ee09de190df265c78d84260e277a9a8a3ddff05eb55d72afe7fc0fdbf4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f48948a5-06b1-465b-a0dc-ea1a1a52323d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.entr.spm",
+     "size": 798793,
+     "sha256": "a220363d60391f7ce3df8ec9785424dbc00c24d5786d1a4308cf8ca3ed3385c2",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/462a6fc1-0f2d-4b61-ae3f-147bd9f9d588.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "uk",
+   "version": "2.2",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enuk.s2t.bin",
+     "size": 3054364,
+     "sha256": "dbfd4f8dc95da9c575164f7fc95ef00a2fb5f7d9f51b656559f99eeebdb57c87",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e7b2fd05-abf2-4e30-a612-59bce8a6702c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enuk.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "ed8bb4a811e1c45a259e91052080d25e5c8b4e2df0e59cb1521c04a57855ef97",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6c69578a-1f77-44ce-993d-4d37c81e081e.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enuk.spm",
+     "size": 922077,
+     "sha256": "4dd6a91feff71e745395dcc0d52f885848ca0d843d5f70628ca51b3be1b70b45",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ffea5811-fcfe-486e-8812-6284bd33ee3a.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "ur",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enur.s2t.bin",
+     "size": 3067772,
+     "sha256": "64fb95c1f2c782cc76227b5d3a09e08cb30fea7b14a27aad69b929ad25f24401",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134610--2e99b5c4-0265-4e75-bc86-10611e9638e4--16ad2691-87c9-4f25-af54-10f6b9177a3c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enur.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "0c29a5776a42ccb68f7969f41e64c0cd7a16ff00a5bfed0ed2809039febc202e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134606--396ed26c-84a7-470d-92d3-88c3bcd03788--887c2b23-bac9-49e1-8904-ddfd223aee5f.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.enur.spm",
+     "size": 842549,
+     "sha256": "24be4dacbcb080e4dba5cd025fbb90113de346dcb49930520f49fed484ac2d1f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134608--9800133e-bfe1-42b7-95ad-b1f0cc530aab--d059795e-dfed-4528-af77-637e840e9a67.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "vi",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.envi.s2t.bin",
+     "size": 4597684,
+     "sha256": "18116817fcd3d24dcdfd97cb57e9e60472800dae3b8a007f6f36d61d645f699c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192836--32f34bd8-c481-4c26-aad9-eeddaac9cd79--cd40019d-37ce-4a14-8f11-ccddc804e7a2.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.envi.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "04fa6044593a404c2aa02b3096f203880852df6f8f41e5eb966ed9f2b4366737",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192834--e5c737d0-a39d-4bb8-8832-2bcc5ef45e5c--991fc4d6-87c3-476d-b879-ddeff0b6cae0.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.envi.spm",
+     "size": 785200,
+     "sha256": "76daa9a49e393e50c865c889290e4dc36e9453e5e1ec9df7b9f3bc39ea782537",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522192839--8cf85580-732e-484a-8b75-7417bbef3c69--a5f5c4c0-3c8f-452d-ba95-68948247d1a4.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "zh-Hans",
+   "version": "2.2",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enzh.s2t.bin",
+     "size": 6506248,
+     "sha256": "4a5e5827788060f1d718a8132b69440929387514a045796e9b77f935db68c055",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/da8fccc0-31df-4665-9703-96d36606e019.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enzh.intgemm.alphas.bin",
+     "size": 43849787,
+     "sha256": "4e5accc141373565ddc8fa1565bceaa8d0c3482a82cab8131c719ebcc6c2157c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a7ff7d5e-e67e-406c-a34b-a7edea35b10e.bin"
+    },
+    {
+     "type": "srcvocab",
+     "name": "srcvocab.enzh.spm",
+     "size": 806952,
+     "sha256": "bd9b65504acc6d9726dd281f7defc2adb7c2c22d0688fe2f84697de25197c8c5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ea98c52c-58dc-45d5-af23-38f2b029d020.spm"
+    },
+    {
+     "type": "trgvocab",
+     "name": "trgvocab.enzh.spm",
+     "size": 772004,
+     "sha256": "aded6993c36e440284d11cec3f6b8aef9c0e43188a772d80be342a713adf223d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/bddbda68-d4d2-4317-a0a1-119caa47525e.spm"
+    }
+   ]
+  },
+  {
+   "from": "en",
+   "to": "zh-Hant",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.enzh.s2t.bin",
+     "size": 4057188,
+     "sha256": "d891404d1436a7334df12539fe30a26f9e9f2b80bd42fdb8b5f8849e8a1e942b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194159--13a8d548-8d6a-46f6-ab8d-ea19098b7fe8--6cf4bdcb-dbe5-4e2d-af40-a02b440fdcc9.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.enzh.intgemm.alphas.bin",
+     "size": 43849787,
+     "sha256": "559ab90d723a58c1f1e2ab7cc12137bc667af5ba3e325e3eb30b5cdc930db520",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194155--76d2a34e-7ef2-4829-ac1a-a1319b852dc5--72be7771-db83-4218-bec5-44f021cbf00b.bin"
+    },
+    {
+     "type": "srcvocab",
+     "name": "srcvocab.enzh.spm",
+     "size": 803694,
+     "sha256": "2266df70492162a249ab1c0154f929bd6098b246544c666c1a0d5a24dde7d2ea",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194144--b93467f8-2c0b-43f4-a662-19cae5c7f899--ae44a945-6ed0-44d2-88ac-d4b9c25f6c3a.spm"
+    },
+    {
+     "type": "trgvocab",
+     "name": "trgvocab.enzh.spm",
+     "size": 751671,
+     "sha256": "22b91a4436d70b91ab8777c677252ab5fae2bc284d71f977df5206c110e3444c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194157--52f509a0-ac8b-48bf-ba9f-0c61a064a00a--85418cc0-208e-440b-ac6f-c56d242ca430.spm"
+    }
+   ]
+  },
+  {
+   "from": "es",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.esen.s2t.bin",
+     "size": 4636248,
+     "sha256": "e2610211d3b9577d012638fe7e7e74ed7b4b708ce96b9e792e67c282a6492daa",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a55a9cf2-8a8c-4942-a528-91e93d081746.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.esen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "4aed7734152ae0045d1a69ae49c86cfda18f53c61f90e95e1d1de1c7c7c3b033",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d7256ea9-7731-4f15-866c-62998eef93b9.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.esen.spm",
+     "size": 816054,
+     "sha256": "5ae254fa9b15aa182e70fd2a6186b1333c63a29a48043a9224c6aa4fcac058ad",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8695cc3d-7897-4c29-808b-bc983a93d1cd.spm"
+    }
+   ]
+  },
+  {
+   "from": "et",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.eten.s2t.bin",
+     "size": 4625968,
+     "sha256": "ad9750f3b41cb5686e561608271a0dc935fc827bf43226e579a6f48a3f6b5f11",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d1eac33a-7bc9-4434-83ba-2f4d4b71169e.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.eten.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "df844b3a6df906b2e0682fb7765694f35b351854db00f964896d9c8c365fbff3",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/db579f73-6a71-45fa-b8a2-4a10592d1708.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.eten.spm",
+     "size": 817574,
+     "sha256": "89a3deea4ae7d674fb46a4dae39135dd4dfaac9786f2868d0b5bc5c0aca2ef83",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3d6825f2-7be2-4f57-9c75-1d0eeafc7f8c.spm"
+    }
+   ]
+  },
+  {
+   "from": "eu",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.euen.s2t.bin",
+     "size": 3738856,
+     "sha256": "4be647536631440bdf68c59d3de5720d8e87a482e0493ff41767488b4df1731d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603154011--3e7cb4af-1362-4b92-8a4d-876af8503aed--25a7b41f-ef0e-401c-a20b-e886c4945547.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.euen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "f0a31e26b381d6340b069da4d505e11d18ac91e42f0189d37ed5fe6aa3685ed4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603154027--5320f62e-c826-4644-8e01-bec64710822f--6b369bc2-bd90-40a0-a6e2-fc5e58d24a95.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.euen.spm",
+     "size": 826064,
+     "sha256": "8f0cdff0c5bca8ed24d91c415f428d8b208f4991087723f38c1c28b59896de89",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603154029--7a4d5761-5490-4cff-bf14-83e99165c749--fdb7f0cb-a4de-4501-8c30-e4dda214c491.spm"
+    }
+   ]
+  },
+  {
+   "from": "fa",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.faen.s2t.bin",
+     "size": 3896420,
+     "sha256": "4828cb060bd4375f8aabb85fed39c18aca52b738838394546f2ddbf707a6f28e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/7b4ebd8f-771e-4324-86b4-17c6fb7d34fc.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.faen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "aa326306c177e11129de5bfeba518abc499c0b6005492766748a9c9ea6f4c712",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f4aff749-de66-43df-864e-0593eb932a5a.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.faen.spm",
+     "size": 843153,
+     "sha256": "bf36943053883d6c0fc98c2985f676a0a37042e796bad0e3df0a813d9d5393f4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b6d1420e-9622-4f1f-8997-6731d8a9fd73.spm"
+    }
+   ]
+  },
+  {
+   "from": "fi",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.fien.s2t.bin",
+     "size": 5195132,
+     "sha256": "8bad431e07b062ba47f363b76e4656cc743fd608316d8a4830a4315e44ac9abb",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/285fa313-3daa-4117-b6fe-4246295fddab.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.fien.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "e3887341f18bcc7787d9b59eb1229b56eefce18d49b7ebf1e62c55d65a377321",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/53159619-d082-4a0a-95c3-48b5765bee9b.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.fien.spm",
+     "size": 818770,
+     "sha256": "6a866911427f2916609ae89c7f2f04a78de3fdd8aa183039ecba986635d4f246",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/473d4127-c4ad-4e55-8263-15be0bb60985.spm"
+    }
+   ]
+  },
+  {
+   "from": "fr",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.fren.s2t.bin",
+     "size": 4824120,
+     "sha256": "87c6752ea908f5f0347c10ac0cf7d80d9c2f4f20c81c90168f3e8230b56d4440",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c4d99496-81bf-480f-b0bb-3aebacdcbe8e.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.fren.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "15f997bc0d13808b0b0fbd0786e684a3c8a52adcd8071844b76123fdacbf2b90",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8ef78b1c-df6c-49fc-8cae-cf8c0c2a6630.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.fren.spm",
+     "size": 814404,
+     "sha256": "783abf3abe075afdf8d85d233994bef2c3a064e935ab1bed946820aff6ac002a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/11ecb9da-60dd-4b39-aa12-27883099294b.spm"
+    }
+   ]
+  },
+  {
+   "from": "gl",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.glen.s2t.bin",
+     "size": 4367596,
+     "sha256": "fea6d0e1ea5d5e8e5f7207e4572867fb8f8d8b3f5f983a33067a06b218ab287f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603153924--06b098f0-ee9c-433c-a08a-1be06e2e94bd--e55fbbc5-18f3-40a2-b7f8-27662b078569.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.glen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "7e8ea0279166c72b0b430327533c643a88f26e80e4a9f9f294244a84213f3e6d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603153931--1f4f1b9a-7e71-42d8-9c56-81a2054afeb4--213ed8eb-077b-4018-b08a-5c4f229d1680.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.glen.spm",
+     "size": 827023,
+     "sha256": "5157bf2e08eeac7b98703bf50a14653eab84607bb707a00db81585f61c814a6c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260603153925--0306045a-4e4d-4349-a54b-21746bb9a1a6--beac37c5-ee0d-46e8-96e6-8097aef83613.spm"
+    }
+   ]
+  },
+  {
+   "from": "gu",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.guen.s2t.bin",
+     "size": 4197836,
+     "sha256": "af01dbec5a1555ddad7c4b19878ecda00e6f9d179ca76a40ab2413de6b081cb0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/cf25205a-8cdb-4a34-9fab-22f4242a9429.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.guen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "7b16e4e64f2776c73d87db01922c091738566b6a6092a42488cbaee1385cb4ab",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f91e70e6-4a8e-463d-94da-bcccb60e473b.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.guen.spm",
+     "size": 965143,
+     "sha256": "6ad2aa442cc04398bd06b4f03a1027939bbfbaac5f87b3d21f667406f4f62704",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/94d4e6e4-acf0-49c7-ac5c-d7fc122f0e62.spm"
+    }
+   ]
+  },
+  {
+   "from": "he",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.heen.s2t.bin",
+     "size": 4636028,
+     "sha256": "427c88732cb93b28d2a947cace79f62aabceb7d6f4438516e85994b14a73b68e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f565a912-e45d-476c-a94d-c69ec0224b25.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.heen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "7291cab3ec483b8cf524da96201fe947dca8c550132be21a06badeb946b5c079",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/eb972efb-b367-4196-b695-ff7dc92272a6.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.heen.spm",
+     "size": 845177,
+     "sha256": "45f5d413b9208c5f24340ab0e20a63604a572784d289baa2d788deea946f79a2",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b8975592-4c98-4b56-8111-83125b8200d1.spm"
+    }
+   ]
+  },
+  {
+   "from": "hi",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.hien.s2t.bin",
+     "size": 4605984,
+     "sha256": "e789be33dfdb639e98f5cf9eb01aa945ec3c882f68f3c8860389cf846f0112d8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d5c8cc93-ccd8-4fc5-9739-1085b6ab25cd.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.hien.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "c82fd6ed3794b79fb9dde0718a22324502a408a9eca73497b5d0a4b8024ec6de",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/fe8b6e35-403a-493d-996a-4842e86cf9b7.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.hien.spm",
+     "size": 925436,
+     "sha256": "9cbc02094ac2ebd75211b3bb6789a9d6fa112ce3c08e897f1645f18b21fbab00",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ab2371ea-810c-4dcb-bedf-35fb9e07696a.spm"
+    }
+   ]
+  },
+  {
+   "from": "hr",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.hren.s2t.bin",
+     "size": 3860080,
+     "sha256": "c9ef83603e41f78d41fa601ba9c7196be58518bd964bfe364f325665bc8bc7d0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ac72b3bf-3886-4951-bc25-50814d071313.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.hren.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "fa6c8220d3f1c41eb75b720859971dbe3acb6bf63691656c58faa4cdc28d918d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5fac58c4-3e2f-4bd5-83ed-a79854690eb3.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.hren.spm",
+     "size": 796159,
+     "sha256": "4e9cc10e8ff4a4ed64fc90b45835385690e55f49b40e8efe471597d2e3a9cd24",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/28050743-d5bd-4407-99f5-8bee12db36fc.spm"
+    }
+   ]
+  },
+  {
+   "from": "hu",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.huen.s2t.bin",
+     "size": 4847184,
+     "sha256": "9d701f7b9c7472ff0a02154983d67136ef50052b5955fbf32ced0eb8377d235c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143508--2f3354f5-989b-496a-8d6b-96d9271675d6--33a0d936-739f-4b6b-a9a0-21d998639efd.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.huen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "477d9ff69eaaf692e9c87b5bad681748f56da2f81b0dd393665c90f5d6f7d55e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143505--c63620be-c458-447d-8b75-1058b05837e9--1d4991e8-28d8-461e-bd3c-113346031961.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.huen.spm",
+     "size": 832895,
+     "sha256": "77f61965a24b93eef9805d32049791b05fdc351ec4b3dfb938995f947390149c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143459--515afde6-549a-4d16-832b-8175323fa6aa--125e236b-decd-4454-b58c-6003fdcf2c09.spm"
+    }
+   ]
+  },
+  {
+   "from": "id",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.iden.s2t.bin",
+     "size": 4050348,
+     "sha256": "7a543087d4e9c1fe2f6b6f735b5e31aeadab80235e734c0388278722042ee3a2",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b1ef3f20-d635-454f-8936-9d9d9dc52a95.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.iden.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "eeed3d8c2c78ec7011b31b2419e1d2dfdf2a7cc0ee0dbb1fcd164c934cb5d328",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/411195b7-3320-4390-87b8-47efed847e45.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.iden.spm",
+     "size": 772941,
+     "sha256": "a2dd1462abd17cccbbf3fefc562131f06b293f8ff6a5efad73ebb0176810d835",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a166d34f-91f1-46aa-bd74-3f0698cade5d.spm"
+    }
+   ]
+  },
+  {
+   "from": "is",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.isen.s2t.bin",
+     "size": 3951884,
+     "sha256": "0655d05ccaf3cd2a01f910ef542455b7b14e66d96f6c95889079b9ca1ee168cf",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0248937c-889b-4f94-bd01-b01453ef07a4.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.isen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "d2c285755d37f710458f1a49db5391a123e4e41ca7bd9829dd87cc61e4907ee6",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/7f963727-dae3-4004-91b0-6405a29ca2f0.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.isen.spm",
+     "size": 808315,
+     "sha256": "5c69f0c81f6198f5615ac5aad9d89eb81a46ae8ea396a9e8e274a76409d35e13",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/4fa854b5-b9c3-4487-a430-e3237cd51059.spm"
+    }
+   ]
+  },
+  {
+   "from": "it",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.iten.s2t.bin",
+     "size": 4713616,
+     "sha256": "0700d6d70b30490e68ff9deca0b45b80310745b491855bde3a13e1692d0cbce1",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/122ac310-0f7b-40d5-b49d-bcee81077c85.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.iten.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "21b70978ce2f3b4da7a06b5de86a09abe3acd30b9eee1b2ebb3582b9bad790bf",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/a6e3de84-6612-4546-a4ef-b658ee23ca08.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.iten.spm",
+     "size": 812724,
+     "sha256": "3ef0211d4ae6db21440892f180f2019fe2bfc110a330ffa9d2eca9665e4f2bc5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/51b5a437-9daa-481e-a9bc-311f2b3f490c.spm"
+    }
+   ]
+  },
+  {
+   "from": "ja",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.jaen.s2t.bin",
+     "size": 9348172,
+     "sha256": "525f412f0d210536c2933c78ae395fa0bf2b5ee6cc5dda61ebc2e79410ebaee4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/4e6b3270-8a2f-491d-b717-f99749328622.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.jaen.intgemm.alphas.bin",
+     "size": 43977787,
+     "sha256": "3a603e20bfe1be86071913f9e23ab5129075bc0a8490151020ac4821e4f17302",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2b066368-11b5-4cee-92e8-e6156b334f80.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.jaen.spm",
+     "size": 1443222,
+     "sha256": "5cb217758bae05877bb3f0c2f612e4e7c1e4cb03c10db11f4a47098d7ae62919",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6f4898e3-ebaa-4a79-a1af-93a4f65b96fa.spm"
+    }
+   ]
+  },
+  {
+   "from": "kn",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.knen.s2t.bin",
+     "size": 4655776,
+     "sha256": "aa50a74f15e9ef8cf27a5b905c17037bd9d67883afde71b34c4138f9507fedfc",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/8aef2927-82d5-4534-8edf-ba4f9906d692.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.knen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "49e8d3bd794b098047f7b177d9d0e6d3e49ac798c2b75bc132149cb46c5bfbfd",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/28129f02-9fcd-48a0-9b19-ec1a6184e6b0.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.knen.spm",
+     "size": 1065636,
+     "sha256": "d729397a42dba5801f330927a9956527161d6e0711b59fcea7cd2e862e6f36cc",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0340bd4a-7eae-462a-8593-9f4d7c1321e1.spm"
+    }
+   ]
+  },
+  {
+   "from": "ko",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.koen.s2t.bin",
+     "size": 8617516,
+     "sha256": "b26291f063ce216a74239275f0485534a38111203e59d42a2a56ba62d6eeb196",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/66a51334-41dd-4f08-bd22-6016035d6904.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.koen.intgemm.alphas.bin",
+     "size": 43977787,
+     "sha256": "7cb30cbc0a86e242084756445268a2346136771c92b884d9b4ebb077f67d5507",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/bf6d1f85-351f-4934-934d-8a7b0d118270.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.koen.spm",
+     "size": 1410063,
+     "sha256": "1c72b740ab793cdc3a8f16913dd6b4e806c77421077dd2d85edeb7be38418598",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/409950da-3a7f-4a0a-bd3e-9f655d7150eb.spm"
+    }
+   ]
+  },
+  {
+   "from": "lt",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.lten.s2t.bin",
+     "size": 4724124,
+     "sha256": "f687821f4074063031b7857bd61232b4ef520f3cbac5a80d59993b27bf10a032",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0904ba86-3d64-4fc3-bc0b-89bc13fdcb03.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.lten.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "0aa4571ede6f68db2f14d2662875b4d2e6323aeccd75e3b4377ab9072a22db70",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6f262eca-064a-4e8e-bf19-e781ebed1edf.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.lten.spm",
+     "size": 807623,
+     "sha256": "df3c6b7e9aa74ab4cce9f4ec73a44aac80be05fcd41ae55198a92c07c5ee3109",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e2896132-a89e-4668-a9a8-1242a04c7a32.spm"
+    }
+   ]
+  },
+  {
+   "from": "lv",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.lven.s2t.bin",
+     "size": 4214476,
+     "sha256": "dff852d317f80169899e2e1132277cf922fa7a117b060e09a14dd19c0e1a02b8",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b6c1f16d-1118-4e74-93c5-74dba239fdbe.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.lven.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "7a96dd363ae9b4485aa254ddbff042223a565a20bfe5ba0ba29b94d8ded0406a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/31ed537d-a1af-41c6-86c1-559a6ca39c3d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.lven.spm",
+     "size": 815278,
+     "sha256": "585a265757c071f5694d1bb7e65b73f38b1d065a62cda61510fa6c54fb87d2c9",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/25768d10-79e1-438c-86c9-255a69f42d73.spm"
+    }
+   ]
+  },
+  {
+   "from": "ml",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.mlen.s2t.bin",
+     "size": 5017972,
+     "sha256": "afb882ad10c9540c12fa105e1e5418a54ec8117f11c4f17d998adf1d445e308c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/53ebac17-738e-4ba6-afd5-064970cd66df.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.mlen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "5480719a5a8ac43acdf28db1c89a4d60837a475e1120ea0c4e021c4d5b7e6fd6",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/be6246b9-49cf-46a1-92d2-83c7d773c90d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.mlen.spm",
+     "size": 1109047,
+     "sha256": "c6b2150c85a18cae437d4e7245ef29d4b3629b2c611fce812d115a59c3b80efe",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2e851d3f-883f-4d3c-9e7b-227eddea2d83.spm"
+    }
+   ]
+  },
+  {
+   "from": "mr",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.mren.s2t.bin",
+     "size": 4534544,
+     "sha256": "27e8cb59d07bc1043a4b61ad7e15c2ce7b4c6aedc54cfe02514b4ad606f7c649",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134652--14e7c8bd-9cf2-4768-93bf-834c3fdc3126--5b789f01-3b95-48df-b621-a531cffd4b4c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.mren.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "7e4ce4102d159b1d0154193859ee36e26232ad6b1bc656fd9de23ebf530d67b0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134649--ac45fdc7-c614-4e85-a69a-decb526089e8--7fb67214-6c8b-4429-a8ab-17f7323e09b7.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.mren.spm",
+     "size": 1009482,
+     "sha256": "1dbe32811a6f1324bfdd9a0e0fd919730044ee79b59f24b3f36f3e07c69a06ed",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260824134642--55581873-6baf-4f00-87f8-e87c904e94f9--2477e0db-df20-4ab6-91aa-4df06bc084c1.spm"
+    }
+   ]
+  },
+  {
+   "from": "ms",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.msen.s2t.bin",
+     "size": 4371896,
+     "sha256": "1ef575be54a310eeace84c52e609f2a8c292f3c4b170376ee6ee3524c0c30316",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f314012f-a5f4-4b7c-88db-1c037318dfd8.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.msen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "db5c9415591f8a35c5c72046227b9c9398acade5df8afb5e6ac9f11f7d6650d5",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d15b2c97-ea4c-4ee0-b8de-19550aa55401.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.msen.spm",
+     "size": 802191,
+     "sha256": "6db8c20803d5f9c9fff2b6c3950f5bda4a9fa14aaef1d92818f8a3d53fd850f9",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e8f368ab-7594-4357-a0b9-b22e92431d69.spm"
+    }
+   ]
+  },
+  {
+   "from": "nb",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.nben.s2t.bin",
+     "size": 4517876,
+     "sha256": "cc07976874c905e859918be71d3fe993c9ec8696d986db2418bb1a16ff4ea500",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522193036--b74a4188-2902-4975-a9ca-1727443e2fc1--9fe22488-5d86-4cea-a14f-9d461a2b2ce7.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.nben.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "00ab7b969156f6c948be59dad4755e47a24eeb31aa39f02f1de7bce43081cc2a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522193045--9feb1537-4a06-4fe2-b680-186a24793b29--0963f0ba-1574-4da9-aac8-ae8ae8a3ff3b.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.nben.spm",
+     "size": 802367,
+     "sha256": "23eb1743070efac5a447f4f72aafda69b1985af272cece85a2f0bb08e6fcdeef",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522193032--70cbb53a-bdad-427b-835f-86aa7bae1ff9--783b30c6-7de5-4b7c-b434-896416277f4e.spm"
+    }
+   ]
+  },
+  {
+   "from": "nl",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.nlen.s2t.bin",
+     "size": 4862412,
+     "sha256": "811ac8f9dcbd12706e2d73a7057a7bbe6b9f0607d15170ffe9439977e8229b41",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/42bce52f-f0bf-4771-82d9-507af6aed9db.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.nlen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "ff987741ff15a5d94fff16cbef28f2b0a85a6e9547d982fad60ac09d16d11270",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/71841772-36c8-483a-a3a2-4564aa55aa7d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.nlen.spm",
+     "size": 807708,
+     "sha256": "c09588ca5662b230ed65bd39a07f58d9f7dd21c3a19e4aeb1bff39bf3b297c56",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/fdbc9d1b-0246-4405-a57f-28fd41b734f7.spm"
+    }
+   ]
+  },
+  {
+   "from": "pl",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.plen.s2t.bin",
+     "size": 4964208,
+     "sha256": "b295dfefa7022a62e105276e8c39fdfd67bffe588f4fd78583edd4e04ee0cb3b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/9a072be8-d900-4062-a2ab-c53c8eb8e619.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.plen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "06dbab3baa3bbceab746bc6a3bba807878f38536382c03acddf59d3edf3b5d94",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/dd8a7ab8-b12f-4ad4-8827-0922510df232.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.plen.spm",
+     "size": 821612,
+     "sha256": "2000f182efa8ce5f69bc3f9e574666b5bc2c0af684eedd32f69d15aa9021ea85",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/47b0f4cd-7d3c-4cf5-b7b4-0aecfbdc51f6.spm"
+    }
+   ]
+  },
+  {
+   "from": "pt",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.pten.s2t.bin",
+     "size": 4634492,
+     "sha256": "2685d8b6530be92a4db4cc61f15a097eb114552be15cb6c1699e9d2d99d24470",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3a6531f9-2ab9-4164-852e-29d5242ceeaa.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.pten.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "7b854f1ec5a485dd33efd7c1bc01dd7d5a57f566957c5e47722af333f0ce9157",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6a2cb71f-cf08-431a-a4a2-22e450750408.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.pten.spm",
+     "size": 816726,
+     "sha256": "d9f46182823d5bbc84201252b2dfcac28f63e561f0ec827ed858f241864c9def",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/9f79e7dc-18ca-4ee7-ad79-2935e46b7d9a.spm"
+    }
+   ]
+  },
+  {
+   "from": "ro",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.roen.s2t.bin",
+     "size": 4691708,
+     "sha256": "d242745eadff6f345784fccf1d58046061501b28c8190ba5912a9da5f056cd2f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6661bfc3-fd0e-47ae-ab65-4c19adaa5ab0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.roen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "e7542557fc6dbafacddae7b48e67fcdb07bd67b3fb55a76139edf366eca5dbdb",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5e717d94-7c4e-4fd6-af34-63e3c29682af.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.roen.spm",
+     "size": 800832,
+     "sha256": "2a690fbcd1b79bc9b99c43d582252720e0900245c82ecc813c8eb05cf063fd0c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/6cfea415-f0ff-47d7-ac93-5450bc92f0aa.spm"
+    }
+   ]
+  },
+  {
+   "from": "ru",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.ruen.s2t.bin",
+     "size": 4397908,
+     "sha256": "c944e753f298bbdf6506388de7257fb48cbd12c83e2807e2c284fc323771895b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260901210100--fd808a7b-0081-427d-83a5-7043bdd97a87--215ca362-0436-495d-b89d-542187b696cb.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.ruen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "aa0efa194b3dbd2da129ba0b8db8ef139126cb0914e57072f62061294746f1e2",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260901210056--9781ee2a-d15e-4fe8-893d-687193373fff--37b65106-c6cd-4ed2-a28e-3acd72725429.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.ruen.spm",
+     "size": 952371,
+     "sha256": "de8af5f87e231ee4016cec4bb482e6b584cb1ca34dcb624fc7b8398f25bb35df",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260901210058--222363ca-4a98-48a9-9162-65acdffc2572--ba370dc8-709d-42cd-b68c-83b912bd3e38.spm"
+    }
+   ]
+  },
+  {
+   "from": "sk",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.sken.s2t.bin",
+     "size": 4913324,
+     "sha256": "18577a7ded6b9957c948f2a384683f7ce09def42336c8141eee7ba86b79e2c8e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0bd69a2c-39d7-488a-b9e0-38a37a6f9d75.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.sken.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "1686f94838ace314719e945606a09a66dafd40847dd3fd352ad3f7a969aac62f",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/280f0757-15d3-48a4-a67f-4af2d3f6c963.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.sken.spm",
+     "size": 808082,
+     "sha256": "7d25655bd15f34d77db5d2cb96a51c7943c5528f37f83b677a09bb0ea4e4f59b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/9082a61c-aaf0-4c44-a8df-1388c5d2de5d.spm"
+    }
+   ]
+  },
+  {
+   "from": "sl",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.slen.s2t.bin",
+     "size": 4320484,
+     "sha256": "f456a49e437ccb4a547e4b51480e29c8b83f11e26a3713af35b078cd4dd255cc",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/fdcff854-c547-423d-bc5a-147e1da06ad0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.slen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "9d15df58b60048366de4f7b6e727157ffdaea3a0fd1c1759ce232b057e2f991c",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/19d1f495-2dda-4dc1-829a-b463f38624ba.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.slen.spm",
+     "size": 803078,
+     "sha256": "54ed331d3435e2bdc5b02462180197b77631f466fc0e61897b5469449857dd2b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/696fd002-1716-48cc-adb8-b9dc5f08c2a7.spm"
+    }
+   ]
+  },
+  {
+   "from": "sq",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.sqen.s2t.bin",
+     "size": 4256516,
+     "sha256": "b2f51df0bc14b9f89a29d39652a80167ef413eb1579957ecea825cb0a7575c60",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/5b825230-e17e-4749-baf6-b9bbdc0e95c8.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.sqen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "4b0ce319e7c8f7e1836ce18cb6522c83268e8cff54f2a7f5dcef270250a44475",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/73b13241-a205-42fa-8c9d-5b362bf6bc43.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.sqen.spm",
+     "size": 820200,
+     "sha256": "6b7ce057b54ed983eb47087254ea8673e20a857739fc5b57874c80c3301bb91d",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2504afd7-d9b1-4a11-85be-2162c0bee6ea.spm"
+    }
+   ]
+  },
+  {
+   "from": "sr",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.sren.s2t.bin",
+     "size": 4628048,
+     "sha256": "476d9731a1fd44811466abf2292523f11eaad57f0fb7a5cd30391e7720c7071a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/89668816-671a-41d6-ac59-81b54e34b63f.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.sren.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "99c44e9690a7ed2c1f13468765c3b1db2b8a8ae739980e4056d45dca613a1966",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/d3adb13f-87a8-4abc-81ab-af4f77f0f478.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.sren.spm",
+     "size": 822509,
+     "sha256": "5cdbad076c8f5b11e3342f5011e9f56f22558523ca82aec9bab621ddc7614bdc",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/2e72e9fa-89d3-4961-a491-372c8da0e02a.spm"
+    }
+   ]
+  },
+  {
+   "from": "sv",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.sven.s2t.bin",
+     "size": 4645680,
+     "sha256": "1c4640765e806d905cdc4f51158f6f869c78709b9e8a43070877965fa13c160e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/346b91bf-2540-43fa-a7d2-684e02f19252.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.sven.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "92d79e2725718b84aed486473bdfcbe6bba3e7094922d4bead8a121cfa346372",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c9320d7a-0b85-444f-8b8e-4b83ddf86cbb.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.sven.spm",
+     "size": 793049,
+     "sha256": "93427195fac4125722ed778707478ef78cb77b3fdf1ed5b93bee9fd36e30a8ec",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/60d6442e-ef60-4074-b1b3-330b916d619b.spm"
+    }
+   ]
+  },
+  {
+   "from": "ta",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.taen.s2t.bin",
+     "size": 4940884,
+     "sha256": "2eb77117d9997984fe700c386126865a6ca951fcfb78b3c29b2921a6a770d63a",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260715140619--c8ee9a68-ac2d-4a2f-89c3-8f93c8537f37--4fc5a810-c260-48b6-b93a-2199877eb76f.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.taen.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "5413fca6c35cd9c50157df1ebd425d6ca02713bfedc1ba7e5fb3050a437b13b6",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260715140617--f0e86729-368b-429c-b36e-c694bff13b11--7d585df8-e009-4b2b-a203-4fb5d6df8967.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.taen.spm",
+     "size": 1104678,
+     "sha256": "5ce5f840335d9cbbbd76ef160ee2566ebe239d820d66a827996f40dd01467a92",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260715140611--dd913371-ad2b-4faf-bd87-6603acbe5b93--863f06ba-b617-4a8e-bf03-23c4c336e750.spm"
+    }
+   ]
+  },
+  {
+   "from": "te",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.teen.s2t.bin",
+     "size": 4815756,
+     "sha256": "5df84ca17e4cc76a73ef7d93f94f53a89f37a11a456f2b6373ff19c4ce4ef964",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/c704f4f5-2b2d-4874-8022-8046f8962f99.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.teen.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "e2ec7b13ba6148eba309244ee17dc935f1b71e95bbf57154216f6247877abb7e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20200b20-2ee3-4fc4-ae89-52e045ebdad0.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.teen.spm",
+     "size": 1056197,
+     "sha256": "dd57e1d68316ae32f9ba3f77223f317ce39cd1ef72e69e6b06b7c1d1ba954052",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/f06f79ff-a591-47ef-aa99-4ce0dbacc222.spm"
+    }
+   ]
+  },
+  {
+   "from": "th",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.then.s2t.bin",
+     "size": 4487056,
+     "sha256": "3a7661a7f5c811c83f05f53008083b042fea0334fc6044ca1fda4982a8d48453",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522193112--cc62d282-fc42-4465-b72e-911466f813f2--3bb43596-e613-4553-afc1-ea0cfc1215c0.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.then.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "f70a501324743668b031bee19cd001a66839e8e5dfc0b4a1c44d5ea99d4e8d66",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522193109--d9494dd9-d382-4b84-b600-1445bbb07847--7bfb305f-f514-4d81-b390-f8bc76b5b461.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.then.spm",
+     "size": 995429,
+     "sha256": "b625d3dcdfa2b4bbec496c9a0a30d169c917464ac5ea75506c0699972fea95f0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522193057--0dcc1a4a-ca77-43fb-a034-ebc94de8f247--73cdb249-b2b2-44f6-85b4-cd3a2f8c5607.spm"
+    }
+   ]
+  },
+  {
+   "from": "tr",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.tren.s2t.bin",
+     "size": 4662492,
+     "sha256": "d3374ab5267a73ee1aa1d926a298bd349426835f40856991ee959bc5cd4f9fce",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/0c8e7a90-9172-4987-aab2-ed027e0ff3aa.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.tren.intgemm.alphas.bin",
+     "size": 17140836,
+     "sha256": "bd18594ac5a7f1d9997e7ea5bd80272082219cf8b1ce604766e4f207eb86abbf",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/553d0a23-6940-49f5-8b2e-155b08897db7.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.tren.spm",
+     "size": 811353,
+     "sha256": "ed328e589a3ccd70fd3ce7773fc3c01d8b7b18c687464cacf17fd40a8c0daadd",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/b99302c1-af69-4781-930f-d8dec82b8ec9.spm"
+    }
+   ]
+  },
+  {
+   "from": "uk",
+   "to": "en",
+   "version": "1.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.uken.s2t.bin",
+     "size": 3914120,
+     "sha256": "32b5e0df493671a223cb5cb32430181cbb7fe6b5562c91dbc3d35410d37e5ff6",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3e01a41b-9384-4bfc-98b9-031df4f9ee5e.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.uken.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "2e7b8bc9d2569d8b4ae244e964cdc343a0aa3735cc83ecb664be84a37cb45f48",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/31e03e41-af47-4de2-9420-f6fd206e0114.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.uken.spm",
+     "size": 886410,
+     "sha256": "8b51480dfc4ca2d7a08d2bfdaa9e57353ca97e6cf3d5f9aba4c0179d3665bfc0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/3155c3f0-b486-40f3-bfdd-1b3b734cc171.spm"
+    }
+   ]
+  },
+  {
+   "from": "ur",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.uren.s2t.bin",
+     "size": 3518528,
+     "sha256": "afe891a57dc54974e322fc30feda41f32b5d7d2697a03bfc649dac5e079ae81e",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143630--7c19cc5a-014a-49e5-930a-7aeeef0267ec--ce6bd093-a844-4185-9ed9-ebc886ea5317.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.uren.intgemm.alphas.bin",
+     "size": 31561787,
+     "sha256": "4915518d1699fb72c390603605d3ead9fb87a8c2f70092089a27df22a7c540d0",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143636--c80e0e9e-11b8-490e-ac35-885ebd75bf48--44e5d656-3384-4e3e-9705-25c3a93e1e8d.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.uren.spm",
+     "size": 843115,
+     "sha256": "48304e0f0e30cd69a0d50f0fc61ba6ac2d75f86bab70d7ee59f7af14099e2e28",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260831143637--71d7ac59-e756-455f-aaa7-e09b5843a52f--612d91b1-c6fa-4dd1-a4e4-a38aa338e874.spm"
+    }
+   ]
+  },
+  {
+   "from": "vi",
+   "to": "en",
+   "version": "1.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.vien.s2t.bin",
+     "size": 3910184,
+     "sha256": "3a071ed3d982f6eb6ee116b84067bf70041e4229e43ea65ecb6d7c2796e8851b",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/32d8a39d-acdd-4511-926e-b106875ae125.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.vien.intgemm.alphas.bin",
+     "size": 17141051,
+     "sha256": "de4bf2b9ffb4d910e32720ec3a43655fb6f4062ce5219332f824fc1bdca7a5f4",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ac5d5553-78cd-4b5a-846a-a51c07f148e3.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.vien.spm",
+     "size": 757250,
+     "sha256": "cb152765d1e71ea3cf96fdb339c764b7201be7b9ab32e20cfebcf16a20fc0939",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/e182522d-4844-453c-81ba-7360522f7c1d.spm"
+    }
+   ]
+  },
+  {
+   "from": "zh-Hans",
+   "to": "en",
+   "version": "2.1",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.zhen.s2t.bin",
+     "size": 9219192,
+     "sha256": "8524dd4c93ffd7f0ae7be32f77a7c14fea7cdbbebe34ea6ad0ec368d5ddd8b13",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/ae5f53d2-59ec-4aad-944d-999e50d6a65c.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.zhen.intgemm.alphas.bin",
+     "size": 43977787,
+     "sha256": "5cd149601802fc8a18124a1c1306144dbbedc058630c4ddb2d53aa76fa9c7c06",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/715efbde-c974-4696-981a-83c0c5f82ad5.bin"
+    },
+    {
+     "type": "vocab",
+     "name": "vocab.zhen.spm",
+     "size": 1359697,
+     "sha256": "dff594318ab7d8b7b60b844ab98ebe6b932ae8045fab15235404c787715965b3",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/17ff5d42-6d4c-42f8-ad3c-b8042b5bafa7.spm"
+    }
+   ]
+  },
+  {
+   "from": "zh-Hant",
+   "to": "en",
+   "version": "2.0",
+   "files": [
+    {
+     "type": "lex",
+     "name": "lex.50.50.zhen.s2t.bin",
+     "size": 6385944,
+     "sha256": "aa7daf6cfc85c0cd2c10e2944d66f6da55497c9c6408789f3adfded4074c2fb1",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194215--6c386193-432a-422f-be5f-3cad0977e52b--a52e4a54-5f80-43ce-b873-1bc792ec1483.bin"
+    },
+    {
+     "type": "model",
+     "name": "model.zhen.intgemm.alphas.bin",
+     "size": 43849787,
+     "sha256": "0aee91790894458f5d367551f6edcd4c9cb97852c34f221bcbf9f4701ebcf0cd",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194230--6ca6db97-6bce-4110-981f-350e15965675--8323efd2-43e9-4886-9f60-35870d1744ea.bin"
+    },
+    {
+     "type": "srcvocab",
+     "name": "srcvocab.zhen.spm",
+     "size": 769669,
+     "sha256": "5cc6a76611dbf86219f109141533606b15ecb34eee83673bb86b2c16b14734db",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194213--ad6a9ed2-06ed-4c72-b6ba-aa4492bd582f--72fab356-41da-4bd6-a22c-aa5456ba3ea1.spm"
+    },
+    {
+     "type": "trgvocab",
+     "name": "trgvocab.zhen.spm",
+     "size": 812572,
+     "sha256": "7bf002db37c10d3b114cc5588d7fdcb16c57d0fd1e2c34354c22cc9f0b6c3c29",
+     "url": "https://firefox-settings-attachments.cdn.mozilla.net/main-workspace/translations-models/20260522194217--5e1d7df1-80a8-4142-ae9d-0ff51b8c2fbc--5e39a274-9805-4d87-a950-39b3d95aac93.spm"
+    }
+   ]
+  }
+ ]
+}

@@ -773,6 +773,7 @@ internal class FloatingAsrInteractionController(
             } catch (_: Throwable) {
                 null
             }
+            val translation = asrSessionManager.lastTranslation
             val promptSelection = try {
                 asrSessionManager.getLastPromptSelection()
             } catch (_: Throwable) {
@@ -832,7 +833,8 @@ internal class FloatingAsrInteractionController(
                                 llmVendorId = llmVendorId,
                                 charCount = chars,
                                 timingTrace = timingTrace,
-                                promptSelection = promptSelection
+                                promptSelection = promptSelection,
+                                translation = translation
                             )
                         )
                         timingTrace?.let { trace ->

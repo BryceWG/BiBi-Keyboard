@@ -78,8 +78,10 @@ import com.brycewg.asrkb.asr.AsrRecordedAudioRouteKind
 import com.brycewg.asrkb.asr.AsrRecordedAudioRouteResolver
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.AsrHistoryStore
+import com.brycewg.asrkb.store.AsrHistoryTimingInterval
 import com.brycewg.asrkb.store.AsrHistoryTimingOrigin
 import com.brycewg.asrkb.store.AsrHistoryTimingStage
+import com.brycewg.asrkb.store.AsrHistoryTimingTrace
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.history.AsrHistoryFailDisplay
 import com.brycewg.asrkb.ui.history.AsrHistoryRerunErrorMessages
@@ -868,6 +870,15 @@ private fun HistoryDetailsSections(
             modifier = if (constrainResultSections) Modifier.weight(1f, fill = false) else Modifier,
             fillBody = constrainResultSections
         )
+        record.translation?.let { translation ->
+            HistoryResultSection(
+                title = stringResource(R.string.translation_input_text),
+                value = translation.inputText,
+                canCopy = translation.inputText.isNotBlank(),
+                uiMode = uiMode,
+                onCopy = { onCopy(translation.inputText) }
+            )
+        }
         HistoryResultSection(
             title = stringResource(R.string.history_final_text),
             value = record.text.ifBlank {
@@ -942,7 +953,7 @@ private fun HistoryTimingTraceSection(
     record: AsrHistoryStore.AsrHistoryRecord,
     uiMode: BibiUiMode
 ) {
-    val trace = record.timingTrace
+    val trace = record.historyDisplayTimingTrace()
     if (trace == null) {
         HistoryText(
             text = stringResource(R.string.history_timing_legacy_unavailable),
@@ -1063,6 +1074,11 @@ private fun historyTimingStageStyles(source: String): List<HistoryTimingStageSty
         stage = AsrHistoryTimingStage.AI_POSTPROCESS,
         label = stringResource(R.string.history_timing_ai_postprocess),
         color = colorResource(R.color.history_timing_ai_postprocess)
+    ),
+    HistoryTimingStageStyle(
+        stage = AsrHistoryTimingStage.TRANSLATION,
+        label = stringResource(R.string.translation_feature),
+        color = colorResource(R.color.history_timing_translation)
     ),
     HistoryTimingStageStyle(
         stage = AsrHistoryTimingStage.TEXT_DELIVERY,
@@ -1601,4 +1617,36 @@ private fun historyRerecognitionFallbackLine(
     } else {
         context.getString(R.string.history_rerecognition_fallback_supported, fallbackLabel)
     }
+}
+
+private fun AsrHistoryStore.AsrHistoryRecord.historyDisplayTimingTrace(): AsrHistoryTimingTrace? {
+    val trace = timingTrace ?: return null
+    val translationMs = translation?.elapsedMs ?: return trace
+    if (translationMs <= 0 || trace.intervals.any { it.stage == AsrHistoryTimingStage.TRANSLATION }) return trace
+
+    // Early IME builds measured translation inside the surrounding stage: after polishing
+    // it occupied the beginning of delivery; without polishing it ended postprocessing.
+    // Reclassify only those records, preserving the recorded total and persisted trace.
+    if (source != "ime") return trace
+    val containingStage = if (aiProcessed) AsrHistoryTimingStage.TEXT_DELIVERY else AsrHistoryTimingStage.POSTPROCESS
+    val index = trace.intervals.indexOfLast {
+        it.stage == containingStage && it.endOffsetMs - it.startOffsetMs >= translationMs
+    }
+    if (index < 0) return trace
+    val containing = trace.intervals[index]
+    val translationStart = if (aiProcessed) containing.startOffsetMs else containing.endOffsetMs - translationMs
+    val translationEnd = translationStart + translationMs
+    return trace.copy(
+        intervals = buildList {
+            trace.intervals.forEachIndexed { i, interval ->
+                if (i != index) {
+                    add(interval)
+                } else {
+                    if (translationStart > interval.startOffsetMs) add(interval.copy(endOffsetMs = translationStart))
+                    add(AsrHistoryTimingInterval(AsrHistoryTimingStage.TRANSLATION, translationStart, translationEnd))
+                    if (translationEnd < interval.endOffsetMs) add(interval.copy(startOffsetMs = translationEnd))
+                }
+            }
+        }
+    )
 }

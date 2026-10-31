@@ -36,6 +36,10 @@ sealed interface BibiSettingsRoute {
         override val id: String = "asr"
     }
 
+    data object Translation : BibiSettingsRoute {
+        override val id: String = "translation"
+    }
+
     data object Ai : BibiSettingsRoute {
         override val id: String = "ai"
     }
@@ -91,6 +95,7 @@ sealed interface BibiSettingsRoute {
             Floating.id -> Floating
             Asr.id -> Asr
             Ai.id -> Ai
+            Translation.id -> Translation
             PromptSelection.id -> PromptSelection
             PromptSelectionPreview.id -> PromptSelectionPreview
             Backup.id -> Backup

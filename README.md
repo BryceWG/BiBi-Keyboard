@@ -189,6 +189,7 @@ Apache 2.0 License - 自由使用、修改、分发，需保留版权声明
 - [Phosphor](https://github.com/phosphor-icons/homepage) - 提供了软件内几乎所有 Icons
 - [miuix](https://github.com/compose-miuix-ui/miuix) - 提供了 Miuix 风格的 Compose UI 组件、图标与偏好设置组件
 - [WaveLineView](https://github.com/Jay-Goo/WaveLineView) - 提供了录音波形动画的实现方案，使音频可视化效果更加流畅美观
+- [foxlet-translate](https://github.com/yinvoke/foxlet-translate) - 提供了离线翻译功能的支持，使离线翻译成为可能
 - 感谢《补全计划》图标包作者南㲺为本项目设计了全新的应用图标
 
 <div align="center">

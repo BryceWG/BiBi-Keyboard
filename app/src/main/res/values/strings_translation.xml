@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_translation_settings">Translation settings</string>
+    <string name="label_translation_enabled">Enable translation</string>
+    <string name="translation_feature">Translation</string>
+    <string name="translation_service_config">Service configuration</string>
+    <string name="translation_vendor">Service</string>
+    <string name="translation_foxlet">Foxlet offline translation</string>
+    <string name="translation_source_language">Input language</string>
+    <string name="translation_target_language">Target language</string>
+    <string name="translation_packages">Language packs</string>
+    <string name="translation_download_packages">Download language packs</string>
+    <string name="translation_delete_packages">Delete language packs</string>
+    <string name="translation_cancel_download">Cancel download</string>
+    <string name="translation_swap">Swap languages</string>
+    <string name="translation_ready">Language packs ready</string>
+    <string name="translation_checking">Checking language packs…</string>
+    <string name="translation_required_download">%1$d language packs to download · %2$d MB</string>
+    <string name="translation_download_progress">Downloading · %1$d%%</string>
+    <string name="translation_downloading">Downloading language packs</string>
+    <string name="translation_download_failed">Language pack download failed. Tap to retry.</string>
+    <string name="translation_model_error">Unable to read language packs</string>
+    <string name="translation_delete_failed">Unable to delete language packs</string>
+    <string name="translation_delete_confirm">Delete packs for this direction? Other directions may share these packs.</string>
+    <string name="translation_processing">Translating…</string>
+    <string name="translation_failed">Translation failed. Check language packs and retry.</string>
+    <string name="translation_empty_result">Translation returned no text</string>
+    <string name="translation_choose_languages">Choose input and target languages</string>
+    <string name="translation_unsupported_device">Foxlet requires Android 9 or later and a 64-bit ARM device.</string>
+    <string name="translation_feature_off">Voice input keeps the processed text without translation.</string>
+    <string name="translation_feature_on">Translate recognized text after AI polishing, if used, and then apply final text cleanup.</string>
+    <string name="translation_input_text">Text before translation</string>
+    <string name="translation_preload">Preload models</string>
+    <string name="translation_preload_off">Load translation models when translation starts.</string>
+    <string name="translation_preload_on">When translation is enabled, load its models as recording starts.</string>
+    <string name="translation_keep_alive">Model unloading policy</string>
+    <string name="translation_keep_alive_immediate">Do not retain (unload after translation)</string>
+    <string name="translation_downloaded_packages">Downloaded language packs</string>
+    <string name="translation_no_packages">No language packs downloaded</string>
+    <string name="translation_pack_details">%1$d MB · Version %2$s</string>
+    <string name="translation_delete_one_confirm">Delete %1$s? Other translation directions may use this pack.</string>
+    <string name="translation_keep_alive_always">Keep loaded</string>
+    <string name="translation_manage_packages">Manage language packs</string>
+    <string name="translation_delete_pack_action">Delete %1$s</string>
+</resources>

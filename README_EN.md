@@ -191,6 +191,7 @@ Thanks to the following open-source projects for their technical support:
 - [Phosphor](https://github.com/phosphor-icons/homepage) - Provides almost all icons used in the software
 - [miuix](https://github.com/compose-miuix-ui/miuix) - Provides Miuix-style Compose UI components, icons, and preference components
 - [WaveLineView](https://github.com/Jay-Goo/WaveLineView) - Provides beautiful wave animation implementation for audio visualization, making recording experience more fluid and visually appealing
+- [foxlet-translate](https://github.com/yinvoke/foxlet-translate) - Provides technical support for offline translation, making offline translation possible
 - Thanks to the author NURKE(南㲺) of the "Completion Project" icon pack for designing the new application icon for this project
 
 <div align="center">

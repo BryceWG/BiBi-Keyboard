@@ -35,6 +35,8 @@ internal class DictationUseCase(
     private val onPostprocessUndoAvailable: () -> Unit,
     private val onContinueSession: () -> Unit
 ) {
+    private var translationRecord: com.brycewg.asrkb.store.TranslationRecord? = null
+
     suspend fun handleFinal(
         ic: InputConnection?,
         text: String,
@@ -51,6 +53,7 @@ internal class DictationUseCase(
             uiListenerProvider()?.onVibrate()
             return
         }
+        translationRecord = null
         val historyTiming = asrManager.acquireNextHistoryCommitContext()
         historyTiming?.timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
         if (polishPolicy != RecordingPolishPolicy.Skip &&
@@ -149,7 +152,7 @@ internal class DictationUseCase(
 
         if (isCancelled(seq)) return
 
-        val finalOut = postprocessResult.finalText
+        val finalOut = translateFinal(ic, seq, postprocessResult.finalText, historyTiming) ?: return
         val rawText = postprocessResult.rawText
         val postprocFailed = postprocessResult.postprocFailed
         val aiUsed = postprocessResult.aiUsed
@@ -248,14 +251,15 @@ internal class DictationUseCase(
         )
     }
 
-    private fun handleWithoutPostprocess(
+    private suspend fun handleWithoutPostprocess(
         ic: InputConnection?,
         text: String,
         state: KeyboardState.Listening,
         seq: Long,
         historyTiming: AsrSessionManager.HistoryCommitContext?
     ) {
-        val finalToCommit = com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text)
+        val processed = com.brycewg.asrkb.util.AsrFinalFilters.applySimple(context, prefs, text)
+        val finalToCommit = translateFinal(ic, seq, processed, historyTiming) ?: return
 
         if (finalToCommit.isBlank()) {
             dictationSession.complete(seq, ic, "")
@@ -334,6 +338,37 @@ internal class DictationUseCase(
         )
     }
 
+    private suspend fun translateFinal(
+        ic: InputConnection?,
+        seq: Long,
+        text: String,
+        historyTiming: AsrSessionManager.HistoryCommitContext?
+    ): String? {
+        if (!prefs.translationEnabled) return text
+        processingTimeoutController.cancel()
+        transitionToState(KeyboardState.Processing)
+        uiListenerProvider()?.onStatusMessage(context.getString(R.string.translation_processing))
+        return try {
+            val translated = com.brycewg.asrkb.translation.TranslationPipeline.translate(context, prefs, text, historyTiming?.timing) { translationRecord = it }
+            historyTiming?.timing?.end(com.brycewg.asrkb.store.AsrHistoryTimingStage.POSTPROCESS)
+            historyTiming?.timing?.begin(com.brycewg.asrkb.store.AsrHistoryTimingStage.TEXT_DELIVERY)
+            if (isCancelled(seq)) null else translated
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            asrManager.archiveQueuedHistoryFailure(
+                status = AsrHistoryStore.AsrHistoryStatus.FAILED,
+                failStage = AsrHistoryStore.AsrHistoryFailStage.TRANSLATION,
+                failReasonCode = "translation_failed",
+                context = historyTiming
+            )
+            dictationSession.complete(seq, ic, "")
+            transitionToIdle(true)
+            uiListenerProvider()?.onStatusMessage(context.getString(R.string.translation_failed))
+            null
+        }
+    }
+
     private fun archiveEmptyFilteredResult(historyTiming: AsrSessionManager.HistoryCommitContext? = null) {
         asrManager.archiveQueuedHistoryFailure(
             status = AsrHistoryStore.AsrHistoryStatus.FAILED,
@@ -386,7 +421,8 @@ internal class DictationUseCase(
                 aiPostStatus = aiPostStatus,
                 llmVendorId = llmVendorId,
                 promptSelection = promptSelection,
-                historyTiming = historyTiming
+                historyTiming = historyTiming,
+                translation = translationRecord
             )
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to prepare background ASR commit", t)

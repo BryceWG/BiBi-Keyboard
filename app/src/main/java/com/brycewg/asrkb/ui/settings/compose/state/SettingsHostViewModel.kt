@@ -130,6 +130,7 @@ class SettingsHostViewModel(
 
         BibiSettingsRoute.Asr,
         BibiSettingsRoute.Ai,
+        BibiSettingsRoute.Translation,
         BibiSettingsRoute.PromptSelection,
         BibiSettingsRoute.PromptSelectionPreview,
         BibiSettingsRoute.History,
