@@ -1,5 +1,6 @@
 package com.brycewg.asrkb.ime
 
+import android.text.Spanned
 import android.util.Log
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
@@ -35,9 +36,8 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
         }
         val ok = try {
             ic.commitText(text, newCursorPosition)
-            true
         } catch (e: Throwable) {
-            Log.e(tag, "commitText failed: text='$text', pos=$newCursorPosition", e)
+            Log.e(tag, "commitText failed: len=${text.length}, pos=$newCursorPosition", e)
             false
         }
         logCommitOrFinish(
@@ -66,9 +66,29 @@ class InputConnectionHelper(private val tag: String = "InputConnectionHelper") {
         return try {
             ic.setComposingText(text, newCursorPosition)
         } catch (e: Throwable) {
-            Log.e(tag, "setComposingText failed: text='$text', pos=$newCursorPosition", e)
+            Log.e(tag, "setComposingText failed: len=${text.length}, pos=$newCursorPosition", e)
             false
         }
+    }
+
+    /** 恢复已存在正文的组合区，不删除或重写字符。 */
+    internal fun setComposingRegion(ic: InputConnection, start: Int, end: Int): Boolean = try {
+        ic.setComposingRegion(start, end)
+    } catch (e: Throwable) {
+        logDiag(
+            "dictation_restore_failed",
+            diagBase() + mapOf("start" to start, "end" to end, "errorType" to e.javaClass.simpleName)
+        )
+        false
+    }
+
+    /** 片段未携带样式时，null 不能用来断言宿主已移除组合区。 */
+    internal fun composingRange(text: CharSequence?): Pair<Int, Int>? {
+        if (text !is Spanned) return null
+        return text.getSpans(0, text.length, Any::class.java)
+            .firstOrNull { text.getSpanFlags(it) and Spanned.SPAN_COMPOSING != 0 }
+            ?.let { text.getSpanStart(it) to text.getSpanEnd(it) }
+            ?.takeIf { it.first >= 0 && it.second > it.first }
     }
 
     /**

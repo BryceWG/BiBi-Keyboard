@@ -1,154 +1,92 @@
 /**
- * IME 听写会话的文本写入与交付：正常 composing，以及严格归属校验下的一次有界修复。
+ * IME 听写文本交付：直接更新 composing；组合区丢失时局部确认上一版预览并恢复范围。
  */
 package com.brycewg.asrkb.ime
 
-import android.os.SystemClock
 import android.view.inputmethod.InputConnection
 import com.brycewg.asrkb.store.debug.DebugLogManager
 
-private const val ANCHOR_MAX = 128
-private const val VERIFY_MAX = 10_000
-
-/** 所有入口由 IME 主线程串行调用；结果处理不依赖本类是否仍有编辑器写入权限。 */
+/** 主线程串行使用；ASR、AI 与终稿共享绑定，诊断读回不决定普通写入是否成功。 */
 internal class DictationTextSession(private val inputHelper: InputConnectionHelper) {
-    enum class Delivery { CONFIRMED_REPLACED, REPAIRED, UNVERIFIED, SKIPPED }
+    /** ACCEPTED 表示编辑器接受了操作，不代表同步读回确认了正文。 */
+    enum class Delivery { ACCEPTED, FAILED, SKIPPED }
 
-    private enum class Check { REPLACED, APPENDED, UNREADABLE, CONFLICT }
+    private data class Binding(val ic: InputConnection, var start: Int)
 
-    private data class Ownership(
-        val ic: InputConnection,
-        val before: String?,
-        val after: String?,
-        val start: Int,
-        val initialSelection: Pair<Int, Int>
-    )
-
-    private var ownership: Ownership? = null
+    private var binding: Binding? = null
     private var generation = 0L
     private var active = false
     private var invalidated = true
     private var sentText = ""
-    private var confirmedText: String? = null
     private var hasWritten = false
     private var aiPhase = false
+    private var operation = 0L
+    private var segment = 0L
+    private var expectedCursor = -1 to -1
     private val expectedSelections = ArrayDeque<Pair<Int, Int>>()
 
-    /** 只有新的听写开始才采集连接、编辑位置和前后锚点。 */
+    // null 表示本次写入尚无宿主回报；(-1, -1) 才是回调明确报告没有组合区。
+    private var composingRange: Pair<Int, Int>? = null
+
     fun begin(generation: Long, ic: InputConnection?, selectionStart: Int, selectionEnd: Int) {
         this.generation = generation
+        operation = 0
+        segment = 0
+        val selection = ic?.let { inputHelper.getSelection(it) } ?: (selectionStart to selectionEnd)
+        beginSegment(ic, selection)
+    }
+
+    private fun beginSegment(ic: InputConnection?, selection: Pair<Int, Int>) {
         active = ic != null
         invalidated = ic == null
         sentText = ""
-        confirmedText = null
         hasWritten = false
         aiPhase = false
+        composingRange = null
         expectedSelections.clear()
-        val selection = ic?.let { inputHelper.getSelection(it) } ?: (selectionStart to selectionEnd)
-        ownership = ic?.let {
-            Ownership(
-                it,
-                inputHelper.getTextBeforeCursor(it, ANCHOR_MAX)?.toString(),
-                inputHelper.getTextAfterCursor(it, ANCHOR_MAX)?.toString(),
-                minOf(selection.first, selection.second),
-                selection
-            )
-        }
-        rememberSelection(selection.first, selection.second)
-        logBase("dictation_session_begin", mapOf("hasIc" to (ic != null), "start" to ownership?.start))
+        binding = ic?.let { Binding(it, minOf(selection.first, selection.second)) }
+        expectedCursor = selection
+        rememberSelection(selection)
+        logDiag("dictation_session_begin", mapOf("hasIc" to (ic != null), "start" to binding?.start))
     }
 
     fun isActive(generation: Long): Boolean = active && !invalidated && this.generation == generation
 
-    fun isSameConnection(ic: InputConnection?): Boolean = ic != null && ownership?.ic === ic
+    fun isSameConnection(ic: InputConnection?): Boolean = ic != null && binding?.ic === ic
 
     fun enterAi(generation: Long) {
         if (this.generation != generation) return
         aiPhase = true
-        logBase("dictation_phase", mapOf("writable" to isActive(generation)))
+        logDiag("dictation_phase", mapOf("writable" to isActive(generation)))
     }
 
-    /** 重试只更换结果代次，不重采位置或锚点，也不恢复已撤销的权限。 */
+    /** 重试沿用原输入框和替换范围，不能重新授权已经取消的绑定。 */
     fun resumeForRetry(generation: Long, ic: InputConnection?): Boolean {
         if (invalidated || !isSameConnection(ic)) return false
         this.generation = generation
         active = true
-        logBase("dictation_retry_resume", emptyMap())
+        logDiag("dictation_retry_resume", emptyMap())
         return true
     }
 
-    /** 同一录音中的下一段只能沿用仍有效且已确认完成交付的权限。 */
+    /** 连续录音的下一段从上一段提交后的光标开始。 */
     fun continueAfterDelivery(ic: InputConnection?) {
-        val own = ownership ?: return
-        if (invalidated || active || confirmedText != sentText || !isSameConnection(ic)) return
-        val end = if (own.start >= 0) own.start + sentText.length else -1
-        begin(generation, ic, end, end)
+        val own = binding ?: return
+        if (invalidated || active || !isSameConnection(ic)) return
+        val selection = inputHelper.getSelection(own.ic) ?: expectedCursor
+        segment++
+        beginSegment(own.ic, selection)
     }
 
-    fun update(generation: Long, ic: InputConnection?, text: String): Delivery {
-        val own = authorized(generation, ic) ?: return Delivery.SKIPPED
-        // 写入前验证旧稿，避免先破坏未知位置、再发现上下文冲突。
-        if (checkCurrent(own) == Check.CONFLICT) return conflict("before_write")
-        if (hasWritten && text == sentText) return verifyTarget(own, text)
+    fun update(generation: Long, ic: InputConnection?, text: String): Delivery = write(generation, ic, text, final = false)
 
-        val previous = sentText
-        val previousConfirmed = confirmedText == previous && hasWritten
-        expectCursor(own, text.length)
-        if (previousConfirmed) expectCursor(own, previous.length + text.length)
-        val startedAt = SystemClock.elapsedRealtime()
-        if (!inputHelper.setComposingText(own.ic, text)) return conflict("write_failed")
-        if (invalidated) return Delivery.SKIPPED
-        sentText = text
-        hasWritten = true
-        confirmedText = null
-        val check = checkText(own, text, if (previousConfirmed && previous.isNotEmpty()) previous + text else null)
-        logVerbose("dictation_write", mapOf("len" to text.length, "check" to check.name))
-        return when (check) {
-            Check.REPLACED -> {
-                confirmedText = text
-                Delivery.CONFIRMED_REPLACED
-            }
-            Check.APPENDED -> repair(own, previous + text, text, startedAt)
-            Check.UNREADABLE -> Delivery.UNVERIFIED
-            Check.CONFLICT -> conflict("after_write")
-        }
-    }
-
-    /** 相同终稿不重写，但同样验证连接、位置及正文，并检查 finish 与最终正文。 */
-    fun complete(generation: Long, ic: InputConnection?, finalText: String): Delivery {
-        val own = authorized(generation, ic) ?: return Delivery.SKIPPED
-        val write = update(generation, ic, finalText)
-        if (invalidated || write == Delivery.SKIPPED) return Delivery.SKIPPED
-        expectCursor(own, finalText.length)
-        val finishOk = inputHelper.finishComposingText(own.ic)
-        if (invalidated) return Delivery.SKIPPED
-        if (!finishOk) {
-            invalidate("finish_failed")
-            logBase("dictation_delivery", mapOf("len" to finalText.length, "finishOk" to false))
-            return Delivery.UNVERIFIED
-        }
-        val verified = if (finishOk) verifyTarget(own, finalText) else Delivery.UNVERIFIED
-        active = false
-        val delivery = when {
-            !finishOk || verified == Delivery.UNVERIFIED -> Delivery.UNVERIFIED
-            verified == Delivery.SKIPPED -> Delivery.SKIPPED
-            write == Delivery.REPAIRED -> Delivery.REPAIRED
-            else -> Delivery.CONFIRMED_REPLACED
-        }
-        // 保留绑定供失败音频重试核对；结束输入或外部编辑才撤销它。
-        logBase(
-            "dictation_delivery",
-            mapOf("len" to finalText.length, "finishOk" to finishOk, "delivery" to delivery.name)
-        )
-        return delivery
-    }
+    fun complete(generation: Long, ic: InputConnection?, finalText: String): Delivery = write(generation, ic, finalText, final = true)
 
     fun cancelRecording() {
-        val own = ownership ?: return
+        val own = binding ?: return
         if (!active || invalidated) return
-        // 与正常更新共享授权和校验，宿主已固化时也不按 partial 长度盲删。
         complete(generation, own.ic, "")
-        logBase("dictation_cancel", mapOf("reason" to "recording"))
+        logDiag("dictation_cancel", mapOf("reason" to "recording"))
     }
 
     fun cancelPolish(ic: InputConnection?, rawText: String): Delivery = complete(generation, ic, rawText)
@@ -157,37 +95,176 @@ internal class DictationTextSession(private val inputHelper: InputConnectionHelp
         if (invalidated) return
         invalidated = true
         active = false
-        ownership = null
+        binding = null
+        composingRange = null
         expectedSelections.clear()
-        logBase("dictation_ownership_invalid", mapOf("reason" to reason))
+        logDiag("dictation_ownership_invalid", mapOf("reason" to reason))
     }
 
-    /**
-     * 自身操作的预期选区在调用前登记；迟到回调不改写当前文本状态。
-     * 不凭 composing 消失推断异常，也不把 composing 内任意光标位置当作自身操作。
-     */
+    /** 迟到的自身选区回报只记录；只让当前预期光标的回报更新组合区状态。 */
     fun onSelectionChanged(start: Int, end: Int, composingStart: Int, composingEnd: Int) {
-        val own = ownership ?: return
-        if (invalidated) return
-        logVerbose(
+        val own = binding ?: return
+        val selection = start to end
+        val pendingIndex = expectedSelections.lastIndexOf(selection)
+        val expected = pendingIndex >= 0
+        logDiag(
             "dictation_selection",
-            mapOf("start" to start, "end" to end, "composingStart" to composingStart, "composingEnd" to composingEnd)
+            mapOf(
+                "start" to start,
+                "end" to end,
+                "composingStart" to composingStart,
+                "composingEnd" to composingEnd,
+                "expected" to expected,
+                "current" to (selection == expectedCursor)
+            )
         )
-        if (own.start >= 0 && composingStart >= 0 && composingEnd > composingStart && composingStart != own.start) {
-            invalidate("composing_range_drift")
+        if (selection == expectedCursor) {
+            expectedSelections.clear()
+            composingRange = composingStart to composingEnd
             return
         }
-        if ((start to end) in expectedSelections) return
-        if (own.start < 0 && start == end) {
-            // 未知绝对位置时，以实际正文判定；读取不可用不能授权显式删除。
-            if (checkCurrent(own) != Check.CONFLICT) return
+        if (expected) {
+            repeat(pendingIndex + 1) { expectedSelections.removeFirst() }
+            return
+        }
+        // 宿主可能调整 composing 正文长度；在其组合区末尾的折叠光标仍属于本次输入。
+        if (active &&
+            start == end &&
+            composingStart >= 0 &&
+            composingEnd == end &&
+            (own.start < 0 || composingStart == own.start)
+        ) {
+            own.start = composingStart
+            composingRange = composingStart to composingEnd
+            expectedCursor = selection
+            expectedSelections.clear()
+            rememberSelection(selection)
+            return
         }
         invalidate("external_selection")
     }
 
-    private fun authorized(generation: Long, ic: InputConnection?): Ownership? {
-        if (!isActive(generation)) return null
-        val own = ownership ?: return null
+    private fun write(generation: Long, ic: InputConnection?, text: String, final: Boolean): Delivery {
+        val own = authorized(generation, ic) ?: return Delivery.SKIPPED
+        operation++
+        // 尚未写入预览时取消/空结果，不向原选区提交空串，否则会删除用户选中的正文。
+        if (!hasWritten && text.isEmpty()) {
+            if (final) active = false
+            logDiag("dictation_write", mapOf("action" to "empty", "final" to final))
+            return Delivery.ACCEPTED
+        }
+        if (!final && hasWritten && text == sentText) {
+            logDiag("dictation_write", mapOf("action" to "unchanged", "len" to text.length))
+            return Delivery.ACCEPTED
+        }
+        val previous = sentText
+        val reported = composingRange
+        val before = DictationTextDiagnostics.capture(inputHelper, own.ic, previous, text)
+        val prepared = prepareComposing(own)
+        val accepted = if (prepared && !invalidated) writeText(own, text, final) else null
+        val action = if (final) "commit_text" else "set_composing_text"
+        val delivery = when {
+            accepted == false -> Delivery.FAILED
+            invalidated || accepted == null -> Delivery.SKIPPED
+            else -> Delivery.ACCEPTED
+        }
+        val after = DictationTextDiagnostics.capture(inputHelper, own.ic, previous, text)
+        logDiag(
+            "dictation_write",
+            mapOf(
+                "action" to action,
+                "previousLen" to previous.length,
+                "len" to text.length,
+                "start" to own.start,
+                "final" to final,
+                "accepted" to accepted,
+                "reportedComposingStart" to reported?.first,
+                "reportedComposingEnd" to reported?.second,
+                "expectedSelectionStart" to expectedCursor.first,
+                "expectedSelectionEnd" to expectedCursor.second,
+                "delivery" to delivery.name
+            ) + DictationTextDiagnostics.describe(before, after, previous, text)
+        )
+        if (final) logDiag("dictation_delivery", mapOf("len" to text.length, "delivery" to delivery.name))
+        return delivery
+    }
+
+    private fun writeText(own: Binding, text: String, final: Boolean): Boolean {
+        if (own.start >= 0) {
+            val end = own.start + text.length
+            expectedCursor = end to end
+            rememberSelection(expectedCursor)
+        }
+        composingRange = null
+        val accepted = if (final) {
+            inputHelper.commitText(own.ic, text)
+        } else {
+            inputHelper.setComposingText(own.ic, text)
+        }
+        if (!accepted) {
+            invalidate("write_failed")
+            return false
+        }
+        sentText = text
+        hasWritten = true
+        if (final) {
+            active = false
+            composingRange = -1 to -1
+        }
+        return true
+    }
+
+    /**
+     * 正常 composing 不匹配周围正文。仅在组合区未知/丢失时，核对光标前上一版预览以恢复范围。
+     * 读不到 span 不等于组合区丢失；没有恢复依据时仍遵循普通 composing 协议。
+     */
+    private fun prepareComposing(own: Binding): Boolean {
+        val reported = composingRange
+        if (!hasWritten || sentText.isEmpty() || reported?.let { it.first >= 0 && it.second > it.first } == true) {
+            logDiag("dictation_prepare", mapOf("path" to "composing", "composingStart" to reported?.first, "composingEnd" to reported?.second))
+            return true
+        }
+        val local = inputHelper.getTextBeforeCursor(own.ic, sentText.length, InputConnection.GET_TEXT_WITH_STYLES)
+        val position = inputHelper.getSelection(own.ic)
+        val span = inputHelper.composingRange(local)
+        val matches = local?.toString() == sentText
+        val atEnd = position != null &&
+            position.first == position.second &&
+            (own.start < 0 || position.first == own.start + sentText.length)
+        val data = mapOf(
+            "previousLen" to sentText.length, "readLen" to local?.length,
+            "matchesPrevious" to matches, "atExpectedEnd" to atEnd,
+            "selectionStart" to position?.first, "selectionEnd" to position?.second,
+            "composingStart" to reported?.first, "composingEnd" to reported?.second,
+            "localComposingStart" to span?.first, "localComposingEnd" to span?.second
+        )
+        if (span != null) {
+            logDiag("dictation_prepare", data + mapOf("path" to "composing_span"))
+            return true
+        }
+        if (matches && atEnd) {
+            val start = position.first - sentText.length
+            val ok = inputHelper.setComposingRegion(own.ic, start, position.first)
+            logDiag("dictation_prepare", data + mapOf("path" to "restore_region", "start" to start, "end" to position.first, "accepted" to ok))
+            if (!ok) invalidate("restore_failed")
+            if (ok) own.start = start
+            return ok
+        }
+        if (reported == (-1 to -1)) {
+            logDiag("dictation_prepare", data + mapOf("path" to "lost_preview_unmatched"))
+            invalidate("lost_preview_unmatched")
+            return false
+        }
+        logDiag("dictation_prepare", data + mapOf("path" to "composing_unknown"))
+        return true
+    }
+
+    private fun authorized(generation: Long, ic: InputConnection?): Binding? {
+        if (!isActive(generation)) {
+            logDiag("dictation_write_skipped", mapOf("reason" to "inactive", "requestedGeneration" to generation))
+            return null
+        }
+        val own = binding ?: return null
         if (ic == null || own.ic !== ic) {
             invalidate("connection_changed")
             return null
@@ -195,103 +272,16 @@ internal class DictationTextSession(private val inputHelper: InputConnectionHelp
         return own
     }
 
-    private fun checkCurrent(own: Ownership): Check = checkText(own, if (hasWritten) sentText else "")
-
-    private fun verifyTarget(own: Ownership, text: String): Delivery = when (checkText(own, text)) {
-        Check.REPLACED -> {
-            confirmedText = text
-            Delivery.CONFIRMED_REPLACED
-        }
-        Check.UNREADABLE -> {
-            confirmedText = null
-            Delivery.UNVERIFIED
-        }
-        else -> conflict("verify_target")
-    }
-
-    /** 同一次读取按各候选长度比较尾部，同时核对后文；不足读取和歧义不得授权删除。 */
-    private fun checkText(own: Ownership, text: String, appended: String? = null): Check {
-        val position = inputHelper.getSelection(own.ic)
-        if (position != null && own.start >= 0) {
-            val expectedEnd = own.start + text.length
-            val appendEnd = appended?.let { own.start + it.length }
-            val initial = !hasWritten && position == own.initialSelection
-            val expectedPosition = position.first == position.second &&
-                (position.first == expectedEnd || position.first == appendEnd)
-            if (!initial && !expectedPosition) {
-                return Check.CONFLICT
-            }
-        }
-        val before = own.before ?: return Check.UNREADABLE
-        val after = own.after ?: return Check.UNREADABLE
-        val replaced = before + text
-        val duplicate = appended?.let { before + it }
-        val readLength = maxOf(replaced.length, duplicate?.length ?: 0)
-        if (readLength > VERIFY_MAX) return Check.UNREADABLE
-        val read = inputHelper.getTextBeforeCursor(own.ic, readLength)?.toString() ?: return Check.UNREADABLE
-        val tail = inputHelper.getTextAfterCursor(own.ic, ANCHOR_MAX)?.toString() ?: return Check.UNREADABLE
-        if (tail.length < after.length) return Check.UNREADABLE
-        if (if (after.length < ANCHOR_MAX) tail != after else !tail.startsWith(after)) return Check.CONFLICT
-        fun matches(candidate: String): Boolean = read.length >= candidate.length && read.endsWith(candidate)
-        val matchesReplacement = matches(replaced)
-        val matchesAppend = duplicate != null && matches(duplicate)
-        return when {
-            matchesReplacement && matchesAppend -> Check.CONFLICT
-            matchesReplacement -> Check.REPLACED
-            matchesAppend -> Check.APPENDED
-            read.length < replaced.length -> Check.UNREADABLE
-            else -> Check.CONFLICT
-        }
-    }
-
-    private fun repair(own: Ownership, appended: String, target: String, startedAt: Long): Delivery {
-        // 修复必须拥有前后锚点和已知起点；读不到位置则仅继续 composing。
-        if (own.start < 0 || own.before == null || own.after == null) return Delivery.UNVERIFIED
-        if (!repairMatches(own, appended, target)) return conflict("repair_before_finish")
-        expectCursor(own, appended.length)
-        if (!inputHelper.finishComposingText(own.ic)) return conflict("repair_finish_failed")
-        if (!repairMatches(own, appended, target)) return conflict("repair_after_finish")
-        expectCursor(own, 0)
-        if (!inputHelper.deleteSurroundingText(own.ic, appended.length, 0)) return conflict("repair_delete_failed")
-        expectCursor(own, target.length)
-        if (!inputHelper.setComposingText(own.ic, target)) return conflict("repair_write_failed")
-        val result = verifyTarget(own, target)
-        if (result != Delivery.CONFIRMED_REPLACED) return conflict("repair_verify_failed")
-        logBase(
-            "dictation_repair",
-            mapOf("result" to "repaired", "len" to target.length, "ms" to SystemClock.elapsedRealtime() - startedAt)
-        )
-        return Delivery.REPAIRED
-    }
-
-    private fun repairMatches(own: Ownership, appended: String, target: String): Boolean {
-        val end = own.start + appended.length
-        return !invalidated &&
-            ownership === own &&
-            checkText(own, target, appended) == Check.APPENDED &&
-            inputHelper.getSelection(own.ic) == (end to end) &&
-            inputHelper.getSelectedText(own.ic).isNullOrEmpty()
-    }
-
-    private fun expectCursor(own: Ownership, length: Int) {
-        if (own.start >= 0) rememberSelection(own.start + length, own.start + length)
-    }
-
-    private fun rememberSelection(start: Int, end: Int) {
-        expectedSelections.addLast(start to end)
+    private fun rememberSelection(selection: Pair<Int, Int>) {
+        expectedSelections.addLast(selection)
         if (expectedSelections.size > 64) expectedSelections.removeFirst()
     }
 
-    private fun conflict(reason: String): Delivery {
-        invalidate(reason)
-        return Delivery.SKIPPED
-    }
-
-    private fun logBase(event: String, data: Map<String, Any?>) {
-        DebugLogManager.logBase("insert", event, data + mapOf("generation" to generation, "ai" to aiPhase))
-    }
-
-    private fun logVerbose(event: String, data: Map<String, Any?>) {
-        DebugLogManager.log("insert", event, data + mapOf("generation" to generation, "ai" to aiPhase))
+    private fun logDiag(event: String, data: Map<String, Any?>) {
+        DebugLogManager.log(
+            "insert",
+            event,
+            data + mapOf("generation" to generation, "segment" to segment, "operation" to operation, "ai" to aiPhase, "pkg" to inputHelper.diagHostPkg)
+        )
     }
 }

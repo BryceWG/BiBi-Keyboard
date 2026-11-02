@@ -709,8 +709,7 @@ class KeyboardActionHandler(
         var delivered = false
         if (ic != null) {
             val delivery = dictationSession.cancelPolish(ic, rawText)
-            delivered = delivery == DictationTextSession.Delivery.CONFIRMED_REPLACED ||
-                delivery == DictationTextSession.Delivery.REPAIRED
+            delivered = delivery == DictationTextSession.Delivery.ACCEPTED
             if (delivered && allowAutoEnter && rawText.isNotEmpty() && consumeAutoEnterOnce()) {
                 try {
                     inputHelper.sendEnter(ic, getCurrentEditorInfo())
@@ -1354,7 +1353,7 @@ class KeyboardActionHandler(
         uiListener?.onStatusMessage(context.getString(R.string.status_listening))
     }
 
-    /** 开启会话级写入器；同字段同连接 restart 时保留归属，不重采锚点。 */
+    /** 开始新听写时绑定输入框与选区；同字段同连接的 restart 不重建绑定。 */
     private fun beginDictationSession() {
         dictationSession.begin(
             generation = opSeq,
@@ -1402,8 +1401,8 @@ class KeyboardActionHandler(
     /**
      * 输入会话开始（新字段或同字段 restart）。
      *
-     * restart 且输入连接未变时保留写入权限与锚点；否则撤销旧会话写入权限，
-     * 迟到的旧结果不得写入新字段，录音开始时再以新连接绑定锚点。
+     * restart 且输入连接未变时保留写入权限与替换范围；否则撤销旧会话写入权限，
+     * 迟到的旧结果不得写入新字段，录音开始时再绑定新连接与选区。
      */
     fun onStartInputSession(ic: InputConnection?, info: EditorInfo?, restarting: Boolean) {
         val field = Triple(info?.packageName, info?.fieldId, info?.inputType)

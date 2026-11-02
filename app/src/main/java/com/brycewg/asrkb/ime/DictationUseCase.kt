@@ -168,14 +168,13 @@ internal class DictationUseCase(
             return
         }
 
-        val finishStartedAt = elapsedRealtimeMs()
+        val deliveryStartedAt = elapsedRealtimeMs()
         val delivery = dictationSession.complete(seq, ic, finalOut)
-        val delivered = delivery == DictationTextSession.Delivery.CONFIRMED_REPLACED ||
-            delivery == DictationTextSession.Delivery.REPAIRED
+        val delivered = delivery == DictationTextSession.Delivery.ACCEPTED
         logSolidifyTiming(
-            "finish_composing",
+            "commit_text",
             mapOf(
-                "durationMs" to (elapsedRealtimeMs() - finishStartedAt).coerceAtLeast(0L),
+                "durationMs" to (elapsedRealtimeMs() - deliveryStartedAt).coerceAtLeast(0L),
                 "delivery" to delivery.name,
                 "delivered" to delivered,
                 "aiUsed" to aiUsed
@@ -279,10 +278,9 @@ internal class DictationUseCase(
 
         val partial = state.partialText
         val delivery = dictationSession.complete(seq, ic, finalToCommit)
-        val delivered = delivery == DictationTextSession.Delivery.CONFIRMED_REPLACED ||
-            delivery == DictationTextSession.Delivery.REPAIRED
+        val delivered = delivery == DictationTextSession.Delivery.ACCEPTED
         logCommitPath(
-            mode = if (partial.isNullOrEmpty()) "stable_remainder" else "composing_replace",
+            mode = "commit_text",
             seq = seq,
             partial = partial,
             finalText = finalToCommit,
