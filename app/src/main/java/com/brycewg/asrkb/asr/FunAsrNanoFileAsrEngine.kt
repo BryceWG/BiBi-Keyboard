@@ -129,7 +129,7 @@ class FunAsrNanoFileAsrEngine(
                 return
             }
 
-            val chunks = splitLocalOfflinePcm16WithVad(context, prefs, pcm, sampleRate)
+            val chunks = splitLocalOfflinePcm16WithVad(context, prefs, pcm, sampleRate, probabilities = recognitionVadProbabilities)
             if (chunks.isEmpty()) {
                 reportDuration()
                 val msg = context.getString(R.string.error_audio_empty)

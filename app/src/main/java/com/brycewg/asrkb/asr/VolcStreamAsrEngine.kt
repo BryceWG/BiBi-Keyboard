@@ -389,7 +389,7 @@ class VolcStreamAsrEngine(
                     }
 
                     // VAD 自动判停
-                    if (vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true) {
+                    if (vadDetector?.shouldStop(audioChunk, audioChunk.size) == true) {
                         Log.d(TAG, "Silence detected, stopping recording")
                         try {
                             listener.onStopped()

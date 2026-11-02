@@ -27,7 +27,8 @@ abstract class PushPcmPseudoStreamAsrEngine(
     protected val listener: StreamingAsrEngine.Listener,
     protected val onRequestDuration: ((Long) -> Unit)? = null
 ) : StreamingAsrEngine,
-    ExternalPcmConsumer {
+    ExternalPcmConsumer,
+    VadPcmConsumer {
 
     companion object {
         private const val TAG = "PushPcmPseudoStream"
@@ -40,11 +41,15 @@ abstract class PushPcmPseudoStreamAsrEngine(
 
     private val running = AtomicBoolean(false)
     private val finalized = AtomicBoolean(false)
+    private val probabilityBuffer = VadProbabilityStream(context, sampleRate)
 
     private val sessionBuffer = ByteArrayOutputStream()
     private val segmentBuffer = ByteArrayOutputStream()
     private var vadInputLeveler = VadInputLevelerBranch()
     private var segmentElapsedMs: Long = 0L
+
+    override val needsVadProbabilities: Boolean
+        get() = RecordedAudioVoiceFilter.isEnabled(prefs)
 
     override val isRunning: Boolean
         get() = running.get()
@@ -61,6 +66,7 @@ abstract class PushPcmPseudoStreamAsrEngine(
 
         running.set(true)
         finalized.set(false)
+        probabilityBuffer.reset()
         sessionBuffer.reset()
         segmentBuffer.reset()
         vadInputLeveler = VadInputLevelerBranch(sampleRate = sampleRate)
@@ -79,7 +85,11 @@ abstract class PushPcmPseudoStreamAsrEngine(
         finalizeOnce()
     }
 
-    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) {
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) = appendFrame(pcm, sampleRate, channels, null)
+
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities) = appendFrame(pcm, sampleRate, channels, probabilities)
+
+    private fun appendFrame(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities?) {
         if (!running.get()) return
         if (sampleRate != this.sampleRate || channels != 1) {
             Log.w(TAG, "ignore frame: sr=$sampleRate ch=$channels")
@@ -87,6 +97,7 @@ abstract class PushPcmPseudoStreamAsrEngine(
         }
         if (pcm.isEmpty()) return
 
+        if (needsVadProbabilities || probabilities != null) probabilityBuffer.append(pcm, probabilities)
         val leveled = vadInputLeveler.process(pcm)
         try {
             listener.onAmplitude(leveled.stableAmplitude)
@@ -157,6 +168,8 @@ abstract class PushPcmPseudoStreamAsrEngine(
             return
         }
 
+        val probabilities = probabilityBuffer.snapshot().takeIf { it.sampleCount > 0 }
+        probabilityBuffer.release()
         scope.launch(Dispatchers.IO) {
             try {
                 val processed = RecordedAudioVoiceFilter.processIfEnabled(
@@ -164,7 +177,8 @@ abstract class PushPcmPseudoStreamAsrEngine(
                     prefs = prefs,
                     pcm = fullPcm,
                     sampleRate = sampleRate,
-                    chunkMillis = 200
+                    chunkMillis = 200,
+                    probabilities = probabilities
                 )
                 if (processed.droppedAsEmptyAudio) {
                     try {

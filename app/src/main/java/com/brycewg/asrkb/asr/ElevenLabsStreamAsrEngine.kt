@@ -270,7 +270,7 @@ class ElevenLabsStreamAsrEngine(
                         Log.w(TAG, "Failed to compute amplitude", t)
                     }
 
-                    if (vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true) {
+                    if (vadDetector?.shouldStop(chunk, chunk.size) == true) {
                         Log.d(TAG, "VAD silence detected, stopping stream")
                         notifyStoppedIfNeeded()
                         stop()

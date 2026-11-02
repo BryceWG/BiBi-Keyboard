@@ -364,6 +364,9 @@ internal object PrefsBackup {
             optInt(KEY_RECORDING_MAX_DURATION_MS)?.let { recordingMaxDurationMs = it }
             optInt(KEY_AUTO_STOP_SILENCE_WINDOW_MS)?.let { autoStopSilenceWindowMs = it }
             optInt(KEY_AUTO_STOP_SILENCE_SENSITIVITY)?.let { autoStopSilenceSensitivity = it }
+                ?: optInt(KEY_LEGACY_AUTO_STOP_SILENCE_SENSITIVITY)?.let {
+                    autoStopSilenceSensitivity = Prefs.DEFAULT_SILENCE_SENSITIVITY
+                }
             optInt(KEY_KEYBOARD_HEIGHT_TIER)?.let { keyboardHeightTier = it }
             optInt(KEY_KEYBOARD_BOTTOM_PADDING_DP)?.let { keyboardBottomPaddingDp = it }
             optBool(KEY_IME_TABLET_FLOATING_KEYBOARD_ENABLED)?.let { imeTabletFloatingKeyboardEnabled = it }

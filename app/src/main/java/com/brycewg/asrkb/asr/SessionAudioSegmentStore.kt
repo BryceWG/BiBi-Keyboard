@@ -18,12 +18,13 @@ interface SessionAudioSourceOwner {
 
 class SessionAudioSegmentStore(context: Context) {
 
-    private class SegmentSpan(val offset: Int, val length: Int)
+    private class SegmentSpan(val offset: Int, val length: Int, val probabilities: VadProbabilities?)
 
     private val appContext = context.applicationContext
     private val file = File(File(appContext.cacheDir, DIRECTORY), "${UUID.randomUUID()}.pcm")
 
     private val segments = ArrayList<SegmentSpan>()
+    private var sessionProbabilities: VadProbabilities? = null
     private var output: FileOutputStream? = null
     private var totalWritten = 0L
     private var failed = false
@@ -51,7 +52,7 @@ class SessionAudioSegmentStore(context: Context) {
      * 追加一个已封闭的分段并登记 manifest，返回段号。
      * 写盘失败后进入降级态并返回 -1：识别照常继续，段级重试不可用。
      */
-    fun appendSegment(pcm: ByteArray): Int {
+    fun appendSegment(pcm: ByteArray, probabilities: VadProbabilities? = null): Int {
         return synchronized(this) {
             if (closed || failed || pcm.isEmpty()) return@synchronized -1
             val offset = totalWritten
@@ -61,7 +62,8 @@ class SessionAudioSegmentStore(context: Context) {
                 out.flush()
                 totalWritten += pcm.size
                 val index = segments.size
-                segments.add(SegmentSpan(offset.toInt(), pcm.size))
+                segments.add(SegmentSpan(offset.toInt(), pcm.size, probabilities))
+                sessionProbabilities = null
                 index
             } catch (t: Throwable) {
                 Log.e(TAG, "Failed to append session audio segment", t)
@@ -78,6 +80,19 @@ class SessionAudioSegmentStore(context: Context) {
             if (failed) null else segments.getOrNull(index)
         } ?: return null
         return readRange(span.offset, span.length)
+    }
+
+    /** 段级重试直接复用录音时的概率，不创建新的模型。 */
+    internal fun readSegmentProbabilities(index: Int): VadProbabilities? = synchronized(this) {
+        segments.getOrNull(index)?.probabilities
+    }
+
+    /** 整轮重试按原始 PCM 段顺序拼接概率，晋升音频到历史文件时也保留这份元数据。 */
+    internal fun readProbabilities(): VadProbabilities? = synchronized(this) {
+        sessionProbabilities?.let { return@synchronized it }
+        if (segments.isEmpty()) return@synchronized null
+        val parts = segments.map { it.probabilities ?: return@synchronized null }
+        VadProbabilities.concatenate(parts).also { sessionProbabilities = it }
     }
 
     /** 读取全会话音频，供"重试最近一次识别"整段重切使用；已晋升时读历史文件。 */
@@ -124,6 +139,7 @@ class SessionAudioSegmentStore(context: Context) {
             closed = true
             closeOutputLocked()
             segments.clear()
+            sessionProbabilities = null
             runCatching { file.delete() }
                 .onFailure { Log.w(TAG, "Failed to delete session audio file", it) }
         }
@@ -148,6 +164,7 @@ class SessionAudioSegmentStore(context: Context) {
         failed = true
         closeOutputLocked()
         segments.clear()
+        sessionProbabilities = null
         runCatching { file.delete() }
             .onFailure { Log.w(TAG, "Failed to delete session audio file", it) }
     }

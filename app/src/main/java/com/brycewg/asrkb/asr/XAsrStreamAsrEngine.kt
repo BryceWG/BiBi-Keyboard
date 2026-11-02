@@ -399,8 +399,8 @@ class XAsrStreamAsrEngine(
                 }
 
                 val shouldStopForVad = vadDetector?.shouldStop(
-                    leveled.leveledPcm,
-                    leveled.leveledPcm.size
+                    audioChunk,
+                    audioChunk.size
                 ) == true
                 val active = session
                 if (active != null && active.enqueuePcm(audioChunk)) {

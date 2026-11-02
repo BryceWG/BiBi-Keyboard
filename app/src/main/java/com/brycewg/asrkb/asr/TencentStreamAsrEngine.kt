@@ -158,7 +158,7 @@ internal class TencentStreamAsrEngine(
                         listener.onAmplitude(leveled.stableAmplitude)
                     } catch (_: Throwable) { }
 
-                    if (vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true) {
+                    if (vadDetector?.shouldStop(audioChunk, audioChunk.size) == true) {
                         try {
                             listener.onStopped()
                         } catch (_: Throwable) { }

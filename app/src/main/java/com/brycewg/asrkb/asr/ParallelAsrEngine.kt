@@ -38,6 +38,7 @@ class ParallelAsrEngine(
 ) : StreamingAsrEngine,
     BackupAwareAsrEngine,
     ExternalPcmConsumer,
+    VadPcmConsumer,
     CancelableAsrEngine,
     AudioFrameSinkOwner,
     SessionAudioSourceOwner,
@@ -57,10 +58,15 @@ class ParallelAsrEngine(
         data class Error(val message: String) : Terminal()
     }
 
+    override val needsVadProbabilities: Boolean
+        get() = (primaryConsumer as? VadPcmConsumer)?.needsVadProbabilities == true ||
+            (backupConsumer as? VadPcmConsumer)?.needsVadProbabilities == true
+
     override val isRunning: Boolean
         get() = running.get()
 
     private val running = AtomicBoolean(false)
+    private val probabilityBuffer = VadProbabilityStream(context, SAMPLE_RATE)
     override var audioFrameSink: AudioFrameSink? = null
     internal var modePreferencesOverride: AsrEngineModePreferences? = null
     internal var modelOverride: AsrRequestModelOverride = AsrRequestModelOverride()
@@ -114,6 +120,7 @@ class ParallelAsrEngine(
     override fun start() {
         if (!running.compareAndSet(false, true)) return
 
+        probabilityBuffer.reset()
         stopRequested.set(false)
         stoppedNotified = false
         audioBytes.set(0L)
@@ -206,6 +213,7 @@ class ParallelAsrEngine(
         if (stopRequested.getAndSet(true)) return
 
         running.set(false)
+        if (externalPcmInput) probabilityBuffer.release()
         if (!terminalCoordinator.terminalDelivered) {
             notifyStoppedIfNeeded()
         }
@@ -238,6 +246,7 @@ class ParallelAsrEngine(
     override fun cancel() {
         stopRequested.set(true)
         running.set(false)
+        if (externalPcmInput) probabilityBuffer.release()
         terminalCoordinator.markTerminalDelivered()
         try {
             audioJob?.cancel()
@@ -280,7 +289,11 @@ class ParallelAsrEngine(
         return primaryOk && backupOk
     }
 
-    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) {
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) = appendExternalFrame(pcm, sampleRate, channels, null)
+
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities) = appendExternalFrame(pcm, sampleRate, channels, probabilities)
+
+    private fun appendExternalFrame(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities?) {
         if (!externalPcmInput) return
         if (!running.get()) return
         if (terminalCoordinator.terminalDelivered) return
@@ -293,12 +306,13 @@ class ParallelAsrEngine(
         } catch (t: Throwable) {
             Log.w(TAG, "notify amplitude failed (externalPcmInput)", t)
         }
-        appendPcmToConsumers(pcm, sourceLabel = "externalPcmInput")
+        appendPcmToConsumers(pcm, sourceLabel = "externalPcmInput", probabilities)
     }
 
     private fun cleanupAfterTerminal() {
         stopRequested.set(true)
         running.set(false)
+        if (externalPcmInput) probabilityBuffer.release()
         try {
             switchDeadlineJob?.cancel()
         } catch (t: Throwable) {
@@ -378,7 +392,7 @@ class ParallelAsrEngine(
                     }
                     audioBytes.addAndGet(chunk.size.toLong())
 
-                    appendPcmToConsumers(chunk, sourceLabel = "capture")
+                    val probabilities = appendPcmToConsumers(chunk, sourceLabel = "capture")
 
                     if (maxDurationLimiter.acceptPcm(chunk.size)) {
                         Log.d(TAG, "Max recording duration reached, stopping session")
@@ -387,7 +401,7 @@ class ParallelAsrEngine(
                         return@collect
                     }
 
-                    if (vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true) {
+                    if (vadDetector?.accept(checkNotNull(probabilities)) == true) {
                         Log.d(TAG, "VAD silence detected, stopping session")
                         notifyStoppedIfNeeded()
                         stop()
@@ -406,6 +420,7 @@ class ParallelAsrEngine(
             } finally {
                 try {
                     vadDetector?.release()
+                    probabilityBuffer.release()
                 } catch (t: Throwable) {
                     Log.w(TAG, "VAD release failed", t)
                 }
@@ -430,17 +445,20 @@ class ParallelAsrEngine(
         }
     }
 
-    private fun appendPcmToConsumers(pcm: ByteArray, sourceLabel: String) {
+    private fun appendPcmToConsumers(pcm: ByteArray, sourceLabel: String, supplied: VadProbabilities? = null): VadProbabilities? {
+        val needsStop = !externalPcmInput && isVadAutoStopEnabled(context, prefs)
+        val probabilities = if (supplied != null || needsVadProbabilities || needsStop) probabilityBuffer.append(pcm, supplied) else null
         try {
-            primaryConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
+            primaryConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
         } catch (t: Throwable) {
             Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
         }
         try {
-            backupConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
+            backupConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
         } catch (t: Throwable) {
             Log.w(TAG, "backup appendPcm failed ($sourceLabel)", t)
         }
+        return probabilities
     }
 
     private fun notifyStoppedIfNeeded() {

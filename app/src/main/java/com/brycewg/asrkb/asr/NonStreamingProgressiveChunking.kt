@@ -96,20 +96,6 @@ internal fun createNonStreamingChunkResultCollector(
     requestDurationCallback = onRequestDuration
 )
 
-internal fun createNonStreamingSentenceVad(context: Context, sampleRate: Int): VadDetector? = try {
-    VadDetector(
-        context = context,
-        sampleRate = sampleRate,
-        windowMs = NON_STREAMING_MIN_SILENCE_MS,
-        tuning = VadTuning.ConservativeFilter
-    ).also { detector ->
-        if (!detector.isAvailable()) detector.release()
-    }.takeIf(VadDetector::isAvailable)
-} catch (t: Throwable) {
-    Log.w("NonStreamingChunking", "Failed to create sentence-boundary VAD", t)
-    null
-}
-
 internal class NonStreamingPcmChunker(
     sampleRate: Int,
     minChunkMs: Int = NON_STREAMING_MIN_CHUNK_MS,

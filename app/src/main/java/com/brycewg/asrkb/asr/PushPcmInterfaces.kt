@@ -37,3 +37,22 @@ interface PcmBatchRecognizer {
 interface ProgressiveRetryStatusOwner {
     fun peekPendingRetryCount(): Int
 }
+
+internal interface VadPcmConsumer {
+    val needsVadProbabilities: Boolean
+
+    fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities)
+}
+
+internal fun ExternalPcmConsumer.appendPcmWithVad(
+    pcm: ByteArray,
+    sampleRate: Int,
+    channels: Int,
+    probabilities: VadProbabilities?
+) {
+    if (probabilities != null && this is VadPcmConsumer) {
+        appendPcm(pcm, sampleRate, channels, probabilities)
+    } else {
+        appendPcm(pcm, sampleRate, channels)
+    }
+}

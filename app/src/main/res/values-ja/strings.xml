@@ -269,7 +269,7 @@
   <string name="option_recording_auto_stop_max_duration">タイムアウト停止</string>
   <string name="label_auto_stop_silence">音声がない時に自動停止</string>
   <string name="label_silence_window_ms">停止ウィンドウ（ms）</string>
-  <string name="label_silence_sensitivity">録音停止感度（1-10；高いほど早く停止）</string>
+  <string name="label_silence_sensitivity">感度（高いほど停止しやすい）</string>
   <string name="label_recording_max_duration">最大録音時間</string>
   <string name="label_recording_max_duration_value_s">%1$d 秒</string>
 
@@ -556,4 +556,7 @@
   <string name="keyboard_layout_prompt_hint">既存の推敲プロンプトを選択します。プリセットの変更はこのボタンにも反映されます。</string>
   <string name="keyboard_layout_prompt_required">既存の推敲プロンプトを選択してください。選択済みのプリセットは削除された可能性があります。</string>
   <string name="keyboard_layout_add">追加</string>
+  <string name="option_vad_sensitivity_high">高</string>
+  <string name="option_vad_sensitivity_standard">標準</string>
+  <string name="option_vad_sensitivity_low">低</string>
 </resources>

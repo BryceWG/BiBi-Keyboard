@@ -36,19 +36,24 @@ internal fun measureRecordedVoiceFilterEnergy(pcm: ByteArray, len: Int): Recorde
 object RecordedAudioVoiceFilter {
     private const val TAG = "RecordedAudioVoiceFilter"
     private const val BYTES_PER_SAMPLE = 2
-    private const val PRE_ROLL_MS = 350
-    private const val POST_ROLL_MS = 500
+    private const val PRE_ROLL_MS = 400
+    private const val POST_ROLL_MS = 150
     private const val MIN_SILENT_RUN_TO_TRIM_MS = 800
     private const val MIN_SILENT_RUN_TO_SPLIT_MS = 300
     private const val NEAR_SILENCE_MAX_ABS_THRESHOLD = 220
     private const val NEAR_SILENCE_RMS_THRESHOLD = 90
     private const val VAD_DOMINANT_MAX_ABS_THRESHOLD = 1_500
     private const val VAD_DOMINANT_RMS_THRESHOLD = 650
+    internal fun isEnabled(prefs: Prefs): Boolean = prefs.autoCancelEmptyAudioInputEnabled ||
+        prefs.autoFilterSilentAudioSegmentsEnabled ||
+        prefs.recordingAutoStopMode == Prefs.RecordingAutoStopMode.SILENCE
+
     private data class ChunkMark(
         val offset: Int,
         val length: Int,
         val durationMs: Int,
         val isSpeech: Boolean,
+        val isEmptyAudioSpeech: Boolean,
         val maxAbs: Int,
         val sumSquares: Double,
         val sampleCount: Int,
@@ -62,7 +67,8 @@ object RecordedAudioVoiceFilter {
         val pcm: ByteArray,
         val candidateRunCount: Int,
         val trimmedRunCount: Int,
-        val trimmedMs: Int
+        val trimmedMs: Int,
+        val ranges: List<IntRange>
     )
 
     data class Result(
@@ -70,8 +76,19 @@ object RecordedAudioVoiceFilter {
         val hasSpeech: Boolean,
         val droppedAsEmptyAudio: Boolean,
         val originalDurationMs: Long,
-        val outputDurationMs: Long
-    )
+        val outputDurationMs: Long,
+        val probabilities: VadProbabilities? = null
+    ) {
+        internal fun denoiseIfEnabled(context: Context, prefs: Prefs, sampleRate: Int): Result {
+            val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(context, prefs, pcm, sampleRate)
+            // GTCRN 的居中 STFT/ISTFT 抵消首部填充，输出是同一起点、按 hop 截短的前缀。
+            return copy(
+                pcm = denoised,
+                probabilities = probabilities?.slice(0, denoised.size.toLong()),
+                outputDurationMs = durationMs(denoised.size, sampleRate)
+            )
+        }
+    }
 
     data class SilenceAnalysis(
         val silentPercent: Int
@@ -82,33 +99,25 @@ object RecordedAudioVoiceFilter {
         prefs: Prefs,
         pcm: ByteArray,
         sampleRate: Int,
-        chunkMillis: Int
+        chunkMillis: Int,
+        probabilities: VadProbabilities? = null
     ): SilenceAnalysis? {
         if (pcm.isEmpty() || sampleRate <= 0) return null
 
-        val detector = try {
-            VadDetector(
-                context = context,
-                sampleRate = sampleRate,
-                windowMs = prefs.autoStopSilenceWindowMs,
-                tuning = VadTuning.ConservativeFilter
-            )
+        val analysis = try {
+            probabilities ?: VadProbabilities.analyze(context, pcm, sampleRate)
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to create VAD analyzer", t)
-            return null
-        }
-        if (!detector.isAvailable()) {
-            detector.release()
-            Log.w(TAG, "VAD analyzer is unavailable")
             return null
         }
 
         return try {
             val marks = buildChunkMarks(
-                detector = detector,
+                probabilities = analysis,
                 pcm = pcm,
                 sampleRate = sampleRate,
-                chunkMillis = chunkMillis.coerceAtLeast(20)
+                chunkMillis = chunkMillis.coerceAtLeast(20),
+                classifier = VadSpeechClassifier(VadTuning.SilenceAnalysis)
             )
             if (marks.isEmpty()) return null
 
@@ -124,12 +133,6 @@ object RecordedAudioVoiceFilter {
         } catch (t: Throwable) {
             Log.w(TAG, "VAD silence analysis failed", t)
             null
-        } finally {
-            try {
-                detector.release()
-            } catch (t: Throwable) {
-                Log.w(TAG, "Failed to release VAD analyzer", t)
-            }
         }
     }
 
@@ -138,31 +141,24 @@ object RecordedAudioVoiceFilter {
         prefs: Prefs,
         pcm: ByteArray,
         sampleRate: Int,
-        chunkMillis: Int = 100
+        chunkMillis: Int = 100,
+        probabilities: VadProbabilities? = null
     ): List<IntRange> {
         if (pcm.isEmpty() || sampleRate <= 0) return emptyList()
-        val detector = try {
-            VadDetector(
-                context = context,
-                sampleRate = sampleRate,
-                windowMs = prefs.autoStopSilenceWindowMs,
-                tuning = VadTuning.ConservativeFilter
-            )
+        val analysis = try {
+            probabilities ?: VadProbabilities.analyze(context, pcm, sampleRate)
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to create VAD chunk analyzer", t)
-            return emptyList()
-        }
-        if (!detector.isAvailable()) {
-            detector.release()
             return emptyList()
         }
 
         return try {
             val marks = buildChunkMarks(
-                detector = detector,
+                probabilities = analysis,
                 pcm = pcm,
                 sampleRate = sampleRate,
-                chunkMillis = chunkMillis.coerceAtLeast(20)
+                chunkMillis = chunkMillis.coerceAtLeast(20),
+                classifier = VadSpeechClassifier(VadTuning.SentenceBoundary)
             )
             buildList {
                 var index = 0
@@ -187,12 +183,6 @@ object RecordedAudioVoiceFilter {
         } catch (t: Throwable) {
             Log.w(TAG, "VAD chunk analysis failed", t)
             emptyList()
-        } finally {
-            try {
-                detector.release()
-            } catch (t: Throwable) {
-                Log.w(TAG, "Failed to release VAD chunk analyzer", t)
-            }
         }
     }
 
@@ -201,28 +191,26 @@ object RecordedAudioVoiceFilter {
         prefs: Prefs,
         pcm: ByteArray,
         sampleRate: Int,
-        chunkMillis: Int
+        chunkMillis: Int,
+        probabilities: VadProbabilities? = null
     ): Result {
         val cancelEmpty = prefs.autoCancelEmptyAudioInputEnabled
         val filterSilent = prefs.autoFilterSilentAudioSegmentsEnabled
+        val trimBounds = prefs.recordingAutoStopMode == Prefs.RecordingAutoStopMode.SILENCE
         val originalDurationMs = durationMs(pcm.size, sampleRate)
-        if (pcm.isEmpty() || sampleRate <= 0 || (!cancelEmpty && !filterSilent)) {
+        if (pcm.isEmpty() || sampleRate <= 0 || (!cancelEmpty && !filterSilent && !trimBounds)) {
             return Result(
                 pcm = pcm,
                 hasSpeech = pcm.isNotEmpty(),
                 droppedAsEmptyAudio = false,
                 originalDurationMs = originalDurationMs,
-                outputDurationMs = originalDurationMs
+                outputDurationMs = originalDurationMs,
+                probabilities = probabilities
             )
         }
 
-        val detector = try {
-            VadDetector(
-                context = context,
-                sampleRate = sampleRate,
-                windowMs = prefs.autoStopSilenceWindowMs,
-                tuning = VadTuning.ConservativeFilter
-            )
+        val analysis = try {
+            probabilities ?: VadProbabilities.analyze(context, pcm, sampleRate)
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to create VAD filter, keeping original audio", t)
             return Result(
@@ -230,29 +218,20 @@ object RecordedAudioVoiceFilter {
                 hasSpeech = true,
                 droppedAsEmptyAudio = false,
                 originalDurationMs = originalDurationMs,
-                outputDurationMs = originalDurationMs
-            )
-        }
-        if (!detector.isAvailable()) {
-            detector.release()
-            Log.w(TAG, "VAD filter is unavailable, keeping original audio")
-            return Result(
-                pcm = pcm,
-                hasSpeech = true,
-                droppedAsEmptyAudio = false,
-                originalDurationMs = originalDurationMs,
-                outputDurationMs = originalDurationMs
+                outputDurationMs = originalDurationMs,
+                probabilities = probabilities
             )
         }
 
         return try {
-            processWithDetector(
-                detector = detector,
+            processWithProbabilities(
+                probabilities = analysis,
                 pcm = pcm,
                 sampleRate = sampleRate,
-                chunkMillis = chunkMillis.coerceAtLeast(20),
+                chunkMillis = 32,
                 cancelEmpty = cancelEmpty,
                 filterSilent = filterSilent,
+                prefsTrimBounds = trimBounds,
                 originalDurationMs = originalDurationMs
             )
         } catch (t: Throwable) {
@@ -262,27 +241,26 @@ object RecordedAudioVoiceFilter {
                 hasSpeech = true,
                 droppedAsEmptyAudio = false,
                 originalDurationMs = originalDurationMs,
-                outputDurationMs = originalDurationMs
+                outputDurationMs = originalDurationMs,
+                probabilities = probabilities
             )
-        } finally {
-            try {
-                detector.release()
-            } catch (t: Throwable) {
-                Log.w(TAG, "Failed to release VAD filter", t)
-            }
         }
     }
 
-    private fun processWithDetector(
-        detector: VadDetector,
+    private fun processWithProbabilities(
+        probabilities: VadProbabilities,
         pcm: ByteArray,
         sampleRate: Int,
         chunkMillis: Int,
         cancelEmpty: Boolean,
         filterSilent: Boolean,
+        prefsTrimBounds: Boolean,
         originalDurationMs: Long
     ): Result {
-        val marks = buildChunkMarks(detector, pcm, sampleRate, chunkMillis)
+        val classifier = VadSpeechClassifier(VadTuning.SilenceFilter)
+        val emptyClassifier = VadSpeechClassifier(VadTuning.EmptyAudio)
+        val boundsClassifier = VadSpeechClassifier(VadTuning.SpeechBounds)
+        val marks = buildChunkMarks(probabilities, pcm, sampleRate, chunkMillis, classifier, emptyClassifier, boundsClassifier)
 
         val hasContent = marks.any { it.shouldKeepAsContent() }
         val shouldDrop = cancelEmpty && shouldDropAsEmptyAudio(marks)
@@ -291,7 +269,10 @@ object RecordedAudioVoiceFilter {
         } else {
             null
         }
-        val out = if (filterOutput != null) {
+        val bounds = boundsClassifier.speechBounds(pcm.size, sampleRate)
+        val out = if (!filterSilent && prefsTrimBounds) {
+            pcm.copyOfRange(bounds.first, bounds.last + 1)
+        } else if (filterOutput != null) {
             filterOutput.pcm.takeIf { it.isNotEmpty() } ?: pcm
         } else {
             pcm
@@ -314,15 +295,23 @@ object RecordedAudioVoiceFilter {
             hasSpeech = hasContent,
             droppedAsEmptyAudio = shouldDrop,
             originalDurationMs = originalDurationMs,
-            outputDurationMs = outputDurationMs
+            outputDurationMs = outputDurationMs,
+            probabilities = when {
+                !filterSilent && prefsTrimBounds -> probabilities.slice(bounds.first.toLong(), bounds.last.toLong() + 1)
+                filterOutput != null && filterOutput.pcm.isNotEmpty() -> probabilities.select(filterOutput.ranges)
+                else -> probabilities
+            }
         )
     }
 
     private fun buildChunkMarks(
-        detector: VadDetector,
+        probabilities: VadProbabilities,
         pcm: ByteArray,
         sampleRate: Int,
-        chunkMillis: Int
+        chunkMillis: Int,
+        classifier: VadSpeechClassifier = VadSpeechClassifier(),
+        emptyClassifier: VadSpeechClassifier? = null,
+        boundsClassifier: VadSpeechClassifier? = null
     ): List<ChunkMark> {
         val chunkBytes = (((sampleRate * chunkMillis) / 1000) * BYTES_PER_SAMPLE)
             .coerceAtLeast(BYTES_PER_SAMPLE)
@@ -336,7 +325,10 @@ object RecordedAudioVoiceFilter {
             val rawEnergy = measureEnergy(chunk, chunk.size)
             val leveled = leveler.process(chunk)
             val leveledPcm = leveled.leveledPcm
-            val isSpeech = detector.analyzeFrame(leveledPcm, leveledPcm.size).isSpeech
+            val chunkProbabilities = probabilities.slice(offset.toLong(), (offset + len).toLong())
+            val isSpeech = classifier.accept(chunkProbabilities)
+            val emptySpeech = emptyClassifier?.accept(chunkProbabilities) ?: isSpeech
+            boundsClassifier?.accept(chunkProbabilities)
             val energy = measureEnergy(leveledPcm, leveledPcm.size)
             marks.add(
                 ChunkMark(
@@ -344,6 +336,7 @@ object RecordedAudioVoiceFilter {
                     length = len,
                     durationMs = frameMs,
                     isSpeech = isSpeech,
+                    isEmptyAudioSpeech = emptySpeech,
                     maxAbs = energy.maxAbs,
                     sumSquares = energy.sumSquares,
                     sampleCount = energy.sampleCount,
@@ -364,7 +357,7 @@ object RecordedAudioVoiceFilter {
     private fun shouldDropAsEmptyAudio(marks: List<ChunkMark>): Boolean {
         if (marks.isEmpty()) return false
         if (marks.all { it.isRawBadSourceLevel() }) return true
-        return marks.none { it.shouldKeepAsContent() }
+        return marks.none { it.shouldKeepAsContent(it.isEmptyAudioSpeech) }
     }
 
     private fun filterLongNonContentRuns(pcm: ByteArray, marks: List<ChunkMark>): FilterOutput {
@@ -426,7 +419,8 @@ object RecordedAudioVoiceFilter {
             pcm = out.toByteArray(),
             candidateRunCount = candidateRunCount,
             trimmedRunCount = trimmedRunCount,
-            trimmedMs = trimmedMs
+            trimmedMs = trimmedMs,
+            ranges = marks.indices.filter { keep[it] }.map { marks[it].offset until (marks[it].offset + marks[it].length) }
         )
     }
 
@@ -496,7 +490,7 @@ object RecordedAudioVoiceFilter {
                 "vadRms=$VAD_DOMINANT_RMS_THRESHOLD," +
                 "minRunMs=$MIN_SILENT_RUN_TO_TRIM_MS," +
                 "preMs=$PRE_ROLL_MS,postMs=$POST_ROLL_MS," +
-                "vadTuning=${VadTuning.ConservativeFilter.name}}"
+                "vadTuning=${VadTuning.SilenceFilter.name}}"
         )
     }
 
@@ -507,10 +501,10 @@ object RecordedAudioVoiceFilter {
             rms <= NEAR_SILENCE_RMS_THRESHOLD
     }
 
-    private fun ChunkMark.shouldKeepAsContent(): Boolean {
+    private fun ChunkMark.shouldKeepAsContent(speech: Boolean = isSpeech): Boolean {
         if (sampleCount <= 0) return false
         return if (isVadDominantVolume()) {
-            isSpeech
+            speech
         } else {
             !isNearSilence()
         }

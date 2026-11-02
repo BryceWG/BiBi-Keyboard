@@ -268,7 +268,7 @@
   <string name="option_recording_auto_stop_max_duration">逾時停止</string>
   <string name="label_auto_stop_silence">停說自動停止錄音</string>
   <string name="label_silence_window_ms">判停時間閾值（毫秒）</string>
-  <string name="label_silence_sensitivity">判停靈敏度（1-10，越高越容易停錄）</string>
+  <string name="label_silence_sensitivity">靈敏度（越高越容易停錄）</string>
   <string name="label_recording_max_duration">最長錄音時長</string>
   <string name="label_recording_max_duration_value_s">%1$d 秒</string>
 
@@ -555,4 +555,7 @@
   <string name="keyboard_layout_prompt_hint">選擇既有潤色 Prompt，按鈕會跟隨該預設的修改。</string>
   <string name="keyboard_layout_prompt_required">請為此按鈕選擇既有潤色 Prompt，原預設可能已被刪除。</string>
   <string name="keyboard_layout_add">新增</string>
+  <string name="option_vad_sensitivity_high">高</string>
+  <string name="option_vad_sensitivity_standard">標準</string>
+  <string name="option_vad_sensitivity_low">低</string>
 </resources>

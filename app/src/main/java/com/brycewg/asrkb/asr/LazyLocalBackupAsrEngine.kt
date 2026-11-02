@@ -69,6 +69,7 @@ internal class LazyLocalBackupAsrEngine(
     private val modePreferences: AsrEngineModePreferences = prefs.asrEngineModePreferencesSnapshot(),
     private val modelOverride: AsrRequestModelOverride = AsrRequestModelOverride(),
     private val maxBufferedPcmBytes: Int = defaultMaxBufferedPcmBytes(),
+    private val probabilityBuffer: VadProbabilityStream = VadProbabilityStream(context, SAMPLE_RATE),
     private val hooks: LazyLocalBackupAsrEngineHooks = realHooks(
         context = context,
         scope = scope,
@@ -79,10 +80,12 @@ internal class LazyLocalBackupAsrEngine(
         onBackupRequestDuration = onBackupRequestDuration,
         backupRequestDurationHolder = backupRequestDurationHolder,
         modePreferences = modePreferences,
-        modelOverride = modelOverride
+        modelOverride = modelOverride,
+        probabilityBuffer = probabilityBuffer
     )
 ) : BackupAwareAsrEngine,
     ExternalPcmConsumer,
+    VadPcmConsumer,
     CancelableAsrEngine,
     AudioFrameSinkOwner,
     SessionAudioSourceOwner,
@@ -100,6 +103,9 @@ internal class LazyLocalBackupAsrEngine(
 
     override val primaryStreamingForSwitchPlan: Boolean
         get() = isPrimaryStreamingForSwitchPlan()
+
+    // 延迟备选在停录后消费整段音频，须保留同一条原始概率记录。
+    override val needsVadProbabilities: Boolean = true
 
     override val isRunning: Boolean
         get() = running.get()
@@ -151,6 +157,7 @@ internal class LazyLocalBackupAsrEngine(
     override fun start() {
         if (!running.compareAndSet(false, true)) return
 
+        probabilityBuffer.reset()
         stopRequested.set(false)
         backupTriggered.set(false)
         backupFed.set(false)
@@ -206,6 +213,7 @@ internal class LazyLocalBackupAsrEngine(
         if (stopRequested.getAndSet(true)) return
 
         running.set(false)
+        if (externalPcmInput) probabilityBuffer.release()
         if (!terminalCoordinator.terminalDelivered) {
             notifyStoppedIfNeeded()
         }
@@ -233,6 +241,7 @@ internal class LazyLocalBackupAsrEngine(
     override fun cancel() {
         stopRequested.set(true)
         running.set(false)
+        if (externalPcmInput) probabilityBuffer.release()
         terminalCoordinator.markTerminalDelivered()
         try {
             audioJob?.cancel()
@@ -260,7 +269,11 @@ internal class LazyLocalBackupAsrEngine(
         return primaryOk && backupOk
     }
 
-    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) {
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) = appendExternalFrame(pcm, sampleRate, channels, null)
+
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities) = appendExternalFrame(pcm, sampleRate, channels, probabilities)
+
+    private fun appendExternalFrame(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities?) {
         if (!externalPcmInput) return
         if (!running.get()) return
         if (terminalCoordinator.terminalDelivered) return
@@ -273,7 +286,8 @@ internal class LazyLocalBackupAsrEngine(
         } catch (t: Throwable) {
             Log.w(TAG, "notify amplitude failed (externalPcmInput)", t)
         }
-        if (appendPcmToPrimaryAndBuffer(pcm, sourceLabel = "externalPcmInput")) {
+        val analysis = probabilityBuffer.append(pcm, probabilities)
+        if (appendPcmToPrimaryAndBuffer(pcm, sourceLabel = "externalPcmInput", analysis)) {
             notifyStoppedIfNeeded()
             stop()
         }
@@ -331,7 +345,8 @@ internal class LazyLocalBackupAsrEngine(
                         Log.w(TAG, "notify amplitude failed", t)
                     }
                     audioBytes.addAndGet(chunk.size.toLong())
-                    if (appendPcmToPrimaryAndBuffer(chunk, sourceLabel = "capture")) {
+                    val probabilities = probabilityBuffer.append(chunk)
+                    if (appendPcmToPrimaryAndBuffer(chunk, sourceLabel = "capture", probabilities)) {
                         notifyStoppedIfNeeded()
                         stop()
                         return@collect
@@ -343,7 +358,7 @@ internal class LazyLocalBackupAsrEngine(
                         return@collect
                     }
 
-                    if (vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true) {
+                    if (vadDetector?.accept(probabilities) == true) {
                         notifyStoppedIfNeeded()
                         stop()
                         return@collect
@@ -362,6 +377,7 @@ internal class LazyLocalBackupAsrEngine(
             } finally {
                 try {
                     vadDetector?.release()
+                    probabilityBuffer.release()
                 } catch (t: Throwable) {
                     Log.w(TAG, "VAD release failed", t)
                 }
@@ -369,7 +385,7 @@ internal class LazyLocalBackupAsrEngine(
         }
     }
 
-    private fun appendPcmToPrimaryAndBuffer(pcm: ByteArray, sourceLabel: String): Boolean {
+    private fun appendPcmToPrimaryAndBuffer(pcm: ByteArray, sourceLabel: String, probabilities: VadProbabilities): Boolean {
         try {
             synchronized(pcmLock) {
                 val remaining = (maxBufferedPcmBytes - pcmBuffer.size()).coerceAtLeast(0)
@@ -387,14 +403,14 @@ internal class LazyLocalBackupAsrEngine(
             }
 
         try {
-            primaryConsumer?.appendPcm(pcm, SAMPLE_RATE, CHANNELS)
+            primaryConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
         } catch (t: Throwable) {
             Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
         }
         return capReached
     }
 
-    private fun processedBufferedPcmOrError(errorSource: Source): ByteArray? {
+    private fun processedBufferedPcmOrError(errorSource: Source): RecordedAudioVoiceFilter.Result? {
         val pcm = synchronized(pcmLock) {
             pcmBuffer.toByteArray()
         }
@@ -404,7 +420,7 @@ internal class LazyLocalBackupAsrEngine(
             onTerminal(errorSource, Terminal.Error(context.getString(R.string.error_audio_empty_skipped)))
             return null
         }
-        return processed.pcm
+        return processed
     }
 
     private fun triggerBackup(reason: String) {
@@ -517,7 +533,7 @@ internal class LazyLocalBackupAsrEngine(
         notifyBackupRecognizing()
         try {
             engine.start()
-            backupConsumer?.appendPcm(processed, SAMPLE_RATE, CHANNELS)
+            backupConsumer?.appendPcmWithVad(processed.pcm, SAMPLE_RATE, CHANNELS, processed.probabilities)
             engine.stop()
         } catch (t: Throwable) {
             Log.e(TAG, "backup recognize failed", t)
@@ -688,6 +704,7 @@ internal class LazyLocalBackupAsrEngine(
     private fun cleanupAfterTerminal() {
         stopRequested.set(true)
         running.set(false)
+        if (externalPcmInput) probabilityBuffer.release()
         cancelBackupPlanJobs()
         try {
             audioJob?.cancel()
@@ -798,7 +815,8 @@ internal class LazyLocalBackupAsrEngine(
             onBackupRequestDuration: ((Long) -> Unit)?,
             backupRequestDurationHolder: AtomicReference<Long?>,
             modePreferences: AsrEngineModePreferences,
-            modelOverride: AsrRequestModelOverride
+            modelOverride: AsrRequestModelOverride,
+            probabilityBuffer: VadProbabilityStream
         ): LazyLocalBackupAsrEngineHooks {
             val pushPcmFactory = AsrPushPcmEngineFactory()
             return LazyLocalBackupAsrEngineHooks(
@@ -847,19 +865,13 @@ internal class LazyLocalBackupAsrEngine(
                         prefs = prefs,
                         pcm = pcm,
                         sampleRate = SAMPLE_RATE,
-                        chunkMillis = CHUNK_MS
+                        chunkMillis = CHUNK_MS,
+                        probabilities = probabilityBuffer.snapshot(0, pcm.size.toLong())
                     )
                     if (filtered.droppedAsEmptyAudio) {
                         filtered
                     } else {
-                        filtered.copy(
-                            pcm = OfflineSpeechDenoiserManager.denoiseIfEnabled(
-                                context = context,
-                                prefs = prefs,
-                                pcm = filtered.pcm,
-                                sampleRate = SAMPLE_RATE
-                            )
-                        )
+                        filtered.denoiseIfEnabled(context, prefs, SAMPLE_RATE)
                     }
                 },
                 primaryNetworkGateEvent = {

@@ -75,18 +75,21 @@ internal fun AsrSilenceSection(
                 onValueChange = { value -> onWindowChange(value.roundToNearestHundred()) },
                 onValueChangeFinished = { onWindowFinished() }
             )
-            AsrSliderPreference(
+            AsrDropdownPreference(
+                id = "silence_sensitivity",
                 titleRes = R.string.label_silence_sensitivity,
-                valueLabel = { it.roundToInt().toString() },
-                value = silenceSensitivity.toFloat(),
-                valueRange = 1f..10f,
-                steps = 8,
-                uiMode = uiMode,
-                highlightId = "silence_sensitivity",
+                options = listOf(
+                    DropdownOption("1", stringResource(R.string.option_vad_sensitivity_high)),
+                    DropdownOption("2", stringResource(R.string.option_vad_sensitivity_standard)),
+                    DropdownOption("3", stringResource(R.string.option_vad_sensitivity_low))
+                ),
+                selectedOptionId = silenceSensitivity.toString(),
                 index = 2,
                 count = itemCount,
-                onValueChange = { value -> onSensitivityChange(value.roundToInt()) },
-                onValueChangeFinished = { onSensitivityFinished() }
+                onSelectedOptionChange = { id ->
+                    onSensitivityChange(id.toInt())
+                    onSensitivityFinished()
+                }
             )
         }
         if (autoStopMode == Prefs.RecordingAutoStopMode.MAX_DURATION) {

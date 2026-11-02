@@ -53,6 +53,7 @@ internal object PrefsInitTasks {
         registerGlobalToggleListenerIfNeeded(sp)
         migrateFloatingRecordingSettings(sp)
         migrateRecordingAutoStopModeIfNeeded(sp)
+        migrateSileroVadSettings(sp)
         migrateOnboardingGuideStateIfNeeded(sp)
         migrateTeleSpeechToFireRedAsrIfNeeded(sp)
         normalizeFireRedVariantIfNeeded(sp)
@@ -68,6 +69,20 @@ internal object PrefsInitTasks {
         normalizeFunAsrVariantIfNeeded(sp)
         cleanupLegacyFunAsrModelsIfNeeded(appContext, sp)
         migrateSyncClipboardReceiveModeIfNeeded(sp)
+    }
+
+    private fun migrateSileroVadSettings(sp: SharedPreferences) {
+        if (sp.contains(KEY_AUTO_STOP_SILENCE_SENSITIVITY)) return
+        sp.edit {
+            putInt(KEY_AUTO_STOP_SILENCE_SENSITIVITY, Prefs.DEFAULT_SILENCE_SENSITIVITY)
+            remove(KEY_LEGACY_AUTO_STOP_SILENCE_SENSITIVITY)
+            if (sp.contains(KEY_AUTO_STOP_SILENCE_WINDOW_MS)) {
+                putInt(
+                    KEY_AUTO_STOP_SILENCE_WINDOW_MS,
+                    sp.getInt(KEY_AUTO_STOP_SILENCE_WINDOW_MS, Prefs.DEFAULT_SILENCE_WINDOW_MS).coerceIn(300, 5000)
+                )
+            }
+        }
     }
 
     /** 保留已存在的 StepAudio 内置模型，避免升级后被 UI 当作自定义模型。 */

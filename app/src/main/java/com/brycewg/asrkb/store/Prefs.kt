@@ -410,7 +410,7 @@ class Prefs(context: Context) {
             }
         }
 
-    // 静音自动判停：时间窗口（ms），连续低能量超过该时间则自动停止
+    // 静音自动判停：时间窗口（ms），尾部静音超过该时间则自动停止
     var autoStopSilenceWindowMs: Int
         get() = sp.getInt(
             KEY_AUTO_STOP_SILENCE_WINDOW_MS,
@@ -418,13 +418,13 @@ class Prefs(context: Context) {
         ).coerceIn(300, 5000)
         set(value) = sp.edit { putInt(KEY_AUTO_STOP_SILENCE_WINDOW_MS, value.coerceIn(300, 5000)) }
 
-    // 静音自动判停：灵敏度（1-10，数值越大越容易判定无人说话）
+    // 静音自动判停：判停灵敏度（1 高 / 2 标准 / 3 低），越高越容易停录
     var autoStopSilenceSensitivity: Int
         get() = sp.getInt(
             KEY_AUTO_STOP_SILENCE_SENSITIVITY,
             DEFAULT_SILENCE_SENSITIVITY
-        ).coerceIn(1, 10)
-        set(value) = sp.edit { putInt(KEY_AUTO_STOP_SILENCE_SENSITIVITY, value.coerceIn(1, 10)) }
+        ).coerceIn(1, 3)
+        set(value) = sp.edit { putInt(KEY_AUTO_STOP_SILENCE_SENSITIVITY, value.coerceIn(1, 3)) }
 
     // 键盘高度档位（1/2/3），默认中档
     var keyboardHeightTier: Int
@@ -2529,7 +2529,7 @@ class Prefs(context: Context) {
 
         // 静音自动判停默认值
         const val DEFAULT_SILENCE_WINDOW_MS = 1200
-        const val DEFAULT_SILENCE_SENSITIVITY = 4 // 1-10
+        const val DEFAULT_SILENCE_SENSITIVITY = 2 // 高 / 标准 / 低
         const val DEFAULT_RECORDING_MAX_DURATION_MS = 120_000
         const val RECORDING_MAX_DURATION_MIN_MS = 30_000
         const val RECORDING_MAX_DURATION_MAX_MS = 600_000

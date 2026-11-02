@@ -33,6 +33,7 @@ internal class GenericPushFileAsrAdapter(
     private val progressiveResults: NonStreamingChunkResultCollector? = null
 ) : StreamingAsrEngine,
     ExternalPcmConsumer,
+    VadPcmConsumer,
     CancelableAsrEngine,
     SessionAudioSourceOwner,
     ProgressiveRetryStatusOwner {
@@ -40,7 +41,8 @@ internal class GenericPushFileAsrAdapter(
     private class ProgressiveChunk(
         val pcm: ByteArray,
         val segmentIndex: Int,
-        val attempt: Int
+        val attempt: Int,
+        val probabilities: VadProbabilities? = null
     )
 
     companion object {
@@ -53,7 +55,9 @@ internal class GenericPushFileAsrAdapter(
     private val progressiveRecognizer = recognizer as? BaseFileAsrEngine
     private var recognitionJob: kotlinx.coroutines.Job? = null
     private var progressiveChunker: NonStreamingPcmChunker? = null
-    private var sentenceVadDetector: VadDetector? = null
+    private var sentenceClassifier = VadSpeechClassifier(VadTuning.SentenceBoundary)
+    private var probabilityBuffer = VadProbabilityStream(context, 16_000)
+    private var enqueuedBytes = 0L
     private var chunkChannel: Channel<ProgressiveChunk>? = null
     private var progressiveAudioBytes = 0
 
@@ -67,6 +71,9 @@ internal class GenericPushFileAsrAdapter(
 
     override fun peekPendingRetryCount(): Int = pendingRetrySegments.get()
 
+    override val needsVadProbabilities: Boolean
+        get() = progressiveResults != null || (applyAudioPreprocess && RecordedAudioVoiceFilter.isEnabled(prefs))
+
     override val isRunning: Boolean
         get() = running.get()
 
@@ -77,6 +84,10 @@ internal class GenericPushFileAsrAdapter(
             return
         }
         running.set(true)
+        probabilityBuffer.release()
+        probabilityBuffer = VadProbabilityStream(context, 16_000)
+        sentenceClassifier = VadSpeechClassifier(VadTuning.SentenceBoundary)
+        enqueuedBytes = 0L
         bos.reset()
         vadInputLeveler.reset()
         val results = progressiveResults ?: return
@@ -91,7 +102,6 @@ internal class GenericPushFileAsrAdapter(
             minChunkMs = window.minChunkMs,
             maxChunkMs = window.maxChunkMs
         )
-        sentenceVadDetector = createNonStreamingSentenceVad(context, 16_000)
         val channel = Channel<ProgressiveChunk>(Channel.UNLIMITED)
         chunkChannel = channel
         retryScheduler = ProgressiveSegmentRetryScheduler(
@@ -105,7 +115,7 @@ internal class GenericPushFileAsrAdapter(
                         pendingRetrySegments.updateAndGet { (it - 1).coerceAtLeast(0) }
                     }
                     results.beginSegment(chunk.segmentIndex)
-                    recognizePcm(chunk.pcm, progressive = true)
+                    recognizePcm(chunk.pcm, progressive = true, probabilities = chunk.probabilities)
                     handleSegmentRecognitionOutcome(chunk)
                     if (results.hasFatalError) break
                 }
@@ -128,7 +138,7 @@ internal class GenericPushFileAsrAdapter(
                 retryScheduler?.cancel()
                 retryScheduler = null
                 channel.cancel()
-                releaseSentenceVad()
+                releaseProbabilityStream()
                 val store = currentStore
                 try {
                     progressiveRecognizer?.finishProgressiveResults(results, progressiveAudioBytes)
@@ -174,10 +184,12 @@ internal class GenericPushFileAsrAdapter(
             }
             scheduler?.flushNow()
             chunkChannel?.close()
-            releaseSentenceVad()
+            releaseProbabilityStream()
             return
         }
         val data = bos.toByteArray()
+        val probabilities = probabilityBuffer.snapshot().takeIf { it.sampleCount > 0 }
+        probabilityBuffer.release()
         bos.reset()
         if (data.isEmpty()) {
             try {
@@ -189,7 +201,7 @@ internal class GenericPushFileAsrAdapter(
         }
         recognitionJob = scope.launch(Dispatchers.IO) {
             try {
-                recognizePcm(data)
+                recognizePcm(data, probabilities = probabilities)
             } catch (t: Throwable) {
                 Log.e(TAG, "recognizeFromPcm failed", t)
                 try {
@@ -212,7 +224,7 @@ internal class GenericPushFileAsrAdapter(
         chunkChannel?.cancel()
         chunkChannel = null
         progressiveResults?.cancel()
-        releaseSentenceVad()
+        releaseProbabilityStream()
         try {
             recognitionJob?.cancel()
         } catch (t: Throwable) {
@@ -220,12 +232,17 @@ internal class GenericPushFileAsrAdapter(
         }
     }
 
-    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) {
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) = appendFrame(pcm, sampleRate, channels, null)
+
+    override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities) = appendFrame(pcm, sampleRate, channels, probabilities)
+
+    private fun appendFrame(pcm: ByteArray, sampleRate: Int, channels: Int, probabilities: VadProbabilities?) {
         if (!isRunning) return
         if (sampleRate != 16000 || channels != 1) {
             Log.w(TAG, "ignore frame: sr=$sampleRate ch=$channels")
             return
         }
+        val analysis = if (needsVadProbabilities || probabilities != null) probabilityBuffer.append(pcm, probabilities) else null
         val chunker = progressiveChunker
         if (chunker == null) {
             val leveled = vadInputLeveler.process(pcm)
@@ -241,10 +258,10 @@ internal class GenericPushFileAsrAdapter(
             }
             return
         }
-        appendProgressiveFrame(pcm, chunker)
+        appendProgressiveFrame(pcm, chunker, checkNotNull(analysis))
     }
 
-    private fun appendProgressiveFrame(pcm: ByteArray, chunker: NonStreamingPcmChunker) {
+    private fun appendProgressiveFrame(pcm: ByteArray, chunker: NonStreamingPcmChunker, probabilities: VadProbabilities) {
         val leveled = vadInputLeveler.process(pcm)
         try {
             listener.onAmplitude(leveled.stableAmplitude)
@@ -252,13 +269,8 @@ internal class GenericPushFileAsrAdapter(
             Log.w(TAG, "amp cb failed", t)
         }
         // 句间 VAD 与分段器按 ≤100ms 子帧推进
-        val leveledPcm = leveled.leveledPcm
         forEachSentenceVadSubFrame(pcm, 16_000) { offset, end ->
-            val leveledEnd = minOf(end, leveledPcm.size)
-            val isSpeech = sentenceVadDetector
-                ?.analyzeFrame(leveledPcm.copyOfRange(offset, leveledEnd), leveledEnd - offset)
-                ?.isSpeech
-                ?: true
+            val isSpeech = sentenceClassifier.accept(probabilities.slice(offset.toLong(), end.toLong()))
             val subPcm = if (offset == 0 && end == pcm.size) pcm else pcm.copyOfRange(offset, end)
             chunker.append(subPcm, isSpeech).forEach(::enqueueClosedChunk)
         }
@@ -267,8 +279,10 @@ internal class GenericPushFileAsrAdapter(
     /** 封闭段落盘并入识别队列；落盘降级时段号为 -1（该段失败不再可重试）。 */
     private fun enqueueClosedChunk(chunk: ByteArray) {
         progressiveAudioBytes += chunk.size
-        val segmentIndex = currentStore?.appendSegment(chunk) ?: -1
-        chunkChannel?.trySend(ProgressiveChunk(chunk, segmentIndex, attempt = 0))
+        val probabilities = probabilityBuffer.snapshot(enqueuedBytes, enqueuedBytes + chunk.size)
+        val segmentIndex = currentStore?.appendSegment(chunk, probabilities) ?: -1
+        enqueuedBytes += chunk.size
+        chunkChannel?.trySend(ProgressiveChunk(chunk, segmentIndex, attempt = 0, probabilities = probabilities))
     }
 
     /** 段识别返回后的失败处置：首次失败调度 10s 重试，重试耗尽升级为会话级错误。 */
@@ -298,36 +312,34 @@ internal class GenericPushFileAsrAdapter(
     private fun enqueueSegmentRetry(channel: Channel<ProgressiveChunk>, segmentIndex: Int) {
         val results = progressiveResults ?: return
         val pcm = currentStore?.readSegment(segmentIndex)
-        if (pcm == null || !channel.trySend(ProgressiveChunk(pcm, segmentIndex, attempt = 1)).isSuccess) {
+        if (pcm == null || !channel.trySend(ProgressiveChunk(pcm, segmentIndex, attempt = 1, probabilities = currentStore?.readSegmentProbabilities(segmentIndex))).isSuccess) {
             // 读取失败或通道已收尾：该段重试丢失，按失败收口
             pendingRetrySegments.updateAndGet { (it - 1).coerceAtLeast(0) }
             results.failSegment(segmentIndex)
         }
     }
 
-    private suspend fun recognizePcm(data: ByteArray, progressive: Boolean = false) {
+    private suspend fun recognizePcm(data: ByteArray, progressive: Boolean = false, probabilities: VadProbabilities? = null) {
         // applyAudioPreprocess=false 表示上层（主备 wrapper）已对人声过滤与降噪，
-        val denoised = if (applyAudioPreprocess) {
-            preprocessForRecognition(data) ?: return
+        val processed = if (applyAudioPreprocess) preprocessForRecognition(data, probabilities) ?: return else null
+        val audio = processed?.pcm ?: data
+        val analysis = processed?.probabilities ?: probabilities
+        if (progressiveRecognizer != null) {
+            progressiveRecognizer.recognizeWithVad(audio, analysis, progressive)
         } else {
-            data
-        }
-        if (progressive) {
-            progressiveRecognizer?.recognizeProgressiveChunk(denoised)
-                ?: recognizer.recognizeFromPcm(denoised)
-        } else {
-            recognizer.recognizeFromPcm(denoised)
+            recognizer.recognizeFromPcm(audio)
         }
     }
 
     /** 返回 null 表示已按空音频交付错误，调用方应直接结束本次识别。 */
-    private fun preprocessForRecognition(data: ByteArray): ByteArray? {
+    private fun preprocessForRecognition(data: ByteArray, probabilities: VadProbabilities?): RecordedAudioVoiceFilter.Result? {
         val processed = RecordedAudioVoiceFilter.processIfEnabled(
             context = context,
             prefs = prefs,
             pcm = data,
             sampleRate = 16000,
-            chunkMillis = 200
+            chunkMillis = 200,
+            probabilities = probabilities
         )
         if (processed.droppedAsEmptyAudio) {
             (progressiveResults ?: listener).onError(
@@ -335,23 +347,10 @@ internal class GenericPushFileAsrAdapter(
             )
             return null
         }
-        return OfflineSpeechDenoiserManager.denoiseIfEnabled(
-            context = context,
-            prefs = prefs,
-            pcm = processed.pcm,
-            sampleRate = 16000
-        )
+        return processed.denoiseIfEnabled(context, prefs, 16000)
     }
 
-    private fun releaseSentenceVad() {
-        try {
-            sentenceVadDetector?.release()
-        } catch (t: Throwable) {
-            Log.w(TAG, "Failed to release sentence-boundary VAD", t)
-        } finally {
-            sentenceVadDetector = null
-        }
-    }
+    private fun releaseProbabilityStream() = probabilityBuffer.release()
 
     private fun recognitionError(t: Throwable): String = context.getString(
         R.string.error_recognize_failed_with_reason,

@@ -151,7 +151,7 @@ class SettingsActionController(
             append("\n\n")
             append("=".repeat(80))
             append("\n\n")
-            append(activity.readAssetFile("licenses/TenVAD-LICENSE"))
+            append(activity.readAssetFile("licenses/SileroVAD-LICENSE"))
             append("\n\n")
             append(activity.readAssetFile("licenses/Foxlet-LICENSE"))
         }

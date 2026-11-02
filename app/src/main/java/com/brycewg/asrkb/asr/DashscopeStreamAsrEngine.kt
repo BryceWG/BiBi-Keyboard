@@ -682,7 +682,7 @@ class DashscopeStreamAsrEngine(
                     }
 
                     // 客户端 VAD 自动停止（可选，与服务端 VAD 独立）
-                    if (vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true) {
+                    if (vadDetector?.shouldStop(audioChunk, audioChunk.size) == true) {
                         Log.d(TAG, "Client VAD: silence detected, stopping recording")
                         try {
                             listener.onStopped()

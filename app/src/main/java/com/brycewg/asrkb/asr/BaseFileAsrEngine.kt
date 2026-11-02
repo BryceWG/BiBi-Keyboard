@@ -166,31 +166,26 @@ abstract class BaseFileAsrEngine(
                                 }
                                 chunkResults.beginSegment(seg.segmentIndex)
                                 val preprocessStartedAt = SystemClock.elapsedRealtime()
-                                val processed = processPcmForRecognition(seg.pcm) ?: continue
+                                val processed = processPcmForRecognition(seg.pcm, seg.probabilities) ?: continue
                                 val preprocessMs =
                                     (SystemClock.elapsedRealtime() - preprocessStartedAt).coerceAtLeast(0L)
                                 if (!progressiveChunkingEnabled) {
-                                    lastNonProgressiveSegmentForRetry = RecordedSegment.Pcm(processed)
+                                    lastNonProgressiveSegmentForRetry = RecordedSegment.Pcm(processed.pcm, probabilities = processed.probabilities)
                                 }
                                 val denoiseStartedAt = SystemClock.elapsedRealtime()
-                                val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(
-                                    context = context,
-                                    prefs = prefs,
-                                    pcm = processed,
-                                    sampleRate = sampleRate
-                                )
+                                val denoised = processed.denoiseIfEnabled(context, prefs, sampleRate)
                                 val denoiseMs =
                                     (SystemClock.elapsedRealtime() - denoiseStartedAt).coerceAtLeast(0L)
                                 logCallLatency(
                                     "t_recognize_enter",
                                     mapOf(
-                                        "bytes" to denoised.size,
+                                        "bytes" to denoised.pcm.size,
                                         "preprocess_ms" to preprocessMs,
                                         "denoise_ms" to denoiseMs,
                                         "attempt" to seg.attempt
                                     )
                                 )
-                                recognizeProgressiveChunk(denoised)
+                                recognizeWithVad(denoised.pcm, denoised.probabilities, progressive = true)
                                 handleSegmentRecognitionOutcome(seg)
                             }
                             is RecordedSegment.Encoded -> {
@@ -395,13 +390,16 @@ abstract class BaseFileAsrEngine(
             return
         }
 
+        val probabilityStream = VadProbabilityStream(context, sampleRate)
+        val needsProbabilities = progressiveChunkingEnabled || RecordedAudioVoiceFilter.isEnabled(prefs)
         // VAD 检测器（如果启用）。长按说话模式下由用户松手决定停止，绕过 VAD 自动判停
         val vadDetector = if (isVadAutoStopEnabled(context, prefs)) {
             VadDetector(
                 context,
                 sampleRate,
                 prefs.autoStopSilenceWindowMs,
-                prefs.autoStopSilenceSensitivity
+                prefs.autoStopSilenceSensitivity,
+                probabilityStream = probabilityStream
             )
         } else {
             null
@@ -422,20 +420,19 @@ abstract class BaseFileAsrEngine(
         } else {
             null
         }
-        val sentenceVadDetector = if (progressiveChunkingEnabled) {
-            createNonStreamingSentenceVad(context, sampleRate)
-        } else {
-            null
-        }
+        val sentenceClassifier = VadSpeechClassifier(VadTuning.SentenceBoundary)
+        var enqueuedBytes = 0L
 
         val currentSeg = ByteArrayOutputStream()
 
         fun enqueuePcm(pcm: ByteArray) {
             if (pcm.isEmpty()) return
             progressiveAudioBytes += pcm.size
-            val segmentIndex = currentStore?.appendSegment(pcm) ?: -1
+            val probabilities = if (needsProbabilities) probabilityStream.snapshot(enqueuedBytes, enqueuedBytes + pcm.size) else null
+            val segmentIndex = currentStore?.appendSegment(pcm, probabilities) ?: -1
             logUncompressedUploadSegment(pcm)
-            chan.trySend(RecordedSegment.Pcm(pcm, segmentIndex))
+            enqueuedBytes += pcm.size
+            chan.trySend(RecordedSegment.Pcm(pcm, segmentIndex, probabilities = probabilities))
         }
 
         try {
@@ -451,23 +448,20 @@ abstract class BaseFileAsrEngine(
                     Log.w(TAG, "Failed to calculate amplitude", t)
                 }
 
+                val probabilities = if (needsProbabilities) probabilityStream.append(audioChunk) else null
                 if (progressiveChunker == null) {
                     currentSeg.write(audioChunk)
                 } else {
                     // 句间 VAD 与分段器按 ≤100ms 子帧推进，300ms 静音阈值不被 200ms 采集帧放大
-                    val leveledPcm = leveled.leveledPcm
                     forEachSentenceVadSubFrame(audioChunk, sampleRate) { offset, end ->
-                        val isSpeech = sentenceVadDetector
-                            ?.analyzeFrame(leveledPcm.copyOfRange(offset, end), end - offset)
-                            ?.isSpeech
-                            ?: true
+                        val isSpeech = sentenceClassifier.accept(checkNotNull(probabilities).slice(offset.toLong(), end.toLong()))
                         val subPcm = if (offset == 0 && end == audioChunk.size) audioChunk else audioChunk.copyOfRange(offset, end)
                         progressiveChunker.append(subPcm, isSpeech).forEach(::enqueuePcm)
                     }
                 }
 
                 val stopReason = when {
-                    vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true ->
+                    vadDetector?.accept(checkNotNull(probabilities)) == true ->
                         "Silence detected, stopping recording"
                     maxDurationLimiter.acceptPcm(audioChunk.size) ->
                         "Max recording duration reached, stopping recording"
@@ -539,9 +533,9 @@ abstract class BaseFileAsrEngine(
                 Log.e(TAG, "Failed to release VAD detector", t)
             }
             try {
-                sentenceVadDetector?.release()
+                probabilityStream.release()
             } catch (t: Throwable) {
-                Log.e(TAG, "Failed to release sentence-boundary VAD", t)
+                Log.e(TAG, "Failed to release probability stream", t)
             }
         }
     }
@@ -623,7 +617,7 @@ abstract class BaseFileAsrEngine(
                 encodeChan.send(EncodeRequest(audioChunk))
 
                 val stopReason = when {
-                    vadDetector?.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size) == true ->
+                    vadDetector?.shouldStop(audioChunk, audioChunk.size) == true ->
                         "Silence detected, stopping recording"
                     maxDurationLimiter.acceptPcm(audioChunk.size) ->
                         "Max recording duration reached, stopping recording"
@@ -846,13 +840,14 @@ abstract class BaseFileAsrEngine(
      */
     protected open suspend fun recognizeEncoded(audio: UploadAudioData): Unit = throw UnsupportedOperationException("Encoded upload audio is not supported by this ASR engine")
 
-    private fun processPcmForRecognition(pcm: ByteArray): ByteArray? {
+    private fun processPcmForRecognition(pcm: ByteArray, probabilities: VadProbabilities? = null): RecordedAudioVoiceFilter.Result? {
         val result = RecordedAudioVoiceFilter.processIfEnabled(
             context = context,
             prefs = prefs,
             pcm = pcm,
             sampleRate = sampleRate,
-            chunkMillis = chunkMillis
+            chunkMillis = chunkMillis,
+            probabilities = probabilities
         )
         if (result.droppedAsEmptyAudio) {
             Log.d(
@@ -872,7 +867,7 @@ abstract class BaseFileAsrEngine(
                 "Filtered silent audio: ${result.originalDurationMs}ms -> ${result.outputDurationMs}ms"
             )
         }
-        return result.pcm
+        return result
     }
 
     private fun logUncompressedUploadSegment(pcm: ByteArray) {
@@ -943,30 +938,28 @@ abstract class BaseFileAsrEngine(
                 progressiveStoppedAtMs = SystemClock.uptimeMillis()
             }
             try {
+                val needsProbabilities = RecordedAudioVoiceFilter.isEnabled(prefs) ||
+                    localOfflinePcmNeedsChunking(pcm, sampleRate, progressiveChunkWindow.maxChunkMs)
+                val probabilities = if (needsProbabilities) checkNotNull(store.readProbabilities()) else null
                 val chunks = if (progressiveChunkingEnabled) {
                     splitLocalOfflinePcm16WithVad(
                         context = context,
                         prefs = prefs,
                         pcm = pcm,
                         sampleRate = sampleRate,
-                        window = progressiveChunkWindow
+                        window = progressiveChunkWindow,
+                        probabilities = probabilities
                     )
                 } else {
                     listOf(pcm)
                 }
+                var offset = 0L
                 for (chunk in chunks) {
-                    val processed = if (progressiveChunkingEnabled) {
-                        processPcmForRecognition(chunk) ?: continue
-                    } else {
-                        chunk
-                    }
-                    val denoised = OfflineSpeechDenoiserManager.denoiseIfEnabled(
-                        context = context,
-                        prefs = prefs,
-                        pcm = processed,
-                        sampleRate = sampleRate
-                    )
-                    recognizeProgressiveChunk(denoised)
+                    val analysis = probabilities?.slice(offset, offset + chunk.size)
+                    offset += chunk.size
+                    val processed = processPcmForRecognition(chunk, analysis) ?: continue
+                    val denoised = processed.denoiseIfEnabled(context, prefs, sampleRate)
+                    recognizeWithVad(denoised.pcm, denoised.probabilities, progressive = true)
                     if (progressiveChunkingEnabled && chunkResults.hasFatalError) break
                 }
             } catch (t: Throwable) {
@@ -1005,7 +998,7 @@ abstract class BaseFileAsrEngine(
                             pcm = segment.pcm,
                             sampleRate = sampleRate
                         )
-                        recognizeProgressiveChunk(denoised)
+                        recognizeWithVad(denoised, segment.probabilities?.slice(0, denoised.size.toLong()), progressive = true)
                     }
                     is RecordedSegment.Encoded -> recognizeEncoded(segment.audio)
                 }
@@ -1022,6 +1015,18 @@ abstract class BaseFileAsrEngine(
                     Log.e(TAG, "Failed to notify recognition error (retry)", e)
                 }
             }
+        }
+    }
+
+    protected var recognitionVadProbabilities: VadProbabilities? = null
+        private set
+
+    internal suspend fun recognizeWithVad(pcm: ByteArray, probabilities: VadProbabilities?, progressive: Boolean) {
+        recognitionVadProbabilities = probabilities
+        try {
+            if (progressive) recognizeProgressiveChunk(pcm) else recognize(pcm)
+        } finally {
+            recognitionVadProbabilities = null
         }
     }
 
@@ -1060,7 +1065,7 @@ abstract class BaseFileAsrEngine(
     private fun enqueueSegmentRetry(chan: Channel<RecordedSegment>, segmentIndex: Int) {
         if (discardOnStop) return
         val pcm = currentStore?.readSegment(segmentIndex)
-        if (pcm == null || !chan.trySend(RecordedSegment.Pcm(pcm, segmentIndex, attempt = 1)).isSuccess) {
+        if (pcm == null || !chan.trySend(RecordedSegment.Pcm(pcm, segmentIndex, attempt = 1, probabilities = currentStore?.readSegmentProbabilities(segmentIndex))).isSuccess) {
             // 读取失败或通道已收尾：该段重试丢失，按失败收口
             pendingRetrySegments.updateAndGet { (it - 1).coerceAtLeast(0) }
             chunkResults.failSegment(segmentIndex)
@@ -1136,7 +1141,8 @@ abstract class BaseFileAsrEngine(
         data class Pcm(
             val pcm: ByteArray,
             val segmentIndex: Int = -1,
-            val attempt: Int = 0
+            val attempt: Int = 0,
+            val probabilities: VadProbabilities? = null
         ) : RecordedSegment
 
         data class Encoded(val audio: UploadAudioData) : RecordedSegment

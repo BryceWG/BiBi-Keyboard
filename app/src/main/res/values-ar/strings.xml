@@ -270,7 +270,7 @@
   <string name="option_recording_auto_stop_max_duration">إيقاف بالمهلة</string>
   <string name="label_auto_stop_silence">إيقاف تلقائي عند غياب الكلام</string>
   <string name="label_silence_window_ms">نافذة الإيقاف (مللي ثانية)</string>
-  <string name="label_silence_sensitivity">حساسية إيقاف التسجيل (1-10؛ الأعلى يوقف أبكر)</string>
+  <string name="label_silence_sensitivity">حساسية (أعلى ستؤدي إلى إيقاف التسجيل بشكل أسهل)</string>
   <string name="label_recording_max_duration">أقصى مدة تسجيل</string>
   <string name="label_recording_max_duration_value_s">%1$d ث</string>
 
@@ -557,4 +557,7 @@
   <string name="keyboard_layout_prompt_hint">اختر موجّه تنقيح موجوداً. يتبع هذا الزر التغييرات على الإعداد المحدد.</string>
   <string name="keyboard_layout_prompt_required">اختر موجّه تنقيح موجوداً لهذا الزر؛ ربما تم حذف الإعداد المحدد.</string>
   <string name="keyboard_layout_add">إضافة</string>
+  <string name="option_vad_sensitivity_high">عالية</string>
+  <string name="option_vad_sensitivity_standard">قياسية</string>
+  <string name="option_vad_sensitivity_low">منخفضة</string>
 </resources>

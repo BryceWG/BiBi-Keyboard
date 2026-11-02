@@ -59,14 +59,16 @@ internal fun splitLocalOfflinePcm16WithVad(
     prefs: Prefs,
     pcm: ByteArray,
     sampleRate: Int,
-    window: NonStreamingChunkWindow = NonStreamingChunkWindow.Local
+    window: NonStreamingChunkWindow = NonStreamingChunkWindow.Local,
+    probabilities: VadProbabilities? = null
 ): List<ByteArray> {
     val silenceRanges = if (localOfflinePcmNeedsChunking(pcm, sampleRate, window.maxChunkMs)) {
         RecordedAudioVoiceFilter.findSilenceRangesForLocalOfflineChunking(
             context = context,
             prefs = prefs,
             pcm = pcm,
-            sampleRate = sampleRate
+            sampleRate = sampleRate,
+            probabilities = probabilities
         )
     } else {
         emptyList()

@@ -30,6 +30,9 @@ import com.brycewg.asrkb.asr.RecordedAudioVoiceFilter
 import com.brycewg.asrkb.asr.RecordingAudioFocusController
 import com.brycewg.asrkb.asr.RecordingAudioFocusLoss
 import com.brycewg.asrkb.asr.StreamingAsrEngine
+import com.brycewg.asrkb.asr.VadProbabilities
+import com.brycewg.asrkb.asr.VadProbabilityStream
+import com.brycewg.asrkb.asr.appendPcmWithVad
 import com.brycewg.asrkb.asr.asrEngineModePreferencesSnapshot
 import com.brycewg.asrkb.asr.isAsrVendorConfigured
 import com.brycewg.asrkb.asr.preloadLocalAsrForImmediateUse
@@ -121,6 +124,7 @@ internal class RecordingTestViewModel(
     private var activePcmConsumer: ExternalPcmConsumer? = null
     private var recognitionStopUptimeMs: Long? = null
     private var rawPcm = ByteArray(0)
+    private var recordedProbabilities: VadProbabilities? = null
     private var wavFile: File? = null
     private var firstFrameUptimeMs: Long? = null
     private var recordingStartUptimeMs: Long = 0L
@@ -267,6 +271,7 @@ internal class RecordingTestViewModel(
                 Log.w(TAG, "Failed to release recording test capture on page exit", t)
             }
             rawPcm = ByteArray(0)
+            recordedProbabilities = null
             firstFrameUptimeMs = null
             resetAudioStats()
         }
@@ -277,6 +282,7 @@ internal class RecordingTestViewModel(
         stopActiveRecognition(cancelTimeout = true)
         stopPlayback()
         rawPcm = ByteArray(0)
+        recordedProbabilities = null
         deleteWavFile()
         firstFrameUptimeMs = null
         _uiState.update {
@@ -305,6 +311,7 @@ internal class RecordingTestViewModel(
         resetAudioStats()
         stopActiveRecognition(cancelTimeout = true)
         rawPcm = ByteArray(0)
+        recordedProbabilities = null
         deleteWavFile()
         val engine = buildConfiguredPushPcmEngine(createConfiguredRecognitionListener())
         val pcmConsumer = engine as? ExternalPcmConsumer
@@ -381,6 +388,7 @@ internal class RecordingTestViewModel(
         captureJob = viewModelScope.launch(Dispatchers.IO) {
             val audioManager = AudioCaptureManager(appContext)
             val output = ByteArrayOutputStream()
+            val probabilityStream = VadProbabilityStream(appContext, RECORDING_TEST_SAMPLE_RATE)
             try {
                 audioManager.startCapture().collect { chunk ->
                     val now = SystemClock.elapsedRealtime()
@@ -389,8 +397,9 @@ internal class RecordingTestViewModel(
                         firstFrameUptimeMs = now
                     }
                     output.write(chunk)
+                    val probabilities = probabilityStream.append(chunk)
                     try {
-                        activePcmConsumer?.appendPcm(chunk, RECORDING_TEST_SAMPLE_RATE, RECORDING_TEST_CHANNELS)
+                        activePcmConsumer?.appendPcmWithVad(chunk, RECORDING_TEST_SAMPLE_RATE, RECORDING_TEST_CHANNELS, probabilities)
                     } catch (t: Throwable) {
                         Log.w(TAG, "Failed to push recording test PCM to ASR", t)
                     }
@@ -424,6 +433,8 @@ internal class RecordingTestViewModel(
                 }
             } finally {
                 rawPcm = output.toByteArray()
+                recordedProbabilities = probabilityStream.snapshot()
+                probabilityStream.release()
                 releaseRecordingResources()
             }
         }
@@ -460,19 +471,22 @@ internal class RecordingTestViewModel(
             return
         }
         val finalized = withContext(Dispatchers.IO) {
+            val probabilities = checkNotNull(recordedProbabilities)
             val silenceAnalysis = RecordedAudioVoiceFilter.analyzeSilence(
                 context = localizedContext,
                 prefs = prefs,
                 pcm = source,
                 sampleRate = RECORDING_TEST_SAMPLE_RATE,
-                chunkMillis = RECORDING_TEST_CHUNK_MS
+                chunkMillis = RECORDING_TEST_CHUNK_MS,
+                probabilities = probabilities
             )
             val filtered = RecordedAudioVoiceFilter.processIfEnabled(
                 context = localizedContext,
                 prefs = prefs,
                 pcm = source,
                 sampleRate = RECORDING_TEST_SAMPLE_RATE,
-                chunkMillis = RECORDING_TEST_CHUNK_MS
+                chunkMillis = RECORDING_TEST_CHUNK_MS,
+                probabilities = probabilities
             )
             OfflineSpeechDenoiserManager.denoiseIfEnabled(
                 context = localizedContext,

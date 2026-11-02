@@ -105,6 +105,8 @@ abstract class LocalModelPseudoStreamAsrEngine(
 
         audioJob?.cancel()
         audioJob = scope.launch(Dispatchers.IO) {
+            val probabilityBuffer = VadProbabilityStream(context, sampleRate)
+            val needsProbabilities = RecordedAudioVoiceFilter.isEnabled(prefs)
             val sessionBuffer = ByteArrayOutputStream()
             val segmentBuffer = ByteArrayOutputStream()
             var hasRecordedAudio = false
@@ -170,6 +172,7 @@ abstract class LocalModelPseudoStreamAsrEngine(
                 audioManager.startCapture().collect { audioChunk ->
                     if (!running.get()) return@collect
 
+                    val probabilities = if (needsProbabilities) probabilityBuffer.append(audioChunk) else null
                     val leveled = vadInputLeveler.process(audioChunk)
 
                     // 振幅回调（波形）
@@ -230,7 +233,7 @@ abstract class LocalModelPseudoStreamAsrEngine(
                     val stopVad = stopVadDetector
                     if (autoStopEnabled && stopVad != null && audioChunk.isNotEmpty()) {
                         val shouldStop = try {
-                            stopVad.shouldStop(leveled.leveledPcm, leveled.leveledPcm.size)
+                            stopVad.accept(checkNotNull(probabilities))
                         } catch (t: Throwable) {
                             Log.e(TAG, "Stop VAD shouldStop failed", t)
                             false
@@ -264,6 +267,7 @@ abstract class LocalModelPseudoStreamAsrEngine(
             } finally {
                 try {
                     stopVadDetector?.release()
+                    probabilityBuffer.release()
                 } catch (t: Throwable) {
                     Log.e(TAG, "Failed to release stop VAD detector", t)
                 }
@@ -304,7 +308,8 @@ abstract class LocalModelPseudoStreamAsrEngine(
                         prefs = prefs,
                         pcm = fullPcm,
                         sampleRate = sampleRate,
-                        chunkMillis = chunkMillis
+                        chunkMillis = chunkMillis,
+                        probabilities = if (needsProbabilities) probabilityBuffer.snapshot() else null
                     )
                     if (processed.droppedAsEmptyAudio) {
                         try {

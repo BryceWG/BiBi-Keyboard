@@ -315,7 +315,7 @@ class AsrSettingsViewModel : ViewModel() {
 
     fun updateSilenceWindow(windowMs: Int) {
         prefs.autoStopSilenceWindowMs = windowMs
-        _uiState.value = _uiState.value.copy(silenceWindowMs = windowMs)
+        _uiState.value = _uiState.value.copy(silenceWindowMs = prefs.autoStopSilenceWindowMs)
     }
 
     fun updateSilenceSensitivity(sensitivity: Int) {
