@@ -6,7 +6,7 @@
     <string name="error_audio_init_failed">錄音初始化失敗</string>
     <string name="error_audio_error">錄音錯誤：%1$s</string>
     <string name="error_audio_empty">空白音訊</string>
-    <string name="error_audio_empty_skipped">識別為空白音訊，已略過轉錄</string>
+    <string name="error_audio_empty_skipped">未偵測到人聲，已略過轉錄</string>
     <string name="error_missing_gemini_key">未設定 Gemini API Key</string>
     <string name="error_missing_dashscope_key">未設定 DashScope API Key</string>
     <string name="error_missing_siliconflow_key">未設定 SiliconFlow API Key</string>

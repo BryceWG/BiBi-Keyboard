@@ -7,6 +7,7 @@ package com.brycewg.asrkb.asr
  */
 internal object AsrFailReasonCodes {
     const val EMPTY_RESULT = "empty_result"
+    const val EMPTY_AUDIO_SKIPPED = "empty_audio_skipped"
     const val AUTH_INVALID = "auth_invalid"
     const val AUTH_FORBIDDEN = "auth_forbidden"
     const val MIC_PERMISSION = "mic_permission"

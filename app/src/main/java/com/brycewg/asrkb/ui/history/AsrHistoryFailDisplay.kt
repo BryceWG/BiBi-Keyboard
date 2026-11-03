@@ -17,9 +17,12 @@ internal object AsrHistoryFailDisplay {
     fun copyText(record: AsrHistoryStore.AsrHistoryRecord): String? = record.text.takeIf { it.isNotBlank() }
         ?: record.rawText?.takeIf { it.isNotBlank() }
 
+    fun isSkipped(record: AsrHistoryStore.AsrHistoryRecord): Boolean = record.failReasonCode == AsrFailReasonCodes.EMPTY_AUDIO_SKIPPED
+
     fun format(context: Context, record: AsrHistoryStore.AsrHistoryRecord): String {
         if (!record.isUnsuccessful) return ""
         val localized = LocaleHelper.wrap(context)
+        if (isSkipped(record)) return localized.getString(R.string.error_audio_empty_skipped)
         if (record.failStage == AsrHistoryStore.AsrHistoryFailStage.TRANSLATION) {
             return localized.getString(R.string.translation_failed)
         }

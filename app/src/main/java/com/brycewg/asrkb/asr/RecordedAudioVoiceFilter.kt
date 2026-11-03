@@ -48,19 +48,20 @@ object RecordedAudioVoiceFilter {
         prefs.autoFilterSilentAudioSegmentsEnabled ||
         prefs.recordingAutoStopMode == Prefs.RecordingAutoStopMode.SILENCE
 
+    internal fun isNearSilencePcm(pcm: ByteArray): Boolean {
+        val energy = measureEnergy(pcm, pcm.size)
+        return energy.maxAbs <= NEAR_SILENCE_MAX_ABS_THRESHOLD &&
+            kotlin.math.sqrt(energy.sumSquares / energy.sampleCount) <= NEAR_SILENCE_RMS_THRESHOLD
+    }
+
     private data class ChunkMark(
         val offset: Int,
         val length: Int,
         val durationMs: Int,
         val isSpeech: Boolean,
-        val isEmptyAudioSpeech: Boolean,
         val maxAbs: Int,
         val sumSquares: Double,
-        val sampleCount: Int,
-        val rawMaxAbs: Int,
-        val rawSumSquares: Double,
-        val rawCountAbove30: Int,
-        val rawSampleCount: Int
+        val sampleCount: Int
     )
 
     private data class FilterOutput(
@@ -99,7 +100,6 @@ object RecordedAudioVoiceFilter {
         prefs: Prefs,
         pcm: ByteArray,
         sampleRate: Int,
-        chunkMillis: Int,
         probabilities: VadProbabilities? = null
     ): SilenceAnalysis? {
         if (pcm.isEmpty() || sampleRate <= 0) return null
@@ -112,23 +112,26 @@ object RecordedAudioVoiceFilter {
         }
 
         return try {
-            val marks = buildChunkMarks(
-                probabilities = analysis,
-                pcm = pcm,
-                sampleRate = sampleRate,
-                chunkMillis = chunkMillis.coerceAtLeast(20),
-                classifier = VadSpeechClassifier(VadTuning.SilenceAnalysis)
+            val endpoint = VadEndpoint(
+                VadTuning.tuningForLevel(prefs.autoStopSilenceSensitivity),
+                prefs.autoStopSilenceWindowMs
             )
-            if (marks.isEmpty()) return null
-
-            val contentDurationMs = marks
-                .filter { it.shouldKeepAsContent() }
-                .sumOf { it.durationMs }
-                .toLong()
-            val totalDurationMs = marks.sumOf { it.durationMs }.toLong().coerceAtLeast(1L)
-            val nonContentDurationMs = (totalDurationMs - contentDurationMs).coerceAtLeast(0L)
+            var speechSamples = 0L
+            var previousEnd = 0L
+            var lastSpeech = false
+            for (frame in analysis.frames) {
+                lastSpeech = endpoint.accept(
+                    frame.probability,
+                    allowStop = false,
+                    frameEndMs = (frame.endSample * 1000 / sampleRate).toInt()
+                )
+                if (lastSpeech) speechSamples += frame.endSample - previousEnd
+                previousEnd = frame.endSample
+            }
+            // 不足一个推理帧的尾部沿用最后状态，不另跑模型或把整块 200 ms 算成同一状态。
+            if (lastSpeech) speechSamples += analysis.sampleCount - previousEnd
             SilenceAnalysis(
-                silentPercent = (nonContentDurationMs * 100L / totalDurationMs).toInt().coerceIn(0, 100)
+                silentPercent = ((analysis.sampleCount - speechSamples) * 100 / analysis.sampleCount).toInt()
             )
         } catch (t: Throwable) {
             Log.w(TAG, "VAD silence analysis failed", t)
@@ -192,9 +195,10 @@ object RecordedAudioVoiceFilter {
         pcm: ByteArray,
         sampleRate: Int,
         chunkMillis: Int,
-        probabilities: VadProbabilities? = null
+        probabilities: VadProbabilities? = null,
+        emptyAudioHandledBySession: Boolean = false
     ): Result {
-        val cancelEmpty = prefs.autoCancelEmptyAudioInputEnabled
+        val cancelEmpty = prefs.autoCancelEmptyAudioInputEnabled && !emptyAudioHandledBySession
         val filterSilent = prefs.autoFilterSilentAudioSegmentsEnabled
         val trimBounds = prefs.recordingAutoStopMode == Prefs.RecordingAutoStopMode.SILENCE
         val originalDurationMs = durationMs(pcm.size, sampleRate)
@@ -230,6 +234,7 @@ object RecordedAudioVoiceFilter {
                 sampleRate = sampleRate,
                 chunkMillis = 32,
                 cancelEmpty = cancelEmpty,
+                emptyAudioTuning = EmptyAudioTuning.forStopSensitivity(prefs.autoStopSilenceSensitivity),
                 filterSilent = filterSilent,
                 prefsTrimBounds = trimBounds,
                 originalDurationMs = originalDurationMs
@@ -253,17 +258,18 @@ object RecordedAudioVoiceFilter {
         sampleRate: Int,
         chunkMillis: Int,
         cancelEmpty: Boolean,
+        emptyAudioTuning: EmptyAudioTuning,
         filterSilent: Boolean,
         prefsTrimBounds: Boolean,
         originalDurationMs: Long
     ): Result {
         val classifier = VadSpeechClassifier(VadTuning.SilenceFilter)
-        val emptyClassifier = VadSpeechClassifier(VadTuning.EmptyAudio)
+        val emptyClassifier = EmptyAudioDetector(emptyAudioTuning)
         val boundsClassifier = VadSpeechClassifier(VadTuning.SpeechBounds)
         val marks = buildChunkMarks(probabilities, pcm, sampleRate, chunkMillis, classifier, emptyClassifier, boundsClassifier)
 
         val hasContent = marks.any { it.shouldKeepAsContent() }
-        val shouldDrop = cancelEmpty && shouldDropAsEmptyAudio(marks)
+        val shouldDrop = cancelEmpty && !emptyClassifier.hasSpeech
         val filterOutput = if (filterSilent && hasContent) {
             filterLongNonContentRuns(pcm, marks)
         } else {
@@ -292,7 +298,7 @@ object RecordedAudioVoiceFilter {
         )
         return Result(
             pcm = out,
-            hasSpeech = hasContent,
+            hasSpeech = emptyClassifier.hasSpeech,
             droppedAsEmptyAudio = shouldDrop,
             originalDurationMs = originalDurationMs,
             outputDurationMs = outputDurationMs,
@@ -310,7 +316,7 @@ object RecordedAudioVoiceFilter {
         sampleRate: Int,
         chunkMillis: Int,
         classifier: VadSpeechClassifier = VadSpeechClassifier(),
-        emptyClassifier: VadSpeechClassifier? = null,
+        emptyClassifier: EmptyAudioDetector? = null,
         boundsClassifier: VadSpeechClassifier? = null
     ): List<ChunkMark> {
         val chunkBytes = (((sampleRate * chunkMillis) / 1000) * BYTES_PER_SAMPLE)
@@ -322,28 +328,28 @@ object RecordedAudioVoiceFilter {
             val len = minOf(chunkBytes, pcm.size - offset)
             val chunk = pcm.copyOfRange(offset, offset + len)
             val frameMs = durationMs(len, sampleRate).toInt().coerceAtLeast(1)
-            val rawEnergy = measureEnergy(chunk, chunk.size)
             val leveled = leveler.process(chunk)
             val leveledPcm = leveled.leveledPcm
             val chunkProbabilities = probabilities.slice(offset.toLong(), (offset + len).toLong())
             val isSpeech = classifier.accept(chunkProbabilities)
-            val emptySpeech = emptyClassifier?.accept(chunkProbabilities) ?: isSpeech
             boundsClassifier?.accept(chunkProbabilities)
             val energy = measureEnergy(leveledPcm, leveledPcm.size)
+            if (emptyClassifier != null) {
+                val nearSilence = energy.maxAbs <= NEAR_SILENCE_MAX_ABS_THRESHOLD &&
+                    kotlin.math.sqrt(energy.sumSquares / energy.sampleCount) <= NEAR_SILENCE_RMS_THRESHOLD
+                for (frame in chunkProbabilities.frames) {
+                    emptyClassifier.accept(if (nearSilence) 0f else frame.probability)
+                }
+            }
             marks.add(
                 ChunkMark(
                     offset = offset,
                     length = len,
                     durationMs = frameMs,
                     isSpeech = isSpeech,
-                    isEmptyAudioSpeech = emptySpeech,
                     maxAbs = energy.maxAbs,
                     sumSquares = energy.sumSquares,
-                    sampleCount = energy.sampleCount,
-                    rawMaxAbs = rawEnergy.maxAbs,
-                    rawSumSquares = rawEnergy.sumSquares,
-                    rawCountAbove30 = rawEnergy.countAbove30,
-                    rawSampleCount = rawEnergy.sampleCount
+                    sampleCount = energy.sampleCount
                 )
             )
 
@@ -353,12 +359,6 @@ object RecordedAudioVoiceFilter {
     }
 
     private fun measureEnergy(pcm: ByteArray, len: Int): RecordedVoiceFilterEnergy = measureRecordedVoiceFilterEnergy(pcm, len)
-
-    private fun shouldDropAsEmptyAudio(marks: List<ChunkMark>): Boolean {
-        if (marks.isEmpty()) return false
-        if (marks.all { it.isRawBadSourceLevel() }) return true
-        return marks.none { it.shouldKeepAsContent(it.isEmptyAudioSpeech) }
-    }
 
     private fun filterLongNonContentRuns(pcm: ByteArray, marks: List<ChunkMark>): FilterOutput {
         val keep = BooleanArray(marks.size)
@@ -501,10 +501,10 @@ object RecordedAudioVoiceFilter {
             rms <= NEAR_SILENCE_RMS_THRESHOLD
     }
 
-    private fun ChunkMark.shouldKeepAsContent(speech: Boolean = isSpeech): Boolean {
+    private fun ChunkMark.shouldKeepAsContent(): Boolean {
         if (sampleCount <= 0) return false
         return if (isVadDominantVolume()) {
-            speech
+            isSpeech
         } else {
             !isNearSilence()
         }
@@ -518,18 +518,6 @@ object RecordedAudioVoiceFilter {
     }
 
     private fun ChunkMark.rms(): Double = kotlin.math.sqrt(sumSquares / sampleCount)
-
-    private fun ChunkMark.rawRms(): Double = if (rawSampleCount > 0) {
-        kotlin.math.sqrt(rawSumSquares / rawSampleCount)
-    } else {
-        0.0
-    }
-
-    private fun ChunkMark.isRawBadSourceLevel(): Boolean = isLikelyBadSource(
-        maxAbs = rawMaxAbs,
-        rms = rawRms(),
-        countAbove30 = rawCountAbove30
-    )
 
     private fun durationMs(byteCount: Int, sampleRate: Int): Long {
         if (sampleRate <= 0) return 0L

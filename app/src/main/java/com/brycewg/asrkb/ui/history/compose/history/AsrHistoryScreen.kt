@@ -647,7 +647,7 @@ private fun HistoryItemContent(
             text = bodyText,
             uiMode = uiMode,
             emphasized = true,
-            error = record.isUnsuccessful,
+            error = record.isUnsuccessful && !AsrHistoryFailDisplay.isSkipped(record),
             maxLines = 4
         )
         HistoryText(
@@ -857,7 +857,7 @@ private fun HistoryDetailsSections(
                 text = AsrHistoryFailDisplay.format(LocalContext.current, record),
                 uiMode = uiMode,
                 emphasized = true,
-                error = true
+                error = !AsrHistoryFailDisplay.isSkipped(record)
             )
         }
         HistoryTimingTraceSection(record = record, uiMode = uiMode)

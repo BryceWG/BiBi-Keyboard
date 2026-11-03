@@ -7,7 +7,7 @@
     <string name="error_audio_init_failed">録音初期化失敗</string>
     <string name="error_audio_error">録音エラー：%1$s</string>
     <string name="error_audio_empty">空の音声</string>
-    <string name="error_audio_empty_skipped">空の音声として判定されたため、文字起こしをスキップしました</string>
+    <string name="error_audio_empty_skipped">発話が検出されなかったため、文字起こしをスキップしました</string>
     <string name="error_missing_gemini_key">Gemini APIキーが設定されていません</string>
     <string name="error_missing_dashscope_key">DashScope APIキーが設定されていません</string>
     <string name="error_missing_siliconflow_key">SiliconFlow APIキーが設定されていません</string>

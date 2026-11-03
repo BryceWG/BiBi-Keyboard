@@ -477,7 +477,6 @@ internal class RecordingTestViewModel(
                 prefs = prefs,
                 pcm = source,
                 sampleRate = RECORDING_TEST_SAMPLE_RATE,
-                chunkMillis = RECORDING_TEST_CHUNK_MS,
                 probabilities = probabilities
             )
             val filtered = RecordedAudioVoiceFilter.processIfEnabled(

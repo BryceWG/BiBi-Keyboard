@@ -89,7 +89,7 @@ internal class AsrHistoryPanelAdapter(
             )
             tv.setTextColor(
                 when {
-                    overlayError || (overlayText == null && record.isUnsuccessful) -> theme.error
+                    overlayError || (overlayText == null && record.isUnsuccessful && !AsrHistoryFailDisplay.isSkipped(record)) -> theme.error
                     working -> theme.panelSummary
                     else -> theme.keyContent
                 }

@@ -34,6 +34,7 @@ internal class GenericPushFileAsrAdapter(
 ) : StreamingAsrEngine,
     ExternalPcmConsumer,
     VadPcmConsumer,
+    SessionEmptyAudioConsumer,
     CancelableAsrEngine,
     SessionAudioSourceOwner,
     ProgressiveRetryStatusOwner {
@@ -70,6 +71,8 @@ internal class GenericPushFileAsrAdapter(
         get() = currentStore
 
     override fun peekPendingRetryCount(): Int = pendingRetrySegments.get()
+
+    override var emptyAudioHandledBySession: Boolean = false
 
     override val needsVadProbabilities: Boolean
         get() = progressiveResults != null || (applyAudioPreprocess && RecordedAudioVoiceFilter.isEnabled(prefs))
@@ -339,7 +342,8 @@ internal class GenericPushFileAsrAdapter(
             pcm = data,
             sampleRate = 16000,
             chunkMillis = 200,
-            probabilities = probabilities
+            probabilities = probabilities,
+            emptyAudioHandledBySession = emptyAudioHandledBySession
         )
         if (processed.droppedAsEmptyAudio) {
             (progressiveResults ?: listener).onError(

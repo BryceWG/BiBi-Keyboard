@@ -223,7 +223,7 @@ class AsrRecognitionService : RecognitionService() {
      * 将内部错误消息映射到 SpeechRecognizer 标准错误码
      */
     private fun mapToSpeechRecognizerError(message: String): Int {
-        if (AsrErrorMessageMapper.classify(this, message) == AsrFailReasonCodes.EMPTY_RESULT) {
+        if (AsrErrorMessageMapper.classify(this, message) in setOf(AsrFailReasonCodes.EMPTY_RESULT, AsrFailReasonCodes.EMPTY_AUDIO_SKIPPED)) {
             return SpeechRecognizer.ERROR_NO_MATCH
         }
         return when {

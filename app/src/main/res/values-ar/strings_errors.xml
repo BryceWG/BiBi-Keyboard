@@ -6,7 +6,7 @@
     <string name="error_audio_init_failed">فشل تهيئة التسجيل</string>
     <string name="error_audio_error">خطأ في التسجيل: %1$s</string>
     <string name="error_audio_empty">صوت فارغ</string>
-    <string name="error_audio_empty_skipped">تم التعرّف على صوت فارغ؛ تم تخطّي النسخ النصي</string>
+    <string name="error_audio_empty_skipped">لم يُكتشف كلام؛ تم تخطي النسخ النصي</string>
     <string name="error_missing_gemini_key">مفتاح Gemini API غير مضبوط</string>
     <string name="error_missing_dashscope_key">مفتاح DashScope API غير مضبوط</string>
     <string name="error_missing_siliconflow_key">مفتاح SiliconFlow API غير مضبوط</string>

@@ -51,6 +51,8 @@ internal class BackupAsrTerminalCoordinator(
         onFinal(text, source)
     }
 
+    internal fun finishWithError(message: String) = deliverError(message)
+
     private fun deliverError(message: String) {
         if (!delivered.compareAndSet(false, true)) return
         onError(message)

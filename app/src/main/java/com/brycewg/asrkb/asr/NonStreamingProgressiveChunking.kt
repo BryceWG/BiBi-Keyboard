@@ -93,7 +93,8 @@ internal fun createNonStreamingChunkResultCollector(
         context.getString(R.string.error_asr_empty_result),
         context.getString(R.string.error_audio_empty_skipped)
     ),
-    requestDurationCallback = onRequestDuration
+    requestDurationCallback = onRequestDuration,
+    emptyAudioSkippedMessage = context.getString(R.string.error_audio_empty_skipped)
 )
 
 internal class NonStreamingPcmChunker(
@@ -187,7 +188,8 @@ internal class NonStreamingChunkResultCollector(
     private val emptyResultMessage: String,
     private val ignorableEmptyErrors: Set<String>,
     private val requestDurationCallback: ((Long) -> Unit)? = null,
-    private val nanoTime: () -> Long = System::nanoTime
+    private val nanoTime: () -> Long = System::nanoTime,
+    private val emptyAudioSkippedMessage: String? = null
 ) : StreamingAsrEngine.Listener {
     private val lock = Any()
     private val texts = ArrayList<String?>()
@@ -198,6 +200,8 @@ internal class NonStreamingChunkResultCollector(
     private var fatalError: String? = null
     private var stoppedAtNanos = 0L
     private var canceled = false
+    private var skippedEmptyAudio = false
+    private var receivedRecognitionResult = false
 
     val hasFatalError: Boolean
         get() = synchronized(lock) { fatalError != null }
@@ -210,6 +214,8 @@ internal class NonStreamingChunkResultCollector(
         fatalError = null
         stoppedAtNanos = 0L
         canceled = false
+        skippedEmptyAudio = false
+        receivedRecognitionResult = false
         state = State.Active
     }
 
@@ -246,7 +252,16 @@ internal class NonStreamingChunkResultCollector(
             val unresolvedSegmentError = segmentErrors.minByOrNull { it.key }?.value
             val outcome = (fatalError ?: unresolvedSegmentError)?.let(Outcome::Error) ?: run {
                 val text = joinNonStreamingChunkTexts(texts.filterNotNull() + unindexedTexts)
-                if (text.isBlank()) Outcome.Error(emptyResultMessage) else Outcome.Final(text)
+                if (text.isBlank()) {
+                    val message = if (skippedEmptyAudio && !receivedRecognitionResult) {
+                        checkNotNull(emptyAudioSkippedMessage)
+                    } else {
+                        emptyResultMessage
+                    }
+                    Outcome.Error(message)
+                } else {
+                    Outcome.Final(text)
+                }
             }
             stoppedAtNanos to outcome
         }
@@ -291,6 +306,7 @@ internal class NonStreamingChunkResultCollector(
             when (state) {
                 State.Idle -> true
                 State.Active -> {
+                    receivedRecognitionResult = true
                     val trimmed = text.trim()
                     if (trimmed.isNotEmpty()) {
                         val index = activeSegmentIndex
@@ -316,6 +332,11 @@ internal class NonStreamingChunkResultCollector(
             when (state) {
                 State.Idle -> true
                 State.Active -> {
+                    if (message == emptyAudioSkippedMessage) {
+                        skippedEmptyAudio = true
+                    } else if (message in ignorableEmptyErrors) {
+                        receivedRecognitionResult = true
+                    }
                     if (message !in ignorableEmptyErrors) {
                         if (scopeToSegment && activeSegmentIndex >= 0) {
                             segmentErrors[activeSegmentIndex] = message

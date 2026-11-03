@@ -26,7 +26,7 @@ internal class RetryUseCase(
         val isFileEngine = engine is BaseFileAsrEngine
         if (!isFileEngine) return false
 
-        if (AsrErrorMessageMapper.classify(context, message) == AsrFailReasonCodes.EMPTY_RESULT) {
+        if (AsrErrorMessageMapper.classify(context, message) in setOf(AsrFailReasonCodes.EMPTY_RESULT, AsrFailReasonCodes.EMPTY_AUDIO_SKIPPED)) {
             return false
         }
         val msgLower = message.lowercase()

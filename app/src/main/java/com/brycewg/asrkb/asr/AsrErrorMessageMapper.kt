@@ -7,9 +7,9 @@ import java.util.Locale
 internal object AsrErrorMessageMapper {
     fun map(context: Context, raw: String): String? {
         if (raw.isEmpty()) return null
-        if (raw == context.getString(R.string.error_audio_empty_skipped)) return raw
 
         return when (classify(context, raw)) {
+            AsrFailReasonCodes.EMPTY_AUDIO_SKIPPED -> context.getString(R.string.error_audio_empty_skipped)
             AsrFailReasonCodes.EMPTY_RESULT -> context.getString(R.string.asr_error_empty_result)
             AsrFailReasonCodes.AUTH_INVALID -> context.getString(R.string.asr_error_auth_invalid)
             AsrFailReasonCodes.AUTH_FORBIDDEN -> context.getString(R.string.asr_error_auth_forbidden)
@@ -24,6 +24,7 @@ internal object AsrErrorMessageMapper {
 
     fun classify(context: Context, raw: String): String {
         if (raw.isEmpty()) return AsrFailReasonCodes.UNKNOWN
+        if (raw == context.getString(R.string.error_audio_empty_skipped)) return AsrFailReasonCodes.EMPTY_AUDIO_SKIPPED
         val lower = raw.lowercase(Locale.ROOT)
 
         if (isEmptyResult(context, raw) || isEmptyAudio(context, raw)) {

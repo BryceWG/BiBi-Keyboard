@@ -14,6 +14,7 @@ import com.brycewg.asrkb.asr.AsrRecordedAudioRouteResolver
 internal object AsrHistoryRerunErrorMessages {
     fun format(context: Context, code: String): String {
         val localized = LocaleHelper.wrap(context)
+        if (code == AsrFailReasonCodes.EMPTY_AUDIO_SKIPPED) return localized.getString(R.string.error_audio_empty_skipped)
         return localized.getString(R.string.history_rerun_error, reasonText(localized, code))
     }
 

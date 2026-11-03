@@ -127,3 +127,69 @@ internal class VadSpeechClassifier(tuning: VadTuning = VadTuning.SilenceFilter) 
         return start until end
     }
 }
+
+/** 强帧累计、弱帧保持、连续静帧清零；有语音结论一旦成立就不撤销。 */
+internal class EmptyAudioDetector(private val tuning: EmptyAudioTuning) {
+    private var strongMs = 0
+    private var silenceMs = 0
+    var hasSpeech: Boolean = false
+        private set
+
+    fun accept(probability: Float) {
+        if (hasSpeech) return
+        when {
+            probability >= tuning.threshold -> {
+                strongMs += VadEndpoint.FRAME_MS
+                silenceMs = 0
+            }
+            probability >= tuning.weakThreshold -> silenceMs = 0
+            else -> {
+                silenceMs += VadEndpoint.FRAME_MS
+                if (silenceMs > tuning.maxSilenceMs) strongMs = 0
+            }
+        }
+        if (strongMs >= tuning.minSpeechMs) hasSpeech = true
+    }
+}
+
+/** 主备会话只判空一次；确认人声前暂存文件转录音频，原生流式仍实时投喂。 */
+internal class SessionEmptyAudioGate(prefs: com.brycewg.asrkb.store.Prefs) {
+    private val enabled = prefs.autoCancelEmptyAudioInputEnabled
+    private val detector = EmptyAudioDetector(EmptyAudioTuning.forStopSensitivity(prefs.autoStopSilenceSensitivity))
+    private val pending = java.io.ByteArrayOutputStream()
+    private val energyFrame = ByteArray(512 * 2)
+    private var energyBytes = 0
+    private val leveler = VadInputLevelerBranch(sampleRate = 16_000)
+    var confirmed: Boolean = !enabled
+        private set
+
+    val shouldSkip: Boolean get() = enabled && !confirmed
+
+    fun accept(pcm: ByteArray, probabilities: VadProbabilities): ByteArray? {
+        if (confirmed) return pcm
+        pending.write(pcm)
+        var offset = 0
+        val frames = probabilities.frames.iterator()
+        while (offset < pcm.size) {
+            val count = minOf(energyFrame.size - energyBytes, pcm.size - offset)
+            pcm.copyInto(energyFrame, energyBytes, offset, offset + count)
+            energyBytes += count
+            offset += count
+            if (energyBytes == energyFrame.size) {
+                val leveled = leveler.process(energyFrame).leveledPcm
+                val probability = frames.next().probability
+                detector.accept(if (RecordedAudioVoiceFilter.isNearSilencePcm(leveled)) 0f else probability)
+                energyBytes = 0
+            }
+        }
+        if (!detector.hasSpeech) return null
+        confirmed = true
+        leveler.finishDebugSession("speech_confirmed")
+        return pending.toByteArray().also { pending.reset() }
+    }
+
+    fun clear() {
+        pending.reset()
+        leveler.finishDebugSession("clear")
+    }
+}

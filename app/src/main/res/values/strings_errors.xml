@@ -6,7 +6,7 @@
     <string name="error_audio_init_failed">Recording initialization failed</string>
     <string name="error_audio_error">Recording error: %1$s</string>
     <string name="error_audio_empty">Empty audio</string>
-    <string name="error_audio_empty_skipped">Recognized as empty audio; transcription skipped</string>
+    <string name="error_audio_empty_skipped">No speech detected; transcription skipped</string>
     <string name="error_missing_gemini_key">Gemini API Key not set</string>
     <string name="error_missing_dashscope_key">DashScope API Key not set</string>
     <string name="error_missing_siliconflow_key">SiliconFlow API Key not set</string>

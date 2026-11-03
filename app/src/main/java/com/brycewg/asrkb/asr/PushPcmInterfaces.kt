@@ -56,3 +56,8 @@ internal fun ExternalPcmConsumer.appendPcmWithVad(
         appendPcm(pcm, sampleRate, channels)
     }
 }
+
+/** 主备外层已经决定整轮是否跳过；子引擎只做裁剪/降噪，不再逐段判空。 */
+internal interface SessionEmptyAudioConsumer {
+    var emptyAudioHandledBySession: Boolean
+}

@@ -28,7 +28,9 @@ abstract class PushPcmPseudoStreamAsrEngine(
     protected val onRequestDuration: ((Long) -> Unit)? = null
 ) : StreamingAsrEngine,
     ExternalPcmConsumer,
-    VadPcmConsumer {
+    VadPcmConsumer,
+    SessionEmptyAudioConsumer,
+    CancelableAsrEngine {
 
     companion object {
         private const val TAG = "PushPcmPseudoStream"
@@ -47,6 +49,8 @@ abstract class PushPcmPseudoStreamAsrEngine(
     private val segmentBuffer = ByteArrayOutputStream()
     private var vadInputLeveler = VadInputLevelerBranch()
     private var segmentElapsedMs: Long = 0L
+
+    override var emptyAudioHandledBySession: Boolean = false
 
     override val needsVadProbabilities: Boolean
         get() = RecordedAudioVoiceFilter.isEnabled(prefs)
@@ -83,6 +87,15 @@ abstract class PushPcmPseudoStreamAsrEngine(
         }
         vadInputLeveler.finishDebugSession("stop")
         finalizeOnce()
+    }
+
+    override fun cancel() {
+        running.set(false)
+        finalized.set(true)
+        probabilityBuffer.release()
+        sessionBuffer.reset()
+        segmentBuffer.reset()
+        vadInputLeveler.finishDebugSession("cancel")
     }
 
     override fun appendPcm(pcm: ByteArray, sampleRate: Int, channels: Int) = appendFrame(pcm, sampleRate, channels, null)
@@ -178,7 +191,8 @@ abstract class PushPcmPseudoStreamAsrEngine(
                     pcm = fullPcm,
                     sampleRate = sampleRate,
                     chunkMillis = 200,
-                    probabilities = probabilities
+                    probabilities = probabilities,
+                    emptyAudioHandledBySession = emptyAudioHandledBySession
                 )
                 if (processed.droppedAsEmptyAudio) {
                     try {
