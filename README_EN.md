@@ -102,6 +102,8 @@ English | [简体中文](README.md)
 The Pro version offers more advanced features and a better experience (hotwords, Simplified/Traditional conversion, continuous dictation, WebDAV auto-backup, and more).
 You can learn more in **About → Learn about Pro**, or in the [Pro Features](https://bibidocs.brycewg.com/en/pro/features.html) documentation. We welcome your feedback to help us polish a better product!
 
+[Explanation regarding the plan to gradually release subsequent Pro version features](https://github.com/BryceWG/BiBi-Keyboard/issues/132#issuecomment-6263138716)
+
 If you are interested in BiBi Keyboard, join our [Telegram Group](https://t.me/+UGFobXqi2bYzMDFl) for more information.
 
 ## 🚀 Quick Start

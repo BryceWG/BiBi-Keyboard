@@ -1,5 +1,26 @@
 # Changelog
 
+## v4.6.0 (2026-11-01)
+
+### New Features
+
+- **Translation Function:** Voice input now supports translation into a specified language. Supports Foxlet multilingual offline translation and online translation from Microsoft, Tencent, Volcengine, Bilibili, and Google. Offline language packs can be downloaded and managed.
+- **Keyboard Translation Switch:** Added a customizable extended key for the "Translation Switch" and a one-time translation button in the customizable keyboard "Recording" layout.
+- **Polishing Shortcut Button:** Added one-time "Skip Polishing" or "Specify Prompt" polishing buttons to the customizable keyboard "Recording" layout.
+- **GigaAm Local ASR:** Added GigaAm Russian offline speech recognition provider.
+
+### Improvements and Optimizations
+
+- **Input Method Text Delivery:** Unified the dictation result writing and retry process, improving the stability of streaming preview and final text delivery.
+- **VAD Effect Optimization:** Updated to the Silero V6 model, optimized the effect, reconstructed the pipeline, and improved the accuracy and efficiency of the recording stop, empty audio detection, [Pro] continuous talk mode, etc.
+- **APK Volume Optimization:** Compressed native libraries, removed unused resources, and reduced the APK size.
+
+### Bug Fixes
+
+- **Input View Display:** Fixed an issue where the keyboard was not displayed on a few devices.
+
+---
+
 ## v4.5.3 (2026-10-26)
 
 ### New Features

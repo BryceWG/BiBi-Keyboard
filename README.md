@@ -102,6 +102,8 @@
 Pro 版提供更多高级功能和更优质的使用体验（热词、简繁转换、畅说模式、WebDAV 自动备份等）。
 欢迎在应用「关于 → 了解 Pro」或 [Pro 功能](https://bibidocs.brycewg.com/pro/features.html) 文档中了解更多内容。我们非常欢迎你的体验反馈，帮助我们打磨出更好的产品！
 
+[关于 Pro 版功能后续计划逐步下放的说明](https://github.com/BryceWG/BiBi-Keyboard/issues/132#issuecomment-6263138716)
+
 如果你对「说点啥」感兴趣，也加入我们的 [Telegram 群组](https://t.me/+UGFobXqi2bYzMDFl)了解更多信息
 
 ## 🚀 快速开始
