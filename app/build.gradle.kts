@@ -99,6 +99,8 @@ android {
     }
     packaging {
         jniLibs {
+            // Compress native libraries to reduce the standalone APK download size.
+            useLegacyPackaging = true
             excludes += listOf(
                 "**/libonnxruntime4j_jni.so",
                 "**/libsherpa-onnx-c-api.so",
@@ -109,7 +111,9 @@ android {
             excludes += listOf(
                 "META-INF/services/lombok.*",
                 "README.md",
-                "META-INF/README.md"
+                "META-INF/README.md",
+                // DashScope local tokenization is not used by the ASR integrations.
+                "qwen.tiktoken"
             )
         }
     }
