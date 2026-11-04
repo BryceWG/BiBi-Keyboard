@@ -521,7 +521,7 @@ internal class RecordingRibbonOverlayView @JvmOverloads constructor(
                     (wave * maxAmp * ribbon.ampScale * env * amp * (1f - calm)).toFloat()
                 val half = (
                     ribbon.thickness * waveHeight * env * (THICKNESS_FLOOR + THICKNESS_SPAN * amp) * pulseCalm
-                    ).toFloat().coerceAtLeast(MIN_HALF_THICKNESS_PX)
+                    ).coerceAtLeast(MIN_HALF_THICKNESS_PX)
                 val yMorph = verticalMorph(morph, u, shapeBulge)
                 val angleTop = PI * (1.0 - u) + drift
                 val angleBot = -PI * (1.0 - u) + drift

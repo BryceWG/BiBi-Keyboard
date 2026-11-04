@@ -156,6 +156,7 @@ internal fun extractCohereError(body: String): String {
         when (val error = json.opt("error")) {
             is JSONObject -> error.optString("message")
             is String -> error
+            null -> json.optString("message")
             else -> json.optString("message")
         }.trim().ifBlank { body.take(200).trim() }
     }.getOrElse { body.take(200).trim() }

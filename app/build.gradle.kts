@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.3.21"
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.21"
 }
 
 val packagedAbiFilters = (findProperty("abiFilters") as String?)
@@ -14,10 +14,14 @@ val packagedAbiFilters = (findProperty("abiFilters") as String?)
 configurations.matching { it.name == "composeMappingProducerClasspath" }.configureEach {
     resolutionStrategy.eachDependency {
         if (requested.group == "org.jetbrains.kotlin" && requested.name == "compose-group-mapping") {
-            useVersion("2.3.21")
+            useVersion("2.4.21")
             because("AGP 9.2.1 requests 2.2.10, but compose-group-mapping is published from Kotlin 2.3.0.")
         }
     }
+}
+
+configurations.configureEach {
+    resolutionStrategy.force("androidx.compose.material3:material3-window-size-class:1.4.0")
 }
 
 android {
@@ -165,7 +169,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.2.1")
     implementation("androidx.activity:activity-ktx:1.13.0")
     implementation("androidx.activity:activity-compose:1.13.0")
-    implementation(platform("androidx.compose:compose-bom:2026.05.01"))
+    implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material:material-icons-extended")
@@ -178,9 +182,9 @@ dependencies {
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("com.alibaba:dashscope-sdk-java:2.23.1")
-    implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.1")
-    implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.1")
-    implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.1")
+    implementation("top.yukonga.miuix.kmp:miuix-ui-android:0.9.4")
+    implementation("top.yukonga.miuix.kmp:miuix-icons-android:0.9.4")
+    implementation("top.yukonga.miuix.kmp:miuix-preference-android:0.9.4")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

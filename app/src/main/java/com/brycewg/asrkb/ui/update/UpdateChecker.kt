@@ -181,7 +181,6 @@ class UpdateChecker(private val context: Context) {
             }
 
             val body = response.body.string()
-                ?: throw Exception("Empty response body")
 
             val json = JSONObject(body)
 

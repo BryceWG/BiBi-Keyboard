@@ -170,7 +170,7 @@ private fun MaterialMessageDialog(
 ) {
     val alpha by animateFloatAsState(
         targetValue = if (show) 1f else 0f,
-        animationSpec = tween(SETTINGS_DIALOG_EXIT_MILLIS.toInt()),
+        animationSpec = tween(SETTINGS_DIALOG_EXIT_MILLIS),
         label = "MaterialMessageDialogAlpha"
     )
     MaterialSettingsAlertDialog(
@@ -209,7 +209,7 @@ private fun MaterialLongTextDialog(
 ) {
     val alpha by animateFloatAsState(
         targetValue = if (show) 1f else 0f,
-        animationSpec = tween(SETTINGS_DIALOG_EXIT_MILLIS.toInt()),
+        animationSpec = tween(SETTINGS_DIALOG_EXIT_MILLIS),
         label = "MaterialLongTextDialogAlpha"
     )
     MaterialSettingsAlertDialog(

@@ -160,7 +160,9 @@ class ExternalSpeechService : Service() {
                 // ================= 推送 PCM 模式 =================
                 TRANSACTION_START_PCM_SESSION -> {
                     data.enforceInterface(DESCRIPTOR_SVC)
-                    if (data.readInt() != 0) SpeechConfig.CREATOR.createFromParcel(data) else null
+                    if (data.readInt() != 0) {
+                        SpeechConfig.CREATOR.createFromParcel(data)
+                    }
                     val cbBinder = data.readStrongBinder()
                     val cb = CallbackProxy(cbBinder)
 

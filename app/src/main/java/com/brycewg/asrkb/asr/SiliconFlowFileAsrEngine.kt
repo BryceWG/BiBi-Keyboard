@@ -370,6 +370,7 @@ class SiliconFlowFileAsrEngine(
             val msg = c0.optJSONObject("message") ?: return ""
             val contentAny = msg.opt("content")
             when (contentAny) {
+                null -> ""
                 is String -> contentAny.trim()
                 is org.json.JSONArray -> {
                     val sb = StringBuilder()

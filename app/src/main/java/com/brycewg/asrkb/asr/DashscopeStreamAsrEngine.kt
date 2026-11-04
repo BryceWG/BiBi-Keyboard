@@ -754,7 +754,7 @@ class DashscopeStreamAsrEngine(
         if (!useRecognitionProtocol) {
             // realtime 路径不应持有 Recognition；防御性关闭
             try {
-                rec.getDuplexApi()?.close(1000, reason)
+                DashscopeRecognitionTransport.close(rec, reason)
             } catch (t: Throwable) {
                 Log.w(TAG, "unexpected recognition close failed", t)
             }

@@ -145,6 +145,7 @@ class ElevenLabsFileAsrEngine(
                                 loc.optString(it)
                             }
                             is String -> loc
+                            null -> ""
                             else -> ""
                         }
                         msgs.add(if (locStr.isNotBlank()) "$locStr: $msg" else msg)

@@ -89,7 +89,7 @@ internal class JevClassifier(
                         return
                     }
                     response.use {
-                        val body = it.body?.string().orEmpty()
+                        val body = it.body.string()
                         val responseJson = if (it.isSuccessful) {
                             runCatching { JSONObject(body) }.getOrNull()
                         } else {

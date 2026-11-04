@@ -97,6 +97,7 @@ class OpenAiFileAsrEngine(
                 if (choices.length() == 0) return ""
                 val message = choices.optJSONObject(0)?.optJSONObject("message") ?: return ""
                 when (val content = message.opt("content")) {
+                    null -> ""
                     is String -> content.trim()
                     is JSONArray -> {
                         val text = StringBuilder()

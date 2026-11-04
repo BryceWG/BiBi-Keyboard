@@ -79,7 +79,7 @@ internal class TencentFileAsrEngine(
         val t0 = System.nanoTime()
         try {
             http.newCall(request).execute().use { r ->
-                val bodyStr = r.body?.string().orEmpty()
+                val bodyStr = r.body.string()
                 if (!r.isSuccessful) {
                     val detail = formatHttpDetail(r.message, extractApiError(bodyStr) ?: bodyStr.take(200).trim())
                     listener.onError(

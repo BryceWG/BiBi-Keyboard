@@ -131,7 +131,7 @@ internal object DashscopeRecognitionConnectionCache {
 
     private fun closeQuietly(recognition: Recognition, reason: String) {
         try {
-            recognition.getDuplexApi()?.close(1000, reason)
+            DashscopeRecognitionTransport.close(recognition, reason)
         } catch (t: Throwable) {
             Log.w(TAG, "duplex close failed: $reason", t)
         }

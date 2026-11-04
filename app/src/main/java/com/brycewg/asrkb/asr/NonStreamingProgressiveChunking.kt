@@ -220,7 +220,7 @@ internal class NonStreamingChunkResultCollector(
     }
 
     /** 处理循环在识别某段前调用；与该段识别回调同属处理协程，单写者。 */
-    fun beginSegment(index: Int) = synchronized(lock) {
+    fun beginSegment(index: Int): Unit = synchronized(lock) {
         if (state != State.Active || index < 0) return
         activeSegmentIndex = index
         while (texts.size <= index) texts.add(null)
@@ -232,7 +232,7 @@ internal class NonStreamingChunkResultCollector(
     }
 
     /** 段级重试耗尽（或不可重试）时升级为会话级致命错误。 */
-    fun failSegment(index: Int) = synchronized(lock) {
+    fun failSegment(index: Int): Unit = synchronized(lock) {
         if (state != State.Active || index < 0) return
         val message = segmentErrors[index] ?: return
         if (fatalError == null) fatalError = message

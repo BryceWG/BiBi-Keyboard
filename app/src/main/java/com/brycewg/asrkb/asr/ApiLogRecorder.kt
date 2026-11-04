@@ -94,7 +94,7 @@ class ApiLogInterceptor : Interceptor {
      * `asr_http_end` 只覆盖到响应头到达，body 是流式读取的；两者的差值即响应体下载与读取成本。
      */
     private fun probeBodyRead(response: Response, started: Long): Response {
-        val body = response.body ?: return response
+        val body = response.body
         val probedSource = object : ForwardingSource(body.source()) {
             private var reported = false
 

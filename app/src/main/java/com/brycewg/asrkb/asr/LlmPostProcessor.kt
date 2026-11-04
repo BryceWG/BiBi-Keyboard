@@ -921,6 +921,7 @@ class LlmPostProcessor(private val client: OkHttpClient? = null) {
     }
 
     private fun extractDeltaContent(delta: JSONObject): String? = when (val content = delta.opt("content")) {
+        null -> null
         is String -> content.takeIf { it.isNotEmpty() }
         is JSONArray -> buildString {
             for (i in 0 until content.length()) {

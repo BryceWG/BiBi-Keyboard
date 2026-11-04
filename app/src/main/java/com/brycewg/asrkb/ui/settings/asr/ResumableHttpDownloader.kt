@@ -112,7 +112,7 @@ internal object ResumableHttpDownloader {
             .apply {
                 if (useRange) {
                     header("Range", "bytes=$existing-")
-                    header("If-Range", resumeValidator!!)
+                    header("If-Range", resumeValidator)
                 }
             }
             .build()
