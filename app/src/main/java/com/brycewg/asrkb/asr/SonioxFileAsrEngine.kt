@@ -33,7 +33,7 @@ class SonioxFileAsrEngine(
 
     companion object {
         private const val TAG = "SonioxFileAsrEngine"
-        private const val MODEL = "stt-async-v5"
+        private const val MODEL = "stt-async-v6"
     }
 
     private val http: OkHttpClient = httpClient ?: AsrHttpClientProvider.newBuilder()

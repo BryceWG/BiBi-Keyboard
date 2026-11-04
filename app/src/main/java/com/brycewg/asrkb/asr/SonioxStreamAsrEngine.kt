@@ -44,7 +44,7 @@ class SonioxStreamAsrEngine(
 
     companion object {
         private const val TAG = "SonioxStreamAsrEngine"
-        private const val MODEL = "stt-rt-v5"
+        private const val MODEL = "stt-rt-v6"
     }
 
     private val http: OkHttpClient = OkHttpClient.Builder()
