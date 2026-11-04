@@ -8,7 +8,7 @@ package com.brycewg.asrkb.ui.settings.asr
 import android.content.Intent
 import android.os.Bundle
 import com.brycewg.asrkb.ui.BaseActivity
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import com.brycewg.asrkb.ui.settings.compose.core.BibiSettingsRoute
 
 class AsrRecognitionSettingsActivity : BaseActivity() {
@@ -20,8 +20,8 @@ class AsrRecognitionSettingsActivity : BaseActivity() {
 
     private fun openComposeAsrSettings() {
         startActivity(
-            Intent(this, SettingsActivity::class.java)
-                .putExtra(SettingsActivity.EXTRA_INITIAL_ROUTE, BibiSettingsRoute.Asr.id)
+            Intent(this, SettingsHostActivity::class.java)
+                .putExtra(SettingsHostActivity.EXTRA_INITIAL_ROUTE, BibiSettingsRoute.Asr.id)
         )
     }
 }

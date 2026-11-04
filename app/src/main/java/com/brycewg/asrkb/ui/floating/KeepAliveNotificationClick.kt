@@ -11,7 +11,7 @@ import android.util.Log
 import androidx.annotation.StringRes
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import com.brycewg.asrkb.ui.settings.compose.core.BibiSettingsRoute
 
 internal object KeepAliveNotificationClick {
@@ -51,10 +51,10 @@ internal object KeepAliveNotificationClick {
             Log.w(TAG, "Failed to resolve notification click route", t)
             defaultRoute
         }
-        return Intent(context, SettingsActivity::class.java).apply {
+        return Intent(context, SettingsHostActivity::class.java).apply {
             // singleTop 根 Activity 配 CLEAR_TOP：复用已有设置页，而不是再叠一个只有首页的新实例。
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            putExtra(SettingsActivity.EXTRA_INITIAL_ROUTE, route.id)
+            putExtra(SettingsHostActivity.EXTRA_INITIAL_ROUTE, route.id)
         }
     }
 }

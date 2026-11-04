@@ -18,7 +18,7 @@ import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.ui.AsrAccessibilityService
 import com.brycewg.asrkb.ui.AsrVendorUi
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import com.brycewg.asrkb.ui.floatingball.AsrSessionManager
 import com.brycewg.asrkb.ui.floatingball.FloatingBallHoldAccessibilityPromptTracker
 import com.brycewg.asrkb.ui.floatingball.FloatingBallHoldPressAction
@@ -1464,7 +1464,7 @@ internal class FloatingAsrInteractionController(
 
     private fun openSettingsFromMenu() {
         try {
-            val intent = Intent(context, SettingsActivity::class.java).apply {
+            val intent = Intent(context, SettingsHostActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
@@ -1652,9 +1652,9 @@ internal class FloatingAsrInteractionController(
                 context.startActivity(intent)
                 return
             }
-            val intent = Intent(context, SettingsActivity::class.java).apply {
+            val intent = Intent(context, SettingsHostActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                putExtra(SettingsActivity.EXTRA_AUTO_SHOW_IME_PICKER, true)
+                putExtra(SettingsHostActivity.EXTRA_AUTO_SHOW_IME_PICKER, true)
             }
             context.startActivity(intent)
         } catch (e: Throwable) {

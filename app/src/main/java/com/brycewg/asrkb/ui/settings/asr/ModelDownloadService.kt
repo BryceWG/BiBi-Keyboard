@@ -17,7 +17,7 @@ import com.brycewg.asrkb.asr.LocalModelSpecs
 import com.brycewg.asrkb.asr.findGigaAmModelDir
 import com.brycewg.asrkb.asr.requireModelFilesCached
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.ConcurrentHashMap
@@ -1576,7 +1576,7 @@ class NotificationHandler(
         val pi = PendingIntent.getActivity(
             context,
             key.hashCode() + 1,
-            Intent(context, SettingsActivity::class.java),
+            Intent(context, SettingsHostActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         builder.setContentIntent(pi)

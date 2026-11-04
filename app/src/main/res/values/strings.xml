@@ -74,6 +74,17 @@
   <string name="settings_theme_mode_system">Follow system</string>
   <string name="settings_theme_mode_light">Light</string>
   <string name="settings_theme_mode_dark">Dark</string>
+  <string name="settings_app_icon_color">App icon background</string>
+  <string name="settings_app_icon_color_summary">Select a color that does not follow the system dark mode</string>
+  <string name="settings_app_icon_color_system">System</string>
+  <string name="settings_app_icon_color_blue">Blue</string>
+  <string name="settings_app_icon_color_green">Green</string>
+  <string name="settings_app_icon_color_orange">Orange</string>
+  <string name="settings_app_icon_color_red">Red</string>
+  <string name="settings_app_icon_color_purple">Purple</string>
+  <string name="settings_app_icon_color_slate">Slate</string>
+  <string name="settings_app_icon_color_white">White</string>
+  <string name="settings_app_icon_color_black">Black (AMOLED)</string>
   <string name="home_summary_enabled">Enabled</string>
   <string name="home_summary_disabled">Disabled</string>
   <string name="home_summary_more_input_disabled">Not enabled</string>

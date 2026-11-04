@@ -10,7 +10,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.brycewg.asrkb"
-            android:targetClass="com.brycewg.asrkb.ui.SettingsActivity">
+            android:targetClass="com.brycewg.asrkb.ui.SettingsHostActivity">
             <extra
                 android:name="extra_initial_settings_route"
                 android:value="asr" />
@@ -26,7 +26,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.brycewg.asrkb"
-            android:targetClass="com.brycewg.asrkb.ui.SettingsActivity">
+            android:targetClass="com.brycewg.asrkb.ui.SettingsHostActivity">
             <extra
                 android:name="extra_initial_settings_route"
                 android:value="ai" />
@@ -42,7 +42,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="com.brycewg.asrkb"
-            android:targetClass="com.brycewg.asrkb.ui.SettingsActivity">
+            android:targetClass="com.brycewg.asrkb.ui.SettingsHostActivity">
             <extra
                 android:name="extra_initial_settings_route"
                 android:value="history" />

@@ -74,6 +74,17 @@
   <string name="settings_theme_mode_system">اتباع النظام</string>
   <string name="settings_theme_mode_light">فاتح</string>
   <string name="settings_theme_mode_dark">داكن</string>
+  <string name="settings_app_icon_color">خلفية أيقونة التطبيق</string>
+  <string name="settings_app_icon_color_summary">اللون المحدد لا يتبع الوضع الداكن للنظام</string>
+  <string name="settings_app_icon_color_system">اتّباع النظام</string>
+  <string name="settings_app_icon_color_blue">أزرق</string>
+  <string name="settings_app_icon_color_green">أخضر</string>
+  <string name="settings_app_icon_color_orange">برتقالي</string>
+  <string name="settings_app_icon_color_red">أحمر</string>
+  <string name="settings_app_icon_color_purple">بنفسجي</string>
+  <string name="settings_app_icon_color_slate">رمادي داكن</string>
+  <string name="settings_app_icon_color_white">أبيض</string>
+  <string name="settings_app_icon_color_black">أسود (AMOLED)</string>
   <string name="home_summary_enabled">مفعّل</string>
   <string name="home_summary_disabled">معطّل</string>
   <string name="home_summary_more_input_disabled">غير مفعّل</string>

@@ -25,7 +25,7 @@ import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.BaseActivity
 import com.brycewg.asrkb.ui.DownloadSourceOption
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
 import com.brycewg.asrkb.ui.settings.compose.core.BibiSettingsRoute
@@ -341,8 +341,8 @@ class OnboardingGuideActivity : BaseActivity() {
     private fun showProPromo() {
         try {
             startActivity(
-                Intent(this, SettingsActivity::class.java).putExtra(
-                    SettingsActivity.EXTRA_INITIAL_ROUTE,
+                Intent(this, SettingsHostActivity::class.java).putExtra(
+                    SettingsHostActivity.EXTRA_INITIAL_ROUTE,
                     BibiSettingsRoute.Paywall.id
                 )
             )

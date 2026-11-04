@@ -58,18 +58,163 @@
         tools:targetApi="tiramisu">
 
         <activity
-            android:name=".ui.SettingsActivity"
+            android:name=".ui.SettingsHostActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- 默认 alias 保留旧组件名以兼容图标包；设置宿主始终启用。见 AppIconColor。 -->
+        <activity-alias
+            android:name=".ui.SettingsActivity"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:label="@string/app_name"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconBlue"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_blue"
+            android:roundIcon="@mipmap/ic_launcher_bg_blue"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
-        </activity>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconGreen"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_green"
+            android:roundIcon="@mipmap/ic_launcher_bg_green"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconOrange"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_orange"
+            android:roundIcon="@mipmap/ic_launcher_bg_orange"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconRed"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_red"
+            android:roundIcon="@mipmap/ic_launcher_bg_red"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconPurple"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_purple"
+            android:roundIcon="@mipmap/ic_launcher_bg_purple"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconSlate"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_slate"
+            android:roundIcon="@mipmap/ic_launcher_bg_slate"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconWhite"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_white"
+            android:roundIcon="@mipmap/ic_launcher_bg_white"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
+
+        <activity-alias
+            android:name=".ui.icon.IconBlack"
+            android:targetActivity=".ui.SettingsHostActivity"
+            android:icon="@mipmap/ic_launcher_bg_black"
+            android:roundIcon="@mipmap/ic_launcher_bg_black"
+            android:label="@string/app_name"
+            android:enabled="false"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <activity
             android:name=".ui.ClipboardFileShareActivity"

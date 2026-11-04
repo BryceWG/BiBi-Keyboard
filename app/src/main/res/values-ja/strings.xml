@@ -73,6 +73,17 @@
   <string name="settings_theme_mode_system">システムに従う</string>
   <string name="settings_theme_mode_light">ライト</string>
   <string name="settings_theme_mode_dark">ダーク</string>
+  <string name="settings_app_icon_color">アプリアイコンの背景色</string>
+  <string name="settings_app_icon_color_summary">選択した色はシステムのダークモードに追従しません。</string>
+  <string name="settings_app_icon_color_system">システムに従う</string>
+  <string name="settings_app_icon_color_blue">ブルー</string>
+  <string name="settings_app_icon_color_green">グリーン</string>
+  <string name="settings_app_icon_color_orange">オレンジ</string>
+  <string name="settings_app_icon_color_red">レッド</string>
+  <string name="settings_app_icon_color_purple">パープル</string>
+  <string name="settings_app_icon_color_slate">スレート</string>
+  <string name="settings_app_icon_color_white">ホワイト</string>
+  <string name="settings_app_icon_color_black">ブラック（AMOLED）</string>
   <string name="home_summary_enabled">有効</string>
   <string name="home_summary_disabled">無効</string>
   <string name="home_summary_more_input_disabled">未有効</string>

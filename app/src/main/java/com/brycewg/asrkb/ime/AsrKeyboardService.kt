@@ -35,7 +35,7 @@ import com.brycewg.asrkb.clipboard.ClipboardSyncRuntimeService
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
 import com.brycewg.asrkb.ui.AsrVendorUi
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import com.brycewg.asrkb.util.HapticFeedbackHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -891,7 +891,7 @@ class AsrKeyboardService :
     }
 
     private fun openSettings() {
-        val intent = Intent(this, SettingsActivity::class.java)
+        val intent = Intent(this, SettingsHostActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
     }

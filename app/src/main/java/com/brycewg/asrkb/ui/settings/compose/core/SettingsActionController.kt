@@ -15,12 +15,12 @@ import com.brycewg.asrkb.asr.AsrVendor
 import com.brycewg.asrkb.asr.LlmVendor
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 import com.brycewg.asrkb.ui.settings.search.SettingsSearchEntry
 import com.brycewg.asrkb.ui.setup.OnboardingGuideActivity
 
 class SettingsActionController(
-    private val activity: SettingsActivity
+    private val activity: SettingsHostActivity
 ) {
     private val prefs = Prefs(activity)
 
@@ -168,7 +168,7 @@ class SettingsActionController(
         )
     }
 
-    private fun SettingsActivity.readAssetFile(fileName: String): String = try {
+    private fun SettingsHostActivity.readAssetFile(fileName: String): String = try {
         assets.open(fileName).bufferedReader().use { it.readText() }
     } catch (e: Throwable) {
         Log.e(TAG, "Failed to read asset file: $fileName", e)

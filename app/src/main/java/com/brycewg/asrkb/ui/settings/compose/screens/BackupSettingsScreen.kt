@@ -32,6 +32,7 @@ import com.brycewg.asrkb.clipboard.ClipboardSyncRuntimeService
 import com.brycewg.asrkb.ime.AsrKeyboardService
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.AsrAccessibilityService
+import com.brycewg.asrkb.ui.icon.applyAppIconColor
 import com.brycewg.asrkb.ui.settings.backup.WebDavBackupHelper
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsLazyColumn
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
@@ -291,7 +292,7 @@ private suspend fun importSettings(
         }
     }
     return if (imported.getOrDefault(false)) {
-        context.refreshImeUi()
+        context.refreshImeUi(prefs)
         Log.d(TAG, "Settings imported successfully from $uri")
         BackupOperationResult(
             success = true,
@@ -369,7 +370,7 @@ private suspend fun downloadFromWebdav(
     }
 
     return if (outcome.imported) {
-        context.refreshImeUi()
+        context.refreshImeUi(prefs)
         BackupOperationResult(
             success = true,
             message = context.getString(R.string.toast_webdav_download_success)
@@ -383,7 +384,8 @@ private suspend fun downloadFromWebdav(
     }
 }
 
-private fun Context.refreshImeUi() {
+private fun Context.refreshImeUi(prefs: Prefs) {
+    applyAppIconColor(this, prefs.appIconColor)
     try {
         ClipboardSyncRuntimeService.notifyConfigChanged(this)
     } catch (e: Exception) {

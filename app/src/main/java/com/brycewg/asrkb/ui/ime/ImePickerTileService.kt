@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
-import com.brycewg.asrkb.ui.SettingsActivity
+import com.brycewg.asrkb.ui.SettingsHostActivity
 
 /**
  * 快捷设置磁贴：点击后进入设置页，并在前台窗口中弹出系统输入法选择器。
@@ -23,12 +23,12 @@ class ImePickerTileService : TileService() {
     override fun onClick() {
         super.onClick()
         unlockAndRun {
-            val intent = Intent(this, SettingsActivity::class.java)
+            val intent = Intent(this, SettingsHostActivity::class.java)
                 .addFlags(
                     Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or
                         Intent.FLAG_ACTIVITY_SINGLE_TOP
                 )
-                .putExtra(SettingsActivity.EXTRA_SHOW_IME_PICKER, true)
+                .putExtra(SettingsHostActivity.EXTRA_SHOW_IME_PICKER, true)
 
             if (Build.VERSION.SDK_INT >= 34) {
                 val pendingIntent = PendingIntent.getActivity(

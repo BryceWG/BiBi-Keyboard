@@ -3,6 +3,18 @@
     <!-- 图标颜色 (日间默认) -->
     <color name="ic_launcher_background_color">#FCFCFC</color>
     <color name="ic_launcher_foreground_color">#777777</color>
+    <!-- 应用图标预设背景色（用户手动选择，不随深色模式变化） -->
+    <color name="ic_launcher_bg_blue">#3B82F6</color>
+    <color name="ic_launcher_bg_green">#10B981</color>
+    <color name="ic_launcher_bg_orange">#F59E0B</color>
+    <color name="ic_launcher_bg_red">#EF4444</color>
+    <color name="ic_launcher_bg_purple">#8B5CF6</color>
+    <color name="ic_launcher_bg_slate">#334155</color>
+    <color name="ic_launcher_bg_white">#FFFFFF</color>
+    <color name="ic_launcher_bg_black">#000000</color>
+    <!-- 预设背景色上的前景色：彩色/黑底用白色，白底用固定深色 -->
+    <color name="ic_launcher_foreground_on_color">#FFFFFF</color>
+    <color name="ic_launcher_foreground_on_light">#777777</color>
 
     <!-- 启动画面颜色（浅色模式：白色背景、黑色前景） -->
     <color name="splash_background">#FFFFFF</color>

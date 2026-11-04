@@ -539,6 +539,11 @@ class Prefs(context: Context) {
             )
         }
 
+    // 应用图标背景色（预设 id，默认跟随系统取色）
+    var appIconColor: String
+        get() = sp.getString(KEY_APP_ICON_COLOR, APP_ICON_COLOR_SYSTEM) ?: APP_ICON_COLOR_SYSTEM
+        set(value) = sp.edit { putString(KEY_APP_ICON_COLOR, value) }
+
     // 自动检查更新开关（用于“每天首次进入设置页自动检查”）
     var autoUpdateCheckEnabled: Boolean
         get() = sp.getBoolean(KEY_AUTO_UPDATE_CHECK_ENABLED, true)
@@ -2400,6 +2405,7 @@ class Prefs(context: Context) {
         const val SETTINGS_UI_MODE_MATERIAL = "material"
         const val DEFAULT_SETTINGS_UI_MODE = "miuix"
         const val SETTINGS_THEME_MODE_SYSTEM = "system"
+        const val APP_ICON_COLOR_SYSTEM = "system"
         const val SETTINGS_THEME_MODE_LIGHT = "light"
         const val SETTINGS_THEME_MODE_DARK = "dark"
         const val DEFAULT_KEEP_ALIVE_NOTIFICATION_CLICK_ROUTE = "history"

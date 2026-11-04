@@ -158,6 +158,7 @@ object SettingsSearchIndex {
         item(R.string.label_language, R.string.section_main_ui)
         item(R.string.settings_ui_mode, R.string.section_main_ui)
         item(R.string.settings_theme_mode, R.string.section_main_ui)
+        item(R.string.settings_app_icon_color, R.string.section_main_ui)
         item(R.string.label_hide_recent_task_card, R.string.section_main_ui)
         item(R.string.label_keyboard_height, R.string.section_keyboard_ui)
         item(R.string.label_ime_tablet_floating_keyboard, R.string.section_keyboard_ui)

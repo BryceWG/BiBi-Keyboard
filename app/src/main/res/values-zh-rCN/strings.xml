@@ -72,6 +72,17 @@
   <string name="settings_theme_mode_system">跟随系统</string>
   <string name="settings_theme_mode_light">浅色</string>
   <string name="settings_theme_mode_dark">深色</string>
+  <string name="settings_app_icon_color">应用图标背景色</string>
+  <string name="settings_app_icon_color_summary">选择颜色后不再跟随系统深色模式</string>
+  <string name="settings_app_icon_color_system">跟随系统</string>
+  <string name="settings_app_icon_color_blue">蓝色</string>
+  <string name="settings_app_icon_color_green">绿色</string>
+  <string name="settings_app_icon_color_orange">橙色</string>
+  <string name="settings_app_icon_color_red">红色</string>
+  <string name="settings_app_icon_color_purple">紫色</string>
+  <string name="settings_app_icon_color_slate">深灰</string>
+  <string name="settings_app_icon_color_white">白色</string>
+  <string name="settings_app_icon_color_black">黑色（AMOLED）</string>
   <string name="home_summary_enabled">已开启</string>
   <string name="home_summary_disabled">已关闭</string>
   <string name="home_summary_more_input_disabled">未启用</string>

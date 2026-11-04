@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-    android:settingsActivity="com.brycewg.asrkb.ui.SettingsActivity">
+    android:settingsActivity="com.brycewg.asrkb.ui.SettingsHostActivity">
 
     <subtype
         android:label="@string/app_name"

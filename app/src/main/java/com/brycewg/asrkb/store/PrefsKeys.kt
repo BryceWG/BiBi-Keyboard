@@ -94,6 +94,7 @@ internal const val KEY_POSTPROC_TYPEWRITER_ENABLED = "postproc_typewriter_enable
 internal const val KEY_APP_LANGUAGE_TAG = "app_language_tag"
 internal const val KEY_SETTINGS_UI_MODE = "settings_ui_mode"
 internal const val KEY_SETTINGS_THEME_MODE = "settings_theme_mode"
+internal const val KEY_APP_ICON_COLOR = "app_icon_color"
 internal const val KEY_AUTO_UPDATE_CHECK_ENABLED = "auto_update_check_enabled"
 internal const val KEY_LAST_UPDATE_CHECK_DATE = "last_update_check_date"
 internal const val KEY_LLM_ENDPOINT = "llm_endpoint"

@@ -65,6 +65,7 @@ internal object PrefsBackup {
         o.put(KEY_APP_LANGUAGE_TAG, appLanguageTag)
         o.put(KEY_SETTINGS_UI_MODE, settingsUiMode)
         o.put(KEY_SETTINGS_THEME_MODE, settingsThemeMode)
+        o.put(KEY_APP_ICON_COLOR, appIconColor)
         o.put(KEY_AUTO_UPDATE_CHECK_ENABLED, autoUpdateCheckEnabled)
         o.put(KEY_FLOATING_SWITCHER_ENABLED, floatingSwitcherEnabled)
         o.put(KEY_FLOATING_SWITCHER_ALPHA, floatingSwitcherAlpha)
@@ -383,6 +384,7 @@ internal object PrefsBackup {
             optString(KEY_APP_LANGUAGE_TAG)?.let { appLanguageTag = it }
             optString(KEY_SETTINGS_UI_MODE)?.let { settingsUiMode = it }
             optString(KEY_SETTINGS_THEME_MODE)?.let { settingsThemeMode = it }
+            optString(KEY_APP_ICON_COLOR)?.let { appIconColor = it }
             optBool(KEY_AUTO_UPDATE_CHECK_ENABLED)?.let { autoUpdateCheckEnabled = it }
             optBool(KEY_TRANSLATION_PRELOAD)?.let { translationPreloadEnabled = it }
             optInt(KEY_TRANSLATION_KEEP_ALIVE)?.let { translationKeepAliveMinutes = it }

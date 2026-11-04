@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.ui.icon.applyAppIconColor
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsTestInputSheet
@@ -61,9 +62,9 @@ import com.brycewg.asrkb.util.HapticFeedbackHelper
  * - 子设置页导航
  * - 测试输入体验
  */
-class SettingsActivity : BaseActivity() {
+class SettingsHostActivity : BaseActivity() {
     companion object {
-        private const val TAG = "SettingsActivity"
+        private const val TAG = "SettingsHostActivity"
         const val EXTRA_AUTO_SHOW_IME_PICKER = "extra_auto_show_ime_picker"
         const val EXTRA_SHOW_IME_PICKER = "extra_show_ime_picker"
         const val EXTRA_INITIAL_ROUTE = "extra_initial_settings_route"
@@ -104,6 +105,8 @@ class SettingsActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
 
         prefs = Prefs(this)
+        // 清数据/恢复备份后偏好与 alias 启用状态可能不一致，进设置页时对齐一次
+        applyAppIconColor(this, prefs.appIconColor)
 
         // 初始化状态机和工具类
         setupStateMachine = SetupStateMachine(this, ::showSetupStateMessage)
