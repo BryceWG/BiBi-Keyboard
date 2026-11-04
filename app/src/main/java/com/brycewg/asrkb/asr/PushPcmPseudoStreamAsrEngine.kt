@@ -53,7 +53,7 @@ abstract class PushPcmPseudoStreamAsrEngine(
     override var emptyAudioHandledBySession: Boolean = false
 
     override val needsVadProbabilities: Boolean
-        get() = RecordedAudioVoiceFilter.isEnabled(prefs)
+        get() = RecordedAudioVoiceFilter.isEnabled(prefs, emptyAudioHandledBySession)
 
     override val isRunning: Boolean
         get() = running.get()

@@ -119,7 +119,6 @@ internal class LazyLocalBackupAsrEngine(
     private val stateLock = Any()
     private var emptyAudioGate = SessionEmptyAudioGate(prefs)
     private val pendingTerminals = linkedMapOf<Source, Terminal>()
-    private var pendingBackupReason: String? = null
     private val audioBytes = AtomicLong(0L)
     private val pcmLock = Any()
     private val pcmBuffer = ByteArrayOutputStream()
@@ -137,6 +136,7 @@ internal class LazyLocalBackupAsrEngine(
     )
 
     private var audioJob: Job? = null
+    private var emptyAudioCheckJob: Job? = null
     private var backupStartJob: Job? = null
     private var switchDeadlineJob: Job? = null
     private var primaryEngine: StreamingAsrEngine? = null
@@ -160,10 +160,11 @@ internal class LazyLocalBackupAsrEngine(
     override fun start() {
         if (!running.compareAndSet(false, true)) return
 
+        emptyAudioCheckJob?.cancel()
+        emptyAudioCheckJob = null
         probabilityBuffer.reset()
         emptyAudioGate = SessionEmptyAudioGate(prefs)
         pendingTerminals.clear()
-        pendingBackupReason = null
         stopRequested.set(false)
         backupTriggered.set(false)
         backupFed.set(false)
@@ -217,27 +218,59 @@ internal class LazyLocalBackupAsrEngine(
     }
 
     override fun stop() {
-        val skip = synchronized(stateLock) {
+        val gate = synchronized(stateLock) {
             if (stopRequested.getAndSet(true)) return
             running.set(false)
-            emptyAudioGate.shouldSkip
+            emptyAudioGate
         }
-        if (skip) {
-            skipEmptySession()
-            return
+        if (!terminalCoordinator.terminalDelivered) notifyStoppedIfNeeded()
+        audioJob?.cancel()
+        audioJob = null
+        if (gate.awaitingDecision && !gate.hasUsableResult) {
+            val (pcm, probabilities) = synchronized(stateLock) {
+                gate.takeRecording() to probabilityBuffer.snapshot().takeIf { it.sampleCount > 0 }
+            }
+            emptyAudioCheckJob = scope.launch(Dispatchers.Default) {
+                val skip = try {
+                    gate.shouldSkip(context, pcm, probabilities)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    synchronized(stateLock) {
+                        if (!isActive || gate !== emptyAudioGate || terminalCoordinator.terminalDelivered) return@launch
+                        com.brycewg.asrkb.store.debug.DebugLogManager.logError(
+                            category = "asr",
+                            event = "session_empty_audio_check_failed",
+                            data = mapOf("strategy" to backupStrategy.name, "errorType" to e.javaClass.simpleName)
+                        )
+                        terminalCoordinator.finishWithError(context.getString(R.string.error_audio_error, e.javaClass.simpleName))
+                        cleanupAfterTerminal()
+                    }
+                    return@launch
+                }
+                synchronized(stateLock) {
+                    if (!isActive || gate !== emptyAudioGate || terminalCoordinator.terminalDelivered) return@synchronized
+                    if (skip && !gate.hasUsableResult) {
+                        skipEmptySession()
+                    } else {
+                        gate.complete()
+                        drainPendingTerminals()
+                        finishStop()
+                    }
+                }
+            }
+        } else {
+            synchronized(stateLock) {
+                gate.complete()
+                drainPendingTerminals()
+                finishStop()
+            }
         }
-        if (externalPcmInput) probabilityBuffer.release()
-        if (!terminalCoordinator.terminalDelivered) {
-            notifyStoppedIfNeeded()
-        }
-        try {
-            audioJob?.cancel()
-        } catch (t: Throwable) {
-            Log.w(TAG, "cancel audio job failed", t)
-        } finally {
-            audioJob = null
-        }
+    }
 
+    private fun finishStop() {
+        if (terminalCoordinator.terminalDelivered) return
+        if (externalPcmInput) probabilityBuffer.release()
         stopPrimaryEngine()
         scheduleBackupSwitchPlan()
         maybeFeedBackupIfReady()
@@ -252,15 +285,16 @@ internal class LazyLocalBackupAsrEngine(
     }
 
     override fun cancel() {
+        emptyAudioCheckJob?.cancel()
+        emptyAudioCheckJob = null
         stopRequested.set(true)
         running.set(false)
         synchronized(stateLock) {
+            terminalCoordinator.markTerminalDelivered()
             emptyAudioGate.clear()
             pendingTerminals.clear()
-            pendingBackupReason = null
         }
         if (externalPcmInput) probabilityBuffer.release()
-        terminalCoordinator.markTerminalDelivered()
         try {
             audioJob?.cancel()
         } catch (t: Throwable) {
@@ -428,19 +462,12 @@ internal class LazyLocalBackupAsrEngine(
                 pcmBuffer.size() >= maxBufferedPcmBytes
             }
 
-        val wasConfirmed = emptyAudioGate.confirmed
-        val audio = emptyAudioGate.accept(pcm, probabilities)
+        emptyAudioGate.record(pcm)
         try {
-            if (primaryEngine is SessionEmptyAudioConsumer) {
-                val forwarded = if (!wasConfirmed && audio != null) probabilityBuffer.snapshot() else probabilities
-                if (audio != null) primaryConsumer?.appendPcmWithVad(audio, SAMPLE_RATE, CHANNELS, forwarded)
-            } else {
-                primaryConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
-            }
+            primaryConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
         } catch (t: Throwable) {
             Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
         }
-        if (!wasConfirmed && emptyAudioGate.confirmed) drainPendingTerminals()
         capReached
     }
 
@@ -459,10 +486,6 @@ internal class LazyLocalBackupAsrEngine(
 
     private fun triggerBackup(reason: String) {
         val shouldStart = synchronized(stateLock) {
-            if (emptyAudioGate.shouldSkip) {
-                pendingBackupReason = reason
-                return
-            }
             !terminalCoordinator.terminalDelivered && backupTriggered.compareAndSet(false, true)
         }
         if (!shouldStart) return
@@ -543,6 +566,7 @@ internal class LazyLocalBackupAsrEngine(
     private fun maybeFeedBackupIfReady(forceReady: Boolean = false) {
         if (terminalCoordinator.terminalDelivered) return
         if (!stopRequested.get()) return
+        if (synchronized(stateLock) { emptyAudioGate.awaitingDecision }) return
         if (!backupTriggered.get()) return
         if (!backupFed.compareAndSet(false, true)) return
         val ready = forceReady || hooks.isBackupReady()
@@ -655,12 +679,14 @@ internal class LazyLocalBackupAsrEngine(
         }
         val shouldStop = synchronized(stateLock) {
             if (terminalCoordinator.terminalDelivered) return
+            if (terminal is Terminal.Final) emptyAudioGate.markResult(terminal.text)
             val event = terminal.toArbitrationEvent(source)
-            if (emptyAudioGate.shouldSkip) {
+            if (emptyAudioGate.awaitingDecision && (terminal is Terminal.Final || event is AsrBackupArbitrationEvent.PrimaryFinal)) {
                 pendingTerminals[source] = terminal
                 return
             }
             terminalCoordinator.dispatch(event)
+            if (!emptyAudioGate.awaitingDecision) drainPendingTerminals()
             if (source == Source.PRIMARY && terminal.shouldTriggerBackup()) {
                 triggerBackup("primary_terminal")
             }
@@ -679,9 +705,6 @@ internal class LazyLocalBackupAsrEngine(
     private fun drainPendingTerminals() {
         val terminals = synchronized(stateLock) { pendingTerminals.toMap().also { pendingTerminals.clear() } }
         terminals.forEach { (source, terminal) -> onTerminal(source, terminal) }
-        val reason = pendingBackupReason
-        pendingBackupReason = null
-        if (reason != null) triggerBackup(reason)
     }
 
     private fun Terminal.toArbitrationEvent(source: Source): AsrBackupArbitrationEvent = when (source) {
@@ -766,7 +789,6 @@ internal class LazyLocalBackupAsrEngine(
         synchronized(stateLock) {
             emptyAudioGate.clear()
             pendingTerminals.clear()
-            pendingBackupReason = null
         }
         if (externalPcmInput) probabilityBuffer.release()
         cancelBackupPlanJobs()
@@ -850,8 +872,13 @@ internal class LazyLocalBackupAsrEngine(
         }
 
         override fun onPartial(text: String) {
+            synchronized(stateLock) {
+                if (terminalCoordinator.terminalDelivered) return
+                emptyAudioGate.markResult(text)
+                if (!emptyAudioGate.awaitingDecision) drainPendingTerminals()
+                if (terminalCoordinator.terminalDelivered) return
+            }
             if (source != Source.PRIMARY) return
-            if (synchronized(stateLock) { emptyAudioGate.shouldSkip || terminalCoordinator.terminalDelivered }) return
             try {
                 listener.onPartial(text)
             } catch (t: Throwable) {

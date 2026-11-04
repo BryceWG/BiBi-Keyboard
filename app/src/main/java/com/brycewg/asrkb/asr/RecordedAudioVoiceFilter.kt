@@ -44,15 +44,9 @@ object RecordedAudioVoiceFilter {
     private const val NEAR_SILENCE_RMS_THRESHOLD = 90
     private const val VAD_DOMINANT_MAX_ABS_THRESHOLD = 1_500
     private const val VAD_DOMINANT_RMS_THRESHOLD = 650
-    internal fun isEnabled(prefs: Prefs): Boolean = prefs.autoCancelEmptyAudioInputEnabled ||
+    internal fun isEnabled(prefs: Prefs, emptyAudioHandledBySession: Boolean = false): Boolean = (prefs.autoCancelEmptyAudioInputEnabled && !emptyAudioHandledBySession) ||
         prefs.autoFilterSilentAudioSegmentsEnabled ||
         prefs.recordingAutoStopMode == Prefs.RecordingAutoStopMode.SILENCE
-
-    internal fun isNearSilencePcm(pcm: ByteArray): Boolean {
-        val energy = measureEnergy(pcm, pcm.size)
-        return energy.maxAbs <= NEAR_SILENCE_MAX_ABS_THRESHOLD &&
-            kotlin.math.sqrt(energy.sumSquares / energy.sampleCount) <= NEAR_SILENCE_RMS_THRESHOLD
-    }
 
     private data class ChunkMark(
         val offset: Int,
@@ -335,10 +329,8 @@ object RecordedAudioVoiceFilter {
             boundsClassifier?.accept(chunkProbabilities)
             val energy = measureEnergy(leveledPcm, leveledPcm.size)
             if (emptyClassifier != null) {
-                val nearSilence = energy.maxAbs <= NEAR_SILENCE_MAX_ABS_THRESHOLD &&
-                    kotlin.math.sqrt(energy.sumSquares / energy.sampleCount) <= NEAR_SILENCE_RMS_THRESHOLD
                 for (frame in chunkProbabilities.frames) {
-                    emptyClassifier.accept(if (nearSilence) 0f else frame.probability)
+                    emptyClassifier.accept(frame.probability)
                 }
             }
             marks.add(

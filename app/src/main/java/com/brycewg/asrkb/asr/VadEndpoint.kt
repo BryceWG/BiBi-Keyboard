@@ -1,6 +1,9 @@
 /** 按 32 ms 概率帧推进的停说判停状态机；归属模块：asr。 */
 package com.brycewg.asrkb.asr
 
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+
 internal class VadEndpoint(private val tuning: VadTuning, private val silenceMs: Int) {
     private enum class State { Waiting, Speaking, Ended }
 
@@ -152,44 +155,60 @@ internal class EmptyAudioDetector(private val tuning: EmptyAudioTuning) {
     }
 }
 
-/** 主备会话只判空一次；确认人声前暂存文件转录音频，原生流式仍实时投喂。 */
+/** 主备会话只在停录后检查完整录音；录音期间只留存副本，不干预投喂与预览。 */
 internal class SessionEmptyAudioGate(prefs: com.brycewg.asrkb.store.Prefs) {
     private val enabled = prefs.autoCancelEmptyAudioInputEnabled
-    private val detector = EmptyAudioDetector(EmptyAudioTuning.forStopSensitivity(prefs.autoStopSilenceSensitivity))
+    private val tuning = EmptyAudioTuning.forStopSensitivity(prefs.autoStopSilenceSensitivity)
     private val pending = java.io.ByteArrayOutputStream()
-    private val energyFrame = ByteArray(512 * 2)
-    private var energyBytes = 0
-    private val leveler = VadInputLevelerBranch(sampleRate = 16_000)
-    var confirmed: Boolean = !enabled
+
+    @Volatile
+    var hasUsableResult: Boolean = false
         private set
 
-    val shouldSkip: Boolean get() = enabled && !confirmed
+    var awaitingDecision: Boolean = enabled
+        private set
 
-    fun accept(pcm: ByteArray, probabilities: VadProbabilities): ByteArray? {
-        if (confirmed) return pcm
-        pending.write(pcm)
-        var offset = 0
-        val frames = probabilities.frames.iterator()
-        while (offset < pcm.size) {
-            val count = minOf(energyFrame.size - energyBytes, pcm.size - offset)
-            pcm.copyInto(energyFrame, energyBytes, offset, offset + count)
-            energyBytes += count
-            offset += count
-            if (energyBytes == energyFrame.size) {
-                val leveled = leveler.process(energyFrame).leveledPcm
-                val probability = frames.next().probability
-                detector.accept(if (RecordedAudioVoiceFilter.isNearSilencePcm(leveled)) 0f else probability)
-                energyBytes = 0
-            }
+    fun markResult(text: String) {
+        if (!hasUsableResult && com.brycewg.asrkb.util.TextSanitizer.countEffectiveChars(text) > 0) {
+            hasUsableResult = true
+            awaitingDecision = false
+            pending.reset()
         }
-        if (!detector.hasSpeech) return null
-        confirmed = true
-        leveler.finishDebugSession("speech_confirmed")
-        return pending.toByteArray().also { pending.reset() }
+    }
+
+    fun record(pcm: ByteArray) {
+        if (enabled && !hasUsableResult) pending.write(pcm)
+    }
+
+    fun takeRecording(): ByteArray = pending.toByteArray().also { pending.reset() }
+
+    suspend fun shouldSkip(context: android.content.Context, pcm: ByteArray, probabilities: VadProbabilities?): Boolean {
+        if (hasUsableResult) return false
+        if (pcm.isEmpty()) return true
+        val analysis = probabilities ?: VadProbabilities.analyze(context, pcm, 16_000)
+        val detector = EmptyAudioDetector(tuning)
+        for (frame in analysis.frames) {
+            currentCoroutineContext().ensureActive()
+            detector.accept(frame.probability)
+        }
+        com.brycewg.asrkb.store.debug.DebugLogManager.logBase(
+            category = "asr",
+            event = "session_empty_audio_checked",
+            data = mapOf(
+                "samples" to analysis.sampleCount,
+                "hasSpeech" to detector.hasSpeech,
+                "threshold" to tuning.threshold
+            )
+        )
+        return !detector.hasSpeech && !hasUsableResult
+    }
+
+    fun complete() {
+        awaitingDecision = false
     }
 
     fun clear() {
         pending.reset()
-        leveler.finishDebugSession("clear")
+        hasUsableResult = false
     }
 }

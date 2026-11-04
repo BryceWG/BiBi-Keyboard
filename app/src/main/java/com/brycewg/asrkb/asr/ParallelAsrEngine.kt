@@ -59,8 +59,7 @@ class ParallelAsrEngine(
     }
 
     override val needsVadProbabilities: Boolean
-        get() = prefs.autoCancelEmptyAudioInputEnabled ||
-            (primaryConsumer as? VadPcmConsumer)?.needsVadProbabilities == true ||
+        get() = (primaryConsumer as? VadPcmConsumer)?.needsVadProbabilities == true ||
             (backupConsumer as? VadPcmConsumer)?.needsVadProbabilities == true
 
     override val isRunning: Boolean
@@ -80,6 +79,7 @@ class ParallelAsrEngine(
     private val pendingTerminals = linkedMapOf<Source, Terminal>()
 
     private var audioJob: Job? = null
+    private var emptyAudioCheckJob: Job? = null
     private var switchDeadlineJob: Job? = null
 
     @Volatile private var startUptimeMs: Long = 0L
@@ -123,6 +123,8 @@ class ParallelAsrEngine(
     override fun start() {
         if (!running.compareAndSet(false, true)) return
 
+        emptyAudioCheckJob?.cancel()
+        emptyAudioCheckJob = null
         probabilityBuffer.reset()
         emptyAudioGate = SessionEmptyAudioGate(prefs)
         pendingTerminals.clear()
@@ -217,28 +219,59 @@ class ParallelAsrEngine(
     }
 
     override fun stop() {
-        val skip = synchronized(stateLock) {
+        val gate = synchronized(stateLock) {
             if (stopRequested.getAndSet(true)) return
             running.set(false)
-            emptyAudioGate.shouldSkip
+            emptyAudioGate
         }
-        if (skip) {
-            skipEmptySession()
-            return
+        if (!terminalCoordinator.terminalDelivered) notifyStoppedIfNeeded()
+        audioJob?.cancel()
+        audioJob = null
+        if (gate.awaitingDecision && !gate.hasUsableResult) {
+            val (pcm, probabilities) = synchronized(stateLock) {
+                gate.takeRecording() to probabilityBuffer.snapshot().takeIf { it.sampleCount > 0 }
+            }
+            emptyAudioCheckJob = scope.launch(Dispatchers.Default) {
+                val skip = try {
+                    gate.shouldSkip(context, pcm, probabilities)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    synchronized(stateLock) {
+                        if (!isActive || gate !== emptyAudioGate || terminalCoordinator.terminalDelivered) return@launch
+                        com.brycewg.asrkb.store.debug.DebugLogManager.logError(
+                            category = "asr",
+                            event = "session_empty_audio_check_failed",
+                            data = mapOf("strategy" to backupStrategy.name, "errorType" to e.javaClass.simpleName)
+                        )
+                        terminalCoordinator.finishWithError(context.getString(R.string.error_audio_error, e.javaClass.simpleName))
+                        cleanupAfterTerminal(discardAudio = true)
+                    }
+                    return@launch
+                }
+                synchronized(stateLock) {
+                    if (!isActive || gate !== emptyAudioGate || terminalCoordinator.terminalDelivered) return@synchronized
+                    if (skip && !gate.hasUsableResult) {
+                        skipEmptySession()
+                    } else {
+                        gate.complete()
+                        drainPendingTerminals()
+                        finishStop()
+                    }
+                }
+            }
+        } else {
+            synchronized(stateLock) {
+                gate.complete()
+                drainPendingTerminals()
+                finishStop()
+            }
         }
+    }
+
+    private fun finishStop() {
+        if (terminalCoordinator.terminalDelivered) return
         if (externalPcmInput) probabilityBuffer.release()
-        if (!terminalCoordinator.terminalDelivered) {
-            notifyStoppedIfNeeded()
-        }
-
-        try {
-            audioJob?.cancel()
-        } catch (t: Throwable) {
-            Log.w(TAG, "cancel audio job failed", t)
-        } finally {
-            audioJob = null
-        }
-
         stopEngines()
         scheduleSwitchDeadlineIfNeeded()
     }
@@ -257,14 +290,16 @@ class ParallelAsrEngine(
     }
 
     override fun cancel() {
+        emptyAudioCheckJob?.cancel()
+        emptyAudioCheckJob = null
         stopRequested.set(true)
         running.set(false)
         synchronized(stateLock) {
+            terminalCoordinator.markTerminalDelivered()
             emptyAudioGate.clear()
             pendingTerminals.clear()
         }
         if (externalPcmInput) probabilityBuffer.release()
-        terminalCoordinator.markTerminalDelivered()
         try {
             audioJob?.cancel()
         } catch (t: Throwable) {
@@ -482,28 +517,17 @@ class ParallelAsrEngine(
         if (!running.get() || stopRequested.get() || terminalCoordinator.terminalDelivered) return@synchronized null
         val needsStop = !externalPcmInput && isVadAutoStopEnabled(context, prefs)
         val probabilities = if (supplied != null || needsVadProbabilities || needsStop) probabilityBuffer.append(pcm, supplied) else null
-        val wasConfirmed = emptyAudioGate.confirmed
-        val audio = if (probabilities != null) emptyAudioGate.accept(pcm, probabilities) else pcm
-        val forwarded = if (!wasConfirmed && audio != null) probabilityBuffer.snapshot() else probabilities
+        emptyAudioGate.record(pcm)
         try {
-            if (primaryEngine is SessionEmptyAudioConsumer) {
-                if (audio != null) primaryConsumer?.appendPcmWithVad(audio, SAMPLE_RATE, CHANNELS, forwarded)
-            } else {
-                primaryConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
-            }
+            primaryConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
         } catch (t: Throwable) {
             Log.w(TAG, "primary appendPcm failed ($sourceLabel)", t)
         }
         try {
-            if (backupEngine is SessionEmptyAudioConsumer) {
-                if (audio != null) backupConsumer?.appendPcmWithVad(audio, SAMPLE_RATE, CHANNELS, forwarded)
-            } else {
-                backupConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
-            }
+            backupConsumer?.appendPcmWithVad(pcm, SAMPLE_RATE, CHANNELS, probabilities)
         } catch (t: Throwable) {
             Log.w(TAG, "backup appendPcm failed ($sourceLabel)", t)
         }
-        if (!wasConfirmed && emptyAudioGate.confirmed) drainPendingTerminals()
         probabilities
     }
 
@@ -640,11 +664,14 @@ class ParallelAsrEngine(
         }
         val shouldStopCapture = synchronized(stateLock) {
             if (terminalCoordinator.terminalDelivered) return
-            if (emptyAudioGate.shouldSkip) {
+            if (t is Terminal.Final) emptyAudioGate.markResult(t.text)
+            val event = t.toArbitrationEvent(source)
+            if (emptyAudioGate.awaitingDecision && (t is Terminal.Final || event is AsrBackupArbitrationEvent.PrimaryFinal)) {
                 pendingTerminals[source] = t
                 return
             }
-            terminalCoordinator.dispatch(t.toArbitrationEvent(source))
+            terminalCoordinator.dispatch(event)
+            if (!emptyAudioGate.awaitingDecision) drainPendingTerminals()
             terminalCoordinator.terminalDelivered
         }
         if (shouldStopCapture) {
@@ -726,8 +753,13 @@ class ParallelAsrEngine(
         }
 
         override fun onPartial(text: String) {
+            synchronized(stateLock) {
+                if (terminalCoordinator.terminalDelivered) return
+                emptyAudioGate.markResult(text)
+                if (!emptyAudioGate.awaitingDecision) drainPendingTerminals()
+                if (terminalCoordinator.terminalDelivered) return
+            }
             if (source != Source.PRIMARY) return
-            if (synchronized(stateLock) { emptyAudioGate.shouldSkip || terminalCoordinator.terminalDelivered }) return
             try {
                 listener.onPartial(text)
             } catch (t: Throwable) {

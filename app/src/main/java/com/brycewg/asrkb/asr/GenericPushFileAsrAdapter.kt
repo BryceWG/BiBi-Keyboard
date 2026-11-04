@@ -75,7 +75,7 @@ internal class GenericPushFileAsrAdapter(
     override var emptyAudioHandledBySession: Boolean = false
 
     override val needsVadProbabilities: Boolean
-        get() = progressiveResults != null || (applyAudioPreprocess && RecordedAudioVoiceFilter.isEnabled(prefs))
+        get() = progressiveResults != null || (applyAudioPreprocess && RecordedAudioVoiceFilter.isEnabled(prefs, emptyAudioHandledBySession))
 
     override val isRunning: Boolean
         get() = running.get()

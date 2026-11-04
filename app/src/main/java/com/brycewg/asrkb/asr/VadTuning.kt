@@ -32,16 +32,18 @@ data class VadTuning(
 }
 
 /** 全空录音使用独立的累计规则，不沿用判停器的起说/恢复条件。 */
-internal data class EmptyAudioTuning(val threshold: Float, val minSpeechMs: Int) {
+internal data class EmptyAudioTuning(
+    val threshold: Float,
+    val minSpeechMs: Int
+) {
     val weakThreshold: Float get() = threshold - 0.15f
     val maxSilenceMs: Int get() = 64
 
     companion object {
-        // 跟随判停档位：高对应严格，低对应宽松；累计时长仍由全空策略独立定义。
         fun forStopSensitivity(level: Int): EmptyAudioTuning = when (level) {
-            1 -> EmptyAudioTuning(0.60f, 256)
-            2 -> EmptyAudioTuning(0.50f, 192)
-            3 -> EmptyAudioTuning(0.40f, 160)
+            1 -> EmptyAudioTuning(0.45f, 192)
+            2 -> EmptyAudioTuning(0.35f, 160)
+            3 -> EmptyAudioTuning(0.25f, 128)
             else -> error("Unknown empty audio sensitivity: $level")
         }
     }
