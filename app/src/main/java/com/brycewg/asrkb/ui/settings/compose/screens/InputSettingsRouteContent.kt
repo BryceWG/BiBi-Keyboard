@@ -12,18 +12,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.LocaleListCompat
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.ui.icon.AppIconColor
-import com.brycewg.asrkb.ui.icon.applyAppIconColor
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsLazyColumn
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsPreference
@@ -507,11 +501,6 @@ internal fun InputMainUiSettingsSection(
         DropdownOption("light", stringResource(R.string.settings_theme_mode_light)),
         DropdownOption("dark", stringResource(R.string.settings_theme_mode_dark))
     )
-    // 下拉框标签读的是 prefs，prefs 变化不会触发重组，本地留一份用于即时回显
-    var iconColorId by remember { mutableStateOf(AppIconColor.fromId(prefs.appIconColor).id) }
-    val iconColorOptions = AppIconColor.entries.map {
-        DropdownOption(it.id, stringResource(it.labelRes))
-    }
     InputSection(uiMode = uiMode, titleRes = R.string.section_main_ui) {
         SettingsPreference(
             entry = SettingsEntry.Dropdown(
@@ -559,24 +548,7 @@ internal fun InputMainUiSettingsSection(
             index = 2,
             count = 5
         )
-        SettingsPreference(
-            entry = SettingsEntry.Dropdown(
-                id = "settings_app_icon_color",
-                titleRes = R.string.settings_app_icon_color,
-                summaryRes = R.string.settings_app_icon_color_summary,
-                options = iconColorOptions,
-                selectedOptionId = iconColorId,
-                onSelectedOptionChange = { id ->
-                    iconColorId = id
-                    if (id != prefs.appIconColor) {
-                        prefs.appIconColor = id
-                        applyAppIconColor(context, id)
-                    }
-                }
-            ),
-            index = 3,
-            count = 5
-        )
+        InputAppIconColorPreference(prefs = prefs, index = 3, count = 5)
         InputExplainedSwitch(
             id = "hide_recent_task_card",
             titleRes = R.string.label_hide_recent_task_card,
