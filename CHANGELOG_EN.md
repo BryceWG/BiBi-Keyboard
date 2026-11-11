@@ -1,5 +1,23 @@
 # Changelog
 
+## v4.6.1 (2026-11-10)
+
+### New Features
+
+- **App Icon Background Color:** Added an app icon background color option in theme settings — follow system, or pick blue, green, orange, red, purple, slate, white, or black.
+- **[Pro] Traditional/Simplified Conversion Key:** Added a "Traditional/Simplified Conversion" customizable keyboard key and a one-time conversion button in the customizable keyboard "Recording" layout.
+
+### Improvements
+
+- **Soniox Model Upgrade:** Streaming and file recognition now use the v6 models.
+
+### Bug Fixes
+
+- **Empty Audio Detection:** Empty audio is now judged once on the full recording after stopping, and skipped when a result already exists, so valid results are no longer dropped.
+- **GigaAM ASR:** Fixed the issue where GigaAM local ASR recognition did not integrate the segmented function.
+
+---
+
 ## v4.6.0 (2026-11-01)
 
 ### New Features
