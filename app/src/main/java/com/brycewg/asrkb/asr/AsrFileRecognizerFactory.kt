@@ -43,7 +43,7 @@ internal enum class AsrFileRecognizerKey(
     FunAsrNanoFile("FunAsrNanoFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
     Qwen3AsrFile("Qwen3AsrFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
     ParakeetFile("ParakeetFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
-    GigaAmFile("GigaAmFileAsrEngine", AsrFileRecognizerFamily.LocalFile, progressiveChunkingEnabled = false),
+    GigaAmFile("GigaAmFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
     FireRedAsrFile("FireRedAsrFileAsrEngine", AsrFileRecognizerFamily.LocalFile),
     TencentFile("TencentFileAsrEngine", AsrFileRecognizerFamily.File)
 }

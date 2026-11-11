@@ -78,9 +78,10 @@ internal fun joinNonStreamingChunkTexts(texts: List<String>): String = buildStri
     }
 }
 
-private fun needsChunkBoundarySpace(previous: Char, next: Char): Boolean = next.isAsciiLetterOrDigit() && (previous.isAsciiLetterOrDigit() || previous in ",.!?;:")
+private fun needsChunkBoundarySpace(previous: Char, next: Char): Boolean = next.isSpacedLetterOrDigit() && (previous.isSpacedLetterOrDigit() || previous in ",.!?;:")
 
-private fun Char.isAsciiLetterOrDigit(): Boolean = code < 128 && isLetterOrDigit()
+private fun Char.isSpacedLetterOrDigit(): Boolean = isLetterOrDigit() &&
+    (code < 128 || Character.UnicodeScript.of(code) == Character.UnicodeScript.CYRILLIC)
 
 internal fun createNonStreamingChunkResultCollector(
     context: Context,

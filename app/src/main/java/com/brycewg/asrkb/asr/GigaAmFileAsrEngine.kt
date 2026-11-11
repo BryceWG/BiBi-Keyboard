@@ -15,7 +15,7 @@ internal class GigaAmFileAsrEngine(
     prefs: Prefs,
     listener: StreamingAsrEngine.Listener,
     onRequestDuration: ((Long) -> Unit)? = null
-) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration, progressiveChunkingEnabled = false),
+) : BaseFileAsrEngine(context, scope, prefs, listener, onRequestDuration, progressiveChunkingEnabled = true),
     PcmBatchRecognizer {
 
     override val progressiveVendor: AsrVendor = AsrVendor.GigaAm
@@ -31,18 +31,23 @@ internal class GigaAmFileAsrEngine(
 
     override suspend fun recognize(pcm: ByteArray) {
         val startedAt = System.currentTimeMillis()
-        val callLog = LocalAsrCallLogger.startInference(
-            prefs = prefs,
-            vendor = AsrVendor.GigaAm,
-            source = "file",
-            audioBytes = pcm.size,
-            sampleRate = sampleRate
-        )
+        val callLog = if (isProgressiveChunkDecode) {
+            null
+        } else {
+            LocalAsrCallLogger.startInference(
+                prefs = prefs,
+                vendor = AsrVendor.GigaAm,
+                source = "file",
+                audioBytes = pcm.size,
+                sampleRate = sampleRate
+            )
+        }
+        var loadLog: LocalAsrCallLogger.Session? = null
         try {
             val manager = GigaAmOnnxManager.getInstance()
             if (!manager.isOnnxAvailable()) {
                 val message = context.getString(R.string.error_local_asr_not_ready)
-                callLog.failure(message)
+                callLog?.failure(message)
                 listener.onError(message)
                 return
             }
@@ -54,49 +59,80 @@ internal class GigaAmFileAsrEngine(
                     modelCheck,
                     R.string.error_giga_am_model_missing
                 )
-                callLog.failure(message)
+                callLog?.failure(message)
                 listener.onError(message)
                 return
             }
-            val samples = parakeetPcmToFloatArray(pcm)
-            if (samples.isEmpty()) {
+            val chunks = splitLocalOfflinePcm16WithVad(
+                context = context,
+                prefs = prefs,
+                pcm = pcm,
+                sampleRate = sampleRate,
+                probabilities = recognitionVadProbabilities
+            )
+            if (chunks.isEmpty()) {
                 val message = context.getString(R.string.error_audio_empty)
-                callLog.failure(message)
+                callLog?.failure(message)
                 listener.onError(message)
                 return
             }
             val keepMinutes = prefs.gigaAmKeepAliveMinutes
-            val text = manager.decodeOffline(
-                assetManager = null,
-                tokens = model.tokensPath,
-                encoder = model.encoderPath,
-                decoder = model.decoderPath,
-                joiner = model.joinerPath,
-                provider = "cpu",
-                numThreads = prefs.gigaAmNumThreads,
-                samples = samples,
-                sampleRate = sampleRate,
-                keepAliveMs = if (keepMinutes <= 0) 0L else keepMinutes.toLong() * 60_000L,
-                alwaysKeep = keepMinutes < 0
-            )
-            if (text.isNullOrBlank()) {
+            val texts = ArrayList<String>(chunks.size)
+            for (chunk in chunks) {
+                val text = manager.decodeOffline(
+                    assetManager = null,
+                    tokens = model.tokensPath,
+                    encoder = model.encoderPath,
+                    decoder = model.decoderPath,
+                    joiner = model.joinerPath,
+                    provider = "cpu",
+                    numThreads = prefs.gigaAmNumThreads,
+                    samples = parakeetPcmToFloatArray(chunk),
+                    sampleRate = sampleRate,
+                    keepAliveMs = if (keepMinutes <= 0) 0L else keepMinutes.toLong() * 60_000L,
+                    alwaysKeep = keepMinutes < 0,
+                    onLoadStart = {
+                        loadLog = LocalAsrCallLogger.startLoad(
+                            prefs = prefs,
+                            vendor = AsrVendor.GigaAm,
+                            source = "inference_load"
+                        )
+                    },
+                    onLoadDone = {
+                        loadLog?.success("loaded=true")
+                        loadLog = null
+                    }
+                )
+                if (!text.isNullOrBlank()) texts += text.trim()
+            }
+            val text = joinNonStreamingChunkTexts(texts)
+            if (text.isBlank()) {
                 val message = context.getString(R.string.error_asr_empty_result)
-                callLog.failure(message)
+                callLog?.failure(message)
                 listener.onError(message)
             } else {
-                val finalText = text.trim()
-                callLog.successWithText(finalText)
+                val finalText = if (isProgressiveChunkDecode) {
+                    text.trim()
+                } else {
+                    finalizeCombinedProgressiveText(text)
+                }
+                callLog?.successWithText(finalText)
                 listener.onFinal(finalText)
             }
         } catch (t: CancellationException) {
-            callLog.failure("cancelled")
+            loadLog?.failure("cancelled")
+            loadLog = null
+            callLog?.failure("cancelled")
             throw t
         } catch (t: Throwable) {
             Log.e(TAG, "GigaAM recognition failed", t)
             val message = context.getString(R.string.error_recognize_failed_with_reason, t.message ?: "")
-            callLog.failure(message)
+            loadLog?.failure(t.message ?: message)
+            loadLog = null
+            callLog?.failure(message)
             listener.onError(message)
         } finally {
+            loadLog?.failure("Model load did not complete")
             onRequestDuration?.invoke(System.currentTimeMillis() - startedAt)
         }
     }
