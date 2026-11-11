@@ -1,12 +1,21 @@
-/** 扫描用户授权目录中的新增附件，并在上传成功后记录增量标识。 */
+/** 剪贴板附件目录的事件监听、增量扫描与上传进度记录。 */
 package com.brycewg.asrkb.clipboard
 
 import android.content.Context
+import android.database.ContentObserver
 import android.net.Uri
+import android.os.SystemClock
 import android.provider.DocumentsContract
 import android.util.Log
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.callbackFlow
 
 internal fun isSyncClipboardDownloadDirectory(treeUri: Uri): Boolean = try {
     DocumentsContract.getTreeDocumentId(treeUri)
@@ -42,31 +51,90 @@ internal class ClipboardAttachmentWatcher(
     private val appContext = context.applicationContext
     private val seenPrefs = appContext.getSharedPreferences(SEEN_PREFS, Context.MODE_PRIVATE)
 
-    fun scanAndUpload(upload: (LocalClipboardAttachment) -> Boolean) = ClipboardAttachmentTransferGate.run { scanAndUploadLocked(upload) }
+    /** 调用方在 IO dispatcher 运行；取消会同时释放监听，不等待下游阻塞上传结束。 */
+    suspend fun watchAndUpload(upload: (LocalClipboardAttachment) -> Boolean) {
+        val root = watchRoot() ?: return
+        val watchContext = currentCoroutineContext()
+        try {
+            directoryChanges(root).collect {
+                ClipboardAttachmentTransferGate.run {
+                    watchContext.ensureActive()
+                    scanAndUploadLocked(root, upload) { watchContext.ensureActive() }
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Clipboard attachment directory watch stopped", e)
+            logWarning("clip_attachment_watch_failed", mapOf("errorType" to e.javaClass.simpleName))
+        }
+    }
 
-    private fun scanAndUploadLocked(upload: (LocalClipboardAttachment) -> Boolean) {
-        if (!policy.hasEnabledType()) return
-        val treeUri = prefs.syncClipboardWatchTreeUri.takeIf { it.isNotBlank() } ?: return
+    private fun directoryChanges(root: Uri) = callbackFlow {
+        val resolver = appContext.contentResolver
+        val observer = object : ContentObserver(null) {
+            override fun onChange(selfChange: Boolean) {
+                trySend(Unit)
+            }
+        }
+        // AOSP 将底层 FileObserver 绑定到 Cursor 生命周期。只保留 ID 列作监听租约，
+        // 快照查询独立关闭，整个会话期间不撤销目录监听。
+        val cursor = resolver.query(
+            childrenUri(root),
+            arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID),
+            null,
+            null,
+            null
+        ) ?: error("Directory provider returned no cursor")
+        cursor.use {
+            try {
+                currentCoroutineContext().ensureActive()
+                // 跨进程 Cursor 通过 Binder observer 转发变更，不透传 notificationUri。
+                // 直接订阅 Cursor，不能用 notificationUri 是否为空判断监听是否可用。
+                cursor.registerContentObserver(observer)
+                logBase("clip_attachment_watch_started", emptyMap())
+                // 订阅完成后才取首个快照，覆盖查询监听 Cursor 到订阅完成之间的变化。
+                trySend(Unit)
+                awaitClose { }
+            } finally {
+                cursor.unregisterContentObserver(observer)
+                logBase("clip_attachment_watch_stopped", emptyMap())
+            }
+        }
+    }.buffer(Channel.CONFLATED)
+
+    fun scanAndUpload(upload: (LocalClipboardAttachment) -> Boolean) {
+        val root = watchRoot() ?: return
+        ClipboardAttachmentTransferGate.run { scanAndUploadLocked(root, upload) {} }
+    }
+
+    private fun watchRoot(): Uri? {
+        if (!policy.hasEnabledType()) return null
+        val treeUri = prefs.syncClipboardWatchTreeUri.takeIf { it.isNotBlank() } ?: return null
         val root = try {
             Uri.parse(treeUri)
         } catch (t: Throwable) {
             Log.w(TAG, "Invalid clipboard watch tree URI", t)
-            return
+            return null
         }
         if (isSyncClipboardDownloadDirectory(root)) {
             Log.w(TAG, "Ignore Download/BiBi as clipboard attachment watch directory")
             prefs.syncClipboardWatchTreeUri = ""
-            return
+            return null
         }
-        val childrenUri = try {
-            DocumentsContract.buildChildDocumentsUriUsingTree(
-                root,
-                DocumentsContract.getTreeDocumentId(root)
-            )
-        } catch (t: Throwable) {
-            Log.w(TAG, "Failed to access clipboard watch tree", t)
-            return
-        }
+        return root
+    }
+
+    private fun childrenUri(root: Uri): Uri = DocumentsContract.buildChildDocumentsUriUsingTree(
+        root,
+        DocumentsContract.getTreeDocumentId(root)
+    )
+
+    private fun scanAndUploadLocked(
+        root: Uri,
+        upload: (LocalClipboardAttachment) -> Boolean,
+        checkActive: () -> Unit
+    ) {
         val projection = arrayOf(
             DocumentsContract.Document.COLUMN_DOCUMENT_ID,
             DocumentsContract.Document.COLUMN_DISPLAY_NAME,
@@ -77,14 +145,16 @@ internal class ClipboardAttachmentWatcher(
         val treeKey = root.toString()
         val firstScanForTree = seenPrefs.getString(KEY_TREE_URI, null) != treeKey
         val attachments = mutableListOf<LocalClipboardAttachment>()
+        val scanStartedAt = SystemClock.elapsedRealtime()
         try {
-            val queried = appContext.contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
+            val queried = appContext.contentResolver.query(childrenUri(root), projection, null, null, null)?.use { cursor ->
                 val idIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DOCUMENT_ID)
                 val nameIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_DISPLAY_NAME)
                 val mimeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_MIME_TYPE)
                 val sizeIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_SIZE)
                 val modifiedIndex = cursor.getColumnIndexOrThrow(DocumentsContract.Document.COLUMN_LAST_MODIFIED)
                 while (cursor.moveToNext()) {
+                    checkActive()
                     val mime = cursor.getString(mimeIndex) ?: continue
                     if (mime == DocumentsContract.Document.MIME_TYPE_DIR || cursor.isNull(sizeIndex)) continue
                     val size = cursor.getLong(sizeIndex)
@@ -114,12 +184,18 @@ internal class ClipboardAttachmentWatcher(
                 }
                 true
             } ?: false
+            checkActive()
             if (!queried) {
                 // provider 掉线或 URI 权限失效时不能落基线，否则下一轮会把既存文件当成新增上传。
                 Log.w(TAG, "Clipboard watch tree query returned no cursor")
                 logWarning("clip_attachment_scan_no_cursor", mapOf("firstScan" to firstScanForTree))
                 return
             }
+            DebugLogManager.log(
+                "app",
+                "clip_attachment_scan",
+                mapOf("count" to attachments.size, "elapsedMs" to SystemClock.elapsedRealtime() - scanStartedAt)
+            )
             if (firstScanForTree) {
                 // 新目录整体作为基线，历史文件不参与上传。
                 writeBaseline(treeKey, attachments)
@@ -140,11 +216,15 @@ internal class ClipboardAttachmentWatcher(
                     it.lastModifiedMillis <= attachment.lastModifiedMillis && it.signature != attachment.signature
                 }
             )
+            checkActive()
             if (upload(attachment)) {
+                // 已完成的上传仍记入进度；锁内提交，恢复后的扫描不会重复上传。
                 markProcessed(
                     newAttachments.filter { it.lastModifiedMillis > attachment.lastModifiedMillis } + attachment
                 )
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (t: Throwable) {
             Log.w(TAG, "Failed to scan clipboard watch tree", t)
             logWarning("clip_attachment_scan_failed", mapOf("firstScan" to firstScanForTree), t)

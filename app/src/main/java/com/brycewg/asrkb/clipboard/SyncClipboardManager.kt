@@ -102,7 +102,6 @@ class SyncClipboardManager(
     companion object {
         private const val TAG = "SyncClipboardManager"
         private const val BRIDGE_OBSERVER_RENEW_INTERVAL_MS = 15_000L
-        private const val ATTACHMENT_SCAN_INTERVAL_MS = 2_000L
         private const val ATTACHMENT_DOWNLOAD_MAX_ATTEMPTS = 3
         private const val ATTACHMENT_DOWNLOAD_RETRY_DELAY_MS = 500L
         private const val ATTACHMENT_RECOVERY_DELAY_MS = 30_000L
@@ -281,12 +280,8 @@ class SyncClipboardManager(
         ) {
             return
         }
-        // ponytail: polling a SAF tree is portable; add provider notifications only if scans prove costly.
         attachmentWatchJob = scope.launch(ioDispatcher) {
-            while (isActive && prefs.syncClipboardEnabled && !clipboardEffectsPaused) {
-                attachmentWatcher.scanAndUpload(::uploadAttachment)
-                delay(ATTACHMENT_SCAN_INTERVAL_MS)
-            }
+            attachmentWatcher.watchAndUpload(::uploadAttachment)
         }
     }
 
