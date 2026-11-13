@@ -226,6 +226,13 @@ object SettingsSearchIndex {
         item(R.string.label_recording_max_duration, R.string.section_silence_autostop, "maximum duration", "最长")
         item(R.string.label_asr_vendor, R.string.label_asr_vendor)
         item(
+            R.string.label_deepseek_api_key,
+            R.string.label_asr_vendor,
+            "deepseek",
+            "ASR",
+            forceAsrVendorId = AsrVendor.DeepSeek.id
+        )
+        item(
             R.string.label_volc_asr_model,
             R.string.label_asr_vendor,
             "豆包",

@@ -23,7 +23,8 @@ enum class AsrVendor(val id: String) {
     FireRedAsr("firered_asr"),
     XAsr("x_asr"),
     MiMo("mimo"),
-    Tencent("tencent");
+    Tencent("tencent"),
+    DeepSeek("deepseek");
 
     companion object {
         fun fromId(id: String?): AsrVendor = AsrVendorRegistry.vendorFromIdOrNull(id) ?: Volc

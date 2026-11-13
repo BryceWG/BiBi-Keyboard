@@ -1,0 +1,5 @@
+<resources>
+    <string name="vendor_deepseek">DeepSeek</string>
+    <string name="label_deepseek_api_key">DeepSeek ASR API Key</string>
+    <string name="error_missing_deepseek_key">尚未設定 DeepSeek ASR API Key</string>
+</resources>

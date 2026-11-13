@@ -76,6 +76,8 @@ internal fun CurrentAsrVendorConfig(
     zhipuTemperature: Float,
     onZhipuTemperatureChange: (Float) -> Unit,
     onZhipuTemperatureFinished: () -> Unit,
+    deepSeekApiKey: String,
+    onDeepSeekApiKeyChange: (String) -> Unit,
     cohereApiKey: String,
     onCohereApiKeyChange: (String) -> Unit,
     cohereModel: String,
@@ -384,6 +386,26 @@ internal fun CurrentAsrVendorConfig(
                 onValueChangeFinished = { onZhipuTemperatureFinished() }
             )
             AsrBodyText(uiMode = uiMode, textRes = R.string.zhipu_temperature_hint)
+        }
+
+        AsrVendor.DeepSeek -> {
+            val itemCount = primaryGroupCount ?: 2
+            AsrTextField(
+                uiMode = uiMode,
+                value = deepSeekApiKey,
+                onValueChange = onDeepSeekApiKeyChange,
+                label = stringResource(R.string.label_deepseek_api_key),
+                password = true,
+                index = primaryIndexOffset,
+                count = itemCount
+            )
+            AsrActionPreference(
+                id = "deepseek_get_key_guide",
+                titleRes = R.string.btn_get_api_key_guide,
+                index = primaryIndexOffset + 1,
+                count = itemCount,
+                onClick = { onOpenGuide("https://platform.deepseek.com/api_keys") }
+            )
         }
 
         AsrVendor.Cohere -> {
@@ -1230,6 +1252,7 @@ internal fun currentOnlineAsrPrimaryItemCount(
         customModelVisible = stepAudioCustomModelVisible
     )
     AsrVendor.Zhipu -> 2
+    AsrVendor.DeepSeek -> 2
     AsrVendor.Cohere -> coherePrimaryItemCount(cohereCustomModelVisible)
     AsrVendor.Gemini -> 6
     AsrVendor.OpenRouter -> 4

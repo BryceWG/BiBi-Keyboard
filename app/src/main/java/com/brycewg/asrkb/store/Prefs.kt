@@ -1633,6 +1633,9 @@ class Prefs(context: Context) {
     // 智谱 GLM：上下文提示（prompt），用于长文本场景的前文上下文，建议小于8000字
     var zhipuPrompt: String by stringPref(KEY_ZHIPU_PROMPT, "")
 
+    // DeepSeek ASR（与 LLM 配置独立）
+    var deepSeekAsrApiKey: String by stringPref(KEY_DEEPSEEK_ASR_API_KEY, "")
+
     // Cohere Transcribe
     var cohereApiKey: String by stringPref(KEY_COHERE_API_KEY, "")
     var cohereAsrModel: String by stringPref(KEY_COHERE_ASR_MODEL, DEFAULT_COHERE_ASR_MODEL)

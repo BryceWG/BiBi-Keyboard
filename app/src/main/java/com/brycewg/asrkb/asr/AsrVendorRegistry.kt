@@ -309,6 +309,13 @@ internal object AsrVendorRegistry {
                 AsrVendorDisplayTag.Accurate
             ),
             capabilities = onlineFileAndStreamCapabilities()
+        ),
+        descriptor(
+            vendor = AsrVendor.DeepSeek,
+            displayNameResId = R.string.vendor_deepseek,
+            pickerOrder = 20,
+            tags = listOf(AsrVendorDisplayTag.Online, AsrVendorDisplayTag.NonStreaming),
+            capabilities = onlineFileCapabilities()
         )
     )
 

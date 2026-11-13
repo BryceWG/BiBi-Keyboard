@@ -79,6 +79,8 @@ internal data class AsrOnlineSettingsRouteState(
     val onZhipuApiKeyChange: (String) -> Unit,
     val zhipuTemperature: Float,
     val onZhipuTemperatureChange: (Float) -> Unit,
+    val deepSeekApiKey: String,
+    val onDeepSeekApiKeyChange: (String) -> Unit,
     val cohereApiKey: String,
     val onCohereApiKeyChange: (String) -> Unit,
     val cohereModel: String,

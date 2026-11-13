@@ -131,6 +131,9 @@ internal object PrefsAsrVendorFields {
         AsrVendor.Zhipu to listOf(
             VendorField.credential(KEY_ZHIPU_API_KEY)
         ),
+        AsrVendor.DeepSeek to listOf(
+            VendorField.credential(KEY_DEEPSEEK_ASR_API_KEY)
+        ),
         AsrVendor.Cohere to listOf(
             VendorField.credential(KEY_COHERE_API_KEY),
             VendorField.model(

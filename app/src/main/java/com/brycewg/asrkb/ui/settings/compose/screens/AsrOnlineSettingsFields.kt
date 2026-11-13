@@ -53,6 +53,7 @@ internal class AsrOnlineSettingsFields(
     var stepAudioUseItn by mutableStateOf(prefs.stepAudioUseItn)
     var zhipuApiKey by mutableStateOf(prefs.zhipuApiKey)
     var zhipuTemperature by mutableStateOf(prefs.zhipuTemperature.coerceIn(0f, 1f))
+    var deepSeekApiKey by mutableStateOf(prefs.deepSeekAsrApiKey)
     var cohereApiKey by mutableStateOf(prefs.cohereApiKey)
     var cohereModel by mutableStateOf(prefs.cohereAsrModel)
     var cohereCustomModelVisible by mutableStateOf(isCohereCustomModel(cohereModel))
@@ -142,6 +143,7 @@ internal class AsrOnlineSettingsFields(
         stepAudioUseItn = prefs.stepAudioUseItn
         zhipuApiKey = prefs.zhipuApiKey
         zhipuTemperature = prefs.zhipuTemperature.coerceIn(0f, 1f)
+        deepSeekApiKey = prefs.deepSeekAsrApiKey
         cohereApiKey = prefs.cohereApiKey
         cohereModel = prefs.cohereAsrModel
         cohereCustomModelVisible = isCohereCustomModel(cohereModel)
@@ -391,6 +393,12 @@ internal class AsrOnlineSettingsFields(
             val next = value.coerceIn(0f, 1f)
             zhipuTemperature = next
             prefs.zhipuTemperature = next
+        },
+        deepSeekApiKey = deepSeekApiKey,
+        onDeepSeekApiKeyChange = { value ->
+            val key = value.removeBearerPrefix()
+            deepSeekApiKey = key
+            prefs.deepSeekAsrApiKey = key
         },
         cohereApiKey = cohereApiKey,
         onCohereApiKeyChange = { value ->
