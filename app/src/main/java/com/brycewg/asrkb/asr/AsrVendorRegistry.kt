@@ -144,9 +144,16 @@ internal object AsrVendorRegistry {
             capabilities = onlineFileAndStreamCapabilities()
         ),
         descriptor(
+            vendor = AsrVendor.DeepSeek,
+            displayNameResId = R.string.vendor_deepseek,
+            pickerOrder = 6,
+            tags = listOf(AsrVendorDisplayTag.Online, AsrVendorDisplayTag.NonStreaming),
+            capabilities = onlineFileCapabilities()
+        ),
+        descriptor(
             vendor = AsrVendor.Gemini,
             displayNameResId = R.string.vendor_gemini,
-            pickerOrder = 6,
+            pickerOrder = 7,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
@@ -158,7 +165,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.MiMo,
             legacyIds = setOf("mimo_asr"),
             displayNameResId = R.string.vendor_mimo,
-            pickerOrder = 7,
+            pickerOrder = 8,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
@@ -167,9 +174,21 @@ internal object AsrVendorRegistry {
             capabilities = onlineFileCapabilities(customEndpoint = true)
         ),
         descriptor(
+            vendor = AsrVendor.Tencent,
+            displayNameResId = R.string.vendor_tencent,
+            pickerOrder = 9,
+            tags = listOf(
+                AsrVendorDisplayTag.Online,
+                AsrVendorDisplayTag.Streaming,
+                AsrVendorDisplayTag.NonStreaming,
+                AsrVendorDisplayTag.Accurate
+            ),
+            capabilities = onlineFileAndStreamCapabilities()
+        ),
+        descriptor(
             vendor = AsrVendor.Soniox,
             displayNameResId = R.string.vendor_soniox,
-            pickerOrder = 8,
+            pickerOrder = 10,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.Streaming,
@@ -182,7 +201,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.StepAudio,
             legacyIds = setOf("step_audio", "stepfun"),
             displayNameResId = R.string.vendor_stepaudio,
-            pickerOrder = 9,
+            pickerOrder = 11,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
@@ -194,7 +213,7 @@ internal object AsrVendorRegistry {
         descriptor(
             vendor = AsrVendor.Zhipu,
             displayNameResId = R.string.vendor_zhipu,
-            pickerOrder = 10,
+            pickerOrder = 12,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
@@ -205,7 +224,7 @@ internal object AsrVendorRegistry {
         descriptor(
             vendor = AsrVendor.Cohere,
             displayNameResId = R.string.vendor_cohere,
-            pickerOrder = 11,
+            pickerOrder = 13,
             tags = listOf(
                 AsrVendorDisplayTag.Online,
                 AsrVendorDisplayTag.NonStreaming,
@@ -216,7 +235,7 @@ internal object AsrVendorRegistry {
         descriptor(
             vendor = AsrVendor.SenseVoice,
             displayNameResId = R.string.vendor_sensevoice,
-            pickerOrder = 12,
+            pickerOrder = 14,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
@@ -228,7 +247,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.FunAsrNano,
             legacyIds = setOf("funasr"),
             displayNameResId = R.string.vendor_funasr_nano,
-            pickerOrder = 13,
+            pickerOrder = 15,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
@@ -240,7 +259,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.Qwen3Asr,
             legacyIds = setOf("qwen_asr", "qwen3asr"),
             displayNameResId = R.string.vendor_qwen3_asr,
-            pickerOrder = 14,
+            pickerOrder = 16,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.Recommended,
@@ -254,7 +273,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.Parakeet,
             legacyIds = setOf("nemo_parakeet"),
             displayNameResId = R.string.vendor_parakeet,
-            pickerOrder = 15,
+            pickerOrder = 17,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming
@@ -265,7 +284,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.GigaAm,
             legacyIds = setOf("gigaam"),
             displayNameResId = R.string.vendor_giga_am,
-            pickerOrder = 16,
+            pickerOrder = 18,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
@@ -277,7 +296,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.FireRedAsr,
             legacyIds = setOf("telespeech"),
             displayNameResId = R.string.vendor_firered_asr,
-            pickerOrder = 17,
+            pickerOrder = 19,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.NonStreaming,
@@ -289,7 +308,7 @@ internal object AsrVendorRegistry {
             vendor = AsrVendor.XAsr,
             legacyIds = setOf("x-asr", LEGACY_X_ASR_VENDOR_ID),
             displayNameResId = R.string.vendor_x_asr,
-            pickerOrder = 18,
+            pickerOrder = 20,
             tags = listOf(
                 AsrVendorDisplayTag.Local,
                 AsrVendorDisplayTag.Recommended,
@@ -297,25 +316,6 @@ internal object AsrVendorRegistry {
                 AsrVendorDisplayTag.Accurate
             ),
             capabilities = localStreamingCapabilities()
-        ),
-        descriptor(
-            vendor = AsrVendor.Tencent,
-            displayNameResId = R.string.vendor_tencent,
-            pickerOrder = 19,
-            tags = listOf(
-                AsrVendorDisplayTag.Online,
-                AsrVendorDisplayTag.Streaming,
-                AsrVendorDisplayTag.NonStreaming,
-                AsrVendorDisplayTag.Accurate
-            ),
-            capabilities = onlineFileAndStreamCapabilities()
-        ),
-        descriptor(
-            vendor = AsrVendor.DeepSeek,
-            displayNameResId = R.string.vendor_deepseek,
-            pickerOrder = 20,
-            tags = listOf(AsrVendorDisplayTag.Online, AsrVendorDisplayTag.NonStreaming),
-            capabilities = onlineFileCapabilities()
         )
     )
 
