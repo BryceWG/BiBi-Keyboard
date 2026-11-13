@@ -28,14 +28,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.LocalSettingsHapticTap
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.settings.compose.core.settingsSegmentedItemShape
+import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.CheckboxLocation
 import top.yukonga.miuix.kmp.preference.CheckboxPreference
+import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 internal data class SettingsMultiChoiceSheetState(
     val title: String,
@@ -127,11 +132,24 @@ private fun MiuixMultiChoiceSheet(
     val hapticTap = LocalSettingsHapticTap.current
     OverlayDialog(
         show = show,
-        title = state.title,
         onDismissRequest = { show = false },
-        onDismissFinished = onDismiss
+        onDismissFinished = onDismiss,
+        insideMargin = DpSize(0.dp, 0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+            MiuixText(
+                text = state.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        top = SettingsLayoutMetrics.SheetDialogTitleTopPadding,
+                        bottom = SettingsLayoutMetrics.SheetTitleBottomPadding
+                    ),
+                color = MiuixTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Medium,
+                style = MiuixTheme.textStyles.title4
+            )
             MultiChoiceList(
                 items = state.items,
                 selectedOrder = selectedOrder,
