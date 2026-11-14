@@ -5,7 +5,7 @@
 
     <!-- Soniox configuration -->
     <string name="label_soniox_streaming">串流識別</string>
-    <string name="label_soniox_endpoint_mode">識別模式</string>
+    <string name="label_soniox_endpoint_mode">識別策略</string>
     <string name="label_soniox_language">識別語言（可複選）</string>
     <string name="label_soniox_language_strict">嚴格限制識別語言</string>
     <string name="label_soniox_api_key">API Key（Bearer）</string>

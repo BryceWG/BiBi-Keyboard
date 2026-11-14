@@ -5,7 +5,7 @@
 
     <!-- Soniox configuration -->
     <string name="label_soniox_streaming">التعرّف بالبث</string>
-    <string name="label_soniox_endpoint_mode">وضع التعرّف</string>
+    <string name="label_soniox_endpoint_mode">استراتيجية التعرّف</string>
     <string name="label_soniox_language">لغة التعرّف (متعدد)</string>
     <string name="label_soniox_language_strict">تقييد اللغة بصرامة</string>
     <string name="label_soniox_api_key">مفتاح API (Bearer)</string>

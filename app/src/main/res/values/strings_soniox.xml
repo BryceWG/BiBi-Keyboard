@@ -5,7 +5,7 @@
 
     <!-- Soniox configuration -->
     <string name="label_soniox_streaming">Streaming recognition</string>
-    <string name="label_soniox_endpoint_mode">Recognition mode</string>
+    <string name="label_soniox_endpoint_mode">Recognition strategy</string>
     <string name="label_soniox_language">Recognition language (Multiple)</string>
     <string name="label_soniox_language_strict">Strict language restriction</string>
     <string name="label_soniox_api_key">API Key (Bearer)</string>

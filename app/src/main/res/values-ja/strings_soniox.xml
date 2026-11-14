@@ -5,7 +5,7 @@
 
     <!-- Soniox configuration -->
     <string name="label_soniox_streaming">ストリーミング認識</string>
-    <string name="label_soniox_endpoint_mode">認識モード</string>
+    <string name="label_soniox_endpoint_mode">認識方針</string>
     <string name="label_soniox_language">認識言語（言語ヒント）</string>
     <string name="label_soniox_language_strict">言語を厳格に制限</string>
     <string name="label_soniox_api_key">APIキー（Bearer）</string>
