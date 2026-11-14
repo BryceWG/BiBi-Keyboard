@@ -8,7 +8,7 @@
     <string name="label_fr_threads">スレッド数（1-8）</string>
     <string name="label_fr_keep_alive">モデルアンロード方針</string>
     <string name="label_fr_preload">積極的にモデルを読み込む</string>
-    <string name="fr_model_ctc_int8">中英語 CTC（int8、約 740MB）</string>
+    <string name="fr_model_ctc_int8">中英語 CTC（int8）\n約 740MB · メモリ8GB以上を推奨</string>
     <string name="btn_fr_download_model">モデルをワンクリックでダウンロード</string>
     <string name="btn_fr_import_model">ローカルからインポート</string>
     <string name="btn_fr_clear_model">ダウンロード済み FireRedASR V2 モデルを削除</string>

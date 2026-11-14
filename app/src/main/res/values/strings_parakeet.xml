@@ -4,8 +4,8 @@
     <string name="vendor_parakeet">Parakeet</string>
 
     <string name="label_pk_model_variant">Model version</string>
-    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 European (456MB)</string>
-    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 English (451MB)</string>
+    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 European\nApprox. 456MB · Recommended: 6GB+ RAM</string>
+    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 English\nApprox. 451MB · Recommended: 6GB+ RAM</string>
     <string name="label_pk_threads">Threads (1-8)</string>
     <string name="label_pk_preload">Aggressive model loading</string>
     <string name="feature_pk_preload_off_desc">Loads the model only when needed, which may cause delay on first use.</string>

@@ -5,8 +5,8 @@
 
     <!-- FunASR Nano local settings -->
     <string name="label_fn_model_variant">إصدار النموذج</string>
-    <string name="fn_model_nano_int8">FunASR Nano (int8، ~690MB)</string>
-    <string name="fn_model_mlt_nano_int8">FunASR MLT Nano (متعدد اللغات، int8، ~690MB)</string>
+    <string name="fn_model_nano_int8">Nano (int8)\nحوالي 690MB · يُنصح بذاكرة RAM بسعة 8GB أو أكثر</string>
+    <string name="fn_model_mlt_nano_int8">MLT Nano (متعدد اللغات، int8)\nحوالي 690MB · يُنصح بذاكرة RAM بسعة 8GB أو أكثر</string>
     <string name="label_fn_language_preset">لغة التعرّف</string>
     <string name="fn_lang_auto">تلقائي / غير محدد</string>
     <string name="fn_lang_zh">الصينية</string>

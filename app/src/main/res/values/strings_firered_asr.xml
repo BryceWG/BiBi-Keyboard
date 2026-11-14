@@ -8,7 +8,7 @@
     <string name="label_fr_threads">Threads (1-8)</string>
     <string name="label_fr_keep_alive">Model unload policy</string>
     <string name="label_fr_preload">Aggressive model loading</string>
-    <string name="fr_model_ctc_int8">Zh + En CTC (int8, ~740MB)</string>
+    <string name="fr_model_ctc_int8">Zh + En CTC (int8)\nApprox. 740MB · Recommended: 8GB+ RAM</string>
     <string name="btn_fr_download_model">One-click download model</string>
     <string name="btn_fr_import_model">Import from local</string>
     <string name="btn_fr_clear_model">Clear downloaded FireRedASR V2 model</string>

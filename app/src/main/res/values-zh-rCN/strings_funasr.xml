@@ -5,8 +5,8 @@
 
     <!-- FunASR Nano local settings -->
     <string name="label_fn_model_variant">模型版本</string>
-    <string name="fn_model_nano_int8">FunASR Nano（int8，约690MB）</string>
-    <string name="fn_model_mlt_nano_int8">FunASR MLT Nano（多国语言，int8，约690MB）</string>
+    <string name="fn_model_nano_int8">Nano（int8）\n约 690MB · 建议 8GB+ 内存设备</string>
+    <string name="fn_model_mlt_nano_int8">MLT Nano（多语种，int8）\n约 690MB · 建议 8GB+ 内存设备</string>
     <string name="label_fn_language_preset">识别语言</string>
     <string name="fn_lang_auto">自动 / 不指定</string>
     <string name="fn_lang_zh">中文</string>

@@ -8,7 +8,7 @@
     <string name="label_fr_threads">執行緒數（1-8）</string>
     <string name="label_fr_keep_alive">模型卸載策略</string>
     <string name="label_fr_preload">積極載入模型</string>
-    <string name="fr_model_ctc_int8">中英雙語 CTC（int8，約 740MB）</string>
+    <string name="fr_model_ctc_int8">中英雙語 CTC（int8）\n約 740MB · 建議 8GB+ 記憶體裝置</string>
     <string name="btn_fr_download_model">一鍵下載模型</string>
     <string name="btn_fr_import_model">從本機匯入模型</string>
     <string name="btn_fr_clear_model">清除已下載的 FireRedASR V2 模型</string>

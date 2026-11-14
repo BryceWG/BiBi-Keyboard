@@ -32,8 +32,8 @@
     <string name="sv_clear_done">تم مسح النموذج</string>
     <string name="sv_clear_failed">فشل المسح</string>
     <string name="label_sv_model_variant">إصدار النموذج</string>
-    <string name="sv_model_small_int8">صغير (int8، ~160MB)</string>
-    <string name="sv_model_small_full">صغير (fp32، ~850MB)</string>
+    <string name="sv_model_small_int8">صغير (int8)\nحوالي 160MB · نموذج خفيف</string>
+    <string name="sv_model_small_full">صغير (fp32)\nحوالي 850MB · يُنصح بذاكرة RAM بسعة 12GB أو أكثر</string>
     <string name="sv_loading_model">جارٍ تحميل النموذج المحلي…</string>
     <string name="sv_loading_model_while_listening">جارٍ الاستماع… تحميل النموذج المحلي في الخلفية…</string>
     <string name="sv_model_ready">تم تحميل النموذج المحلي</string>

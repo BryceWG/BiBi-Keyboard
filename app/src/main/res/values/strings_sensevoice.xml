@@ -32,8 +32,8 @@
     <string name="sv_clear_done">Model cleared</string>
     <string name="sv_clear_failed">Clear failed</string>
     <string name="label_sv_model_variant">Model version</string>
-    <string name="sv_model_small_int8">Small (int8, ~160MB)</string>
-    <string name="sv_model_small_full">Small (fp32, ~850MB)</string>
+    <string name="sv_model_small_int8">Small (int8)\nApprox. 160MB · Lightweight</string>
+    <string name="sv_model_small_full">Small (fp32)\nApprox. 850MB · Recommended: 12GB+ RAM</string>
     <string name="sv_loading_model">Loading local model…</string>
     <string name="sv_loading_model_while_listening">Listening… loading local model in background…</string>
     <string name="sv_model_ready">Local model loaded</string>

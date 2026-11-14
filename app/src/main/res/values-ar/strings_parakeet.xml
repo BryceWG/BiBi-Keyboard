@@ -4,8 +4,8 @@
     <string name="vendor_parakeet">Parakeet</string>
 
     <string name="label_pk_model_variant">إصدار النموذج</string>
-    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 أوروبي (456MB)</string>
-    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 إنجليزي (451MB)</string>
+    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 أوروبي\nحوالي 456MB · يُنصح بذاكرة RAM بسعة 6GB أو أكثر</string>
+    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 إنجليزي\nحوالي 451MB · يُنصح بذاكرة RAM بسعة 6GB أو أكثر</string>
     <string name="label_pk_threads">عدد الخيوط (1-8)</string>
     <string name="label_pk_preload">تحميل النموذج بقوة</string>
     <string name="feature_pk_preload_off_desc">يُحمَّل النموذج عند الحاجة فقط، وقد يسبب تأخيراً في أول استخدام.</string>

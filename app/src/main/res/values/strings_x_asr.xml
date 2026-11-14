@@ -7,7 +7,7 @@
     <string name="label_x_asr_model_variant">Model version</string>
     <string name="label_x_asr_threads">Threads (1-8)</string>
     <string name="label_x_asr_keep_alive">Model unload policy</string>
-    <string name="x_asr_variant_480ms">Zh+En (480 ms, 530MB)</string>
+    <string name="x_asr_variant_480ms">Zh+En (480 ms)\nApprox. 530MB · Recommended: 8GB+ RAM</string>
     <string name="btn_x_asr_download_model">One-click download model</string>
     <string name="btn_x_asr_import_model">Import model from local file</string>
     <string name="btn_x_asr_clear_model">Clear downloaded model</string>

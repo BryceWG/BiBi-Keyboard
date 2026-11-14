@@ -7,7 +7,7 @@
     <string name="label_x_asr_model_variant">模型版本</string>
     <string name="label_x_asr_threads">线程数（1-8）</string>
     <string name="label_x_asr_keep_alive">模型卸载策略</string>
-    <string name="x_asr_variant_480ms">中英（480 ms，530MB）</string>
+    <string name="x_asr_variant_480ms">中英（480 ms）\n约 530MB · 建议 8GB+ 内存设备</string>
     <string name="btn_x_asr_download_model">一键下载模型</string>
     <string name="btn_x_asr_import_model">从本地导入模型</string>
     <string name="btn_x_asr_clear_model">清除已下载模型</string>

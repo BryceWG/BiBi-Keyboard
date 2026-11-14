@@ -4,8 +4,8 @@
     <string name="vendor_qwen3_asr">Qwen3-ASR</string>
 
     <string name="label_qw_model_variant">模型版本</string>
-    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8（806MB）</string>
-    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8（2.0GB）</string>
+    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8\n约 806MB · 建议 12GB+ 内存设备</string>
+    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8\n约 2.0GB · 建议 16GB+ 内存设备</string>
     <string name="label_qw_threads">线程数（1-8）</string>
     <string name="label_qw_preload">积极加载模型</string>
     <string name="label_qw_use_itn">启用 ITN（数字智能识别）</string>

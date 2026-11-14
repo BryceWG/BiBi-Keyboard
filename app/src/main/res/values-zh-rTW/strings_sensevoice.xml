@@ -32,8 +32,8 @@
     <string name="sv_clear_done">已清除模型</string>
     <string name="sv_clear_failed">清除失敗</string>
     <string name="label_sv_model_variant">模型版本</string>
-    <string name="sv_model_small_int8">Small（int8，約160MB）</string>
-    <string name="sv_model_small_full">Small（fp32，約850MB）</string>
+    <string name="sv_model_small_int8">Small（int8）\n約 160MB · 輕量模型</string>
+    <string name="sv_model_small_full">Small（fp32）\n約 850MB · 建議 12GB+ 記憶體裝置</string>
     <string name="sv_loading_model">本機模型載入中…</string>
     <string name="sv_loading_model_while_listening">正在聆聽…本機模型背景載入中…</string>
     <string name="sv_model_ready">本機模型載入完成</string>

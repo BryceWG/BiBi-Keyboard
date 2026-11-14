@@ -4,8 +4,8 @@
     <string name="vendor_qwen3_asr">Qwen3-ASR</string>
 
     <string name="label_qw_model_variant">模型版本</string>
-    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8（806MB）</string>
-    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8（2.0GB）</string>
+    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8\n約 806MB · 建議 12GB+ 記憶體裝置</string>
+    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8\n約 2.0GB · 建議 16GB+ 記憶體裝置</string>
     <string name="label_qw_threads">執行緒數（1-8）</string>
     <string name="label_qw_preload">積極載入模型</string>
     <string name="label_qw_use_itn">啟用 ITN（數字智慧識別）</string>

@@ -4,8 +4,8 @@
     <string name="vendor_parakeet">Parakeet</string>
 
     <string name="label_pk_model_variant">モデルバージョン</string>
-    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 European（456MB）</string>
-    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 English（451MB）</string>
+    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 European\n約 456MB · メモリ6GB以上を推奨</string>
+    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 English\n約 451MB · メモリ6GB以上を推奨</string>
     <string name="label_pk_threads">スレッド数（1-8）</string>
     <string name="label_pk_preload">積極的にモデルを読み込む</string>
     <string name="feature_pk_preload_off_desc">必要なときにのみモデルを読み込むため、初回使用時に遅延が発生する可能性があります。</string>

@@ -7,7 +7,7 @@
     <string name="label_x_asr_model_variant">إصدار النموذج</string>
     <string name="label_x_asr_threads">عدد الخيوط (1-8)</string>
     <string name="label_x_asr_keep_alive">سياسة إلغاء تحميل النموذج</string>
-    <string name="x_asr_variant_480ms">صيني+إنجليزي (480 مللي ثانية، 530MB)</string>
+    <string name="x_asr_variant_480ms">صيني+إنجليزي (480 مللي ثانية)\nحوالي 530MB · يُنصح بذاكرة RAM بسعة 8GB أو أكثر</string>
     <string name="btn_x_asr_download_model">تنزيل النموذج بنقرة</string>
     <string name="btn_x_asr_import_model">استيراد النموذج من ملف محلي</string>
     <string name="btn_x_asr_clear_model">مسح النموذج المُنزَّل</string>

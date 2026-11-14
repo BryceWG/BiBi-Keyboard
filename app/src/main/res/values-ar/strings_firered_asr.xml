@@ -8,7 +8,7 @@
     <string name="label_fr_threads">عدد الخيوط (1-8)</string>
     <string name="label_fr_keep_alive">سياسة إلغاء تحميل النموذج</string>
     <string name="label_fr_preload">تحميل النموذج بقوة</string>
-    <string name="fr_model_ctc_int8">صيني + إنجليزي CTC (int8، ~740MB)</string>
+    <string name="fr_model_ctc_int8">صيني + إنجليزي CTC (int8)\nحوالي 740MB · يُنصح بذاكرة RAM بسعة 8GB أو أكثر</string>
     <string name="btn_fr_download_model">تنزيل النموذج بنقرة</string>
     <string name="btn_fr_import_model">استيراد من محلي</string>
     <string name="btn_fr_clear_model">مسح نموذج FireRedASR V2 المُنزَّل</string>

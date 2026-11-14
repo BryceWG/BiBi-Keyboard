@@ -4,8 +4,8 @@
     <string name="vendor_qwen3_asr">Qwen3-ASR</string>
 
     <string name="label_qw_model_variant">モデルバージョン</string>
-    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8（806MB）</string>
-    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8（2.0GB）</string>
+    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8\n約 806MB · メモリ12GB以上を推奨</string>
+    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8\n約 2.0GB · メモリ16GB以上を推奨</string>
     <string name="label_qw_threads">スレッド数（1-8）</string>
     <string name="label_qw_preload">積極的にモデルを読み込む</string>
     <string name="label_qw_use_itn">ITNを有効化（数字スマート認識）</string>

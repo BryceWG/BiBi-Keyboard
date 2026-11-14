@@ -4,8 +4,8 @@
     <string name="vendor_qwen3_asr">Qwen3-ASR</string>
 
     <string name="label_qw_model_variant">Model version</string>
-    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8 (806MB)</string>
-    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8 (2.0GB)</string>
+    <string name="qw_model_qwen3_06b_int8">Qwen3-ASR 0.6B Int8\nApprox. 806MB · Recommended: 12GB+ RAM</string>
+    <string name="qw_model_qwen3_17b_int8">Qwen3-ASR 1.7B Int8\nApprox. 2.0GB · Recommended: 16GB+ RAM</string>
     <string name="label_qw_threads">Threads (1-8)</string>
     <string name="label_qw_preload">Aggressive model loading</string>
     <string name="label_qw_use_itn">Enable ITN (smart number recognition)</string>

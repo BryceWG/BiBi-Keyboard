@@ -32,8 +32,8 @@
     <string name="sv_clear_done">モデルがクリアされました</string>
     <string name="sv_clear_failed">クリア失敗</string>
     <string name="label_sv_model_variant">モデルバージョン</string>
-    <string name="sv_model_small_int8">Small（int8、約160MB）</string>
-    <string name="sv_model_small_full">Small（fp32、約850MB）</string>
+    <string name="sv_model_small_int8">Small（int8）\n約 160MB · 軽量モデル</string>
+    <string name="sv_model_small_full">Small（fp32）\n約 850MB · メモリ12GB以上を推奨</string>
     <string name="sv_loading_model">ローカルモデルを読み込み中…</string>
     <string name="sv_loading_model_while_listening">聞いています…バックグラウンドでローカルモデルを読み込み中…</string>
     <string name="sv_model_ready">ローカルモデルが読み込まれました</string>

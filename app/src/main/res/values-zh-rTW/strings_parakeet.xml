@@ -4,8 +4,8 @@
     <string name="vendor_parakeet">Parakeet</string>
 
     <string name="label_pk_model_variant">模型版本</string>
-    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 European（456MB）</string>
-    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 English（451MB）</string>
+    <string name="pk_model_06b_v3_int8">0.6B V3 Int8 European\n約 456MB · 建議 6GB+ 記憶體裝置</string>
+    <string name="pk_model_06b_v2_int8">0.6B V2 Int8 English\n約 451MB · 建議 6GB+ 記憶體裝置</string>
     <string name="label_pk_threads">執行緒數（1-8）</string>
     <string name="label_pk_preload">積極載入模型</string>
     <string name="feature_pk_preload_off_desc">僅在需要時載入模型，首次使用可能有延遲。</string>
