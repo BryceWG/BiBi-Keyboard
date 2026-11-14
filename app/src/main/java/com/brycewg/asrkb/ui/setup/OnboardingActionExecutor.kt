@@ -5,8 +5,6 @@
  */
 package com.brycewg.asrkb.ui.setup
 
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.brycewg.asrkb.R
@@ -44,21 +42,9 @@ internal class OnboardingActionExecutor(private val activity: AppCompatActivity)
         return DownloadSourceConfig.buildOptions(activity, SENSEVOICE_ZIP_URL)
     }
 
-    fun applyOnlineCustom() {
+    fun applyCustomService() {
         prefs.sfFreeAsrEnabled = false
         prefs.sfFreeLlmEnabled = false
-    }
-
-    fun openOnlineModelConfigGuide(): Int? {
-        val docUrl = activity.getString(R.string.model_guide_config_doc_url)
-        try {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(docUrl))
-            activity.startActivity(intent)
-            return null
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to open documentation", e)
-            return R.string.external_aidl_guide_open_failed
-        }
     }
 
     fun startLocalModelDownload(option: DownloadSourceOption): Int {

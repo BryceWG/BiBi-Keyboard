@@ -224,7 +224,7 @@ object SettingsSearchIndex {
         item(R.string.label_silence_window_ms, R.string.label_auto_stop_silence)
         item(R.string.label_silence_sensitivity, R.string.label_auto_stop_silence, "vad", "判停", "灵敏度")
         item(R.string.label_recording_max_duration, R.string.section_silence_autostop, "maximum duration", "最长")
-        item(R.string.label_asr_vendor, R.string.label_asr_vendor)
+        item(R.string.label_asr_vendor, R.string.label_asr_vendor, "recommendation", "language", "推荐", "语言", "星标")
         item(
             R.string.label_deepseek_api_key,
             R.string.label_asr_vendor,

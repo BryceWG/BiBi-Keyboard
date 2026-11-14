@@ -314,10 +314,9 @@
   <string name="model_guide_option_local">📦 ローカルモデルを使用</string>
   <string name="model_guide_option_local_desc">API キー不要、オフライン使用可能、プライバシー保護</string>
   <string name="model_guide_option_local_action">SenseVoice モデル（約1GB）をダウンロードし、オフライン認識を有効化</string>
-  <string name="model_guide_option_online">☁️ オンラインモデルを使用（カスタム）</string>
-  <string name="model_guide_option_online_desc">高精度、複数のプロバイダーをサポート（Volcengine、OpenAI、Gemini など）、API キーの設定が必要</string>
-  <string name="model_guide_option_online_action">設定ガイドを開き、API キーの設定をサポート</string>
-  <string name="model_guide_online_dialog_message">オンライン音声認識は複数のプロバイダーをサポート（Volcengine、SiliconFlow、OpenAI、Gemini、Alibaba Qianwen、Soniox、ElevenLabs など）。詳細な手順は設定ガイドをご参照ください。</string>
+  <string name="model_guide_option_custom">ほかの音声認識サービスを選択</string>
+  <string name="model_guide_option_custom_desc">オンラインサービスを設定するか、ほかのローカルモデルをダウンロードします</string>
+  <string name="model_guide_option_custom_action">音声認識設定を開き、プロバイダーを選んで設定します</string>
   <string name="model_guide_select_prompt">モデルのタイプを選択してください</string>
   <string name="model_guide_downloading">モデルをダウンロード中、お待ちください…</string>
   <string name="model_guide_download_complete">モデルのダウンロード完了</string>

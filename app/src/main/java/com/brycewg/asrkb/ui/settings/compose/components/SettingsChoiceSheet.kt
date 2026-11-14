@@ -9,16 +9,22 @@
 package com.brycewg.asrkb.ui.settings.compose.components
 
 import androidx.annotation.ColorRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
@@ -33,9 +39,13 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpSize
@@ -46,7 +56,10 @@ import com.brycewg.asrkb.ui.settings.compose.core.LocalBibiSettingsDark
 import com.brycewg.asrkb.ui.settings.compose.core.LocalSettingsHapticTap
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.settings.compose.core.settingsSegmentedItemShape
+import top.yukonga.miuix.kmp.basic.BasicComponent
 import top.yukonga.miuix.kmp.basic.BasicComponentDefaults
+import top.yukonga.miuix.kmp.basic.Icon as MiuixIcon
+import top.yukonga.miuix.kmp.basic.RadioButton as MiuixRadioButton
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.preference.RadioButtonLocation
@@ -62,7 +75,8 @@ internal data class SettingsChoiceTag(
 internal data class SettingsChoiceItem(
     val title: String,
     val originalIndex: Int,
-    val tags: List<SettingsChoiceTag> = emptyList()
+    val tags: List<SettingsChoiceTag> = emptyList(),
+    val recommended: Boolean = false
 )
 
 internal data class SettingsChoiceGroup(
@@ -74,7 +88,8 @@ internal data class SettingsChoiceSheetState(
     val title: String,
     val groups: List<SettingsChoiceGroup>,
     val selectedIndex: Int,
-    val onSelected: (Int) -> Unit
+    val onSelected: (Int) -> Unit,
+    val header: (@Composable (BibiUiMode) -> Unit)? = null
 )
 
 /** Reusable state holder for provider -> model and other cascading choice sheets. */
@@ -233,6 +248,9 @@ private fun ChoiceSheetList(
         uiMode = uiMode,
         contentPadding = PaddingValues(0.dp)
     ) {
+        state.header?.let { header ->
+            item("choice-header") { header(uiMode) }
+        }
         visibleGroups.forEach { group ->
             if (group.label.isNotBlank()) {
                 item("header-${group.label}") {
@@ -312,7 +330,7 @@ internal fun SettingsChoiceItemRow(
         ) {
             ListItem(
                 modifier = Modifier.heightIn(min = SettingsLayoutMetrics.SettingsPreferenceMinHeight),
-                headlineContent = { MaterialText(item.title) },
+                headlineContent = { ChoiceTitle(item = item, uiMode = uiMode, selected = selected) },
                 supportingContent = item.tags.takeIf { it.isNotEmpty() }?.let { tags ->
                     { ChoiceTags(tags = tags) }
                 },
@@ -333,16 +351,67 @@ internal fun SettingsChoiceItemRow(
             )
         }
 
-        BibiUiMode.Miuix -> RadioButtonPreference(
-            title = item.title,
-            insideMargin = miuixInsideMargin,
-            selected = selected,
-            onClick = onClick,
-            radioButtonLocation = RadioButtonLocation.End,
-            bottomAction = item.tags.takeIf { it.isNotEmpty() }?.let { tags ->
-                { ChoiceTags(tags = tags) }
+        BibiUiMode.Miuix -> if (item.recommended) {
+            BasicComponent(
+                modifier = Modifier.semantics { this.selected = selected },
+                insideMargin = miuixInsideMargin,
+                onClick = onClick,
+                role = Role.RadioButton,
+                endActions = { MiuixRadioButton(selected = selected, onClick = null) },
+                bottomAction = item.tags.takeIf { it.isNotEmpty() }?.let { tags ->
+                    { ChoiceTags(tags = tags) }
+                }
+            ) {
+                ChoiceTitle(item = item, uiMode = uiMode, selected = selected)
             }
-        )
+        } else {
+            RadioButtonPreference(
+                title = item.title,
+                insideMargin = miuixInsideMargin,
+                selected = selected,
+                onClick = onClick,
+                radioButtonLocation = RadioButtonLocation.End,
+                bottomAction = item.tags.takeIf { it.isNotEmpty() }?.let { tags ->
+                    { ChoiceTags(tags = tags) }
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChoiceTitle(item: SettingsChoiceItem, uiMode: BibiUiMode, selected: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        when (uiMode) {
+            BibiUiMode.Material -> MaterialText(item.title, modifier = Modifier.weight(1f, fill = false))
+            BibiUiMode.Miuix -> MiuixText(
+                text = item.title,
+                modifier = Modifier.weight(1f, fill = false),
+                style = MiuixTheme.textStyles.headline1,
+                fontWeight = FontWeight.Medium,
+                color = if (selected) MiuixTheme.colorScheme.primary else MiuixTheme.colorScheme.onSurface
+            )
+        }
+        if (item.recommended) {
+            val description = stringResource(R.string.asr_vendor_tag_recommended)
+            when (uiMode) {
+                BibiUiMode.Material -> Icon(
+                    imageVector = Icons.Rounded.Star,
+                    contentDescription = description,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+                BibiUiMode.Miuix -> MiuixIcon(
+                    imageVector = Icons.Rounded.Star,
+                    contentDescription = description,
+                    tint = MiuixTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
     }
 }
 

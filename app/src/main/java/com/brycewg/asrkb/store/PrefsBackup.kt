@@ -63,6 +63,7 @@ internal object PrefsBackup {
         o.put(KEY_HIDE_RECENT_TASK_CARD, hideRecentTaskCard)
         o.put(KEY_KEEP_ALIVE_NOTIFICATION_CLICK_ROUTE, keepAliveNotificationClickRoute)
         o.put(KEY_APP_LANGUAGE_TAG, appLanguageTag)
+        o.put(KEY_ASR_RECOMMENDATION_LANGUAGE_TAG, asrRecommendationLanguageTag)
         o.put(KEY_SETTINGS_UI_MODE, settingsUiMode)
         o.put(KEY_SETTINGS_THEME_MODE, settingsThemeMode)
         o.put(KEY_APP_ICON_COLOR, appIconColor)
@@ -382,6 +383,7 @@ internal object PrefsBackup {
                 keepAliveNotificationClickRoute = it
             }
             optString(KEY_APP_LANGUAGE_TAG)?.let { appLanguageTag = it }
+            optString(KEY_ASR_RECOMMENDATION_LANGUAGE_TAG)?.let { asrRecommendationLanguageTag = it }
             optString(KEY_SETTINGS_UI_MODE)?.let { settingsUiMode = it }
             optString(KEY_SETTINGS_THEME_MODE)?.let { settingsThemeMode = it }
             optString(KEY_APP_ICON_COLOR)?.let { appIconColor = it }

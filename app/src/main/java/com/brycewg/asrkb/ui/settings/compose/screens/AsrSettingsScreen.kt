@@ -43,6 +43,7 @@ import com.brycewg.asrkb.ui.settings.compose.components.SettingsMultiChoiceSheet
 import com.brycewg.asrkb.ui.settings.compose.components.settingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsActionController
+import com.brycewg.asrkb.ui.settings.compose.state.rememberAsrRecommendationLanguageState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -74,6 +75,8 @@ fun AsrSettingsScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()
     val prefs = remember(context) { Prefs(context) }
+    val recommendationLanguageState = rememberAsrRecommendationLanguageState(prefs)
+    var vendorChoiceSheet by remember { mutableStateOf<AsrVendorChoiceSheetRequest?>(null) }
     val viewModel: AsrSettingsViewModel = viewModel()
     remember(context, viewModel) {
         viewModel.initialize(context)
@@ -244,9 +247,7 @@ fun AsrSettingsScreen(
         selectedVendor: AsrVendor,
         onSelected: (AsrVendor) -> Unit
     ) {
-        choiceSheet = asrVendorChoiceSheetState(
-            context = context,
-            prefs = prefs,
+        vendorChoiceSheet = AsrVendorChoiceSheetRequest(
             titleResId = titleResId,
             selectedVendor = selectedVendor,
             onSelected = onSelected
@@ -739,6 +740,13 @@ fun AsrSettingsScreen(
                 }
             )
         }
+        AsrVendorChoiceSheet(
+            request = vendorChoiceSheet,
+            prefs = prefs,
+            languageState = recommendationLanguageState,
+            uiMode = uiMode,
+            onDismiss = { vendorChoiceSheet = null }
+        )
         AsrSettingsDialogHost(
             uiMode = uiMode,
             choiceSheet = choiceSheet,

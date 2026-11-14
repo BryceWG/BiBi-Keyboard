@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="asr_recommendation_language_title">おすすめの基準言語</string>
+    <string name="asr_recommendation_language_summary">★ は%1$s向けのおすすめ</string>
+    <string name="onboarding_asr_recommendation_language">%1$sに適したサービスをおすすめします</string>
+    <string name="asr_recommendation_language_other">その他</string>
+</resources>

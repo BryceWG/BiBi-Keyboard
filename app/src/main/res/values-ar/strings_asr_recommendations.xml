@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="asr_recommendation_language_title">لغة التوصيات</string>
+    <string name="asr_recommendation_language_summary">★ يشير إلى توصيات للغة %1$s</string>
+    <string name="onboarding_asr_recommendation_language">سنوصي بخدمات مناسبة للغة %1$s</string>
+    <string name="asr_recommendation_language_other">أخرى</string>
+</resources>

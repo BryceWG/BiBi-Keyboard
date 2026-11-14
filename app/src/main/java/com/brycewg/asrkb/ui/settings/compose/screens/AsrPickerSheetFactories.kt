@@ -8,11 +8,13 @@ package com.brycewg.asrkb.ui.settings.compose.screens
 import android.content.Context
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.asr.AsrVendor
+import com.brycewg.asrkb.asr.AsrVendorRecommendations
 import com.brycewg.asrkb.asr.BackupAsrLocalResidency
 import com.brycewg.asrkb.asr.TencentAsrModelCatalog
 import com.brycewg.asrkb.asr.VolcAsrModelCatalog
 import com.brycewg.asrkb.asr.partitionAsrVendorsByConfigured
 import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.ui.AsrVendorTag
 import com.brycewg.asrkb.ui.AsrVendorUi
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceGroup
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceItem
@@ -296,14 +298,18 @@ internal fun asrVendorChoiceSheetState(
     prefs: Prefs,
     titleResId: Int,
     selectedVendor: AsrVendor,
+    recommendationLanguage: String,
     onSelected: (AsrVendor) -> Unit
 ): SettingsChoiceSheetState {
     val vendorOrder = AsrVendorUi.ordered()
+    val recommended = AsrVendorRecommendations.forLanguage(recommendationLanguage)
     val vendorItems = vendorOrder.mapIndexed { index, vendor ->
         SettingsChoiceItem(
             title = AsrVendorUi.name(context, vendor),
             originalIndex = index,
-            tags = AsrVendorUi.tags(vendor).map { tag ->
+            recommended = vendor in recommended,
+            // 旧静态推荐标签不再参与展示，推荐状态只由语言规则提供。
+            tags = AsrVendorUi.tags(vendor).filterNot { it == AsrVendorTag.Recommended }.map { tag ->
                 SettingsChoiceTag(
                     label = context.getString(tag.labelResId),
                     bgColorResId = tag.bgColorResId,
@@ -323,13 +329,13 @@ internal fun asrVendorChoiceSheetState(
         groups = listOf(
             SettingsChoiceGroup(
                 label = context.getString(R.string.asr_vendor_group_configured),
-                items = partition.configured.mapNotNull { vendor ->
+                items = AsrVendorRecommendations.prioritize(partition.configured, recommended).mapNotNull { vendor ->
                     indexByVendor[vendor]?.let { idx -> vendorItems[idx] }
                 }
             ),
             SettingsChoiceGroup(
                 label = context.getString(R.string.asr_vendor_group_unconfigured),
-                items = partition.unconfigured.mapNotNull { vendor ->
+                items = AsrVendorRecommendations.prioritize(partition.unconfigured, recommended).mapNotNull { vendor ->
                     indexByVendor[vendor]?.let { idx -> vendorItems[idx] }
                 }
             )

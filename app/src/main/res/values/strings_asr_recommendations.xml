@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="asr_recommendation_language_title">Recommendation language</string>
+    <string name="asr_recommendation_language_summary">★ marks recommendations for %1$s</string>
+    <string name="onboarding_asr_recommendation_language">We will recommend services for %1$s</string>
+    <string name="asr_recommendation_language_other">Other</string>
+</resources>

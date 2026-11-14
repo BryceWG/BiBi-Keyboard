@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
-import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.Code
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.OpenInBrowser
@@ -31,6 +30,7 @@ import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material.icons.rounded.Stars
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -40,16 +40,21 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.brycewg.asrkb.R
+import com.brycewg.asrkb.store.Prefs
+import com.brycewg.asrkb.ui.settings.compose.components.AsrRecommendationLanguageControl
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
+import com.brycewg.asrkb.ui.settings.compose.state.rememberAsrRecommendationLanguageState
 import top.yukonga.miuix.kmp.basic.Button as MiuixButton
 import top.yukonga.miuix.kmp.basic.ButtonDefaults as MiuixButtonDefaults
 import top.yukonga.miuix.kmp.basic.Card as MiuixCard
@@ -88,11 +93,21 @@ internal fun OnboardingAsrChoicePage(
     contentPadding: PaddingValues = SettingsLayoutMetrics.PageContentPadding,
     onSelected: (OnboardingAsrChoice) -> Unit
 ) {
+    val context = LocalContext.current
+    val prefs = remember(context) { Prefs(context) }
+    val recommendationLanguageState = rememberAsrRecommendationLanguageState(prefs)
     OnboardingPage(uiMode = uiMode, modifier = modifier, contentPadding = contentPadding) {
         OnboardingHeader(
             title = stringResource(R.string.onboarding_asr_title),
             description = stringResource(R.string.onboarding_asr_desc),
-            uiMode = uiMode
+            uiMode = uiMode,
+            beforeDescription = {
+                AsrRecommendationLanguageControl(
+                    state = recommendationLanguageState,
+                    uiMode = uiMode,
+                    prominent = true
+                )
+            }
         )
         AsrChoiceCard(
             title = stringResource(R.string.model_guide_option_sf_free),
@@ -113,13 +128,13 @@ internal fun OnboardingAsrChoicePage(
             onClick = { onSelected(OnboardingAsrChoice.LocalModel) }
         )
         AsrChoiceCard(
-            title = stringResource(R.string.model_guide_option_online),
-            description = stringResource(R.string.model_guide_option_online_desc),
-            action = stringResource(R.string.model_guide_option_online_action),
-            icon = Icons.Rounded.Cloud,
-            selected = selected == OnboardingAsrChoice.OnlineCustom,
+            title = stringResource(R.string.model_guide_option_custom),
+            description = stringResource(R.string.model_guide_option_custom_desc),
+            action = stringResource(R.string.model_guide_option_custom_action),
+            icon = Icons.Rounded.Tune,
+            selected = selected == OnboardingAsrChoice.CustomService,
             uiMode = uiMode,
-            onClick = { onSelected(OnboardingAsrChoice.OnlineCustom) }
+            onClick = { onSelected(OnboardingAsrChoice.CustomService) }
         )
     }
 }
@@ -250,7 +265,12 @@ private fun OnboardingPage(
 }
 
 @Composable
-private fun OnboardingHeader(title: String, description: String, uiMode: BibiUiMode) {
+private fun OnboardingHeader(
+    title: String,
+    description: String,
+    uiMode: BibiUiMode,
+    beforeDescription: (@Composable () -> Unit)? = null
+) {
     Column(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -258,6 +278,7 @@ private fun OnboardingHeader(title: String, description: String, uiMode: BibiUiM
         when (uiMode) {
             BibiUiMode.Material -> {
                 Text(text = title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+                beforeDescription?.invoke()
                 Text(
                     text = description,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -267,6 +288,7 @@ private fun OnboardingHeader(title: String, description: String, uiMode: BibiUiM
 
             BibiUiMode.Miuix -> {
                 MiuixText(text = title, style = MiuixTheme.textStyles.title2)
+                beforeDescription?.invoke()
                 MiuixText(
                     text = description,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
@@ -387,7 +409,7 @@ private fun AsrChoiceCard(
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
-            verticalAlignment = Alignment.Top
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconByMode(icon, uiMode)
             Column(

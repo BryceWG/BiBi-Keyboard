@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="asr_recommendation_language_title">推薦語言</string>
+    <string name="asr_recommendation_language_summary">★ 表示為 %1$s 推薦</string>
+    <string name="onboarding_asr_recommendation_language">將為您推薦適合「%1$s」的服務</string>
+    <string name="asr_recommendation_language_other">其他</string>
+</resources>

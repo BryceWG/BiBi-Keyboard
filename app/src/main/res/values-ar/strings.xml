@@ -315,10 +315,9 @@
   <string name="model_guide_option_local">📦 نموذج محلي</string>
   <string name="model_guide_option_local_desc">بدون مفتاح API، يعمل دون اتصال، أكثر خصوصية</string>
   <string name="model_guide_option_local_action">سينزّل نموذج SenseVoice (~1GB) ويفعّل التعرّف دون اتصال</string>
-  <string name="model_guide_option_online">☁️ نموذج سحابي (مخصص)</string>
-  <string name="model_guide_option_online_desc">دقة أفضل، يدعم مزودين متعددين (Volcengine و OpenAI و Gemini وغيرها)، يتطلّب ضبط مفتاح API</string>
-  <string name="model_guide_option_online_action">سيفتح دليل الإعداد لمساعدتك على ضبط مفاتيح API</string>
-  <string name="model_guide_online_dialog_message">يدعم التعرّف السحابي مزودين متعددين (Volcengine و SiliconFlow و OpenAI و Gemini و Alibaba Qianwen و Soniox و ElevenLabs وغيرها). راجع دليل الإعداد للتفاصيل.</string>
+  <string name="model_guide_option_custom">اختيار خدمة أخرى للتعرّف على الكلام</string>
+  <string name="model_guide_option_custom_desc">اضبط خدمة عبر الإنترنت أو نزّل نموذجًا محليًا آخر</string>
+  <string name="model_guide_option_custom_action">افتح إعدادات التعرّف على الكلام لاختيار مزوّد وإكمال الإعداد</string>
   <string name="model_guide_select_prompt">يرجى اختيار نوع النموذج</string>
   <string name="model_guide_downloading">جارٍ تنزيل النموذج، انتظر…</string>
   <string name="model_guide_download_complete">اكتمل تنزيل النموذج</string>

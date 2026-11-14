@@ -11,7 +11,7 @@ import com.brycewg.asrkb.ui.DownloadSourceOption
 internal enum class OnboardingAsrChoice {
     SiliconFlowFree,
     LocalModel,
-    OnlineCustom
+    CustomService
 }
 
 internal data class OnboardingPermissionItem(
@@ -29,6 +29,5 @@ internal data class OnboardingPermissionGroup(
 
 internal sealed interface OnboardingDialogState {
     data object None : OnboardingDialogState
-    data object OnlineGuide : OnboardingDialogState
     data class DownloadSources(val options: List<DownloadSourceOption>) : OnboardingDialogState
 }

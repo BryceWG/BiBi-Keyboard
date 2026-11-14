@@ -112,7 +112,6 @@ class OnboardingGuideActivity : BaseActivity() {
                     state = onboardingDialog,
                     uiMode = uiMode,
                     onDismiss = ::dismissOnboardingDialog,
-                    onConfirmOnlineGuide = ::confirmOnlineGuide,
                     onSelectDownloadSource = ::selectLocalModelDownloadSource
                 )
                 SettingsMessageDialog(
@@ -372,9 +371,15 @@ class OnboardingGuideActivity : BaseActivity() {
                 dialogState.value = OnboardingDialogState.DownloadSources(actionExecutor.applyLocalModel())
             }
 
-            OnboardingAsrChoice.OnlineCustom -> {
-                actionExecutor.applyOnlineCustom()
-                dialogState.value = OnboardingDialogState.OnlineGuide
+            OnboardingAsrChoice.CustomService -> {
+                actionExecutor.applyCustomService()
+                startActivity(
+                    Intent(this, SettingsHostActivity::class.java).putExtra(
+                        SettingsHostActivity.EXTRA_INITIAL_ROUTE,
+                        BibiSettingsRoute.Asr.id
+                    )
+                )
+                finishOnboarding()
             }
         }
     }
@@ -383,16 +388,6 @@ class OnboardingGuideActivity : BaseActivity() {
         if (dialogState.value == OnboardingDialogState.None) return
         dialogState.value = OnboardingDialogState.None
         finishOnboarding()
-    }
-
-    private fun confirmOnlineGuide() {
-        val messageRes = actionExecutor.openOnlineModelConfigGuide()
-        dialogState.value = OnboardingDialogState.None
-        if (messageRes == null) {
-            finishOnboarding()
-        } else {
-            showOnboardingMessage(messageRes, onDismiss = ::finishOnboarding)
-        }
     }
 
     private fun selectLocalModelDownloadSource(option: DownloadSourceOption) {
@@ -410,6 +405,6 @@ class OnboardingGuideActivity : BaseActivity() {
     private fun deriveInitialAsrChoice(): OnboardingAsrChoice = when {
         prefs.sfFreeAsrEnabled -> OnboardingAsrChoice.SiliconFlowFree
         prefs.asrVendor == AsrVendor.SenseVoice -> OnboardingAsrChoice.LocalModel
-        else -> OnboardingAsrChoice.OnlineCustom
+        else -> OnboardingAsrChoice.CustomService
     }
 }

@@ -315,10 +315,9 @@
   <string name="model_guide_option_local">📦 Local Model</string>
   <string name="model_guide_option_local_desc">No API key required, works offline, more private</string>
   <string name="model_guide_option_local_action">Will download SenseVoice model (~1GB) and enable offline recognition</string>
-  <string name="model_guide_option_online">☁️ Online Model (Custom)</string>
-  <string name="model_guide_option_online_desc">Better recognition accuracy, supports multiple providers (Volcengine, OpenAI, Gemini, etc.), requires API key configuration</string>
-  <string name="model_guide_option_online_action">Will open the configuration guide to help you set up API keys</string>
-  <string name="model_guide_online_dialog_message">Online speech recognition supports multiple providers (Volcengine, SiliconFlow, OpenAI, Gemini, Alibaba Qianwen, Soniox, ElevenLabs, etc.). Please refer to the configuration guide for detailed instructions.</string>
+  <string name="model_guide_option_custom">Choose another speech recognition service</string>
+  <string name="model_guide_option_custom_desc">Configure an online service or download another local model</string>
+  <string name="model_guide_option_custom_action">Open speech recognition settings to choose a provider and complete setup</string>
   <string name="model_guide_select_prompt">Please select a model type</string>
   <string name="model_guide_downloading">Downloading model, please wait…</string>
   <string name="model_guide_download_complete">Model download complete</string>

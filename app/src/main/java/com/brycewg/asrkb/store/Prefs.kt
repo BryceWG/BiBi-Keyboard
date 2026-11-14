@@ -502,6 +502,11 @@ class Prefs(context: Context) {
         get() = sp.getString(KEY_APP_LANGUAGE_TAG, "") ?: ""
         set(value) = sp.edit { putString(KEY_APP_LANGUAGE_TAG, value) }
 
+    // 供应商推荐语言；空字符串跟随系统，不改变界面或识别语言。
+    var asrRecommendationLanguageTag: String
+        get() = sp.getString(KEY_ASR_RECOMMENDATION_LANGUAGE_TAG, "")!!
+        set(value) = sp.edit { putString(KEY_ASR_RECOMMENDATION_LANGUAGE_TAG, value) }
+
     // 设置页 UI 模式（默认 Miuix）
     var settingsUiMode: String
         get() = if (sp.getString(KEY_SETTINGS_UI_MODE, DEFAULT_SETTINGS_UI_MODE) == SETTINGS_UI_MODE_MATERIAL) {
