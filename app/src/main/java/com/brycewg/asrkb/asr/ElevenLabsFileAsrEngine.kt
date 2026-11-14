@@ -30,7 +30,7 @@ class ElevenLabsFileAsrEngine(
 
     companion object {
         private const val TAG = "ElevenLabsFileAsrEngine"
-        private const val MODEL_ID = "scribe_v1"
+        private const val MODEL_ID = "scribe_v3"
     }
 
     private val http: OkHttpClient = httpClient ?: AsrHttpClientProvider.newBuilder()

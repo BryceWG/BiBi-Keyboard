@@ -50,7 +50,7 @@ class ElevenLabsStreamAsrEngine(
     companion object {
         private const val TAG = "ElevenLabsStreamAsr"
         private const val WS_HOST = "api.elevenlabs.io"
-        private const val MODEL_ID = "scribe_v2_realtime"
+        private const val MODEL_ID = "scribe_v3_live"
     }
 
     private val httpClient = OkHttpClient.Builder()
