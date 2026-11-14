@@ -18,7 +18,7 @@ import com.brycewg.asrkb.clipboard.SyncClipboardManager
 import com.brycewg.asrkb.store.AsrHistoryAudioStore
 import com.brycewg.asrkb.store.AsrHistoryStore
 import com.brycewg.asrkb.store.Prefs
-import com.brycewg.asrkb.ui.floating.PrivilegedKeepAliveStarter
+import com.brycewg.asrkb.ui.floating.PrivilegedAccessManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,46 +28,19 @@ private const val OTHER_ACTION_TAG = "OtherSettingsActions"
 
 internal fun checkPrivilegedKeepAlivePreconditions(
     context: Context,
-    prefs: Prefs,
     shouldEnable: Boolean,
     setPendingEnable: (Boolean) -> Unit,
     showMessage: (Int) -> Unit
 ): Boolean {
     if (!shouldEnable) return true
     setPendingEnable(false)
-    if (!prefs.floatingKeepAliveEnabled) {
-        showMessage(R.string.toast_need_floating_keep_alive_first)
-        return false
-    }
+    if (PrivilegedAccessManager.isRootProbablyAvailable()) return true
+    if (PrivilegedAccessManager.isServiceGranted()) return true
 
-    if (PrivilegedKeepAliveStarter.isRootProbablyAvailable()) return true
-    if (PrivilegedKeepAliveStarter.isShizukuGranted(context)) return true
-
-    when (PrivilegedKeepAliveStarter.requestShizukuPermission(context)) {
-        PrivilegedKeepAliveStarter.ShizukuPermissionRequestResult.AlreadyGranted -> Unit
-        PrivilegedKeepAliveStarter.ShizukuPermissionRequestResult.Requested -> {
-            setPendingEnable(true)
-            showMessage(R.string.toast_shizuku_permission_requested)
-            return false
-        }
-
-        PrivilegedKeepAliveStarter.ShizukuPermissionRequestResult.WaitingForBinder -> {
-            setPendingEnable(true)
-            showMessage(R.string.toast_shizuku_permission_waiting)
-            return false
-        }
-
-        PrivilegedKeepAliveStarter.ShizukuPermissionRequestResult.NotInstalled -> {
-            showMessage(R.string.toast_shizuku_or_root_unavailable)
-            return false
-        }
-
-        PrivilegedKeepAliveStarter.ShizukuPermissionRequestResult.Failed -> {
-            showMessage(R.string.toast_shizuku_permission_request_failed)
-            return false
-        }
-    }
-    return true
+    setPendingEnable(true)
+    PrivilegedAccessManager.requestPermission(context)
+    showMessage(R.string.toast_shizuku_permission_waiting)
+    return false
 }
 
 internal fun clearAsrHistory(context: Context, showMessage: (Int) -> Unit) {

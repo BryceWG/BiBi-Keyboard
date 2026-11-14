@@ -21,7 +21,7 @@
     <string name="toast_need_overlay_perm">امنح إذن «العرض فوق التطبيقات الأخرى» في إعدادات النظام لتفعيل الكرة العائمة</string>
     <string name="label_floating_asr">استخدام الكرة العائمة للتعرّف على الصوت</string>
     <string name="label_floating_keep_alive_foreground">الإبقاء عبر خدمة أمامية</string>
-    <string name="label_floating_keep_alive_privileged">الإبقاء عبر Shizuku / root</string>
+    <string name="label_floating_keep_alive_privileged">إبقاء محسّن</string>
     <string name="label_request_battery_whitelist">طلب استثناء تحسين البطارية</string>
     <string name="label_floating_ime_bridge">وحدة Hook لإدخال</string>
     <string name="label_ime_bridge_pcm_recording">التسجيل داخل لوحة المفاتيح الموصولة</string>
@@ -83,12 +83,9 @@
     <string name="cd_floating_edge_handle">إظهار الكرة العائمة</string>
     <string name="toast_battery_whitelist_already">تحسينات البطارية متجاهلة بالفعل</string>
     <string name="toast_battery_whitelist_failed">فشل طلب استثناء البطارية</string>
-    <string name="toast_need_floating_keep_alive_first">فعّل الإبقاء عبر الخدمة الأمامية أولاً</string>
-    <string name="toast_shizuku_permission_requested">طُلب إذن Shizuku. امنحه في Shizuku.</string>
-    <string name="toast_shizuku_permission_waiting">جارٍ الاتصال بـ Shizuku. سيظهر طلب الإذن عند الاتصال.</string>
-    <string name="toast_shizuku_permission_request_failed">فشل طلب إذن Shizuku</string>
-    <string name="toast_shizuku_or_root_unavailable">Shizuku غير متاح ولم يُكتشف root</string>
-    <string name="toast_floating_keep_alive_privileged_start_failed">فشل بدء الإبقاء عبر Shizuku / root</string>
+    <string name="toast_shizuku_permission_waiting">بانتظار الخدمة ذات الامتيازات. شغّل Porter أو Shizuku؛ إذا كان كلاهما مثبتاً فشغّل Porter.</string>
+    <string name="toast_shizuku_permission_request_failed">لم يُمنح الإذن أو أن الخدمة غير متاحة. تحقّق من Porter / Shizuku وحاول مجدداً.</string>
+    <string name="toast_shizuku_or_root_unavailable">Porter / Shizuku غير متاح ولم يُكتشف root</string>
     <string name="toast_floating_recording_foreground_failed">تعذّر بدء خدمة الميكروفون الأمامية. افتح التطبيق مرة ثم أعد المحاولة.</string>
 
     <!-- Floating ASR status messages -->
@@ -178,6 +175,6 @@
     <!-- Floating keep alive -->
     <string name="feature_floating_keep_alive_off_desc">يُرجَّح إيقاف التطبيق بعد التشغيل في الخلفية لفترة، فقد تصبح ميزات الكرة العائمة ومفاتيح الصوت غير متاحة.</string>
     <string name="feature_floating_keep_alive_on_desc">يعرض إشعاراً مستمراً للمساعدة على إبقاء ميزات الكرة العائمة ومفاتيح الصوت متاحة في الخلفية. قد تتطلّب بعض الهواتف تغيير إعدادات البطارية.</string>
-    <string name="feature_floating_keep_alive_privileged_off_desc">يستخدم الطريقة القياسية فقط للبقاء نشطاً في الخلفية. قد توقف بعض الهواتف ميزات الكرة العائمة أو مفاتيح الصوت.</string>
-    <string name="feature_floating_keep_alive_privileged_on_desc">يستخدم Shizuku أو root لاستعادة الخدمة الخلفية دورياً، مما يقلّل انقطاع ميزات الكرة العائمة أو مفاتيح الصوت. يلزم إذن Shizuku أو root.</string>
+    <string name="feature_floating_keep_alive_privileged_off_desc">يوقف الإبقاء المحسّن ويستعيد إعدادات الخلفية التي غيّرها.</string>
+    <string name="feature_floating_keep_alive_privileged_on_desc">يساعد على استمرار ميزات الخلفية ويستعيد خدمة إمكانية الوصول عند الحاجة. يتطلب إذن Porter أو Shizuku أو root.</string>
 </resources>

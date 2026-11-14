@@ -273,6 +273,7 @@ class AsrAccessibilityService :
         instance = null
         Log.d(TAG, "Accessibility service destroyed")
         DebugLogManager.log("a11y", "service_destroyed")
+        com.brycewg.asrkb.ui.floating.PrivilegedAccessibilityRecovery.requestCheck(this)
     }
 
     private val handler = Handler(Looper.getMainLooper())

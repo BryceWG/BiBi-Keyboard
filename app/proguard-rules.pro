@@ -104,7 +104,5 @@
 # BuildConfig
 -keep class com.brycewg.asrkb.BuildConfig { *; }
 
-# Shizuku：PrivilegedKeepAliveStarter 通过反射调用 Shizuku.newProcess
--keepclassmembers class rikka.shizuku.Shizuku {
-    *** newProcess(java.lang.String[], java.lang.String[], java.lang.String);
-}
+# RootService 由独立 root 进程按类名构造。
+-keep class com.brycewg.asrkb.ui.floating.RootKeepAliveService { public <init>(); }

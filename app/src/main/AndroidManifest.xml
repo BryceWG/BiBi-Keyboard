@@ -36,7 +36,6 @@
     <!-- 开机自启 -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- 若通过 ADB 授权可写入 Secure 设置，用于尝试自动开启无障碍（普通应用默认不会授予） -->
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" tools:ignore="ProtectedPermissions" />
     <!-- Shizuku 权限：用于在已授权时以 shell 身份执行部分系统命令 -->
     <uses-permission android:name="moe.shizuku.manager.permission.API_V23" />
 
@@ -324,7 +323,7 @@
                 android:value="user_enabled_floating_keyboard_keep_alive" />
         </service>
 
-        <!-- Shizuku / root 增强保活：周期性拉起前台保活服务 -->
+        <!-- 增强保活：周期性检查独立守护，并按前台服务开关补充恢复 -->
         <service
             android:name=".ui.floating.PrivilegedKeepAliveJobService"
             android:permission="android.permission.BIND_JOB_SERVICE"
@@ -359,7 +358,7 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <!-- 开机启动接收器：根据偏好启动悬浮服务，并在具备权限时尝试开启无障碍 -->
+        <!-- 开机与特权守护广播入口：由协调器按功能开关统一恢复 -->
         <receiver
             android:name=".BootReceiver"
             android:enabled="true"
@@ -367,6 +366,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="com.brycewg.asrkb.action.PRIVILEGED_KEEP_ALIVE_RESTORE" />
             </intent-filter>
         </receiver>
 
@@ -381,12 +381,14 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- Shizuku Provider：用于接收 Shizuku Binder 并启用 API 调用 -->
+        <!-- Porter 的 Shizuku 兼容入口；原生 Porter Provider 由 SDK 合并。 -->
+        <meta-data android:name="moe.shizuku.client.V3_SUPPORT" android:value="true" />
         <provider
-            android:name="rikka.shizuku.ShizukuProvider"
+            android:name="eu.darken.porter.sdk.PorterShizukuApiProvider"
             android:authorities="${applicationId}.shizuku"
             android:exported="true"
-            android:multiprocess="false" />
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <service
             android:name=".api.ExternalSpeechService"
@@ -430,8 +432,6 @@
 
 
     <queries>
-        <package android:name="moe.shizuku.manager" />
-        <package android:name="moe.shizuku.privileged.api" />
         <intent>
             <action android:name="android.view.InputMethod" />
         </intent>

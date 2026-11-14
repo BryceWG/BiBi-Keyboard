@@ -1,335 +1,130 @@
-/**
- * Shizuku / root 通用提权能力管理器。
- *
- * 归属模块：ui/floating
- */
+/** Porter/Shizuku 与直接 Root 的授权及命令入口，归属 ui/floating。 */
 package com.brycewg.asrkb.ui.floating
 
 import android.content.Context
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import com.brycewg.asrkb.BuildConfig
+import com.brycewg.asrkb.store.debug.DebugLogManager
+import com.topjohnwu.superuser.NoShellException
+import com.topjohnwu.superuser.Shell
+import eu.darken.porter.sdk.PermissionState
+import eu.darken.porter.sdk.Porter
+import eu.darken.porter.sdk.PorterAvailability
+import eu.darken.porter.sdk.PorterBackend
+import eu.darken.porter.sdk.PorterException
+import eu.darken.porter.sdk.extras.PorterShellException
+import eu.darken.porter.sdk.extras.exec
 import java.io.File
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.atomic.AtomicBoolean
-import rikka.shizuku.Shizuku
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 
 internal object PrivilegedAccessManager {
-
-    private const val TAG = "PrivAccess"
-    internal const val SHIZUKU_REQUEST_CODE = 4102
-    private const val SHIZUKU_MANAGER_PACKAGE = "moe.shizuku.manager"
-    private const val SHIZUKU_PRIVILEGED_API_PACKAGE = "moe.shizuku.privileged.api"
-
-    enum class PrivilegedMethod {
-        Shizuku,
-        Root,
-        None
-    }
-
-    enum class ShizukuPermissionRequestResult {
-        AlreadyGranted,
-        Requested,
-        WaitingForBinder,
-        NotInstalled,
-        Failed
-    }
+    enum class PrivilegedMethod { Porter, Shizuku, Root, None }
+    enum class PermissionRequestResult { Granted, NotInstalled, Failed }
 
     data class ExecResult(
         val ok: Boolean,
         val method: PrivilegedMethod,
         val exitCode: Int? = null,
-        val stdout: String? = null,
-        val stderr: String? = null,
-        val reason: String? = null
+        val stdout: String = ""
     )
 
-    data class CapabilitySnapshot(val shizukuGranted: Boolean, val rootAvailable: Boolean) {
-        val hasAny: Boolean
-            get() = shizukuGranted || rootAvailable
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val permissionListeners = CopyOnWriteArraySet<(PermissionRequestResult) -> Unit>()
+    private var requestingPermission = false
+
+    fun isServiceGranted(): Boolean = Porter.connection.value?.permission?.value == PermissionState.Granted
+
+    fun addPermissionResultListener(listener: (PermissionRequestResult) -> Unit) {
+        permissionListeners.add(listener)
     }
 
-    private val shizukuInitialized = AtomicBoolean(false)
-    private val shizukuBinderReady = AtomicBoolean(false)
-    private val shizukuPermissionRequestPending = AtomicBoolean(false)
-    private val binderReadyCallbacks = CopyOnWriteArraySet<() -> Unit>()
-    private val mainHandler by lazy(LazyThreadSafetyMode.NONE) { Handler(Looper.getMainLooper()) }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun init(context: Context? = null) {
-        if (!shizukuInitialized.compareAndSet(false, true)) return
-        try {
-            Shizuku.addBinderReceivedListenerSticky {
-                shizukuBinderReady.set(true)
-                dispatchBinderReadyCallbacks()
-            }
-            Shizuku.addBinderDeadListener {
-                shizukuBinderReady.set(false)
-            }
-        } catch (t: Throwable) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "init failed", t)
-        }
+    fun removePermissionResultListener(listener: (PermissionRequestResult) -> Unit) {
+        permissionListeners.remove(listener)
     }
 
-    fun addOnBinderReadyCallback(callback: () -> Unit) {
-        init()
-        binderReadyCallbacks.add(callback)
-        if (isShizukuBinderReady()) {
-            mainHandler.post {
-                try {
-                    callback()
-                } catch (t: Throwable) {
-                    if (BuildConfig.DEBUG) Log.d(TAG, "binder ready callback failed", t)
+    fun requestPermission(context: Context) {
+        if (requestingPermission) return
+        requestingPermission = true
+        scope.launch {
+            val result = try {
+                when (Porter.availability(context)) {
+                    is PorterAvailability.NotInstalled -> PermissionRequestResult.NotInstalled
+                    is PorterAvailability.Incompatible, is PorterAvailability.InstalledUnrecognized -> PermissionRequestResult.Failed
+                    else -> {
+                        val connection = withTimeout(30_000L) { Porter.connection.filterNotNull().first() }
+                        if (connection.requestPermission() == PermissionState.Granted) {
+                            PermissionRequestResult.Granted
+                        } else {
+                            PermissionRequestResult.Failed
+                        }
+                    }
                 }
+            } catch (e: TimeoutCancellationException) {
+                logDiag(context, "permission_connection_timeout")
+                PermissionRequestResult.Failed
+            } catch (e: PorterException) {
+                logDiag(context, "permission_failed", data = mapOf("error" to e.javaClass.simpleName))
+                PermissionRequestResult.Failed
+            } finally {
+                requestingPermission = false
             }
+            permissionListeners.forEach { it(result) }
         }
-    }
-
-    fun removeOnBinderReadyCallback(callback: () -> Unit) {
-        binderReadyCallbacks.remove(callback)
-    }
-
-    private fun dispatchBinderReadyCallbacks() {
-        binderReadyCallbacks.forEach { callback ->
-            mainHandler.post {
-                try {
-                    callback()
-                } catch (t: Throwable) {
-                    if (BuildConfig.DEBUG) Log.d(TAG, "dispatch callback failed", t)
-                }
-            }
-        }
-    }
-
-    fun snapshotCapabilities(context: Context): CapabilitySnapshot {
-        val app = context.applicationContext
-        return CapabilitySnapshot(
-            shizukuGranted = isShizukuGranted(app),
-            rootAvailable = isRootProbablyAvailable()
-        )
-    }
-
-    fun hasPrivilegedCapability(context: Context): Boolean = snapshotCapabilities(context).hasAny
-
-    fun isShizukuManagerInstalled(context: Context): Boolean = getPackageInfoOrNull(context.packageManager, SHIZUKU_MANAGER_PACKAGE) != null
-
-    fun isShizukuPrivilegedApiInstalled(context: Context): Boolean = getPackageInfoOrNull(context.packageManager, SHIZUKU_PRIVILEGED_API_PACKAGE) != null
-
-    fun isShizukuBinderReady(): Boolean {
-        init()
-        if (shizukuBinderReady.get()) return true
-        val ready = try {
-            Shizuku.pingBinder()
-        } catch (_: Throwable) {
-            false
-        }
-        if (ready) shizukuBinderReady.set(true)
-        return ready
-    }
-
-    fun isShizukuGranted(context: Context): Boolean {
-        init(context.applicationContext)
-        return try {
-            Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-        } catch (_: Throwable) {
-            false
-        }
-    }
-
-    fun requestShizukuPermission(context: Context): ShizukuPermissionRequestResult {
-        val app = context.applicationContext
-        init(app)
-        if (!isShizukuManagerInstalled(app) && !isShizukuPrivilegedApiInstalled(app)) {
-            return ShizukuPermissionRequestResult.NotInstalled
-        }
-        if (isShizukuGranted(app)) {
-            return ShizukuPermissionRequestResult.AlreadyGranted
-        }
-
-        if (!isShizukuBinderReady()) {
-            enqueueShizukuPermissionRequest()
-            try {
-                Shizuku.pingBinder()
-            } catch (_: Throwable) {
-            }
-            return ShizukuPermissionRequestResult.WaitingForBinder
-        }
-
-        return if (requestShizukuPermissionNow()) {
-            ShizukuPermissionRequestResult.Requested
-        } else {
-            ShizukuPermissionRequestResult.Failed
-        }
-    }
-
-    private fun enqueueShizukuPermissionRequest() {
-        if (!shizukuPermissionRequestPending.compareAndSet(false, true)) return
-        val listener = object : Shizuku.OnBinderReceivedListener {
-            override fun onBinderReceived() {
-                try {
-                    Shizuku.removeBinderReceivedListener(this)
-                } catch (_: Throwable) {
-                }
-                shizukuPermissionRequestPending.set(false)
-                mainHandler.post { requestShizukuPermissionNow() }
-            }
-        }
-        try {
-            Shizuku.addBinderReceivedListenerSticky(listener)
-        } catch (t: Throwable) {
-            shizukuPermissionRequestPending.set(false)
-            if (BuildConfig.DEBUG) Log.d(TAG, "enqueue permission request failed", t)
-        }
-    }
-
-    private fun requestShizukuPermissionNow(): Boolean = try {
-        if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) {
-            Shizuku.requestPermission(SHIZUKU_REQUEST_CODE)
-            true
-        } else {
-            true
-        }
-    } catch (t: Throwable) {
-        if (BuildConfig.DEBUG) Log.d(TAG, "request permission failed", t)
-        false
     }
 
     fun isRootProbablyAvailable(): Boolean {
-        val candidates = listOf(
-            "/system/bin/su",
-            "/system/xbin/su",
-            "/sbin/su",
-            "/vendor/bin/su",
-            "/su/bin/su"
-        )
-        if (candidates.any { File(it).exists() }) return true
+        if (Shell.isAppGrantedRoot() == true) return true
+        val paths = listOf("/system/bin", "/system/xbin", "/sbin", "/vendor/bin", "/su/bin") +
+            System.getenv("PATH").orEmpty().split(":")
+        return paths.any { it.isNotBlank() && File(it, "su").exists() }
+    }
 
-        val path = System.getenv("PATH") ?: return false
-        return path.split(":").any { dir ->
-            if (dir.isBlank()) return@any false
-            File(dir, "su").exists()
+    suspend fun runShell(context: Context, command: String): ExecResult? = runShellByService(context, command) ?: runShellByRoot(context, command)
+
+    private suspend fun runShellByService(context: Context, command: String): ExecResult? {
+        val connection = Porter.connection.value ?: return null
+        if (connection.permission.value != PermissionState.Granted) return null
+        val method = when (connection.backend) {
+            PorterBackend.PORTER -> PrivilegedMethod.Porter
+            PorterBackend.SHIZUKU -> PrivilegedMethod.Shizuku
         }
-    }
-
-    fun runShellPreferShizuku(context: Context, command: String): ExecResult? {
-        val app = context.applicationContext
-        val shizukuResult = runShellByShizuku(app, command)
-        if (shizukuResult?.ok == true) return shizukuResult
-        val rootResult = runShellByRoot(app, command)
-        return rootResult ?: shizukuResult
-    }
-
-    fun runShellByShizuku(context: Context, command: String): ExecResult? {
-        val app = context.applicationContext
-        if (!isShizukuGranted(app)) return null
-        return runShizukuShell(command)
-    }
-
-    fun runShellByRoot(context: Context, command: String): ExecResult? {
-        if (!isRootProbablyAvailable()) return null
-        return runRootShell(command)
-    }
-
-    private fun runShizukuShell(command: String): ExecResult? {
         return try {
-            val process = createShizukuProcess(arrayOf("sh", "-c", command)) ?: return null
-            val stdout = process.inputStream?.bufferedReader()?.use {
-                it.readText()
-            }?.trim().orEmpty()
-            val stderr = process.errorStream?.bufferedReader()?.use {
-                it.readText()
-            }?.trim().orEmpty()
-            val exit = try {
-                process.waitFor()
-            } catch (t: Throwable) {
-                if (BuildConfig.DEBUG) Log.d(TAG, "Shizuku process waitFor failed", t)
-                null
+            val result = connection.exec("sh", "-c", command)
+            ExecResult(result.exitCode == 0, method, result.exitCode, result.output.trim())
+        } catch (e: PorterShellException) {
+            logDiag(context, "shell_failed", data = mapOf("method" to method.name, "error" to e.javaClass.simpleName))
+            ExecResult(false, method)
+        } catch (e: PorterException) {
+            logDiag(context, "shell_failed", data = mapOf("method" to method.name, "error" to e.javaClass.simpleName))
+            ExecResult(false, method)
+        }
+    }
+
+    suspend fun runShellByRoot(context: Context, command: String): ExecResult? = withContext(Dispatchers.IO) {
+        if (!isRootProbablyAvailable()) return@withContext null
+        try {
+            val shell = Shell.getShell()
+            if (!shell.isRoot) {
+                // libsu 会缓存授权被拒后的普通 shell；释放后，下次重试才能重新申请 Root。
+                shell.close()
+                logDiag(context, "root_permission_denied")
+                return@withContext ExecResult(false, PrivilegedMethod.Root)
             }
-            ExecResult(
-                ok = exit == null || exit == 0,
-                method = PrivilegedMethod.Shizuku,
-                exitCode = exit,
-                stdout = stdout.ifBlank { null },
-                stderr = stderr.ifBlank { null },
-                reason = if (exit != null &&
-                    exit != 0 &&
-                    stderr.isBlank()
-                ) {
-                    "non_zero_exit"
-                } else {
-                    null
-                }
-            )
-        } catch (t: Throwable) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "runShizukuShell failed", t)
-            null
+            val result = shell.newJob().add(command).to(ArrayList<String>()).exec()
+            ExecResult(result.isSuccess, PrivilegedMethod.Root, result.code, result.out.joinToString("\n").trim())
+        } catch (e: NoShellException) {
+            logDiag(context, "root_shell_failed", data = mapOf("error" to e.javaClass.simpleName))
+            ExecResult(false, PrivilegedMethod.Root)
         }
     }
-
-    @Suppress("PrivateApi")
-    private fun createShizukuProcess(cmd: Array<String>): Process? = try {
-        val method = Shizuku::class.java.getDeclaredMethod(
-            "newProcess",
-            Array<String>::class.java,
-            Array<String>::class.java,
-            String::class.java
-        )
-        method.isAccessible = true
-        method.invoke(null, cmd, null, null) as? Process
-    } catch (t: Throwable) {
-        if (BuildConfig.DEBUG) Log.d(TAG, "Shizuku.newProcess reflection failed", t)
-        null
-    }
-
-    private fun runRootShell(command: String): ExecResult? = try {
-        val process = ProcessBuilder("su", "-c", command).start()
-        val stdout = process.inputStream?.bufferedReader()?.use {
-            it.readText()
-        }?.trim().orEmpty()
-        val stderr = process.errorStream?.bufferedReader()?.use {
-            it.readText()
-        }?.trim().orEmpty()
-        val exit = try {
-            process.waitFor()
-        } catch (t: Throwable) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "root process waitFor failed", t)
-            null
-        }
-        ExecResult(
-            ok = exit == null || exit == 0,
-            method = PrivilegedMethod.Root,
-            exitCode = exit,
-            stdout = stdout.ifBlank { null },
-            stderr = stderr.ifBlank { null },
-            reason = if (exit != null &&
-                exit != 0 &&
-                stderr.isBlank()
-            ) {
-                "non_zero_exit"
-            } else {
-                null
-            }
-        )
-    } catch (t: Throwable) {
-        if (BuildConfig.DEBUG) Log.d(TAG, "runRootShell failed", t)
-        null
-    }
-
-    @Suppress("DEPRECATION")
-    private fun getPackageInfoOrNull(
-        packageManager: PackageManager,
-        packageName: String
-    ): PackageInfo? = try {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
-        } else {
-            packageManager.getPackageInfo(packageName, 0)
-        }
-    } catch (_: Throwable) {
-        null
+    private fun logDiag(context: Context, event: String, data: Map<String, Any?> = emptyMap()) {
+        DebugLogManager.logWarning(context, "keepalive", event, data = data)
     }
 }

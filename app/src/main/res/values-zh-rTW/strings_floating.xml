@@ -21,7 +21,7 @@
     <string name="toast_need_overlay_perm">請在系統設定中授予「在其他應用程式上層顯示」權限以啟用懸浮球</string>
     <string name="label_floating_asr">使用懸浮球進行語音識別</string>
     <string name="label_floating_keep_alive_foreground">前台服務保活</string>
-    <string name="label_floating_keep_alive_privileged">Shizuku / Root 增強保活</string>
+    <string name="label_floating_keep_alive_privileged">增強保活</string>
     <string name="label_request_battery_whitelist">申請電池最佳化白名單</string>
     <string name="label_floating_ime_bridge">輸入法 Hook 模組</string>
     <string name="label_ime_bridge_pcm_recording">在橋接輸入法內錄音</string>
@@ -83,12 +83,9 @@
     <string name="cd_floating_edge_handle">展開懸浮球</string>
     <string name="toast_battery_whitelist_already">已在電池最佳化白名單中</string>
     <string name="toast_battery_whitelist_failed">申請電池最佳化白名單失敗</string>
-    <string name="toast_need_floating_keep_alive_first">請先啟用前台服務保活</string>
-    <string name="toast_shizuku_permission_requested">已發起 Shizuku 授權，請在 Shizuku 中確認</string>
-    <string name="toast_shizuku_permission_waiting">正在連線 Shizuku，連線後將彈出授權確認</string>
-    <string name="toast_shizuku_permission_request_failed">發起 Shizuku 授權失敗</string>
-    <string name="toast_shizuku_or_root_unavailable">Shizuku 不可用且未偵測到 root</string>
-    <string name="toast_floating_keep_alive_privileged_start_failed">透過 Shizuku / Root 啟動保活失敗</string>
+    <string name="toast_shizuku_permission_waiting">正在等待特權服務，請啟動 Porter 或 Shizuku；同時安裝時請啟動 Porter</string>
+    <string name="toast_shizuku_permission_request_failed">未取得授權或特權服務無法使用，請檢查 Porter / Shizuku 後重試</string>
+    <string name="toast_shizuku_or_root_unavailable">Porter / Shizuku 無法使用且未偵測到 root</string>
     <string name="toast_floating_recording_foreground_failed">無法啟動麥克風前台服務。請先開啟一次應用程式後重試。</string>
 
     <!-- Floating ASR status messages -->
@@ -178,6 +175,6 @@
     <!-- 前台保活 -->
     <string name="feature_floating_keep_alive_off_desc">應用程式在背景執行一段時間後更容易被系統停止，懸浮球與音量鍵功能可能因此失效。</string>
     <string name="feature_floating_keep_alive_on_desc">顯示一則常駐通知，協助懸浮球與音量鍵功能在背景持續可用。部分手機仍需調整電池設定。</string>
-    <string name="feature_floating_keep_alive_privileged_off_desc">只使用一般方式維持背景執行，部分手機可能仍會停止懸浮球或音量鍵功能。</string>
-    <string name="feature_floating_keep_alive_privileged_on_desc">使用 Shizuku 或 root 定期恢復背景服務，減少懸浮球或音量鍵功能失效。需要先授予 Shizuku 或 root 權限。</string>
+    <string name="feature_floating_keep_alive_privileged_off_desc">停止增強保活，並還原它變更的背景設定。</string>
+    <string name="feature_floating_keep_alive_privileged_on_desc">使用 Porter、Shizuku 或 Root 減少背景中斷，並自動恢復所需的無障礙服務。需要授權。</string>
 </resources>

@@ -8,9 +8,7 @@ package com.brycewg.asrkb
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.Application
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
@@ -20,10 +18,7 @@ import com.brycewg.asrkb.asr.VadDetector
 import com.brycewg.asrkb.store.ApiLogStore
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.store.debug.DebugLogManager
-import com.brycewg.asrkb.ui.floating.FloatingAsrService
-import com.brycewg.asrkb.ui.floating.FloatingKeepAliveService
-import com.brycewg.asrkb.ui.floating.PrivilegedKeepAliveScheduler
-import com.brycewg.asrkb.ui.floating.PrivilegedKeepAliveStarter
+import com.brycewg.asrkb.ui.floating.KeepAliveCoordinator
 import com.google.android.material.color.DynamicColors
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
@@ -78,31 +73,7 @@ class App : Application() {
             DebugLogManager.logWarning(this, "analytics", "init_failed", t)
         }
 
-        PrivilegedKeepAliveStarter.initShizuku(this)
-
-        // 若用户在设置中启用了悬浮球且已授予悬浮窗权限，则启动悬浮球服务
-        try {
-            val prefs = Prefs(this)
-            PrivilegedKeepAliveScheduler.update(this)
-            val canOverlay = Settings.canDrawOverlays(this)
-
-            // 启动语音识别悬浮球
-            if (prefs.floatingAsrEnabled && canOverlay) {
-                val intent = Intent(this, FloatingAsrService::class.java).apply {
-                    action = FloatingAsrService.ACTION_SHOW
-                }
-                startService(intent)
-                DebugLogManager.logBase(this, "float", "app_start_show_service")
-            }
-
-            if (prefs.floatingKeepAliveEnabled) {
-                FloatingKeepAliveService.start(this)
-                DebugLogManager.logBase(this, "keepalive", "app_start_service")
-            }
-        } catch (t: Throwable) {
-            Log.w("App", "Failed to start overlay services", t)
-            DebugLogManager.logWarning(this, "app", "overlay_services_start_failed", t)
-        }
+        KeepAliveCoordinator.init(this)
 
         // 预加载 VAD：仅当已开启“静音自动停止”时，避免首次录音时的模型加载延迟
         try {

@@ -21,7 +21,7 @@
     <string name="toast_need_overlay_perm">请在系统设置中授予"在其他应用上层显示"权限以启用悬浮球</string>
     <string name="label_floating_asr">使用悬浮球进行语音识别</string>
     <string name="label_floating_keep_alive_foreground">前台服务保活</string>
-    <string name="label_floating_keep_alive_privileged">Shizuku / Root 增强保活</string>
+    <string name="label_floating_keep_alive_privileged">增强保活</string>
     <string name="label_request_battery_whitelist">申请电池优化白名单</string>
     <string name="label_floating_ime_bridge">输入法 Hook 模块</string>
     <string name="label_ime_bridge_pcm_recording">在桥接输入法内录音</string>
@@ -83,12 +83,9 @@
     <string name="cd_floating_edge_handle">展开悬浮球</string>
     <string name="toast_battery_whitelist_already">已在电池优化白名单中</string>
     <string name="toast_battery_whitelist_failed">申请电池优化白名单失败</string>
-    <string name="toast_need_floating_keep_alive_first">请先开启前台服务保活</string>
-    <string name="toast_shizuku_permission_requested">已发起 Shizuku 授权，请在 Shizuku 中确认</string>
-    <string name="toast_shizuku_permission_waiting">正在连接 Shizuku，连接后将弹出授权确认</string>
-    <string name="toast_shizuku_permission_request_failed">发起 Shizuku 授权失败</string>
-    <string name="toast_shizuku_or_root_unavailable">Shizuku 不可用且未检测到 root</string>
-    <string name="toast_floating_keep_alive_privileged_start_failed">通过 Shizuku / Root 启动保活失败</string>
+    <string name="toast_shizuku_permission_waiting">正在等待特权服务，请启动 Porter 或 Shizuku；同时安装时请启动 Porter</string>
+    <string name="toast_shizuku_permission_request_failed">未获得授权或特权服务不可用，请检查 Porter / Shizuku 后重试</string>
+    <string name="toast_shizuku_or_root_unavailable">Porter / Shizuku 不可用且未检测到 root</string>
     <string name="toast_floating_recording_foreground_failed">无法启动麦克风前台服务。请先打开一次应用后重试。</string>
 
     <!-- Floating ASR status messages -->
@@ -178,6 +175,6 @@
     <!-- 前台保活 -->
     <string name="feature_floating_keep_alive_off_desc">应用在后台运行一段时间后更容易被系统停止，悬浮球和音量键功能可能因此失效。</string>
     <string name="feature_floating_keep_alive_on_desc">显示一条常驻通知，帮助悬浮球和音量键功能在后台持续可用。部分手机仍需调整电池设置。</string>
-    <string name="feature_floating_keep_alive_privileged_off_desc">只使用普通方式维持后台运行，部分手机可能仍会停止悬浮球或音量键功能。</string>
-    <string name="feature_floating_keep_alive_privileged_on_desc">使用 Shizuku 或 root 定期恢复后台服务，减少悬浮球或音量键功能失效。需要先授予 Shizuku 权限或 root 权限。</string>
+    <string name="feature_floating_keep_alive_privileged_off_desc">停止增强保活，并恢复它修改的后台设置。</string>
+    <string name="feature_floating_keep_alive_privileged_on_desc">使用 Porter、Shizuku 或 Root 减少后台中断，并自动恢复所需的无障碍服务。需要授权。</string>
 </resources>

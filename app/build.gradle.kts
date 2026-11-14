@@ -194,9 +194,10 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:5.5.0")
 
-    // Shizuku：用于在已授权时执行部分 shell 级操作（增强后台保活）
-    implementation("dev.rikka.shizuku:api:13.1.5")
-    implementation("dev.rikka.shizuku:provider:13.1.5")
+    // Porter API 统一接入 Porter/Shizuku；libsu 提供直接 Root 的独立守护进程。
+    implementation("com.github.d4rken-org.porter-api:sdk-extras:0.9.0")
+    implementation("com.github.d4rken-org.porter-api:shizuku-compat:0.9.0")
+    implementation("com.github.topjohnwu.libsu:service:6.0.0")
 
     // AAR 占位：sherpa-onnx Kotlin API AAR 放在 app/libs/ 会自动识别
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))

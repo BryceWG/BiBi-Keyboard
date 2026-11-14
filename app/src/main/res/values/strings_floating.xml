@@ -21,7 +21,7 @@
     <string name="toast_need_overlay_perm">Please grant "Display over other apps" in system settings to enable the floating ball</string>
     <string name="label_floating_asr">Use floating ball for voice recognition</string>
     <string name="label_floating_keep_alive_foreground">Keep alive with a foreground service</string>
-    <string name="label_floating_keep_alive_privileged">Keep alive via Shizuku / root</string>
+    <string name="label_floating_keep_alive_privileged">Enhanced keep-alive</string>
     <string name="label_request_battery_whitelist">Request battery optimization whitelist</string>
     <string name="label_floating_ime_bridge">IME Hook module</string>
     <string name="label_ime_bridge_pcm_recording">Record inside bridged IME</string>
@@ -83,12 +83,9 @@
     <string name="cd_floating_edge_handle">Show floating ball</string>
     <string name="toast_battery_whitelist_already">Already ignoring battery optimizations</string>
     <string name="toast_battery_whitelist_failed">Failed to request battery whitelist</string>
-    <string name="toast_need_floating_keep_alive_first">Enable foreground keep-alive first</string>
-    <string name="toast_shizuku_permission_requested">Shizuku permission requested. Please grant it in Shizuku.</string>
-    <string name="toast_shizuku_permission_waiting">Connecting to Shizuku. Permission prompt will appear once connected.</string>
-    <string name="toast_shizuku_permission_request_failed">Failed to request Shizuku permission</string>
-    <string name="toast_shizuku_or_root_unavailable">Shizuku is unavailable and root is not detected</string>
-    <string name="toast_floating_keep_alive_privileged_start_failed">Failed to start keep-alive via Shizuku / root</string>
+    <string name="toast_shizuku_permission_waiting">Waiting for the privileged service. Start Porter or Shizuku; if both are installed, start Porter.</string>
+    <string name="toast_shizuku_permission_request_failed">Permission was not granted or the privileged service is unavailable. Check Porter or Shizuku and try again.</string>
+    <string name="toast_shizuku_or_root_unavailable">Porter / Shizuku is unavailable and root was not detected</string>
     <string name="toast_floating_recording_foreground_failed">Unable to start microphone foreground service. Open the app once, then try again.</string>
 
     <!-- Floating ASR status messages -->
@@ -178,6 +175,6 @@
     <!-- Floating keep alive -->
     <string name="feature_floating_keep_alive_off_desc">The app is more likely to be stopped after running in the background for a while, so floating-ball and volume-key features may become unavailable.</string>
     <string name="feature_floating_keep_alive_on_desc">Shows an ongoing notification to help keep floating-ball and volume-key features available in the background. Some phones may still require battery settings changes.</string>
-    <string name="feature_floating_keep_alive_privileged_off_desc">Uses only the standard method to stay active in the background. Some phones may still stop floating-ball or volume-key features.</string>
-    <string name="feature_floating_keep_alive_privileged_on_desc">Uses Shizuku or root to periodically restore the background service, reducing interruptions to floating-ball or volume-key features. Shizuku or root permission is required.</string>
+    <string name="feature_floating_keep_alive_privileged_off_desc">Stops enhanced keep-alive and restores the background settings it changed.</string>
+    <string name="feature_floating_keep_alive_privileged_on_desc">Helps keep background features running and restores accessibility when needed. Requires Porter, Shizuku or root permission.</string>
 </resources>

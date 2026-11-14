@@ -678,7 +678,7 @@ class Prefs(context: Context) {
         get() = sp.getBoolean(KEY_FLOATING_KEEP_ALIVE_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_FLOATING_KEEP_ALIVE_ENABLED, value) }
 
-    // 悬浮球：Shizuku / root 增强保活（用于辅助后台重新拉起前台保活服务）
+    // 悬浮球：Porter / Shizuku / root 增强保活（后台限制放行与独立进程守护）
     var floatingKeepAlivePrivilegedEnabled: Boolean
         get() = sp.getBoolean(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED, false)
         set(value) = sp.edit { putBoolean(KEY_FLOATING_KEEP_ALIVE_PRIVILEGED_ENABLED, value) }

@@ -25,7 +25,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.brycewg.asrkb.BuildConfig
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.clipboard.ClipboardSyncReceiveMode
 import com.brycewg.asrkb.clipboard.ClipboardSyncRuntimeService
@@ -35,8 +34,7 @@ import com.brycewg.asrkb.store.AsrHistoryAudioStore
 import com.brycewg.asrkb.store.Prefs
 import com.brycewg.asrkb.ui.floating.FloatingServiceManager
 import com.brycewg.asrkb.ui.floating.KeepAliveNotificationClick
-import com.brycewg.asrkb.ui.floating.PrivilegedKeepAliveScheduler
-import com.brycewg.asrkb.ui.floating.PrivilegedKeepAliveStarter
+import com.brycewg.asrkb.ui.floating.PrivilegedAccessManager
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheet
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialog
@@ -51,9 +49,7 @@ import com.brycewg.asrkb.ui.settings.other.OtherSettingsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
-import rikka.shizuku.Shizuku
 
 private const val OTHER_TAG = "OtherSettingsScreen"
 
@@ -92,7 +88,6 @@ fun OtherSettingsScreen(
     var pendingPrivilegedEnable by remember { mutableStateOf(false) }
     var choiceSheet by remember { mutableStateOf<SettingsChoiceSheetState?>(null) }
     var featureExplainerDialog by remember { mutableStateOf<SettingsFeatureExplainerDialogState?>(null) }
-    val latestPendingPrivilegedEnable by rememberUpdatedState(pendingPrivilegedEnable)
     val latestPunctuation by rememberUpdatedState(PunctuationFields(punct1, punct2, punct3, punct4))
 
     LaunchedEffect(punct1, punct2, punct3, punct4) {
@@ -144,57 +139,33 @@ fun OtherSettingsScreen(
         }
     }
 
-    fun startPrivilegedKeepAlive() {
-        coroutineScope.launch(Dispatchers.IO) {
-            val result =
-                PrivilegedKeepAliveStarter.tryStartKeepAliveByShizuku(context)
-                    ?: PrivilegedKeepAliveStarter.tryStartKeepAliveByRoot(context)
-                    ?: PrivilegedKeepAliveStarter.startKeepAliveFallback(context)
-            if (!result.ok) {
-                withContext(Dispatchers.Main) {
-                    showOtherMessage(R.string.toast_floating_keep_alive_privileged_start_failed)
-                }
-            }
-        }
-    }
-
-    fun autoEnablePrivilegedKeepAliveAfterShizukuGranted() {
-        if (!latestPendingPrivilegedEnable) return
+    fun autoEnablePrivilegedKeepAliveAfterGranted() {
+        if (!pendingPrivilegedEnable) return
         pendingPrivilegedEnable = false
-        if (!prefs.floatingKeepAliveEnabled) return
         if (prefs.floatingKeepAlivePrivilegedEnabled) return
-        if (!PrivilegedKeepAliveStarter.isShizukuGranted(context)) return
+        if (!PrivilegedAccessManager.isServiceGranted()) return
 
         prefs.floatingKeepAlivePrivilegedEnabled = true
-        PrivilegedKeepAliveScheduler.update(context)
         refreshState()
-        startPrivilegedKeepAlive()
     }
 
     DisposableEffect(context) {
-        val listener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
-            if (requestCode == PrivilegedKeepAliveStarter.SHIZUKU_REQUEST_CODE_KEEP_ALIVE) {
-                coroutineScope.launch(Dispatchers.Main) {
-                    if (grantResult == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                        autoEnablePrivilegedKeepAliveAfterShizukuGranted()
+        val listener: (PrivilegedAccessManager.PermissionRequestResult) -> Unit = { result ->
+            if (result == PrivilegedAccessManager.PermissionRequestResult.Granted) {
+                autoEnablePrivilegedKeepAliveAfterGranted()
+            } else {
+                pendingPrivilegedEnable = false
+                showOtherMessage(
+                    if (result == PrivilegedAccessManager.PermissionRequestResult.NotInstalled) {
+                        R.string.toast_shizuku_or_root_unavailable
                     } else {
-                        pendingPrivilegedEnable = false
+                        R.string.toast_shizuku_permission_request_failed
                     }
-                }
+                )
             }
         }
-        try {
-            Shizuku.addRequestPermissionResultListener(listener)
-        } catch (t: Throwable) {
-            if (BuildConfig.DEBUG) Log.d(OTHER_TAG, "Failed to add Shizuku listener", t)
-        }
-        onDispose {
-            try {
-                Shizuku.removeRequestPermissionResultListener(listener)
-            } catch (t: Throwable) {
-                if (BuildConfig.DEBUG) Log.d(OTHER_TAG, "Failed to remove Shizuku listener", t)
-            }
-        }
+        PrivilegedAccessManager.addPermissionResultListener(listener)
+        onDispose { PrivilegedAccessManager.removePermissionResultListener(listener) }
     }
 
     fun applyExplainedSwitch(
@@ -286,7 +257,6 @@ fun OtherSettingsScreen(
                         } else {
                             serviceManager.stopKeepAliveService()
                         }
-                        PrivilegedKeepAliveScheduler.update(context)
                     }
                 ) { prefs.floatingKeepAliveEnabled = it }
             },
@@ -308,15 +278,10 @@ fun OtherSettingsScreen(
                     preCheck = { shouldEnable ->
                         checkPrivilegedKeepAlivePreconditions(
                             context = context,
-                            prefs = prefs,
                             shouldEnable = shouldEnable,
                             setPendingEnable = { pendingPrivilegedEnable = it },
                             showMessage = ::showOtherMessage
                         )
-                    },
-                    onChanged = { enabled ->
-                        PrivilegedKeepAliveScheduler.update(context)
-                        if (enabled) startPrivilegedKeepAlive()
                     }
                 ) { prefs.floatingKeepAlivePrivilegedEnabled = it }
             },

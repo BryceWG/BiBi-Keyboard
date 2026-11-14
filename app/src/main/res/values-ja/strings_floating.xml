@@ -22,7 +22,7 @@
     <string name="toast_need_overlay_perm">フローティングボールを有効にするには、システム設定で「他のアプリの上に表示」を許可してください</string>
     <string name="label_floating_asr">フローティングボールで音声認識を使用する</string>
     <string name="label_floating_keep_alive_foreground">フォアグラウンドサービスで保活する</string>
-    <string name="label_floating_keep_alive_privileged">Shizuku / root で保活する</string>
+    <string name="label_floating_keep_alive_privileged">強化キープアライブ</string>
     <string name="label_request_battery_whitelist">電池最適化の除外を申請</string>
     <string name="label_floating_ime_bridge">IME Hook モジュール</string>
     <string name="label_ime_bridge_pcm_recording">ブリッジIME内で録音</string>
@@ -84,12 +84,9 @@
     <string name="cd_floating_edge_handle">フローティングボールを表示</string>
     <string name="toast_battery_whitelist_already">すでに電池最適化の除外済みです</string>
     <string name="toast_battery_whitelist_failed">電池最適化の除外申請に失敗しました</string>
-    <string name="toast_need_floating_keep_alive_first">先にフォアグラウンド保活を有効にしてください</string>
-    <string name="toast_shizuku_permission_requested">Shizuku の権限を要求しました。Shizuku で許可してください。</string>
-    <string name="toast_shizuku_permission_waiting">Shizuku に接続中です。接続後に権限確認が表示されます。</string>
-    <string name="toast_shizuku_permission_request_failed">Shizuku の権限要求に失敗しました</string>
-    <string name="toast_shizuku_or_root_unavailable">Shizuku が利用できず、root も検出されません</string>
-    <string name="toast_floating_keep_alive_privileged_start_failed">Shizuku / root による保活起動に失敗しました</string>
+    <string name="toast_shizuku_permission_waiting">特権サービスを待機中です。Porter または Shizuku を起動してください。両方ある場合は Porter を起動してください。</string>
+    <string name="toast_shizuku_permission_request_failed">権限が許可されていないか、特権サービスを利用できません。Porter / Shizuku を確認して再試行してください。</string>
+    <string name="toast_shizuku_or_root_unavailable">Porter / Shizuku が利用できず、root も検出されません</string>
     <string name="toast_floating_recording_foreground_failed">マイクのフォアグラウンドサービスを開始できません。アプリを一度開いてから再試行してください。</string>
 
     <!-- Floating ASR status messages -->
@@ -179,6 +176,6 @@
     <!-- フローティング保活 -->
     <string name="feature_floating_keep_alive_off_desc">バックグラウンドでしばらく動作すると、アプリが停止されやすくなり、フローティングボールや音量キー機能が使えなくなる場合があります。</string>
     <string name="feature_floating_keep_alive_on_desc">常駐通知を表示し、フローティングボールや音量キー機能をバックグラウンドでも利用しやすくします。端末によっては電池設定の変更も必要です。</string>
-    <string name="feature_floating_keep_alive_privileged_off_desc">通常の方法だけでバックグラウンド動作を維持します。端末によってはフローティングボールや音量キー機能が停止する場合があります。</string>
-    <string name="feature_floating_keep_alive_privileged_on_desc">Shizuku または root を使ってバックグラウンドサービスを定期的に復帰させ、機能の中断を減らします。Shizuku または root 権限が必要です。</string>
+    <string name="feature_floating_keep_alive_privileged_off_desc">強化キープアライブを停止し、この機能で変更したバックグラウンド設定を元に戻します。</string>
+    <string name="feature_floating_keep_alive_privileged_on_desc">バックグラウンド機能の停止を減らし、必要なユーザー補助サービスを復帰させます。Porter、Shizuku または root の権限が必要です。</string>
 </resources>
