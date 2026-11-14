@@ -5,6 +5,7 @@
     <string name="label_eleven_language">認識言語</string>
     <string name="eleven_lang_auto">自動（言語識別を有効化）</string>
     <string name="eleven_lang_zh">中国語（zh）</string>
+    <string name="eleven_lang_yue">広東語 (yue)</string>
     <string name="eleven_lang_en">英語（en）</string>
     <string name="eleven_lang_ja">日本語（ja）</string>
     <string name="eleven_lang_ko">韓国語（ko）</string>

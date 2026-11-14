@@ -34,6 +34,7 @@
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">الصينية (zh)</string>
+    <string name="dash_lang_yue">الكانتونية (yue)</string>
     <string name="dash_lang_en">الإنجليزية (en)</string>
     <string name="dash_lang_ja">اليابانية (ja)</string>
     <string name="dash_lang_de">الألمانية (de)</string>

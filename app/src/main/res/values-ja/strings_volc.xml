@@ -29,6 +29,7 @@
 
     <!-- Volc language options -->
     <string name="volc_lang_auto">自動（中国語/英語+方言）</string>
+    <string name="volc_lang_yue_cn">広東語 (yue-CN)</string>
     <string name="volc_lang_en_us">英語 (en-US)</string>
     <string name="volc_lang_ja_jp">日本語 (ja-JP)</string>
     <string name="volc_lang_id_id">インドネシア語 (id-ID)</string>

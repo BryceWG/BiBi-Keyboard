@@ -135,6 +135,7 @@ internal fun volcModelLabel(context: Context, modelId: String): String = context
 
 internal fun volcLanguageOptions(context: Context): List<VolcChoice> = listOf(
     VolcChoice("", context.getString(R.string.volc_lang_auto)),
+    VolcChoice("yue-CN", context.getString(R.string.volc_lang_yue_cn)),
     VolcChoice("en-US", context.getString(R.string.volc_lang_en_us)),
     VolcChoice("ja-JP", context.getString(R.string.volc_lang_ja_jp)),
     VolcChoice("id-ID", context.getString(R.string.volc_lang_id_id)),

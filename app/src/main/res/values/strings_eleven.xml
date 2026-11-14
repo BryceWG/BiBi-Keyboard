@@ -5,6 +5,7 @@
     <string name="label_eleven_language">Recognition language</string>
     <string name="eleven_lang_auto">Auto (enable language ID)</string>
     <string name="eleven_lang_zh">Chinese (zh)</string>
+    <string name="eleven_lang_yue">Cantonese (yue)</string>
     <string name="eleven_lang_en">English (en)</string>
     <string name="eleven_lang_ja">Japanese (ja)</string>
     <string name="eleven_lang_ko">Korean (ko)</string>

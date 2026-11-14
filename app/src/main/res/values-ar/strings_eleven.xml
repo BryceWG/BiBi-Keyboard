@@ -5,6 +5,7 @@
     <string name="label_eleven_language">لغة التعرّف</string>
     <string name="eleven_lang_auto">تلقائي (تفعيل تحديد اللغة)</string>
     <string name="eleven_lang_zh">الصينية (zh)</string>
+    <string name="eleven_lang_yue">الكانتونية (yue)</string>
     <string name="eleven_lang_en">الإنجليزية (en)</string>
     <string name="eleven_lang_ja">اليابانية (ja)</string>
     <string name="eleven_lang_ko">الكورية (ko)</string>

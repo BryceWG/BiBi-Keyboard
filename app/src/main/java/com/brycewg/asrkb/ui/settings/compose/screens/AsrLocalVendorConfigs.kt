@@ -923,6 +923,7 @@ private fun funAsrLanguageOptions(context: Context, variant: String): List<Dropd
     )
     if (!variant.contains("mlt", ignoreCase = true)) return common
     return common + listOf(
+        DropdownOption("粤语", context.getString(R.string.fn_lang_yue)),
         DropdownOption("韩文", context.getString(R.string.fn_lang_ko)),
         DropdownOption("越南语", context.getString(R.string.fn_lang_vi)),
         DropdownOption("印尼语", context.getString(R.string.fn_lang_id)),

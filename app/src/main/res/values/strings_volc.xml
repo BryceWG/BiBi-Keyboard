@@ -29,6 +29,7 @@
 
     <!-- Volc language options -->
     <string name="volc_lang_auto">Auto (Chinese/English + dialects)</string>
+    <string name="volc_lang_yue_cn">Cantonese (yue-CN)</string>
     <string name="volc_lang_en_us">English (en-US)</string>
     <string name="volc_lang_ja_jp">Japanese (ja-JP)</string>
     <string name="volc_lang_id_id">Indonesian (id-ID)</string>

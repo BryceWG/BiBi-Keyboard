@@ -29,6 +29,7 @@
 
     <!-- Volc language options -->
     <string name="volc_lang_auto">تلقائي (صيني/إنجليزي + لهجات)</string>
+    <string name="volc_lang_yue_cn">الكانتونية (yue-CN)</string>
     <string name="volc_lang_en_us">الإنجليزية (en-US)</string>
     <string name="volc_lang_ja_jp">اليابانية (ja-JP)</string>
     <string name="volc_lang_id_id">الإندونيسية (id-ID)</string>

@@ -1304,6 +1304,7 @@ internal const val MIMO_PAYGO_GUIDE_URL = "https://platform.xiaomimimo.com/conso
 internal fun elevenLanguageOptions(context: Context): List<OnlineVendorChoice> = listOf(
     OnlineVendorChoice("", context.getString(R.string.eleven_lang_auto)),
     OnlineVendorChoice("zh", context.getString(R.string.eleven_lang_zh)),
+    OnlineVendorChoice("yue", context.getString(R.string.eleven_lang_yue)),
     OnlineVendorChoice("en", context.getString(R.string.eleven_lang_en)),
     OnlineVendorChoice("ja", context.getString(R.string.eleven_lang_ja)),
     OnlineVendorChoice("ko", context.getString(R.string.eleven_lang_ko)),

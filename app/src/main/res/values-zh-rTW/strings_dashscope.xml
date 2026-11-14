@@ -34,6 +34,7 @@
 
     <!-- DashScope language options -->
     <string name="dash_lang_zh">中文 (zh)</string>
+    <string name="dash_lang_yue">粵語 (yue)</string>
     <string name="dash_lang_en">英語 (en)</string>
     <string name="dash_lang_ja">日語 (ja)</string>
     <string name="dash_lang_de">德語 (de)</string>

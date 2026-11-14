@@ -227,6 +227,7 @@ internal fun dashModelLabel(context: Context, model: String): String {
 internal fun dashLanguageOptions(context: Context): List<DashChoice> = listOf(
     DashChoice("", context.getString(R.string.dash_lang_auto)),
     DashChoice("zh", context.getString(R.string.dash_lang_zh)),
+    DashChoice("yue", context.getString(R.string.dash_lang_yue)),
     DashChoice("en", context.getString(R.string.dash_lang_en)),
     DashChoice("ja", context.getString(R.string.dash_lang_ja)),
     DashChoice("de", context.getString(R.string.dash_lang_de)),
