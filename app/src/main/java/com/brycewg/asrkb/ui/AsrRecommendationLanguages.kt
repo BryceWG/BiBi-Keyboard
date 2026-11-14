@@ -32,6 +32,7 @@ internal object AsrRecommendationLanguages {
     fun options(context: Context): List<String> {
         val collator = Collator.getInstance(context.resources.configuration.locales[0])
         return AsrVendorRecommendations.adaptedLanguageTags
+            .filter { it != OTHER }
             .sortedWith { first, second -> collator.compare(displayName(context, first), displayName(context, second)) } + OTHER
     }
 
