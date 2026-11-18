@@ -29,11 +29,15 @@ internal class TranslationDownloadService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_CANCEL) {
-            job?.cancel()
-            return START_NOT_STICKY
+        when (intent?.action) {
+            ACTION_START -> if (job?.isActive != true) startDownload()
+            ACTION_CANCEL -> job?.cancel()
         }
-        if (job?.isActive == true) return START_NOT_STICKY
+        if (job == null) stopSelf(startId)
+        return START_NOT_STICKY
+    }
+
+    private fun startDownload() {
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel(CHANNEL, getString(R.string.translation_packages), NotificationManager.IMPORTANCE_LOW))
         startForeground(NOTIFICATION_ID, notification(getString(R.string.translation_downloading), 0).build())
@@ -73,7 +77,6 @@ internal class TranslationDownloadService : Service() {
                 stopSelf()
             }
         }
-        return START_NOT_STICKY
     }
 
     private fun notification(text: String, percent: Int) = NotificationCompat.Builder(this, CHANNEL)
@@ -93,13 +96,15 @@ internal class TranslationDownloadService : Service() {
     companion object {
         private const val CHANNEL = "translation_models"
         private const val NOTIFICATION_ID = 417
+        private const val ACTION_START = "com.brycewg.asrkb.translation.action.START_DOWNLOAD"
         private const val ACTION_CANCEL = "cancel"
         private val mutableState = MutableStateFlow(State())
         val state = mutableState.asStateFlow()
 
         fun start(context: Context) {
+            val intent = Intent(context, TranslationDownloadService::class.java).setAction(ACTION_START)
+            ContextCompat.startForegroundService(context, intent)
             mutableState.value = State(running = true)
-            ContextCompat.startForegroundService(context, Intent(context, TranslationDownloadService::class.java))
         }
 
         fun cancel(context: Context) {
