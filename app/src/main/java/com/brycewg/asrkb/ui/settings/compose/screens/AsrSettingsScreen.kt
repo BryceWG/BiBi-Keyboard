@@ -36,7 +36,7 @@ import com.brycewg.asrkb.ui.DownloadSourceOption
 import com.brycewg.asrkb.ui.settings.asr.AsrSettingsViewModel
 import com.brycewg.asrkb.ui.settings.asr.ModelDownloadService
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsChoiceSheetState
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsDownloadSourceSheet
+import com.brycewg.asrkb.ui.settings.compose.components.SettingsDownloadSourceDialog
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsFeatureExplainerDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMessageDialogState
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMultiChoiceSheetState
@@ -712,7 +712,7 @@ fun AsrSettingsScreen(
 
     AsrScaffold(uiMode = uiMode, onBack = onBack) { innerPadding, scrollModifier ->
         downloadSourceRequest?.let { request ->
-            SettingsDownloadSourceSheet(
+            SettingsDownloadSourceDialog(
                 options = request.options,
                 uiMode = uiMode,
                 onDismiss = { downloadSourceRequest = null },

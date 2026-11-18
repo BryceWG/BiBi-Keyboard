@@ -109,7 +109,7 @@ internal fun SettingsUpdateHost(
             onDismiss = onDismiss
         )
 
-        is SettingsUpdateUiState.DownloadSources -> SettingsDownloadSourceSheet(
+        is SettingsUpdateUiState.DownloadSources -> SettingsDownloadSourceDialog(
             options = state.options,
             uiMode = uiMode,
             onDismiss = onDismiss,

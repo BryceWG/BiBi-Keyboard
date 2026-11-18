@@ -9,7 +9,7 @@ package com.brycewg.asrkb.ui.setup.compose
 
 import androidx.compose.runtime.Composable
 import com.brycewg.asrkb.ui.DownloadSourceOption
-import com.brycewg.asrkb.ui.settings.compose.components.SettingsDownloadSourceSheet
+import com.brycewg.asrkb.ui.settings.compose.components.SettingsDownloadSourceDialog
 import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 
 @Composable
@@ -21,7 +21,7 @@ internal fun OnboardingDialogHost(
 ) {
     when (state) {
         OnboardingDialogState.None -> Unit
-        is OnboardingDialogState.DownloadSources -> SettingsDownloadSourceSheet(
+        is OnboardingDialogState.DownloadSources -> SettingsDownloadSourceDialog(
             options = state.options,
             uiMode = uiMode,
             onDismiss = onDismiss,

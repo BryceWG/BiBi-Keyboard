@@ -64,7 +64,6 @@ internal object SettingsLayoutMetrics {
     val SheetGroupHeaderVerticalPadding = 8.dp
     val SheetSupportingTextHorizontalPadding = 20.dp
     val SheetSupportingTextVerticalPadding = 8.dp
-    val DownloadSourceInsideHorizontalPadding = 20.dp
     val DownloadSourceInsideVerticalPadding = 12.dp
     val DialogMaxWidth = 360.dp
     val DialogContentMaxHeight = 420.dp
