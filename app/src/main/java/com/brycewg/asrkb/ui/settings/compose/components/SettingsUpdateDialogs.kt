@@ -16,15 +16,22 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider as MaterialHorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text as MaterialText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.brycewg.asrkb.LocaleHelper
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.ui.DownloadSourceOption
@@ -32,9 +39,14 @@ import com.brycewg.asrkb.ui.settings.compose.core.BibiUiMode
 import com.brycewg.asrkb.ui.settings.compose.core.SettingsLayoutMetrics
 import com.brycewg.asrkb.ui.update.UpdateChecker
 import java.text.SimpleDateFormat
+import top.yukonga.miuix.kmp.basic.HorizontalDivider as MiuixHorizontalDivider
 import top.yukonga.miuix.kmp.basic.Text as MiuixText
 import top.yukonga.miuix.kmp.overlay.OverlayDialog
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+
+private val releaseNotesHeading = Regex("""^ {0,3}#{1,6}[ \t]+([^\r\n]+)(?:\r?\n[ \t]*$)?""", RegexOption.MULTILINE)
+private val releaseNotesBullet = Regex("""^(\h*)[-+*][ \t]+""", RegexOption.MULTILINE)
+private val releaseNotesBold = Regex("""(\*\*|__)(.+?)\1""")
 
 internal sealed interface SettingsUpdateUiState {
     data object Idle : SettingsUpdateUiState
@@ -160,21 +172,12 @@ private fun UpdateResultDialog(
                     )
                 },
                 buttons = {
-                    MaterialSettingsDialogButtonRow(
-                        actions = listOf(
-                            MaterialSettingsDialogAction(
-                                text = stringResource(R.string.btn_view_changelog),
-                                onClick = onOpenChangelog
-                            ),
-                            MaterialSettingsDialogAction(
-                                text = stringResource(R.string.btn_view_release_page),
-                                onClick = onOpenReleasePage
-                            ),
-                            MaterialSettingsDialogAction(
-                                text = primaryText,
-                                onClick = primaryAction
-                            )
-                        )
+                    UpdateResultActions(
+                        uiMode = uiMode,
+                        primaryText = primaryText,
+                        onPrimaryAction = primaryAction,
+                        onOpenReleasePage = onOpenReleasePage,
+                        onOpenChangelog = onOpenChangelog
                     )
                 }
             )
@@ -192,25 +195,45 @@ private fun UpdateResultDialog(
                 uiMode = uiMode,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            SettingsDialogActionRow(
-                uiMode = BibiUiMode.Miuix,
-                actions = listOf(
-                    SettingsDialogAction(
-                        text = stringResource(R.string.btn_view_changelog),
-                        onClick = onOpenChangelog
-                    ),
-                    SettingsDialogAction(
-                        text = stringResource(R.string.btn_view_release_page),
-                        onClick = onOpenReleasePage
-                    ),
-                    SettingsDialogAction(
-                        text = primaryText,
-                        onClick = primaryAction,
-                        primary = true
-                    )
-                )
+            UpdateResultActions(
+                uiMode = uiMode,
+                primaryText = primaryText,
+                onPrimaryAction = primaryAction,
+                onOpenReleasePage = onOpenReleasePage,
+                onOpenChangelog = onOpenChangelog
             )
         }
+    }
+}
+
+@Composable
+private fun UpdateResultActions(
+    uiMode: BibiUiMode,
+    primaryText: String,
+    onPrimaryAction: () -> Unit,
+    onOpenReleasePage: () -> Unit,
+    onOpenChangelog: () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(SettingsLayoutMetrics.ActionButtonSpacing)) {
+        SettingsDialogActionRow(
+            uiMode = uiMode,
+            actions = listOf(
+                SettingsDialogAction(
+                    text = stringResource(R.string.btn_view_changelog),
+                    onClick = onOpenChangelog
+                ),
+                SettingsDialogAction(
+                    text = stringResource(R.string.btn_view_release_page),
+                    onClick = onOpenReleasePage
+                )
+            )
+        )
+        SettingsDialogActionRow(
+            uiMode = uiMode,
+            actions = listOf(
+                SettingsDialogAction(text = primaryText, onClick = onPrimaryAction, primary = true)
+            )
+        )
     }
 }
 
@@ -294,35 +317,39 @@ private fun UpdateMessageContent(
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        UpdateText(
-            text = if (hasUpdate) {
-                context.getString(
-                    R.string.update_dialog_message,
-                    result.currentVersion,
-                    result.latestVersion
-                )
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            val versionMessage = if (hasUpdate) {
+                stringResource(R.string.update_dialog_message, result.currentVersion, result.latestVersion)
             } else {
-                context.getString(R.string.current_version_message, result.currentVersion)
-            },
-            uiMode = uiMode
-        )
+                stringResource(R.string.current_version_message, result.currentVersion)
+            }
+            UpdateText(
+                text = AnnotatedString(versionMessage),
+                uiMode = uiMode
+            )
+            result.updateTime?.let { updateTime ->
+                val timestamp = stringResource(R.string.update_timestamp_label, formatUpdateTime(context, updateTime))
+                UpdateText(
+                    text = AnnotatedString(timestamp),
+                    uiMode = uiMode
+                )
+            }
+        }
         result.importantNotice?.let { notice ->
             UpdateText(
-                text = notice,
+                text = AnnotatedString(notice),
                 uiMode = uiMode,
                 colorRole = result.noticeLevel,
                 fontWeight = FontWeight.Bold
             )
         }
-        result.updateTime?.let { updateTime ->
-            UpdateText(
-                text = stringResource(R.string.update_timestamp_label, formatUpdateTime(context, updateTime)),
-                uiMode = uiMode
-            )
-        }
         result.releaseNotes?.let { notes ->
+            when (uiMode) {
+                BibiUiMode.Material -> MaterialHorizontalDivider()
+                BibiUiMode.Miuix -> MiuixHorizontalDivider()
+            }
             UpdateText(
-                text = stringResource(R.string.update_release_notes_label, notes),
+                text = remember(notes) { formatReleaseNotes(notes) },
                 uiMode = uiMode
             )
         }
@@ -331,7 +358,7 @@ private fun UpdateMessageContent(
 
 @Composable
 private fun UpdateText(
-    text: String,
+    text: AnnotatedString,
     uiMode: BibiUiMode,
     modifier: Modifier = Modifier,
     colorRole: UpdateChecker.NoticeLevel? = null,
@@ -364,6 +391,31 @@ private fun UpdateText(
             fontWeight = fontWeight
         )
     }
+}
+
+private fun formatReleaseNotes(notes: String): AnnotatedString = buildAnnotatedString {
+    val withBullets = notes.replace(releaseNotesBullet, "$1• ")
+    var bodyStart = 0
+    for (heading in releaseNotesHeading.findAll(withBullets)) {
+        appendReleaseNotesText(withBullets.substring(bodyStart, heading.range.first))
+        withStyle(SpanStyle(fontSize = 1.15.em, fontWeight = FontWeight.SemiBold)) {
+            appendReleaseNotesText(heading.groupValues[1])
+        }
+        bodyStart = heading.range.last + 1
+    }
+    appendReleaseNotesText(withBullets.substring(bodyStart))
+}
+
+private fun AnnotatedString.Builder.appendReleaseNotesText(text: String) {
+    var plainTextStart = 0
+    for (bold in releaseNotesBold.findAll(text)) {
+        append(text, plainTextStart, bold.range.first)
+        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+            append(bold.groupValues[2])
+        }
+        plainTextStart = bold.range.last + 1
+    }
+    append(text, plainTextStart, text.length)
 }
 
 private fun formatUpdateTime(context: android.content.Context, updateTime: String): String = try {

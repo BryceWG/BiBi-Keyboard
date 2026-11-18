@@ -8,9 +8,9 @@
     <string name="update_no_update">أنت تستخدم أحدث إصدار</string>
     <string name="update_check_failed">فشل التحقق من التحديث: %1$s</string>
     <string name="update_dialog_title">إصدار جديد متاح</string>
-    <string name="update_dialog_message">الإصدار الحالي: %1$s\nأحدث إصدار: %2$s\n\nهل تريد التنزيل؟</string>
+    <string name="update_dialog_message">الإصدار الحالي: %1$s (الأحدث: %2$s)</string>
     <string name="current_version_info_title">معلومات الإصدار الحالي</string>
-    <string name="current_version_message">الإصدار الحالي: %1$s\n\nأنت تستخدم أحدث إصدار!</string>
+    <string name="current_version_message">الإصدار الحالي: %1$s (أحدث إصدار)</string>
     <string name="btn_download">تنزيل</string>
     <string name="btn_view_release_page">الإصدار</string>
     <string name="btn_manual_check">تحقق يدوي</string>
@@ -37,7 +37,6 @@
     <string name="download_source_latency_failed">زمن الاستجابة: غير متاح</string>
     <string name="download_source_latency_note">زمن الاستجابة المعروض هو وقت استجابة HTTP للمراجع فقط ولا يعكس معدل التنزيل الفعلي.</string>
     <string name="update_timestamp_label">وقت الإصدار: %1$s</string>
-    <string name="update_release_notes_label">ملاحظات الإصدار:\n%1$s</string>
     <string name="error_open_browser">تعذّر فتح المتصفح</string>
 
     <!-- APK download and installation -->

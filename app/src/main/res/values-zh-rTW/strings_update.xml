@@ -8,9 +8,9 @@
     <string name="update_no_update">已是最新版本</string>
     <string name="update_check_failed">檢查更新失敗：%1$s</string>
     <string name="update_dialog_title">發現新版本</string>
-    <string name="update_dialog_message">目前版本：%1$s\n最新版本：%2$s\n\n是否前往下載？</string>
+    <string name="update_dialog_message">目前版本：%1$s（最新版本：%2$s）</string>
     <string name="current_version_info_title">目前版本資訊</string>
-    <string name="current_version_message">目前版本：%1$s\n\n已是最新版本！</string>
+    <string name="current_version_message">目前版本：%1$s（已是最新）</string>
     <string name="btn_download">下載</string>
     <string name="btn_view_release_page">發佈頁</string>
     <string name="btn_manual_check">手動查看</string>
@@ -32,7 +32,6 @@
     <string name="download_source_mirror_2">GitHub 鏡像2</string>
     <string name="download_source_mirror_3">GitHub 鏡像3</string>
     <string name="update_timestamp_label">更新時間：%1$s</string>
-    <string name="update_release_notes_label">更新說明：\n%1$s</string>
     <string name="error_open_browser">無法開啟瀏覽器</string>
 
     <!-- APK 下載與安裝 -->

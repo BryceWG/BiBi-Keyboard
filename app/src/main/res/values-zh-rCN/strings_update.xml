@@ -8,9 +8,9 @@
     <string name="update_no_update">已是最新版本</string>
     <string name="update_check_failed">检查更新失败：%1$s</string>
     <string name="update_dialog_title">发现新版本</string>
-    <string name="update_dialog_message">当前版本：%1$s\n最新版本：%2$s\n\n是否前往下载？</string>
+    <string name="update_dialog_message">当前版本：%1$s（最新版本：%2$s）</string>
     <string name="current_version_info_title">当前版本信息</string>
-    <string name="current_version_message">当前版本：%1$s\n\n已是最新版本！</string>
+    <string name="current_version_message">当前版本：%1$s（已是最新）</string>
     <string name="btn_download">下载</string>
     <string name="btn_view_release_page">发布页</string>
     <string name="btn_manual_check">手动查看</string>
@@ -37,7 +37,6 @@
     <string name="download_source_latency_failed">延迟：不可用</string>
     <string name="download_source_latency_note">所示延迟为 HTTP 响应耗时，仅作可达性参考，不能反映实际下载吞吐。</string>
     <string name="update_timestamp_label">更新时间：%1$s</string>
-    <string name="update_release_notes_label">更新说明：\n%1$s</string>
     <string name="error_open_browser">无法打开浏览器</string>
 
     <!-- APK 下载与安装 -->

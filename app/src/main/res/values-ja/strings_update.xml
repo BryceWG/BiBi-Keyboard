@@ -9,9 +9,9 @@
     <string name="update_no_update">最新バージョンを使用しています</string>
     <string name="update_check_failed">更新確認失敗：%1$s</string>
     <string name="update_dialog_title">新しいバージョンが利用可能</string>
-    <string name="update_dialog_message">現在のバージョン：%1$s\n最新バージョン：%2$s\n\nダウンロードしますか？</string>
+    <string name="update_dialog_message">現在のバージョン：%1$s（最新：%2$s）</string>
     <string name="current_version_info_title">現在のバージョン情報</string>
-    <string name="current_version_message">現在のバージョン：%1$s\n\n最新バージョンをご利用中です！</string>
+    <string name="current_version_message">現在のバージョン：%1$s（最新版）</string>
     <string name="btn_download">DL</string>
     <string name="btn_view_release_page">Release</string>
     <string name="btn_manual_check">手動確認</string>
@@ -33,7 +33,6 @@
     <string name="download_source_mirror_2">GitHubミラー2</string>
     <string name="download_source_mirror_3">GitHubミラー3</string>
     <string name="update_timestamp_label">リリース時間：%1$s</string>
-    <string name="update_release_notes_label">リリースノート：\n%1$s</string>
     <string name="error_open_browser">ブラウザを開けません</string>
 
     <!-- APK ダウンロードとインストール -->

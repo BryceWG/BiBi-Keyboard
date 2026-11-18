@@ -8,9 +8,9 @@
     <string name="update_no_update">You are using the latest version</string>
     <string name="update_check_failed">Update check failed: %1$s</string>
     <string name="update_dialog_title">New Version Available</string>
-    <string name="update_dialog_message">Current version: %1$s\nLatest version: %2$s\n\nWould you like to download?</string>
+    <string name="update_dialog_message">Current version: %1$s (latest: %2$s)</string>
     <string name="current_version_info_title">Current Version Info</string>
-    <string name="current_version_message">Current version: %1$s\n\nYou are using the latest version!</string>
+    <string name="current_version_message">Current version: %1$s (up to date)</string>
     <string name="btn_download">Download</string>
     <string name="btn_view_release_page">Release</string>
     <string name="btn_manual_check">Manual Check</string>
@@ -37,7 +37,6 @@
     <string name="download_source_latency_failed">Latency: unavailable</string>
     <string name="download_source_latency_note">Shown latency is HTTP response time for reachability reference and doesn\'t reflect actual download throughput.</string>
     <string name="update_timestamp_label">Release time: %1$s</string>
-    <string name="update_release_notes_label">Release notes:\n%1$s</string>
     <string name="error_open_browser">Unable to open browser</string>
 
     <!-- APK download and installation -->
