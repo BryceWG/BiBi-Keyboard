@@ -8,6 +8,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.brycewg.asrkb.R
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsHighlightContainer
 import com.brycewg.asrkb.ui.settings.compose.components.SettingsMaterialItemSurface
@@ -45,7 +46,7 @@ internal fun OtherDownloadMirrorsSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = SettingsLayoutMetrics.ActionButtonRowHorizontalPadding)
-                        .padding(top = SettingsLayoutMetrics.ActionButtonRowTopPadding),
+                        .padding(top = if (mirrors.isEmpty()) 16.dp else SettingsLayoutMetrics.ActionButtonRowTopPadding),
                     onClick = { onOpenEditor("") },
                     leadingIcon = Icons.Rounded.Add,
                     padded = false
