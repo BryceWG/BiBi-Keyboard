@@ -18,6 +18,14 @@
     <string name="btn_view_changelog">السجل</string>
     <string name="update_feedback_title">تحديث</string>
 
+    <string name="download_mirrors_section">مرايا تنزيل GitHub</string>
+    <string name="download_mirrors_summary">أدخل بادئة المرآة ليُضاف بعدها رابط GitHub الكامل عند التنزيل.</string>
+    <string name="download_mirror_add">إضافة مرآة</string>
+    <string name="download_mirror_edit">تعديل المرآة</string>
+    <string name="download_mirror_address">عنوان بادئة المرآة</string>
+    <string name="download_mirror_invalid">أدخل بادئة HTTP أو HTTPS صالحة بلا مسافات أو بيانات اعتماد أو معلمات استعلام أو أجزاء.</string>
+    <string name="download_mirror_duplicate">هذه المرآة موجودة بالفعل أو تطابق مرآة مدمجة.</string>
+    <string name="download_source_custom_mirror">مرآة مخصصة %1$d</string>
     <string name="download_source_title">اختر مصدر التنزيل</string>
     <string name="download_source_github_official">GitHub (رسمي)</string>
     <string name="download_source_mirror_1">مرآة GitHub 1</string>

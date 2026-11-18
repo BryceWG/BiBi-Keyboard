@@ -2,6 +2,7 @@ package com.brycewg.asrkb.ui
 
 import android.content.Context
 import com.brycewg.asrkb.R
+import com.brycewg.asrkb.store.Prefs
 
 internal data class DownloadSourceOption(
     val label: String,
@@ -10,11 +11,13 @@ internal data class DownloadSourceOption(
 )
 
 internal object DownloadSourceConfig {
+    private const val GITHUB_PREFIX = "https://github.com/"
+
     private data class Mirror(val labelRes: Int, val prefix: String)
 
     private val mirrors = listOf(
         Mirror(R.string.download_source_mirror_1, "https://ghproxy.net/"),
-        Mirror(R.string.download_source_mirror_2, "https://hub.gitmirror.com/"),
+        Mirror(R.string.download_source_mirror_2, "https://cdn.akaere.online/"),
         Mirror(R.string.download_source_mirror_3, "https://fastgit.cc/")
     )
 
@@ -28,32 +31,22 @@ internal object DownloadSourceConfig {
         context: Context,
         officialUrls: List<String>,
         officialLabelRes: Int = R.string.download_source_github_official
-    ): List<DownloadSourceOption> {
-        val primaryOfficialUrl = officialUrls.firstOrNull().orEmpty()
-        val options = ArrayList<DownloadSourceOption>(mirrors.size + 1)
-        options.add(
-            DownloadSourceOption(
-                context.getString(officialLabelRes),
-                primaryOfficialUrl,
-                officialUrls
-            )
-        )
-        mirrors.forEach { mirror ->
-            val mirroredUrls = officialUrls.map { applyMirrorPrefix(it, mirror.prefix) }
-            options.add(
-                DownloadSourceOption(
-                    context.getString(mirror.labelRes),
-                    mirroredUrls.firstOrNull().orEmpty(),
-                    mirroredUrls
-                )
-            )
+    ): List<DownloadSourceOption> = buildList {
+        add(DownloadSourceOption(context.getString(officialLabelRes), officialUrls.firstOrNull().orEmpty(), officialUrls))
+        if (officialUrls.none { it.startsWith(GITHUB_PREFIX) }) return@buildList
+
+        fun addMirror(label: String, prefix: String) {
+            val urls = officialUrls.map { url -> if (url.startsWith(GITHUB_PREFIX)) prefix + url else url }
+            add(DownloadSourceOption(label, urls.first(), urls))
         }
-        return options
+
+        mirrors.forEach { (labelRes, prefix) -> addMirror(context.getString(labelRes), prefix) }
+        Prefs(context).customDownloadMirrors.forEachIndexed { index, prefix ->
+            if (!isBuiltInMirror(prefix)) {
+                addMirror(context.getString(R.string.download_source_custom_mirror, index + 1), prefix)
+            }
+        }
     }
 
-    private fun applyMirrorPrefix(originalUrl: String, mirrorPrefix: String): String = if (originalUrl.startsWith("https://github.com/")) {
-        mirrorPrefix + originalUrl
-    } else {
-        originalUrl
-    }
+    fun isBuiltInMirror(prefix: String): Boolean = mirrors.any { it.prefix == prefix }
 }

@@ -37,6 +37,8 @@ internal fun OtherSettingsRouteContent(
     innerPadding: PaddingValues,
     scrollModifier: Modifier,
     uiState: OtherSettingsUiState,
+    downloadMirrors: List<String>,
+    onOpenDownloadMirrorEditor: (String) -> Unit,
     punctuation: PunctuationFields,
     speechState: OtherSettingsViewModel.SpeechPresetsState,
     syncState: OtherSettingsViewModel.SyncClipboardState,
@@ -124,6 +126,14 @@ internal fun OtherSettingsRouteContent(
                     onClick = onRequestBatteryWhitelist
                 )
             }
+        }
+
+        item("download_mirrors") {
+            OtherDownloadMirrorsSection(
+                uiMode = uiMode,
+                mirrors = downloadMirrors,
+                onOpenEditor = onOpenDownloadMirrorEditor
+            )
         }
 
         item("privacy") {

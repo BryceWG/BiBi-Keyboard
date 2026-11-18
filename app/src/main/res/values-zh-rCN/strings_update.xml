@@ -18,6 +18,14 @@
     <string name="btn_view_changelog">历史</string>
     <string name="update_feedback_title">更新</string>
 
+    <string name="download_mirrors_section">GitHub 下载镜像</string>
+    <string name="download_mirrors_summary">填写镜像前缀，下载时自动拼接完整 GitHub 链接。</string>
+    <string name="download_mirror_add">添加镜像</string>
+    <string name="download_mirror_edit">编辑镜像</string>
+    <string name="download_mirror_address">镜像前缀地址</string>
+    <string name="download_mirror_invalid">请输入有效的 HTTP 或 HTTPS 前缀地址，不含空格、认证信息、查询参数或片段。</string>
+    <string name="download_mirror_duplicate">该镜像已存在或与内置镜像重复。</string>
+    <string name="download_source_custom_mirror">自定义镜像 %1$d</string>
     <string name="download_source_title">选择下载源</string>
     <string name="download_source_github_official">GitHub 官方</string>
     <string name="download_source_mirror_1">GitHub 镜像1</string>

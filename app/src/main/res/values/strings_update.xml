@@ -18,6 +18,14 @@
     <string name="btn_view_changelog">History</string>
     <string name="update_feedback_title">Update</string>
 
+    <string name="download_mirrors_section">GitHub download mirrors</string>
+    <string name="download_mirrors_summary">Enter a mirror prefix; the full GitHub URL is appended when downloading.</string>
+    <string name="download_mirror_add">Add mirror</string>
+    <string name="download_mirror_edit">Edit mirror</string>
+    <string name="download_mirror_address">Mirror prefix URL</string>
+    <string name="download_mirror_invalid">Enter a valid HTTP or HTTPS prefix URL without spaces, credentials, query parameters, or fragments.</string>
+    <string name="download_mirror_duplicate">This mirror already exists or matches a built-in mirror.</string>
+    <string name="download_source_custom_mirror">Custom mirror %1$d</string>
     <string name="download_source_title">Select Download Source</string>
     <string name="download_source_github_official">GitHub (official)</string>
     <string name="download_source_mirror_1">GitHub mirror 1</string>

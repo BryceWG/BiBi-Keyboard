@@ -377,6 +377,11 @@ object SettingsSearchIndex {
         )
         item(R.string.label_floating_keep_alive_privileged, R.string.section_general, "porter", "shizuku", "root", "保活", "后台", "无障碍", "accessibility")
         item(R.string.label_request_battery_whitelist, R.string.section_general)
+        item(
+            R.string.download_mirrors_section,
+            R.string.download_mirrors_section,
+            "github", "mirror", "download", "镜像", "下載", "下载", "ミラー", "مرآة"
+        )
         item(R.string.label_disable_asr_history, R.string.section_data_retention)
         item(R.string.label_disable_usage_stats, R.string.section_data_retention)
         item(R.string.label_data_collection, R.string.section_data_retention)

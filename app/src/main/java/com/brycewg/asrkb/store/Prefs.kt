@@ -2082,6 +2082,12 @@ class Prefs(context: Context) {
         return getEffectiveLlmConfig() != null
     }
 
+    internal var customDownloadMirrors: List<String>
+        get() = json.decodeFromString(getPrefString(KEY_CUSTOM_DOWNLOAD_MIRRORS, "[]"))
+        set(value) = sp.edit {
+            putString(KEY_CUSTOM_DOWNLOAD_MIRRORS, json.encodeToString(value))
+        }
+
     // 自定义标点按钮（4个位置）
     var punct1: String
         get() = (sp.getString(KEY_PUNCT_1, DEFAULT_PUNCT_1) ?: DEFAULT_PUNCT_1).trim()

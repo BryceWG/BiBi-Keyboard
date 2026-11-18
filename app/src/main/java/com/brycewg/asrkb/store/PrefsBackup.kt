@@ -168,6 +168,7 @@ internal object PrefsBackup {
         o.put(KEY_BACKUP_ASR_LOCAL_RESIDENCY, backupAsrLocalResidency.id)
         // 遍历所有供应商字段，统一导出，避免逐个硬编码
         PrefsAsrVendorFields.exportToJson(asVendorFieldStore(), o)
+        o.put(KEY_CUSTOM_DOWNLOAD_MIRRORS, org.json.JSONArray(customDownloadMirrors))
         // 自定义标点
         o.put(KEY_PUNCT_1, punct1)
         o.put(KEY_PUNCT_2, punct2)
@@ -599,6 +600,11 @@ internal object PrefsBackup {
                 importedOpenAiUseCompletions?.let { oaAsrUseCompletions = it }
             }
             syncLegacyOpenAiAsrFields(getActiveOpenAiAsrProvider())
+            o.optJSONArray(KEY_CUSTOM_DOWNLOAD_MIRRORS)?.let { mirrors ->
+                customDownloadMirrors = (0 until mirrors.length())
+                    .mapNotNull { normalizeDownloadMirrorPrefix(mirrors.getString(it)) }
+                    .distinct()
+            }
             optString(KEY_PUNCT_1)?.let { punct1 = it }
             optString(KEY_PUNCT_2)?.let { punct2 = it }
             optString(KEY_PUNCT_3)?.let { punct3 = it }

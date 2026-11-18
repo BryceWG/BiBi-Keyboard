@@ -19,6 +19,14 @@
     <string name="btn_view_changelog">履歴</string>
     <string name="update_feedback_title">アップデート</string>
 
+    <string name="download_mirrors_section">GitHub ダウンロードミラー</string>
+    <string name="download_mirrors_summary">ミラーのプレフィックスを入力すると、ダウンロード時に GitHub の URL 全体が追加されます。</string>
+    <string name="download_mirror_add">ミラーを追加</string>
+    <string name="download_mirror_edit">ミラーを編集</string>
+    <string name="download_mirror_address">ミラーのプレフィックス URL</string>
+    <string name="download_mirror_invalid">空白、認証情報、クエリ、フラグメントを含まない有効な HTTP または HTTPS のプレフィックス URL を入力してください。</string>
+    <string name="download_mirror_duplicate">このミラーは既に存在するか、組み込みミラーと重複しています。</string>
+    <string name="download_source_custom_mirror">カスタムミラー %1$d</string>
     <string name="download_source_title">ダウンロードソースを選択</string>
     <string name="download_source_github_official">GitHub（公式）</string>
     <string name="download_source_mirror_1">GitHubミラー1</string>

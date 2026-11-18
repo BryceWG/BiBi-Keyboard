@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -79,6 +80,8 @@ fun OtherSettingsScreen(
     val speechState by viewModel.speechPresetsState.collectAsStateWithLifecycle()
     val syncState by viewModel.syncClipboardState.collectAsStateWithLifecycle()
     var uiState by remember(context) { mutableStateOf(OtherSettingsUiState.fromPrefs(prefs)) }
+    var downloadMirrors by remember(context) { mutableStateOf(prefs.customDownloadMirrors) }
+    var editingDownloadMirror by rememberSaveable { mutableStateOf<String?>(null) }
     var punct1 by remember(context) { mutableStateOf(prefs.punct1) }
     var punct2 by remember(context) { mutableStateOf(prefs.punct2) }
     var punct3 by remember(context) { mutableStateOf(prefs.punct3) }
@@ -233,11 +236,25 @@ fun OtherSettingsScreen(
             uiMode = uiMode,
             onDismiss = { featureExplainerDialog = null }
         )
+        editingDownloadMirror?.let { prefix ->
+            OtherDownloadMirrorDialog(
+                uiMode = uiMode,
+                mirrors = downloadMirrors,
+                initialPrefix = prefix,
+                onMirrorsChange = { mirrors ->
+                    prefs.customDownloadMirrors = mirrors
+                    downloadMirrors = mirrors
+                },
+                onDismiss = { editingDownloadMirror = null }
+            )
+        }
         OtherSettingsRouteContent(
             uiMode = uiMode,
             innerPadding = innerPadding,
             scrollModifier = scrollModifier,
             uiState = uiState,
+            downloadMirrors = downloadMirrors,
+            onOpenDownloadMirrorEditor = { editingDownloadMirror = it },
             punctuation = PunctuationFields(punct1, punct2, punct3, punct4),
             speechState = speechState,
             syncState = syncState,
