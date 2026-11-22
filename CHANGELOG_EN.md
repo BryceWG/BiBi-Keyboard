@@ -1,5 +1,29 @@
 # Changelog
 
+## v4.7.0 (2026-11-22)
+
+### New Features
+
+- **DeepSeek ASR:** Added DeepSeek online speech recognition for non-streaming recordings.
+- **ASR Provider Recommendations:** View recommended online and local providers by language. Recommended providers are marked with a star and prioritized within their groups.
+- **Custom GitHub Download Mirrors:** Add, edit, or remove mirrors in Other Settings, then select one when downloading local models or open-source app updates.
+- **[Pro] ElevenLabs Hotwords and Context:** Added hotword support for file and streaming recognition, plus context support for streaming recognition.
+
+### Improvements
+
+- **ElevenLabs Models:** Upgraded file recognition to Scribe v3 and streaming recognition to Scribe v3 Live.
+- **Cantonese Recognition:** Added Cantonese options for Alibaba Qianwen, Volcengine, ElevenLabs, and multilingual FunASR Nano models.
+- **Local Model Details:** Added download sizes and brief memory recommendations to model variants.
+- **Enhanced Keep-Alive:** Added Porter, Shizuku, and Root support, with improvements to keep-alive behavior.
+- **Clipboard Attachment Sync:** Improved file-change monitoring for the selected folder to reduce CPU usage.
+- **Settings UI:** Refined several interface details and localized text.
+
+### Bug Fixes
+
+- **[Pro] Auto-Backup Settings Migration:** Prevented migration from overwriting the configured switch and backup interval.
+
+---
+
 ## v4.6.1 (2026-11-10)
 
 ### New Features
