@@ -179,6 +179,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
+    implementation("io.github.jaredmdobson:concentus:1.0.2")
     implementation("org.apache.commons:commons-compress:1.28.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("com.alibaba:dashscope-sdk-java:2.23.1")

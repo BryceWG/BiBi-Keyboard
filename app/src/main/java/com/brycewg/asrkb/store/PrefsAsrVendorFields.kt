@@ -200,7 +200,10 @@ internal object PrefsAsrVendorFields {
             VendorField(KEY_TENCENT_ENGINE_CATEGORY, default = ""),
             VendorField(KEY_TENCENT_ENGINE_TYPE, default = ""),
             VendorField.boolean(KEY_TENCENT_VAD_ENABLED, default = false)
-        )
+        ),
+        // 豆包输入法 / 微信输入法（零配置流式接口）
+        AsrVendor.DoubaoIme to emptyList(),
+        AsrVendor.WeType to emptyList()
     )
 
     internal val backupFields: List<VendorField> =

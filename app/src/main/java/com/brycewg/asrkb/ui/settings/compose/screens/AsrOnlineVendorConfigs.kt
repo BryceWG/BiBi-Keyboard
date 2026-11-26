@@ -732,6 +732,16 @@ internal fun CurrentAsrVendorConfig(
             )
         }
 
+        AsrVendor.DoubaoIme,
+        AsrVendor.WeType -> {
+            ZeroConfigStreamVendorConfig(
+                uiMode = uiMode,
+                vendor = selectedVendor,
+                primaryIndexOffset = primaryIndexOffset,
+                primaryGroupCount = primaryGroupCount
+            )
+        }
+
         AsrVendor.Tencent -> {
             var itemIndex = primaryIndexOffset
             val selection = TencentAsrModelCatalog.resolveSelection(
@@ -1267,6 +1277,8 @@ internal fun currentOnlineAsrPrimaryItemCount(
     )
     AsrVendor.Soniox -> 6
     AsrVendor.Tencent -> tencentPrimaryItemCount(streaming = true)
+    AsrVendor.DoubaoIme,
+    AsrVendor.WeType -> 1
     else -> 0
 }
 

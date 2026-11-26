@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_wetype">微信输入法（流式）</string>
+    <string name="btn_wetype_reset_identity">重置设备标识</string>
+    <string name="toast_wetype_identity_reset">已清除微信输入法设备标识</string>
+    <string name="wetype_description">使用微信输入法加密流式语音识别接口（20ms Opus）。无需 API Key，首次使用时会自动完成密钥交换并注册匿名设备 UIN。</string>
+</resources>

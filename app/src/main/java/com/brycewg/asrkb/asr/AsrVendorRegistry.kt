@@ -317,7 +317,34 @@ internal object AsrVendorRegistry {
             ),
             capabilities = localStreamingCapabilities()
         )
-    )
+    ).let { core ->
+        core + listOf(
+            descriptor(
+                vendor = AsrVendor.DoubaoIme,
+                legacyIds = setOf("doubaoime"),
+                displayNameResId = R.string.vendor_doubao_ime,
+                pickerOrder = core.size,
+                tags = listOf(
+                    AsrVendorDisplayTag.Online,
+                    AsrVendorDisplayTag.Streaming,
+                    AsrVendorDisplayTag.Accurate
+                ),
+                capabilities = onlineStreamingOnlyCapabilities()
+            ),
+            descriptor(
+                vendor = AsrVendor.WeType,
+                legacyIds = setOf("wechat_ime"),
+                displayNameResId = R.string.vendor_wetype,
+                pickerOrder = core.size + 1,
+                tags = listOf(
+                    AsrVendorDisplayTag.Online,
+                    AsrVendorDisplayTag.Streaming,
+                    AsrVendorDisplayTag.Accurate
+                ),
+                capabilities = onlineStreamingOnlyCapabilities()
+            )
+        )
+    }
 
     private val descriptorByVendor: Map<AsrVendor, AsrVendorDescriptor> =
         descriptors.associateBy { it.vendor }
@@ -377,6 +404,12 @@ internal object AsrVendorRegistry {
     ): Set<AsrVendorCapability> = onlineFileCapabilities(customEndpoint) + setOf(
         AsrVendorCapability.StreamingRecognition,
         AsrVendorCapability.NativePushPcmInput
+    )
+
+    private fun onlineStreamingOnlyCapabilities(): Set<AsrVendorCapability> = setOf(
+        AsrVendorCapability.StreamingRecognition,
+        AsrVendorCapability.NativePushPcmInput,
+        AsrVendorCapability.BackupCandidate
     )
 
     private fun localFileCapabilities(): Set<AsrVendorCapability> = setOf(

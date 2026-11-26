@@ -24,7 +24,9 @@ enum class AsrVendor(val id: String) {
     XAsr("x_asr"),
     MiMo("mimo"),
     Tencent("tencent"),
-    DeepSeek("deepseek");
+    DeepSeek("deepseek"),
+    DoubaoIme("doubao_ime"),
+    WeType("wetype");
 
     companion object {
         fun fromId(id: String?): AsrVendor = AsrVendorRegistry.vendorFromIdOrNull(id) ?: Volc

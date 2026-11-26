@@ -202,6 +202,8 @@ internal object AsrEngineModeResolver {
         AsrVendor.Soniox -> sonioxStreamingEnabled
         AsrVendor.XAsr -> true
         AsrVendor.Tencent -> tencentStreamingEnabled
+        AsrVendor.DoubaoIme,
+        AsrVendor.WeType -> true
         else -> false
     }
 
