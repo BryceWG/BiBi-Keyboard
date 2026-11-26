@@ -77,6 +77,8 @@ internal fun fileRecognizerKeyFor(
     AsrVendor.XAsr -> error("X-ASR has no file recognizer")
     AsrVendor.Tencent -> AsrFileRecognizerKey.TencentFile
     AsrVendor.DeepSeek -> AsrFileRecognizerKey.DeepSeekFile
+    AsrVendor.DoubaoIme -> error("Doubao IME has no file recognizer")
+    AsrVendor.WeType -> error("WeType has no file recognizer")
 }
 
 internal fun interface AsrFileRecognizerConstructorTable {

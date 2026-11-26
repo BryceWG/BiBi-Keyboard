@@ -64,7 +64,9 @@ internal enum class AsrPushPcmEngineConstructorKey(
     SenseVoicePushPcmPseudoStream("SenseVoicePushPcmPseudoStreamAsrEngine", AsrPushPcmEngineFamily.PseudoStream),
     FireRedAsrPushPcmPseudoStream("FireRedAsrPushPcmPseudoStreamAsrEngine", AsrPushPcmEngineFamily.PseudoStream),
     XAsrStream("XAsrStreamAsrEngine", AsrPushPcmEngineFamily.LocalStream),
-    TencentStream("TencentStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream)
+    TencentStream("TencentStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream),
+    DoubaoImeStream("DoubaoImeStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream),
+    WeTypeStream("WeTypeStreamAsrEngine", AsrPushPcmEngineFamily.NativeStream)
 }
 
 internal class AsrPushPcmEngineFactory(
@@ -208,6 +210,8 @@ internal class AsrPushPcmEngineFactory(
         AsrVendor.Soniox -> AsrPushPcmEngineConstructorKey.SonioxStream
         AsrVendor.XAsr -> AsrPushPcmEngineConstructorKey.XAsrStream
         AsrVendor.Tencent -> AsrPushPcmEngineConstructorKey.TencentStream
+        AsrVendor.DoubaoIme -> AsrPushPcmEngineConstructorKey.DoubaoImeStream
+        AsrVendor.WeType -> AsrPushPcmEngineConstructorKey.WeTypeStream
         else -> error("$vendor has no Push PCM native stream engine")
     }
 
@@ -303,6 +307,10 @@ internal object RealAsrPushPcmEngineConstructorTable : AsrPushPcmEngineConstruct
             XAsrStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
         AsrPushPcmEngineConstructorKey.TencentStream ->
             TencentStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
+        AsrPushPcmEngineConstructorKey.DoubaoImeStream ->
+            DoubaoImeStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
+        AsrPushPcmEngineConstructorKey.WeTypeStream ->
+            WeTypeStreamAsrEngine(request.context, request.scope, request.prefs, request.listener, externalPcmMode = true)
     }
 
     private fun createFileRecognizer(

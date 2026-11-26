@@ -65,6 +65,8 @@ internal object AsrRecordedAudioRouteResolver {
             AsrVendor.DashScope -> resolveDash(context, prefs, snapshot, backupPolicy)
             AsrVendor.OpenAI -> resolveOpenAi(context, prefs, snapshot, backupPolicy)
             AsrVendor.XAsr -> resolveXAsr(context, snapshot, backupPolicy)
+            AsrVendor.DoubaoIme,
+            AsrVendor.WeType -> resolveStreamingOnly(context, vendor, snapshot, backupPolicy)
             else -> resolveGenericFile(context, vendor, snapshot, backupPolicy)
         }
         if (decision.canContinue && !isAsrVendorConfigured(context, prefs, vendor)) {
@@ -265,6 +267,29 @@ internal object AsrRecordedAudioRouteResolver {
             fallbackEngineLabel = label,
             // X-ASR 本身始终走 ReplayStream；其余开关关掉，避免 backup 仍按实时流式构造。
             modePreferences = fileModePreferences(snapshot, AsrVendor.XAsr),
+            modelOverride = AsrRequestModelOverride(),
+            backupPolicy = backupPolicy
+        )
+    }
+
+    private fun resolveStreamingOnly(
+        context: Context,
+        vendor: AsrVendor,
+        snapshot: AsrEngineModePreferences,
+        backupPolicy: AsrBackupPolicyDecision
+    ): AsrRecordedAudioRouteDecision {
+        val label = vendorLabel(context, vendor)
+        return AsrRecordedAudioRouteDecision(
+            kind = AsrRecordedAudioRouteKind.ReplayStream,
+            reasonCode = REASON_REPLAY_STREAM,
+            canContinue = true,
+            noticeKey = NOTICE_SUPPORTED_XASR_STREAM,
+            vendor = vendor,
+            currentModelKey = null,
+            fallbackModelKey = null,
+            currentEngineLabel = label,
+            fallbackEngineLabel = label,
+            modePreferences = fileModePreferences(snapshot, vendor),
             modelOverride = AsrRequestModelOverride(),
             backupPolicy = backupPolicy
         )

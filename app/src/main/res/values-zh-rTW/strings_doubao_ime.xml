@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_doubao_ime">豆包輸入法（串流）</string>
+    <string name="btn_doubao_ime_reset_identity">重設裝置識別碼</string>
+    <string name="toast_doubao_ime_identity_reset">已清除豆包輸入法裝置識別碼</string>
+    <string name="doubao_ime_description">使用豆包輸入法串流語音辨識介面（10ms Opus）。無需 API Key，首次使用時會自動註冊匿名裝置識別碼並快取於本機。</string>
+</resources>

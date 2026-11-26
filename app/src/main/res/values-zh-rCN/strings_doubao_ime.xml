@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_doubao_ime">豆包输入法（流式）</string>
+    <string name="btn_doubao_ime_reset_identity">重置设备标识</string>
+    <string name="toast_doubao_ime_identity_reset">已清除豆包输入法设备标识</string>
+    <string name="doubao_ime_description">使用豆包输入法流式语音识别接口（10ms Opus）。无需 API Key，首次使用时会自动注册匿名设备标识并本地缓存。</string>
+</resources>

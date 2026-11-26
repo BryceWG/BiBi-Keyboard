@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_wetype">微信輸入法（串流）</string>
+    <string name="btn_wetype_reset_identity">重設裝置識別碼</string>
+    <string name="toast_wetype_identity_reset">已清除微信輸入法裝置識別碼</string>
+    <string name="wetype_description">使用微信輸入法加密串流語音辨識介面（20ms Opus）。無需 API Key，首次使用時會自動完成金鑰交換並註冊匿名裝置 UIN。</string>
+</resources>

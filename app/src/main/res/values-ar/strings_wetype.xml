@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_wetype">WeType IME (Streaming)</string>
+    <string name="btn_wetype_reset_identity">Reset device identity</string>
+    <string name="toast_wetype_identity_reset">WeType device identity cleared</string>
+    <string name="wetype_description">Uses the WeType (WeChat IME) encrypted streaming WebSocket protocol (20ms Opus). Zero configuration required; an anonymous device identity is registered automatically on first use.</string>
+</resources>

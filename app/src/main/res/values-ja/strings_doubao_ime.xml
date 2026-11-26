@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="vendor_doubao_ime">Doubao IME (Streaming)</string>
+    <string name="btn_doubao_ime_reset_identity">Reset device identity</string>
+    <string name="toast_doubao_ime_identity_reset">Doubao IME device identity cleared</string>
+    <string name="doubao_ime_description">Uses the Doubao IME streaming WebSocket protocol (10ms Opus). Zero configuration required; an anonymous device identity is registered automatically on first use.</string>
+</resources>

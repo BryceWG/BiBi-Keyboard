@@ -388,7 +388,9 @@ private fun currentAsrVendorPrimaryItemCount(
     AsrVendor.OpenRouter,
     AsrVendor.MiMo,
     AsrVendor.OpenAI,
-    AsrVendor.Soniox -> currentOnlineAsrPrimaryItemCount(
+    AsrVendor.Soniox,
+    AsrVendor.DoubaoIme,
+    AsrVendor.WeType -> currentOnlineAsrPrimaryItemCount(
         selectedVendor = selectedVendor,
         openAiProviders = onlineState.openAiProviders,
         openAiUsePrompt = onlineState.openAiUsePrompt,

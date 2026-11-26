@@ -74,7 +74,9 @@ internal enum class AsrDirectMicrophoneEngineConstructorKey(
     SenseVoicePseudoStream("SenseVoicePseudoStreamAsrEngine", AsrDirectMicrophoneEngineFamily.LocalPseudoStream),
     FireRedAsrPseudoStream("FireRedAsrPseudoStreamAsrEngine", AsrDirectMicrophoneEngineFamily.LocalPseudoStream),
     XAsrStream("XAsrStreamAsrEngine", AsrDirectMicrophoneEngineFamily.Stream),
-    TencentStream("TencentStreamAsrEngine", AsrDirectMicrophoneEngineFamily.Stream)
+    TencentStream("TencentStreamAsrEngine", AsrDirectMicrophoneEngineFamily.Stream),
+    DoubaoImeStream("DoubaoImeStreamAsrEngine", AsrDirectMicrophoneEngineFamily.Stream),
+    WeTypeStream("WeTypeStreamAsrEngine", AsrDirectMicrophoneEngineFamily.Stream)
 }
 
 internal class AsrDirectMicrophoneEngineFactory(
@@ -173,6 +175,8 @@ internal class AsrDirectMicrophoneEngineFactory(
         resolution: AsrEngineModeResolution
     ): AsrDirectMicrophoneEngineConstructorKey = when (resolution.vendor) {
         AsrVendor.XAsr -> error("X-ASR has no direct file engine")
+        AsrVendor.DoubaoIme -> error("Doubao IME has no direct file engine")
+        AsrVendor.WeType -> error("WeType has no direct file engine")
         else -> AsrDirectMicrophoneEngineConstructorKey.FileRecognizer
     }
 
@@ -201,6 +205,8 @@ internal class AsrDirectMicrophoneEngineFactory(
         AsrVendor.Soniox -> AsrDirectMicrophoneEngineConstructorKey.SonioxStream
         AsrVendor.XAsr -> AsrDirectMicrophoneEngineConstructorKey.XAsrStream
         AsrVendor.Tencent -> AsrDirectMicrophoneEngineConstructorKey.TencentStream
+        AsrVendor.DoubaoIme -> AsrDirectMicrophoneEngineConstructorKey.DoubaoImeStream
+        AsrVendor.WeType -> AsrDirectMicrophoneEngineConstructorKey.WeTypeStream
         else -> error("$vendor has no direct stream engine")
     }
 
@@ -287,6 +293,10 @@ internal object RealAsrDirectMicrophoneEngineConstructorTable : AsrDirectMicroph
             XAsrStreamAsrEngine(request.context, request.scope, request.prefs, request.listener)
         AsrDirectMicrophoneEngineConstructorKey.TencentStream ->
             TencentStreamAsrEngine(request.context, request.scope, request.prefs, request.listener)
+        AsrDirectMicrophoneEngineConstructorKey.DoubaoImeStream ->
+            DoubaoImeStreamAsrEngine(request.context, request.scope, request.prefs, request.listener)
+        AsrDirectMicrophoneEngineConstructorKey.WeTypeStream ->
+            WeTypeStreamAsrEngine(request.context, request.scope, request.prefs, request.listener)
     }
 }
 
